@@ -8,8 +8,6 @@ interface Config {
   port: number
   mongoUri: string
   nodeEnv: string
-  clerkSecretKey: string
-  clerkWebhookSecret: string
   frontendUrl: string
   jwtSecret: string
   jwtExpiresIn: string
@@ -20,10 +18,8 @@ interface Config {
 
 const config: Config = {
   port: parseInt(process.env.PORT || '5000', 10),
-  mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/hsa-songbook-dev',
+  mongoUri: process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/hsa-songbook-dev',
   nodeEnv: process.env.NODE_ENV || 'development',
-  clerkSecretKey: process.env.CLERK_SECRET_KEY || '',
-  clerkWebhookSecret: process.env.CLERK_WEBHOOK_SECRET || '',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   jwtSecret: process.env.JWT_SECRET || 'default-secret-change-in-production',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
@@ -33,14 +29,19 @@ const config: Config = {
 }
 
 // Validation for required environment variables
-const requiredEnvVars = ['MONGO_URI']
+const requiredEnvVars = ['MONGODB_URI']
 
 if (config.nodeEnv === 'production') {
-  requiredEnvVars.push('CLERK_SECRET_KEY', 'CLERK_WEBHOOK_SECRET', 'JWT_SECRET')
+  requiredEnvVars.push('JWT_SECRET')
 }
 
 for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
+  if (!process.env[envVar] && envVar === 'MONGODB_URI' && !process.env['MONGO_URI']) {
+    console.error(`Missing required environment variable: ${envVar} or MONGO_URI`)
+    if (config.nodeEnv === 'production') {
+      process.exit(1)
+    }
+  } else if (!process.env[envVar] && envVar !== 'MONGODB_URI') {
     console.error(`Missing required environment variable: ${envVar}`)
     if (config.nodeEnv === 'production') {
       process.exit(1)
