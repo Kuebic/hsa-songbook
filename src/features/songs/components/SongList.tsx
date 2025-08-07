@@ -25,7 +25,7 @@ export function SongList({ songs, onSongClick, loading, error }: SongListProps) 
     )
   }
 
-  if (songs.length === 0) {
+  if (!songs || songs.length === 0) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
         No songs found
@@ -42,7 +42,7 @@ export function SongList({ songs, onSongClick, loading, error }: SongListProps) 
         padding: '1rem'
       }}
     >
-      {songs.map(song => (
+      {songs?.map(song => (
         <SongCard 
           key={song.id} 
           song={song} 

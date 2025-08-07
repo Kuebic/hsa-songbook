@@ -15,7 +15,7 @@ export function useSongs(filter?: SongFilter) {
         const data = filter 
           ? await songService.searchSongs(filter)
           : await songService.getAllSongs()
-        setSongs(data)
+        setSongs(data || [])
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch songs')
       } finally {

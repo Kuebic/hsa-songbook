@@ -34,15 +34,45 @@ export class NotFoundError extends APIError {
 // API service for songs
 const API_BASE = '/api/v1'
 
-// Helper function for API calls with retry logic
+// Simple cache for deduplicating requests
+interface CacheEntry<T> {
+  data: T
+  timestamp: number
+}
+
+const requestCache = new Map<string, CacheEntry<any>>()
+const CACHE_TTL = 30000 // 30 seconds
+const pendingRequests = new Map<string, Promise<any>>()
+
+// Helper function for API calls with retry logic and caching
 async function fetchAPI<T>(
   endpoint: string,
   options: RequestInit = {},
   retries = 3
 ): Promise<T> {
-  let lastError: Error | undefined
+  // Create cache key from endpoint and method
+  const method = options.method || 'GET'
+  const cacheKey = `${method}:${endpoint}`
   
-  for (let i = 0; i < retries; i++) {
+  // Check cache for GET requests
+  if (method === 'GET') {
+    const cached = requestCache.get(cacheKey)
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return cached.data as T
+    }
+    
+    // Check if request is already pending
+    const pending = pendingRequests.get(cacheKey)
+    if (pending) {
+      return pending as Promise<T>
+    }
+  }
+  
+  // Create the request promise
+  const requestPromise = (async () => {
+    let lastError: Error | undefined
+    
+    for (let i = 0; i < retries; i++) {
     try {
       const response = await fetch(`${API_BASE}${endpoint}`, {
         headers: {
@@ -67,7 +97,17 @@ async function fetchAPI<T>(
       }
 
       const data = await response.json()
-      return data.success ? data.data || data.songs || data.arrangements : data
+      const result = data.success ? data.data || data.songs || data.arrangements : data
+      
+      // Cache successful GET requests
+      if (method === 'GET') {
+        requestCache.set(cacheKey, {
+          data: result,
+          timestamp: Date.now()
+        })
+      }
+      
+      return result
     } catch (error) {
       lastError = error as Error
       
@@ -83,7 +123,26 @@ async function fetchAPI<T>(
     }
   }
   
-  throw lastError || new NetworkError()
+    throw lastError || new NetworkError()
+  })()
+  
+  // Store pending request for deduplication
+  if (method === 'GET') {
+    pendingRequests.set(cacheKey, requestPromise)
+    
+    // Clean up pending request when done
+    requestPromise.finally(() => {
+      pendingRequests.delete(cacheKey)
+    })
+  }
+  
+  return requestPromise
+}
+
+// Function to clear the cache (useful for mutations)
+function clearCache() {
+  requestCache.clear()
+  pendingRequests.clear()
 }
 
 export const songService = {
@@ -101,7 +160,7 @@ export const songService = {
     const endpoint = `/songs${queryString ? `?${queryString}` : ''}`
     
     const response = await fetchAPI<{ songs: Song[], pagination: any }>(endpoint)
-    return response.songs
+    return response.songs || []
   },
 
   async getSongById(id: string): Promise<Song> {
@@ -122,6 +181,7 @@ export const songService = {
   },
 
   async createSong(songData: Partial<Song>, token: string): Promise<Song> {
+    clearCache() // Clear cache after mutation
     return fetchAPI<Song>('/songs', {
       method: 'POST',
       headers: {
@@ -132,6 +192,7 @@ export const songService = {
   },
 
   async updateSong(id: string, songData: Partial<Song>, token: string): Promise<Song> {
+    clearCache() // Clear cache after mutation
     return fetchAPI<Song>(`/songs/${id}`, {
       method: 'PATCH',
       headers: {
@@ -142,6 +203,7 @@ export const songService = {
   },
 
   async deleteSong(id: string, token: string): Promise<void> {
+    clearCache() // Clear cache after mutation
     await fetch(`${API_BASE}/songs/${id}`, {
       method: 'DELETE',
       headers: {
