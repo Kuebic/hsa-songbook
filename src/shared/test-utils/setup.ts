@@ -55,11 +55,11 @@ vi.mock('@clerk/clerk-react', () => ({
   SignInButton: ({ children, ...props }: MockComponentProps) => {
     // Filter out Clerk-specific props that shouldn't be passed to DOM elements
     const { 
-      mode, 
-      redirectUrl, 
-      signUpUrl, 
-      forceRedirectUrl,
-      fallbackRedirectUrl,
+      mode: _mode, 
+      redirectUrl: _redirectUrl, 
+      signUpUrl: _signUpUrl, 
+      forceRedirectUrl: _forceRedirectUrl,
+      fallbackRedirectUrl: _fallbackRedirectUrl,
       ...domProps 
     } = props || {}
     
@@ -74,11 +74,11 @@ vi.mock('@clerk/clerk-react', () => ({
   SignUpButton: ({ children, ...props }: MockComponentProps) => {
     // Filter out Clerk-specific props that shouldn't be passed to DOM elements
     const { 
-      mode, 
-      redirectUrl, 
-      signInUrl, 
-      forceRedirectUrl,
-      fallbackRedirectUrl,
+      mode: _mode, 
+      redirectUrl: _redirectUrl, 
+      signInUrl: _signInUrl, 
+      forceRedirectUrl: _forceRedirectUrl,
+      fallbackRedirectUrl: _fallbackRedirectUrl,
       ...domProps 
     } = props || {}
     
@@ -93,19 +93,19 @@ vi.mock('@clerk/clerk-react', () => ({
   UserButton: (props: MockComponentProps) => {
     // Filter out Clerk-specific props that shouldn't be passed to DOM elements
     const { 
-      afterSignOutUrl, 
-      appearance, 
-      showName,
-      signInUrl,
-      userProfileUrl,
-      userProfileMode,
-      defaultOpen,
+      afterSignOutUrl: _afterSignOutUrl, 
+      appearance: _appearance, 
+      showName: _showName,
+      signInUrl: _signInUrl,
+      userProfileUrl: _userProfileUrl,
+      userProfileMode: _userProfileMode,
+      defaultOpen: _defaultOpen,
       ...domProps 
     } = props || {}
     
     return React.createElement('button', { 
       'data-testid': 'user-button',
-      'data-after-sign-out-url': afterSignOutUrl, // Store as data attribute for testing if needed
+      'data-after-sign-out-url': _afterSignOutUrl, // Store as data attribute for testing if needed
       ...domProps 
     }, 'User')
   },
