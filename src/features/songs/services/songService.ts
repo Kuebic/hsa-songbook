@@ -40,9 +40,9 @@ interface CacheEntry<T> {
   timestamp: number
 }
 
-const requestCache = new Map<string, CacheEntry<any>>()
+const requestCache = new Map<string, CacheEntry<unknown>>()
 const CACHE_TTL = 30000 // 30 seconds
-const pendingRequests = new Map<string, Promise<any>>()
+const pendingRequests = new Map<string, Promise<unknown>>()
 
 // Helper function for API calls with retry logic and caching
 async function fetchAPI<T>(
@@ -159,7 +159,7 @@ export const songService = {
     const queryString = params.toString()
     const endpoint = `/songs${queryString ? `?${queryString}` : ''}`
     
-    const response = await fetchAPI<{ songs: Song[], pagination: any }>(endpoint)
+    const response = await fetchAPI<{ songs: Song[], pagination: Record<string, unknown> }>(endpoint)
     // Handle the response structure - API returns { success: true, songs: [...] }
     return Array.isArray(response) ? response : (response.songs || [])
   },
