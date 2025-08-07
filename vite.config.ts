@@ -16,4 +16,21 @@ export default defineConfig({
       '@assets': path.resolve(__dirname, './src/assets'),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+        configure: (proxy, options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('Proxy error:', err)
+          })
+          proxy.on('proxyReq', (_proxyReq, req, _res) => {
+            console.log('Proxying:', req.method, req.url, '->', options.target + (req.url || ''))
+          })
+        }
+      }
+    }
+  }
 })

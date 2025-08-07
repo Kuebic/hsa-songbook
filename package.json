@@ -5,12 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:server": "cd server && npm run dev",
+    "dev:full": "concurrently \"npm run dev\" \"npm run dev:server\"",
     "build": "tsc -b && vite build",
+    "build:server": "cd server && npm run build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "install:all": "npm install && cd server && npm install"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.39.0",
@@ -30,6 +34,7 @@
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
     "@vitest/ui": "^3.2.4",
+    "concurrently": "^8.2.2",
     "eslint": "^9.30.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
@@ -37,7 +42,7 @@
     "jsdom": "^26.1.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",
-    "vite": "^7.0.4",
+    "vite": "^7.0.6",
     "vitest": "^3.2.4"
   }
 }

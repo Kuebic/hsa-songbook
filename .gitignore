@@ -14,6 +14,7 @@ dist-ssr
 
 PRPs/code_reviews
 .env
+.env.server
 .claude/settings.local.json
 
 # Editor directories and files
