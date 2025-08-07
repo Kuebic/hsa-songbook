@@ -79,14 +79,29 @@ export const updateSong = catchAsync(async (
   req: AuthRequest<{ id: string }>,
   res: Response
 ) => {
-  const userId = req.auth!.userId
-  const song = await songService.update(req.params.id, req.body, userId)
-
-  res.json({
-    success: true,
-    data: song,
-    message: 'Song updated successfully'
+  console.log('🔧 updateSong DEBUG:', {
+    songId: req.params.id,
+    body: req.body,
+    bodyKeys: Object.keys(req.body || {}),
+    userId: req.auth?.userId,
+    contentType: req.headers['content-type']
   })
+  
+  const userId = req.auth!.userId
+  
+  try {
+    const song = await songService.update(req.params.id, req.body, userId)
+    console.log('✅ Update successful')
+    
+    res.json({
+      success: true,
+      data: song,
+      message: 'Song updated successfully'
+    })
+  } catch (error) {
+    console.error('❌ Update failed:', error)
+    throw error
+  }
 })
 
 /**

@@ -88,7 +88,19 @@ describe('useServiceWorker', () => {
       
       renderHook(() => useServiceWorker())
       
-      const mockRegistration = { update: vi.fn() }
+      const mockRegistration = {
+        update: vi.fn(),
+        active: null,
+        installing: null,
+        waiting: null,
+        scope: '',
+        navigationPreload: {} as NavigationPreloadManager,
+        onupdatefound: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+        unregister: vi.fn()
+      } as unknown as ServiceWorkerRegistration
       act(() => {
         onRegisteredCallback?.(mockRegistration)
       })
@@ -123,7 +135,7 @@ describe('useServiceWorker', () => {
       renderHook(() => useServiceWorker())
       
       act(() => {
-        onRegisteredCallback?.(null)
+        onRegisteredCallback?.(null as unknown as ServiceWorkerRegistration)
       })
       
       expect(setIntervalSpy).not.toHaveBeenCalled()
@@ -266,7 +278,19 @@ describe('useServiceWorker', () => {
       
       const { unmount } = renderHook(() => useServiceWorker())
       
-      const mockRegistration = { update: vi.fn() }
+      const mockRegistration = {
+        update: vi.fn(),
+        active: null,
+        installing: null,
+        waiting: null,
+        scope: '',
+        navigationPreload: {} as NavigationPreloadManager,
+        onupdatefound: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+        unregister: vi.fn()
+      } as unknown as ServiceWorkerRegistration
       act(() => {
         onRegisteredCallback?.(mockRegistration)
       })

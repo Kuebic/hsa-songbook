@@ -155,9 +155,18 @@ async function seedSongs() {
       return
     }
     
-    // Add timestamps to all songs
+    // Create a system user ID for seeded content
+    const systemUserId = 'system-seed-user'
+    logger.info('Creating songs with system user ID:', systemUserId)
+    
+    // Add timestamps and createdBy to all songs
     const songsWithTimestamps = sampleSongs.map(song => ({
       ...song,
+      metadata: {
+        ...song.metadata,
+        createdBy: systemUserId,
+        lastModifiedBy: systemUserId
+      },
       createdAt: new Date(),
       updatedAt: new Date()
     }))

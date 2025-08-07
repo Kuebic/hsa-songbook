@@ -52,13 +52,11 @@ const songSchema = new Schema<ISong>({
   },
   metadata: {
     createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
+      type: String,
       required: true
     },
     lastModifiedBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User'
+      type: String
     },
     isPublic: {
       type: Boolean,

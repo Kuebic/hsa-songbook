@@ -11,8 +11,8 @@ export interface ISong extends Document {
   notes?: string
   defaultArrangementId?: Types.ObjectId
   metadata: {
-    createdBy: Types.ObjectId
-    lastModifiedBy?: Types.ObjectId
+    createdBy: string
+    lastModifiedBy?: string
     isPublic: boolean
     ratings: {
       average: number

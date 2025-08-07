@@ -192,12 +192,14 @@ export const songService = {
     })
   },
 
-  async updateSong(id: string, songData: Partial<Song>, token: string): Promise<Song> {
+  async updateSong(id: string, songData: Partial<Song>, token: string, userId?: string): Promise<Song> {
     clearCache() // Clear cache after mutation
     return fetchAPI<Song>(`/songs/${id}`, {
       method: 'PATCH',
       headers: {
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...(userId && { 'x-user-id': userId })
       },
       body: JSON.stringify(songData)
     })

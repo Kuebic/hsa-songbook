@@ -168,7 +168,7 @@ export class SongService {
     const songData = {
       ...data,
       metadata: {
-        createdBy: new Types.ObjectId(userId),
+        createdBy: userId,
         isPublic: data.isPublic || DEFAULTS.IS_PUBLIC,
         ratings: { average: DEFAULTS.RATING, count: 0 },
         views: DEFAULTS.VIEWS
@@ -212,7 +212,7 @@ export class SongService {
       delete updateData.isPublic
     }
     
-    updateData['metadata.lastModifiedBy'] = new Types.ObjectId(userId)
+    updateData['metadata.lastModifiedBy'] = userId
 
     const song = await Song.findByIdAndUpdate(
       id,

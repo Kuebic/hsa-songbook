@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react'
+import { SongTitleEdit } from './SongTitleEdit'
 import type { Song, Arrangement } from '../types/song.types'
 
 interface SongViewerProps {
@@ -5,12 +7,23 @@ interface SongViewerProps {
   arrangement?: Arrangement
 }
 
-export function SongViewer({ song, arrangement }: SongViewerProps) {
+export function SongViewer({ song: initialSong, arrangement }: SongViewerProps) {
+  // Local state to handle optimistic updates
+  const [song, setSong] = useState(initialSong)
+  
+  // Update local state when prop changes
+  useEffect(() => {
+    setSong(initialSong)
+  }, [initialSong])
+  
   return (
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
       <header style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
-          {song.title}
+          <SongTitleEdit 
+            song={song} 
+            onUpdate={setSong}
+          />
         </h1>
         <p style={{ color: '#64748b', fontSize: '1.125rem' }}>
           {song.artist} {song.compositionYear && `(${song.compositionYear})`}

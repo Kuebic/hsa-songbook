@@ -168,8 +168,10 @@ Was blind, but now I see.`
     render(<SongViewer song={mockSong} />)
     
     const title = screen.getByText('Amazing Grace')
-    expect(title.tagName).toBe('H1')
-    expect(title).toHaveStyle({ fontSize: '2rem' })
+    // Title is now wrapped in SongTitleEdit component which renders a span/button
+    const h1Element = title.closest('h1')
+    expect(h1Element).toBeInTheDocument()
+    expect(h1Element).toHaveStyle({ fontSize: '2rem' })
   })
 
   it('renders arrangement metadata badges with correct styling', () => {
