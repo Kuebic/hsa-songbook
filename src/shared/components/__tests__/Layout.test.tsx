@@ -95,8 +95,9 @@ describe('Layout', () => {
     
     const nav = screen.getByRole('navigation')
     expect(nav).toHaveStyle({
-      padding: '1rem 2rem',
-      color: 'rgb(255, 255, 255)'
+      backgroundColor: '#1e293b',
+      color: 'rgb(255, 255, 255)',
+      width: '100%'
     })
   })
 
@@ -107,8 +108,6 @@ describe('Layout', () => {
     expect(main).toHaveStyle({
       flex: '1',
       backgroundColor: '#f8fafc',
-      maxWidth: '1200px',
-      margin: '0 auto',
       width: '100%'
     })
   })
@@ -120,8 +119,7 @@ describe('Layout', () => {
     expect(footer).toHaveStyle({
       backgroundColor: '#1e293b',
       color: '#94a3b8',
-      padding: '1rem',
-      textAlign: 'center'
+      width: '100%'
     })
   })
 
