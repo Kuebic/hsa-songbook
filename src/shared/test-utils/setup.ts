@@ -3,6 +3,15 @@ import { beforeEach, afterEach, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import React from 'react'
 
+// Mock virtual:pwa-register/react module for PWA tests
+vi.mock('virtual:pwa-register/react', () => ({
+  useRegisterSW: vi.fn(() => ({
+    offlineReady: [false, vi.fn()],
+    needRefresh: [false, vi.fn()],
+    updateServiceWorker: vi.fn().mockResolvedValue(undefined)
+  }))
+}))
+
 // Create singleton mock instances outside of vi.mock to prevent recreation
 const mockUseAuth = vi.fn()
 const mockUseUser = vi.fn()

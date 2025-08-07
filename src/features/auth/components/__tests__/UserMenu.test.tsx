@@ -3,6 +3,9 @@ import { screen } from '@testing-library/react'
 import { UserMenu } from '../UserMenu'
 import { renderWithClerk } from '@shared/test-utils/clerk-test-utils'
 
+// Mock the LazyClerkComponents to avoid Suspense issues in tests
+vi.mock('../LazyClerkComponents', () => import('../__mocks__/LazyClerkComponents'))
+
 describe('UserMenu', () => {
   beforeEach(() => {
     vi.clearAllMocks()

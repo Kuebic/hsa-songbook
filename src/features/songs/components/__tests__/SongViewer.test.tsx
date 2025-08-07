@@ -94,7 +94,7 @@ Was blind, but now I see.`
   it('handles undefined themes', () => {
     const songWithUndefinedThemes = {
       ...mockSong,
-      themes: undefined as any
+      themes: undefined as unknown as string[]
     }
     
     render(<SongViewer song={songWithUndefinedThemes} />)

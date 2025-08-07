@@ -78,7 +78,7 @@ describe('SongList', () => {
   })
 
   it('renders empty state when songs array is undefined', () => {
-    render(<SongList songs={undefined as any} loading={false} />)
+    render(<SongList songs={undefined as unknown as Song[]} loading={false} />)
     
     expect(screen.getByText('No songs found')).toBeInTheDocument()
     expect(screen.queryByTestId(/song-card/)).not.toBeInTheDocument()

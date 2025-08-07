@@ -158,7 +158,7 @@ describe('SongCard', () => {
   it('handles undefined themes', () => {
     const songWithUndefinedThemes = {
       ...mockSong,
-      themes: undefined as any
+      themes: undefined as unknown as string[]
     }
     
     render(<SongCard song={songWithUndefinedThemes} />)

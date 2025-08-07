@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { SearchResults } from '../SearchResults'
 import type { Song } from '@features/songs'
@@ -78,9 +78,11 @@ describe('SearchResults', () => {
   it('renders search results with query', () => {
     render(<SearchResults {...defaultProps} results={mockSongs} query="grace" />)
     
-    expect(screen.getByText((content, node) => {
-      return node?.textContent === 'Found 2 songs for "grace"'
-    })).toBeInTheDocument()
+    // Check for the strong element containing the count
+    expect(screen.getByText('2')).toBeInTheDocument()
+    // Check that the complete text is present (it's split across elements)
+    const resultParagraph = screen.getByText('2').parentElement
+    expect(resultParagraph?.textContent).toBe('Found 2 songs for "grace"')
     expect(screen.getByTestId('song-list')).toBeInTheDocument()
   })
 
@@ -95,17 +97,17 @@ describe('SearchResults', () => {
     const singleSong = [mockSongs[0]]
     render(<SearchResults {...defaultProps} results={singleSong} query="amazing" />)
     
-    expect(screen.getByText((content, node) => {
-      return node?.textContent === 'Found 1 song for "amazing"'
-    })).toBeInTheDocument()
+    expect(screen.getByText('1')).toBeInTheDocument()
+    const resultParagraph = screen.getByText('1').parentElement
+    expect(resultParagraph?.textContent).toBe('Found 1 song for "amazing"')
   })
 
   it('displays correct count with multiple songs', () => {
     render(<SearchResults {...defaultProps} results={mockSongs} query="hymns" />)
     
-    expect(screen.getByText((content, node) => {
-      return node?.textContent === 'Found 2 songs for "hymns"'
-    })).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
+    const resultParagraph = screen.getByText('2').parentElement
+    expect(resultParagraph?.textContent).toBe('Found 2 songs for "hymns"')
   })
 
   it('displays count without query when query is provided', () => {
@@ -178,9 +180,9 @@ describe('SearchResults', () => {
     render(<SearchResults {...defaultProps} results={mockSongs} query="test" />)
     
     // Header section
-    expect(screen.getByText((content, node) => {
-      return node?.textContent === 'Found 2 songs for "test"'
-    })).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
+    const resultParagraph = screen.getByText('2').parentElement
+    expect(resultParagraph?.textContent).toBe('Found 2 songs for "test"')
     
     // SongList component
     expect(screen.getByTestId('song-list')).toBeInTheDocument()
@@ -189,18 +191,18 @@ describe('SearchResults', () => {
   it('shows zero results correctly', () => {
     render(<SearchResults {...defaultProps} results={[]} query="nonexistent" />)
     
-    expect(screen.getByText((content, node) => {
-      return node?.textContent === 'Found 0 songs for "nonexistent"'
-    })).toBeInTheDocument()
+    expect(screen.getByText('0')).toBeInTheDocument()
+    const resultParagraph = screen.getByText('0').parentElement
+    expect(resultParagraph?.textContent).toBe('Found 0 songs for "nonexistent"')
   })
 
   it('handles special characters in query', () => {
     const specialQuery = 'test & query "with" special chars'
     render(<SearchResults {...defaultProps} results={mockSongs} query={specialQuery} />)
     
-    expect(screen.getByText((content, node) => {
-      return node?.textContent?.includes('Found 2 songs for') ?? false
-    })).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
+    const resultParagraph = screen.getByText('2').parentElement
+    expect(resultParagraph?.textContent).toContain('Found 2 songs for')
   })
 
   it('shows searching state overrides results count', () => {
@@ -213,9 +215,10 @@ describe('SearchResults', () => {
   it('applies correct styling to header section', () => {
     render(<SearchResults {...defaultProps} results={mockSongs} query="test" />)
     
-    const headerElement = screen.getByText((content, node) => {
-      return node?.textContent === 'Found 2 songs for "test"'
-    }).parentElement
+    // Find the paragraph that contains the result count
+    const countElement = screen.getByText('2')
+    // Get the parent div that has the styling
+    const headerElement = countElement.parentElement?.parentElement
     expect(headerElement).toHaveStyle({
       padding: '1rem',
       borderBottom: '1px solid #e2e8f0'
@@ -240,9 +243,9 @@ describe('SearchResults', () => {
     
     rerender(<SearchResults {...defaultProps} results={mockSongs} query="amazing" />)
     
-    expect(screen.getByText((content, node) => {
-      return node?.textContent === 'Found 2 songs for "amazing"'
-    })).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
+    const resultParagraph = screen.getByText('2').parentElement
+    expect(resultParagraph?.textContent).toBe('Found 2 songs for "amazing"')
     expect(screen.getByTestId('song-list')).toBeInTheDocument()
   })
 })

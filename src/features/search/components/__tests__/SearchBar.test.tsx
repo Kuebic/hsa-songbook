@@ -1,7 +1,20 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { SearchBar } from '../SearchBar'
+import { useState } from 'react'
+
+// Helper component for testing controlled input behavior
+function SearchBarWrapper({ onChange, ...props }: Parameters<typeof SearchBar>[0]) {
+  const [value, setValue] = useState(props.value || '')
+  
+  const handleChange = (newValue: string) => {
+    setValue(newValue)
+    onChange?.(newValue)
+  }
+  
+  return <SearchBar {...props} value={value} onChange={handleChange} />
+}
 
 describe('SearchBar', () => {
   const defaultProps = {
@@ -41,7 +54,7 @@ describe('SearchBar', () => {
     const user = userEvent.setup()
     const mockOnChange = vi.fn()
     
-    render(<SearchBar {...defaultProps} onChange={mockOnChange} />)
+    render(<SearchBarWrapper {...defaultProps} onChange={mockOnChange} />)
     
     const input = screen.getByRole('textbox')
     await user.type(input, 'Amazing')
@@ -54,7 +67,7 @@ describe('SearchBar', () => {
     const user = userEvent.setup()
     const mockOnChange = vi.fn()
     
-    render(<SearchBar {...defaultProps} onChange={mockOnChange} />)
+    render(<SearchBarWrapper {...defaultProps} onChange={mockOnChange} />)
     
     const input = screen.getByRole('textbox')
     await user.type(input, 'Hi')
@@ -130,7 +143,7 @@ describe('SearchBar', () => {
     const user = userEvent.setup()
     const mockOnChange = vi.fn()
     
-    render(<SearchBar {...defaultProps} onChange={mockOnChange} />)
+    render(<SearchBarWrapper {...defaultProps} onChange={mockOnChange} />)
     
     const input = screen.getByRole('textbox')
     

@@ -4,6 +4,9 @@ import userEvent from '@testing-library/user-event'
 import { AuthButtons } from '../AuthButtons'
 import { renderWithClerk } from '@shared/test-utils/clerk-test-utils'
 
+// Mock the LazyClerkComponents to avoid Suspense issues in tests
+vi.mock('../LazyClerkComponents', () => import('../__mocks__/LazyClerkComponents'))
+
 describe('AuthButtons', () => {
   beforeEach(() => {
     vi.clearAllMocks()
