@@ -34,33 +34,38 @@ mockUseClerk.mockReturnValue({
 })
 
 // Mock Clerk with factory function to ensure consistent instances
+interface MockComponentProps {
+  children?: React.ReactNode
+  [key: string]: unknown
+}
+
 vi.mock('@clerk/clerk-react', () => ({
-  ClerkProvider: ({ children }: any) => children,
+  ClerkProvider: ({ children }: MockComponentProps) => children,
   useAuth: mockUseAuth,
   useUser: mockUseUser,
   useClerk: mockUseClerk,
-  SignedIn: ({ children }: any) => {
+  SignedIn: ({ children }: MockComponentProps) => {
     const auth = mockUseAuth()
     return auth.isSignedIn ? children : null
   },
-  SignedOut: ({ children }: any) => {
+  SignedOut: ({ children }: MockComponentProps) => {
     const auth = mockUseAuth()
     return !auth.isSignedIn ? children : null
   },
-  SignInButton: ({ children, ...props }: any) => {
+  SignInButton: ({ children, ...props }: MockComponentProps) => {
     if (children) {
       return React.createElement('div', props, children)
     }
     return React.createElement('button', props, 'Sign In')
   },
-  SignUpButton: ({ children, ...props }: any) => {
+  SignUpButton: ({ children, ...props }: MockComponentProps) => {
     if (children) {
       return React.createElement('div', props, children)
     }
     return React.createElement('button', props, 'Sign Up')
   },
-  UserButton: (props: any) => {
-    const { afterSignOutUrl, ...restProps } = props || {}
+  UserButton: (props: MockComponentProps) => {
+    const restProps = props || {}
     return React.createElement('button', { 'data-testid': 'user-button', ...restProps }, 'User')
   },
 }))
@@ -113,7 +118,7 @@ const IntersectionObserverMock = vi.fn().mockImplementation(() => ({
   disconnect: vi.fn(),
 }))
 
-global.IntersectionObserver = IntersectionObserverMock as any
+global.IntersectionObserver = IntersectionObserverMock as unknown as typeof IntersectionObserver
 
 // Reset mocks before each test
 beforeEach(() => {

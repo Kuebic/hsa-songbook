@@ -11,7 +11,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/shared/test-utils/setup.ts',
-    include: ['**/__tests__/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+    include: ['src/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}', 'src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+    exclude: ['node_modules', 'dist'],
     isolate: true,
     pool: 'forks',
     poolOptions: {
@@ -24,12 +25,14 @@ export default defineConfig({
     restoreMocks: true,
     mockReset: true,
     coverage: {
+      enabled: false,
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       exclude: [
-        'node_modules/',
-        'src/shared/test-utils/',
-        '*.config.ts',
+        'node_modules/**',
+        'dist/**',
+        'src/shared/test-utils/**',
+        '**/*.config.{js,ts}',
         '**/*.d.ts',
         '**/*.types.ts',
         '**/index.ts',

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useAuth } from '../useAuth'
-import { createMockUser } from '@shared/test-utils/clerk-test-utils'
+import { createMockUser } from '@shared/test-utils/clerk-test-helpers'
 import { mockUseUser, mockUseAuth as mockClerkUseAuth } from '@shared/test-utils/setup'
 
 describe('useAuth', () => {
