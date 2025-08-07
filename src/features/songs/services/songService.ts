@@ -97,7 +97,7 @@ async function fetchAPI<T>(
       }
 
       const data = await response.json()
-      const result = data.success ? data.data || data.songs || data.arrangements : data
+      const result = data.success ? (data.data || data.songs || data) : data
       
       // Cache successful GET requests
       if (method === 'GET') {
@@ -160,7 +160,8 @@ export const songService = {
     const endpoint = `/songs${queryString ? `?${queryString}` : ''}`
     
     const response = await fetchAPI<{ songs: Song[], pagination: any }>(endpoint)
-    return response.songs || []
+    // Handle the response structure - API returns { success: true, songs: [...] }
+    return Array.isArray(response) ? response : (response.songs || [])
   },
 
   async getSongById(id: string): Promise<Song> {

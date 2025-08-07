@@ -108,16 +108,18 @@ export const getSongsQuerySchema = z.object({
       .optional(),
     createdBy: z.string().optional(),
     page: z.string()
-      .transform(val => parseInt(val, 10))
-      .pipe(z.number().positive())
-      .default('1'),
+      .optional()
+      .transform(val => val ? parseInt(val, 10) : 1)
+      .pipe(z.number().positive()),
     limit: z.string()
-      .transform(val => parseInt(val, 10))
-      .pipe(z.number().positive().max(100))
-      .default('20'),
+      .optional()
+      .transform(val => val ? parseInt(val, 10) : 20)
+      .pipe(z.number().positive().max(100)),
     sortBy: z.enum(['title', 'createdAt', 'views', 'rating'])
+      .optional()
       .default('createdAt'),
     sortOrder: z.enum(['asc', 'desc'])
+      .optional()
       .default('desc')
   })
 })

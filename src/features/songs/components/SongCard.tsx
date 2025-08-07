@@ -28,14 +28,14 @@ export const SongCard = memo(function SongCard({ song, onClick }: SongCardProps)
         {song.artist} {song.compositionYear && `(${song.compositionYear})`}
       </p>
       <div className={styles.themesContainer}>
-        {song.themes.map(theme => (
+        {song.themes?.map(theme => (
           <span 
             key={theme}
             className={styles.themeTag}
           >
             {theme}
           </span>
-        ))}
+        )) || <span style={{ color: '#64748b', fontSize: '0.8em', fontStyle: 'italic' }}>No themes</span>}
       </div>
       {song.metadata.ratings && (
         <div className={styles.ratings}>

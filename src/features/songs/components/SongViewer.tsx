@@ -93,7 +93,7 @@ export function SongViewer({ song, arrangement }: SongViewerProps) {
       <div style={{ marginTop: '2rem' }}>
         <h3 style={{ marginBottom: '0.5rem' }}>Themes</h3>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          {song.themes.map(theme => (
+          {song.themes?.map(theme => (
             <span 
               key={theme}
               style={{
@@ -105,7 +105,7 @@ export function SongViewer({ song, arrangement }: SongViewerProps) {
             >
               {theme}
             </span>
-          ))}
+          )) || <span style={{ color: '#64748b', fontStyle: 'italic' }}>No themes available</span>}
         </div>
       </div>
 
