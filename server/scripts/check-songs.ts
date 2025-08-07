@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import path from 'path'
 
 // Load environment variables
-dotenv.config({ path: path.join(__dirname, '../..', '.env.server') })
+dotenv.config({ path: path.join(__dirname, '../..', '.env') })
 
 async function checkSongs() {
   try {

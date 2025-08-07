@@ -6,7 +6,7 @@ import { createLogger } from '../shared/services/logger'
 const logger = createLogger('SeedSongs')
 
 // Load environment variables
-dotenv.config({ path: path.join(__dirname, '../..', '.env.server') })
+dotenv.config({ path: path.join(__dirname, '../..', '.env') })
 
 const sampleSongs = [
   {
