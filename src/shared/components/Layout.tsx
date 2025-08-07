@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
+import { Suspense } from 'react'
 import { NavLink } from 'react-router-dom'
-import { SignedIn, SignedOut } from '@clerk/clerk-react'
+import { LazySignedIn, LazySignedOut, ClerkComponentLoader } from '@features/auth/components/LazyClerkComponents'
 import { AuthButtons, UserMenu } from '@features/auth'
 
 interface LayoutProps {
@@ -72,12 +73,16 @@ export function Layout({ children }: LayoutProps) {
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <SignedOut>
-              <AuthButtons />
-            </SignedOut>
-            <SignedIn>
-              <UserMenu />
-            </SignedIn>
+            <Suspense fallback={<ClerkComponentLoader />}>
+              <LazySignedOut>
+                <AuthButtons />
+              </LazySignedOut>
+            </Suspense>
+            <Suspense fallback={<ClerkComponentLoader />}>
+              <LazySignedIn>
+                <UserMenu />
+              </LazySignedIn>
+            </Suspense>
           </div>
         </div>
       </nav>
