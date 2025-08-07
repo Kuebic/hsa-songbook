@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { songService } from '@features/songs'
 import type { Song, SongFilter } from '@features/songs'
 
@@ -8,6 +8,12 @@ export function useSearch() {
   const [results, setResults] = useState<Song[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Memoize the search filter to avoid recreating it on every search
+  const searchFilter = useMemo(() => ({
+    ...filters,
+    searchQuery
+  }), [filters, searchQuery])
 
   const performSearch = useCallback(async () => {
     if (!searchQuery && Object.keys(filters).length === 0) {
@@ -19,10 +25,6 @@ export function useSearch() {
     setError(null)
     
     try {
-      const searchFilter: SongFilter = {
-        ...filters,
-        searchQuery
-      }
       const songs = await songService.searchSongs(searchFilter)
       setResults(songs)
     } catch (err) {
@@ -31,7 +33,7 @@ export function useSearch() {
     } finally {
       setLoading(false)
     }
-  }, [searchQuery, filters])
+  }, [searchQuery, filters, searchFilter])
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {

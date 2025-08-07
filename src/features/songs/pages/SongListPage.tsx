@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SongList } from '../components/SongList'
 import { useSongs } from '../hooks/useSongs'
@@ -6,6 +7,13 @@ import type { Song } from '../types/song.types'
 export function SongListPage() {
   const navigate = useNavigate()
   const { songs, loading, error } = useSongs()
+
+  // Memoize sorted songs to avoid re-sorting on every render
+  const sortedSongs = useMemo(() => {
+    if (!songs || songs.length === 0) return songs
+    // Sort songs alphabetically by title
+    return [...songs].sort((a, b) => a.title.localeCompare(b.title))
+  }, [songs])
 
   const handleSongClick = (song: Song) => {
     navigate(`/songs/${song.slug}`)
@@ -21,7 +29,7 @@ export function SongListPage() {
       </header>
       
       <SongList 
-        songs={songs}
+        songs={sortedSongs}
         loading={loading}
         error={error}
         onSongClick={handleSongClick}

@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { SongList } from '@features/songs'
 import type { Song } from '@features/songs'
 
@@ -16,6 +17,11 @@ export function SearchResults({
   query,
   onSongClick 
 }: SearchResultsProps) {
+  // Memoize the result count label to avoid recalculating on every render
+  const resultCountLabel = useMemo(() => {
+    return results.length === 1 ? 'song' : 'songs'
+  }, [results.length])
+
   if (!query) {
     return (
       <div style={{ 
@@ -38,7 +44,7 @@ export function SearchResults({
           <p>Searching...</p>
         ) : (
           <p>
-            Found <strong>{results.length}</strong> {results.length === 1 ? 'song' : 'songs'} 
+            Found <strong>{results.length}</strong> {resultCountLabel} 
             {query && ` for "${query}"`}
           </p>
         )}
