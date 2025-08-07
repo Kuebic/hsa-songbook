@@ -36,3 +36,4 @@ server/mongodb-binaries/
 # Build artifacts
 server/dist/
 coverage/
+dev-dist/
