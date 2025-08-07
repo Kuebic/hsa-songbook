@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <rect width="180" height="180" fill="#1976d2"/>
+  <text x="50%" y="50%" text-anchor="middle" dy=".3em" 
+        fill="white" font-family="Arial, sans-serif" 
+        font-size="36px" font-weight="bold">
+    HSA
+  </text>
+  <text x="50%" y="65%" text-anchor="middle" dy=".3em" 
+        fill="white" font-family="Arial, sans-serif" 
+        font-size="18px">
+    Songbook
+  </text>
+</svg>
