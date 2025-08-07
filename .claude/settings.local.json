@@ -4,7 +4,14 @@
       "Bash(npm run build:*)",
       "Bash(npm audit:*)",
       "Bash(npm install:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(npm test:*)",
+      "Bash(find:*)",
+      "Bash(npm run test:coverage:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run test:*)"
     ],
     "deny": []
   }
