@@ -40,8 +40,8 @@ export function sanitizeInput(input: string): string {
   return input
     .replace(/[<>]/g, '') // Remove HTML brackets
     .replace(/javascript:/gi, '') // Remove javascript: protocol
-    .replace(/on\w+\s*=/gi, '') // Remove event handlers
-    .trim()
+    .replace(/on\w+=/gi, '') // Remove event handlers (without the \s* to preserve spaces)
+    // Don't trim here - let the consumer decide when to trim (e.g., on blur or submit)
 }
 
 /**

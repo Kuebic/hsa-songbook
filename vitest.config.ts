@@ -45,7 +45,8 @@ export default defineConfig({
       '@app': path.resolve(__dirname, './src/app'),
       '@features': path.resolve(__dirname, './src/features'),
       '@shared': path.resolve(__dirname, './src/shared'),
-      '@assets': path.resolve(__dirname, './src/assets')
+      '@assets': path.resolve(__dirname, './src/assets'),
+      'virtual:pwa-register/react': path.resolve(__dirname, './src/shared/test-utils/__mocks__/virtual-pwa-register.ts')
     }
   }
 })

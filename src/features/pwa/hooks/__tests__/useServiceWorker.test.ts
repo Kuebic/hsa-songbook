@@ -1,15 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 
-// Create a mock function for useRegisterSW
-const mockUseRegisterSW = vi.fn()
-
 // Mock the virtual:pwa-register/react module before importing useServiceWorker
-vi.mock('virtual:pwa-register/react', () => ({
-  useRegisterSW: mockUseRegisterSW
-}))
+vi.mock('virtual:pwa-register/react', () => {
+  const mockUseRegisterSW = vi.fn()
+  return {
+    useRegisterSW: mockUseRegisterSW
+  }
+})
 
+// Import after mocking
 import { useServiceWorker } from '../useServiceWorker'
+import { useRegisterSW } from 'virtual:pwa-register/react'
+
+// Cast for TypeScript
+const mockUseRegisterSW = useRegisterSW as ReturnType<typeof vi.fn>
 
 describe('useServiceWorker', () => {
   const mockSetOfflineReady = vi.fn()

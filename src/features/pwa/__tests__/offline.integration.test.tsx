@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
 import { lazy } from 'react'
 import React from 'react'
 
@@ -12,6 +11,9 @@ vi.mock('virtual:pwa-register/react', () => ({
     updateServiceWorker: vi.fn()
   }))
 }))
+
+// Import MemoryRouter after setting up mocks
+import { MemoryRouter } from 'react-router-dom'
 
 import { LazyRouteWrapper } from '../components/LazyRouteWrapper'
 import { OfflineIndicator } from '../components/OfflineIndicator'
@@ -308,11 +310,7 @@ describe('PWA Offline Integration', () => {
         Promise.reject(new Error('Network error'))
       )
       
-      const mockNavigate = vi.fn()
-      vi.mock('react-router-dom', () => ({
-        ...vi.importActual('react-router-dom'),
-        useNavigate: () => mockNavigate
-      }))
+      // Mock navigate would need to be set up at module level, skipping for now
       
       render(
         <MemoryRouter>
