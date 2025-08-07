@@ -19,15 +19,21 @@ async function resetDatabase() {
     
     logger.info('Connected to MongoDB')
     
+    // Ensure database connection is established
+    const db = mongoose.connection.db
+    if (!db) {
+      throw new Error('Database connection not established')
+    }
+    
     // Get all collections
-    const collections = await mongoose.connection.db.listCollections().toArray()
+    const collections = await db.listCollections().toArray()
     
     logger.info(`Found ${collections.length} collections`)
     
     // Drop each collection
     for (const collection of collections) {
       logger.info(`Dropping collection: ${collection.name}`)
-      await mongoose.connection.db.dropCollection(collection.name)
+      await db.dropCollection(collection.name)
     }
     
     logger.info('All collections dropped successfully')
@@ -36,7 +42,7 @@ async function resetDatabase() {
     logger.info('Creating indexes...')
     
     // Songs collection indexes
-    const songsCollection = mongoose.connection.db.collection('songs')
+    const songsCollection = db.collection('songs')
     await songsCollection.createIndex({ title: 'text', artist: 'text', themes: 'text' })
     await songsCollection.createIndex({ slug: 1 }, { unique: true })
     await songsCollection.createIndex({ 'metadata.isPublic': 1 })
@@ -44,7 +50,7 @@ async function resetDatabase() {
     logger.info('Songs indexes created')
     
     // Arrangements collection indexes
-    const arrangementsCollection = mongoose.connection.db.collection('arrangements')
+    const arrangementsCollection = db.collection('arrangements')
     await arrangementsCollection.createIndex({ songIds: 1 })
     await arrangementsCollection.createIndex({ slug: 1 }, { unique: true })
     await arrangementsCollection.createIndex({ 'metadata.isPublic': 1 })
@@ -52,7 +58,7 @@ async function resetDatabase() {
     logger.info('Arrangements indexes created')
     
     // Users collection indexes
-    const usersCollection = mongoose.connection.db.collection('users')
+    const usersCollection = db.collection('users')
     await usersCollection.createIndex({ clerkId: 1 }, { unique: true })
     await usersCollection.createIndex({ email: 1 }, { unique: true })
     await usersCollection.createIndex({ username: 1 })

@@ -1,5 +1,5 @@
 import { User } from './user.model'
-import { IUser, CreateUserFromClerkDto, UpdateUserDto, UserResponse } from './user.types'
+import { CreateUserFromClerkDto, UpdateUserDto, UserResponse } from './user.types'
 import { NotFoundError, ConflictError } from '../../shared/utils/errors'
 
 export class UserService {

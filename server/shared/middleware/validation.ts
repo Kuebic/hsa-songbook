@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { ValidationError } from '../utils/errors'
 
 export const validate = (schema: z.ZodSchema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     try {
       schema.parse({
         body: req.body,
@@ -27,7 +27,7 @@ export const validate = (schema: z.ZodSchema) => {
 }
 
 export const validateBody = (schema: z.ZodSchema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     try {
       req.body = schema.parse(req.body)
       next()
@@ -47,7 +47,7 @@ export const validateBody = (schema: z.ZodSchema) => {
 }
 
 export const validateParams = (schema: z.ZodSchema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     try {
       req.params = schema.parse(req.params)
       next()
@@ -67,7 +67,7 @@ export const validateParams = (schema: z.ZodSchema) => {
 }
 
 export const validateQuery = (schema: z.ZodSchema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     try {
       req.query = schema.parse(req.query)
       next()

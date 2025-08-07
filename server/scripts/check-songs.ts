@@ -13,7 +13,12 @@ async function checkSongs() {
     await mongoose.connect(mongoUri)
     console.log('Connected to MongoDB')
     
-    const songsCollection = mongoose.connection.db.collection('songs')
+    const db = mongoose.connection.db
+    if (!db) {
+      throw new Error('Database connection not established')
+    }
+    
+    const songsCollection = db.collection('songs')
     const count = await songsCollection.countDocuments()
     console.log(`\nTotal songs in database: ${count}`)
     

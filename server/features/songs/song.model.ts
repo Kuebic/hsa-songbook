@@ -92,12 +92,12 @@ const songSchema = new Schema<ISong>({
   timestamps: true,
   toJSON: {
     virtuals: true,
-    transform: (doc, ret) => {
-      ret.id = ret._id
-      delete ret._id
-      delete ret.__v
-      delete ret.documentSize
-      return ret
+    transform: (_doc, ret) => {
+      const { _id, __v, documentSize, ...cleanRet } = ret
+      return {
+        id: _id,
+        ...cleanRet
+      }
     }
   }
 })

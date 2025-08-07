@@ -88,11 +88,12 @@ const userSchema = new Schema<IUser>({
   timestamps: true,
   toJSON: {
     virtuals: true,
-    transform: (doc, ret) => {
-      ret.id = ret._id
-      delete ret._id
-      delete ret.__v
-      return ret
+    transform: (_doc, ret) => {
+      const { _id, __v, ...cleanRet } = ret
+      return {
+        id: _id,
+        ...cleanRet
+      }
     }
   }
 })

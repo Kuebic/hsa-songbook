@@ -25,8 +25,9 @@ describe('UserMenu', () => {
   it('passes afterSignOutUrl prop correctly', () => {
     renderWithClerk(<UserMenu />)
     
-    // The UserButton is mocked, but we can verify it renders
+    // The UserButton is mocked, but we can verify the prop is handled correctly
     const userButton = screen.getByTestId('user-button')
     expect(userButton).toBeInTheDocument()
+    expect(userButton).toHaveAttribute('data-after-sign-out-url', '/')
   })
 })

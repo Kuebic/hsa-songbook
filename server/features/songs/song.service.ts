@@ -1,5 +1,5 @@
 import { Song } from './song.model'
-import { ISong, CreateSongDto, UpdateSongDto, SongFilter, SongResponse } from './song.types'
+import { CreateSongDto, UpdateSongDto, SongFilter, SongResponse } from './song.types'
 import { NotFoundError, ConflictError } from '../../shared/utils/errors'
 import { Types } from 'mongoose'
 import { SongQuery, SortOptions } from '../../shared/types/database.types'

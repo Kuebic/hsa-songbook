@@ -31,3 +31,4 @@ server.pid
 *.njsproj
 *.sln
 *.sw?
+server/mongodb-binaries/

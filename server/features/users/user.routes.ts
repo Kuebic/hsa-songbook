@@ -29,7 +29,7 @@ router.get(
       })
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: user
     })
@@ -52,7 +52,7 @@ router.patch(
 
     const updated = await userService.update(user.id, req.body)
 
-    res.json({
+    return res.json({
       success: true,
       data: updated,
       message: 'Preferences updated successfully'
@@ -109,7 +109,7 @@ router.patch(
 
     const user = await userService.updateRole(req.params.id, role)
 
-    res.json({
+    return res.json({
       success: true,
       data: user,
       message: 'User role updated successfully'

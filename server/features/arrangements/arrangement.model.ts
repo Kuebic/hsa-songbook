@@ -103,14 +103,12 @@ const arrangementSchema = new Schema<IArrangement>({
   timestamps: true,
   toJSON: {
     virtuals: true,
-    transform: (doc, ret) => {
-      ret.id = ret._id
-      delete ret._id
-      delete ret.__v
-      delete ret.documentSize
-      // Don't send Buffer data in JSON - it should be decompressed first
-      delete ret.chordData
-      return ret
+    transform: (_doc, ret) => {
+      const { _id, __v, documentSize, chordData, ...cleanRet } = ret
+      return {
+        id: _id,
+        ...cleanRet
+      }
     }
   }
 })

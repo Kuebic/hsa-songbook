@@ -53,20 +53,61 @@ vi.mock('@clerk/clerk-react', () => ({
     return !auth.isSignedIn ? children : null
   },
   SignInButton: ({ children, ...props }: MockComponentProps) => {
+    // Filter out Clerk-specific props that shouldn't be passed to DOM elements
+    const { 
+      mode, 
+      redirectUrl, 
+      signUpUrl, 
+      forceRedirectUrl,
+      fallbackRedirectUrl,
+      ...domProps 
+    } = props || {}
+    
     if (children) {
-      return React.createElement('div', props, children)
+      return React.createElement('div', domProps, children)
     }
-    return React.createElement('button', props, 'Sign In')
+    return React.createElement('button', { 
+      'data-testid': 'sign-in-button',
+      ...domProps 
+    }, 'Sign In')
   },
   SignUpButton: ({ children, ...props }: MockComponentProps) => {
+    // Filter out Clerk-specific props that shouldn't be passed to DOM elements
+    const { 
+      mode, 
+      redirectUrl, 
+      signInUrl, 
+      forceRedirectUrl,
+      fallbackRedirectUrl,
+      ...domProps 
+    } = props || {}
+    
     if (children) {
-      return React.createElement('div', props, children)
+      return React.createElement('div', domProps, children)
     }
-    return React.createElement('button', props, 'Sign Up')
+    return React.createElement('button', { 
+      'data-testid': 'sign-up-button',
+      ...domProps 
+    }, 'Sign Up')
   },
   UserButton: (props: MockComponentProps) => {
-    const restProps = props || {}
-    return React.createElement('button', { 'data-testid': 'user-button', ...restProps }, 'User')
+    // Filter out Clerk-specific props that shouldn't be passed to DOM elements
+    const { 
+      afterSignOutUrl, 
+      appearance, 
+      showName,
+      signInUrl,
+      userProfileUrl,
+      userProfileMode,
+      defaultOpen,
+      ...domProps 
+    } = props || {}
+    
+    return React.createElement('button', { 
+      'data-testid': 'user-button',
+      'data-after-sign-out-url': afterSignOutUrl, // Store as data attribute for testing if needed
+      ...domProps 
+    }, 'User')
   },
 }))
 

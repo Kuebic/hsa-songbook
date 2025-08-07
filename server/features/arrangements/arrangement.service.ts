@@ -1,6 +1,5 @@
 import { Arrangement } from './arrangement.model'
 import { 
-  IArrangement, 
   CreateArrangementDto, 
   UpdateArrangementDto, 
   ArrangementFilter, 
@@ -252,7 +251,7 @@ export class ArrangementService {
   /**
    * Update an arrangement
    */
-  async update(id: string, data: UpdateArrangementDto, userId: string): Promise<ArrangementResponse> {
+  async update(id: string, data: UpdateArrangementDto, _userId: string): Promise<ArrangementResponse> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundError('Arrangement')
     }

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response } from 'express'
 import { songService } from './song.service'
 import { catchAsync } from '../../shared/utils/catchAsync'
 import { AuthRequest } from '../../shared/middleware/auth'
@@ -119,7 +119,7 @@ export const rateSong = catchAsync(async (
 
   const song = await songService.updateRating(req.params.id, rating)
 
-  res.json({
+  return res.json({
     success: true,
     data: song,
     message: 'Rating submitted successfully'

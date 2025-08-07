@@ -139,8 +139,14 @@ async function seedSongs() {
     
     logger.info('Connected to MongoDB')
     
+    // Ensure database connection is established
+    const db = mongoose.connection.db
+    if (!db) {
+      throw new Error('Database connection not established')
+    }
+    
     // Get the songs collection
-    const songsCollection = mongoose.connection.db.collection('songs')
+    const songsCollection = db.collection('songs')
     
     // Check if songs already exist
     const existingCount = await songsCollection.countDocuments()

@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { requireAuth, optionalAuth, requireRole } from '../../shared/middleware/auth'
+import { requireAuth, requireRole } from '../../shared/middleware/auth'
 import { validate, validateBody, validateParams, validateQuery } from '../../shared/middleware/validation'
 import {
   createSongSchema,

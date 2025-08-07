@@ -138,7 +138,7 @@ export const rateArrangement = catchAsync(async (
 
   const arrangement = await arrangementService.updateRating(req.params.id, rating)
 
-  res.json({
+  return res.json({
     success: true,
     data: arrangement,
     message: 'Rating submitted successfully'

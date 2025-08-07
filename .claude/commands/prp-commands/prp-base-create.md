@@ -17,7 +17,7 @@ Create a comprehensive PRP that enables **one-pass implementation success** thro
 
 ## Research Process
 
-> During the research process, create clear tasks and spawn as many agents and subagents as needed using the batch tools. The deeper research we do here the better the PRP will be. we optminize for chance of success and not for speed.
+> During the research process, create clear tasks and spawn as many agents and subagents as needed using the batch tools. Also check PRPs/ai_docs to see if similar research has been done before. The deeper research we do here the better the PRP will be. we optminize for chance of success and not for speed.
 
 1. **Codebase Analysis in depth**
    - Create clear todos and spawn subagents to search the codebase for similar features/patterns Think hard and plan your approach
