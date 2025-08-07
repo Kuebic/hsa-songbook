@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react'
 
 export function useOnlineStatus() {
-  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [isOnline, setIsOnline] = useState(() => {
+    if (typeof window !== 'undefined' && 'navigator' in window) {
+      return navigator.onLine
+    }
+    return true
+  })
   const [wasOffline, setWasOffline] = useState(false)
 
   useEffect(() => {
@@ -23,7 +28,9 @@ export function useOnlineStatus() {
     window.addEventListener('offline', handleOffline)
 
     // Check the status when component mounts
-    setIsOnline(navigator.onLine)
+    if (typeof window !== 'undefined' && 'navigator' in window) {
+      setIsOnline(navigator.onLine)
+    }
 
     return () => {
       window.removeEventListener('online', handleOnline)

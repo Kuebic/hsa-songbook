@@ -12,7 +12,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.svg', 'icon.svg'],
+      includeAssets: ['icon.svg', 'apple-touch-icon.svg', 'vite.svg'],
       manifest: {
         name: 'HSA Songbook',
         short_name: 'Songbook',
@@ -187,7 +187,8 @@ export default defineConfig({
       devOptions: {
         enabled: true, // Enable in dev for testing
         type: 'module',
-        navigateFallback: 'index.html'
+        navigateFallback: 'index.html',
+        suppressWarnings: true
       }
     })
   ],
