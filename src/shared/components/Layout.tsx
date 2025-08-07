@@ -13,12 +13,13 @@ export function Layout({ children }: LayoutProps) {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <nav style={{ 
         backgroundColor: '#1e293b',
-        padding: '1rem 2rem',
-        color: 'white'
+        color: 'white',
+        width: '100%'
       }}>
         <div style={{ 
-          maxWidth: '1200px', 
+          maxWidth: '1280px',
           margin: '0 auto',
+          padding: '1rem 2rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
@@ -90,20 +91,30 @@ export function Layout({ children }: LayoutProps) {
       <main style={{ 
         flex: 1,
         backgroundColor: '#f8fafc',
-        maxWidth: '1200px',
-        margin: '0 auto',
         width: '100%'
       }}>
-        {children}
+        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          padding: '2rem'
+        }}>
+          {children}
+        </div>
       </main>
       
       <footer style={{ 
         backgroundColor: '#1e293b',
         color: '#94a3b8',
-        padding: '1rem',
-        textAlign: 'center'
+        width: '100%'
       }}>
-        © 2025 HSA Songbook. All rights reserved.
+        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          padding: '1rem 2rem',
+          textAlign: 'center'
+        }}>
+          © 2025 HSA Songbook. All rights reserved.
+        </div>
       </footer>
     </div>
   )
