@@ -12,10 +12,15 @@ The AI agent only gets the context you are appending to the PRP and its own trai
 
 1. **Codebase Analysis in depth**
    - Create clear todos and spawn subagents to search the codebase for similar features/patterns Think hard and plan your approach
+   - **Vertical Slice Architecture Analysis**: 
+     - Identify existing feature slices (src/features/songs/, src/features/auth/, etc.)
+     - Analyze how each slice organizes: types, components, hooks, services, pages
+     - Map feature boundaries and identify minimal cross-feature dependencies
+     - Document the vertical slice pattern to follow for new features
    - Identify all the necessary files to reference in the PRP
    - Note all existing conventions to follow (React 19 patterns, TypeScript strict mode, Vite config)
    - Check existing test patterns for validation approach (Vitest, React Testing Library)
-   - Review component structure and hooks patterns
+   - Review component structure and hooks patterns within existing vertical slices
    - Use the batch tools to spawn subagents to search the codebase for similar features/patterns
 
 2. **External Research at scale**
@@ -44,10 +49,13 @@ Using PRPs/templates/prp_base_typescript.md as template:
 
 ### Implementation Blueprint
 
-- Start with pseudocode showing approach
-- Reference real files for patterns
-- Include error handling strategy
-- List tasks to be completed to fulfill the PRP in the order they should be completed, use the pattern in the PRP with information dense keywords
+- **Vertical Slice Design**: Plan the complete feature slice from UI to data layer
+- Start with pseudocode showing approach following vertical slice principles
+- Reference real files for patterns within existing feature slices
+- **Feature Boundary Definition**: Clearly define what belongs in this slice vs dependencies on other slices  
+- Include error handling strategy within the slice
+- List tasks to be completed to fulfill the PRP in the order they should be completed, prioritizing complete vertical slice implementation
+- Use the pattern in the PRP with information dense keywords
 
 ### Validation Gates (Must be Executable by the AI agent)
 
@@ -88,10 +96,12 @@ Save as: `PRPs/{feature-name}.md`
 ## Quality Checklist
 
 - [ ] All necessary context included
+- [ ] **Vertical slice architecture clearly defined and documented**
+- [ ] **Feature boundaries explicitly identified with minimal cross-slice dependencies**
 - [ ] Validation gates are executable by AI
-- [ ] References existing patterns
-- [ ] Clear implementation path
-- [ ] Error handling documented
+- [ ] References existing vertical slice patterns from codebase
+- [ ] Clear implementation path following slice-first approach
+- [ ] Error handling documented within the feature slice
 
 Score the PRP on a scale of 1-10 (confidence level to succeed in one-pass implementation using claude codes)
 

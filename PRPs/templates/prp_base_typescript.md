@@ -65,10 +65,47 @@ _Before writing this PRP, validate: "If someone knew nothing about this codebase
 
 ```
 
+### Vertical Slice Architecture Analysis
+
+**Existing Feature Slices** (analyze current patterns):
+```yaml
+src/features/songs/:     # Song management slice
+  - types/song.types.ts  # Domain types
+  - components/          # UI components
+  - hooks/              # State and API hooks  
+  - services/           # API communication
+  - pages/              # Route-specific pages
+
+src/features/auth/:      # Authentication slice
+  - Similar structure...
+
+src/features/setlists/:  # Setlist management slice
+  - Similar structure...
+```
+
+**Feature Boundary Definition**:
+- **This Slice Owns**: [List specific domain responsibilities]
+- **Dependencies On Other Slices**: [Minimal, explicit dependencies only]  
+- **Shared/Common Code**: [What can be accessed from shared/ directory]
+- **Slice Isolation**: [How this slice maintains independence]
+
 ### Desired Codebase tree with files to be added and responsibility of file
 
 ```bash
-
+src/features/{new-feature-name}/
+├── types/
+│   └── {domain}.types.ts        # Domain-specific TypeScript types and interfaces
+├── components/
+│   ├── {ComponentName}.tsx      # Feature-specific React components
+│   └── __tests__/
+├── hooks/
+│   ├── use{DomainAction}.ts     # Custom hooks for state and API calls
+│   └── __tests__/
+├── services/
+│   └── {domain}Service.ts       # API communication layer
+├── pages/
+│   └── {FeaturePage}.tsx        # Route-specific page components
+└── index.ts                     # Public API exports for this slice
 ```
 
 ### Known Gotchas of our codebase & Library Quirks
@@ -97,49 +134,59 @@ Examples:
 
 ```
 
-### Implementation Tasks (ordered by dependencies)
+### Implementation Tasks (ordered by vertical slice completion)
+
+**CRITICAL: Implement complete vertical slice - UI to data layer within feature boundary**
 
 ```yaml
-Task 1: CREATE lib/types/{domain}.types.ts
-  - IMPLEMENT: TypeScript interfaces and types for domain models
-  - FOLLOW pattern: lib/types/existing.types.ts (interface structure, export patterns)
+Task 1: CREATE src/features/{feature}/types/{domain}.types.ts
+  - IMPLEMENT: Complete domain types and interfaces for the feature slice
+  - FOLLOW pattern: src/features/songs/types/song.types.ts (interface structure, export patterns)
   - NAMING: PascalCase for interfaces, camelCase for properties
-  - PLACEMENT: Type definitions in lib/types/
+  - PLACEMENT: Within feature slice types directory
+  - SLICE BOUNDARY: Define all types needed for this feature's complete operation
 
-Task 2: CREATE components/{domain}/{ComponentName}.tsx
-  - IMPLEMENT: React component with proper TypeScript props interface
-  - FOLLOW pattern: components/existing/ExistingComponent.tsx (component structure, props typing)
-  - NAMING: PascalCase for components, camelCase for props, kebab-case for CSS classes
+Task 2: CREATE src/features/{feature}/services/{domain}Service.ts
+  - IMPLEMENT: API communication layer for the feature
+  - FOLLOW pattern: src/features/songs/services/songService.ts (service structure, error handling)
   - DEPENDENCIES: Import types from Task 1
-  - PLACEMENT: Component layer in components/{domain}/
+  - SLICE BOUNDARY: Handle all API operations for this feature domain
+  - PLACEMENT: Within feature slice services directory
 
-Task 3: CREATE app/api/{resource}/route.ts
-  - IMPLEMENT: Next.js API route handlers (GET, POST, etc.)
-  - FOLLOW pattern: app/api/existing/route.ts (request/response handling, error patterns)
-  - NAMING: Named exports (GET, POST, PUT, DELETE), proper TypeScript typing
-  - DEPENDENCIES: Import types and components from previous tasks
-  - PLACEMENT: API routes in app/api/{resource}/
+Task 3: CREATE src/features/{feature}/hooks/use{DomainAction}.ts
+  - IMPLEMENT: Custom hooks for state management and API integration
+  - FOLLOW pattern: src/features/songs/hooks/useSongs.ts (hook structure, TypeScript generics)
+  - DEPENDENCIES: Import types from Task 1, services from Task 2
+  - SLICE BOUNDARY: Manage all state and side effects for this feature
+  - PLACEMENT: Within feature slice hooks directory
 
-Task 4: CREATE app/{feature}/page.tsx
-  - IMPLEMENT: Next.js page component using domain components
-  - FOLLOW pattern: app/existing-page/page.tsx (page structure, metadata, error boundaries)
-  - NAMING: Default export, proper metadata export, TypeScript page props
-  - DEPENDENCIES: Import components from Task 2, types from Task 1
-  - PLACEMENT: Page routes in app/{feature}/
+Task 4: CREATE src/features/{feature}/components/{ComponentName}.tsx
+  - IMPLEMENT: Feature-specific UI components
+  - FOLLOW pattern: src/features/songs/components/ (component structure, props typing)
+  - DEPENDENCIES: Import types from Task 1, hooks from Task 3
+  - SLICE BOUNDARY: All UI components specific to this feature domain
+  - PLACEMENT: Within feature slice components directory
 
-Task 5: CREATE hooks/use{DomainAction}.ts
-  - IMPLEMENT: Custom React hooks for state management and API calls
-  - FOLLOW pattern: hooks/useExisting.ts (hook structure, TypeScript generics, error handling)
-  - NAMING: use{ActionName} with proper TypeScript return types
-  - DEPENDENCIES: Import types from Task 1, API endpoints from Task 3
-  - PLACEMENT: Custom hooks in hooks/
+Task 5: CREATE src/features/{feature}/pages/{FeaturePage}.tsx
+  - IMPLEMENT: Route-specific page components that compose the feature
+  - FOLLOW pattern: src/features/songs/pages/ (page structure, component composition)
+  - DEPENDENCIES: Import components from Task 4, hooks from Task 3
+  - SLICE BOUNDARY: Complete user-facing pages for this feature
+  - PLACEMENT: Within feature slice pages directory
 
-Task 6: CREATE __tests__/{component}.test.tsx
-  - IMPLEMENT: Jest/Testing Library tests for components and hooks
-  - FOLLOW pattern: __tests__/existing.test.tsx (test structure, mocking patterns)
-  - NAMING: describe blocks, test naming conventions, TypeScript test typing
-  - COVERAGE: All components and hooks with positive and negative test cases
-  - PLACEMENT: Tests alongside the code they test
+Task 6: CREATE src/features/{feature}/index.ts
+  - IMPLEMENT: Public API exports for the feature slice
+  - FOLLOW pattern: src/features/songs/index.ts (selective exports)
+  - DEPENDENCIES: Export public interfaces from all previous tasks
+  - SLICE BOUNDARY: Define what other slices can import from this feature
+  - PLACEMENT: Root of feature slice directory
+
+Task 7: CREATE src/features/{feature}/components/__tests__/{component}.test.tsx
+  - IMPLEMENT: Complete test coverage for the feature slice
+  - FOLLOW pattern: src/features/auth/components/__tests__/ (test structure, mocking)
+  - COVERAGE: Test complete vertical slice functionality
+  - SLICE BOUNDARY: Test feature in isolation with minimal external dependencies
+  - PLACEMENT: Within feature slice test directories
 ```
 
 ### Implementation Patterns & Key Details
@@ -181,23 +228,38 @@ export function use{Domain}Action(): {Domain}ActionResult {
 }
 ```
 
-### Integration Points
+### Integration Points & Cross-Slice Dependencies
+
+**CRITICAL: Minimize cross-slice dependencies to maintain architectural boundaries**
 
 ```yaml
-DATABASE:
-  - migration: "Add table 'feature_data' with proper indexes"
-  - client: "@/lib/database/client"
-  - pattern: "createClient() for client components, createServerClient() for server components"
+WITHIN SLICE (Self-contained):
+  - All feature domain logic
+  - Feature-specific types and interfaces
+  - Feature-specific UI components
+  - Feature-specific API services
+  - Feature-specific state management
 
-CONFIG:
-  - add to: .env.local
-  - pattern: "NEXT_PUBLIC_* for client-side env vars"
-  - pattern: "FEATURE_TIMEOUT = process.env.FEATURE_TIMEOUT || '30000'"
+SHARED/COMMON DEPENDENCIES (Allowed):
+  - src/shared/components/ui/ - Common UI primitives
+  - src/shared/utils/ - Generic utility functions  
+  - src/shared/types/ - Cross-cutting type definitions
+  - src/shared/hooks/ - Generic reusable hooks
 
-ROUTES:
-  - file structure: app/feature-name/page.tsx
-  - api routes: app/api/feature-name/route.ts
-  - middleware: middleware.ts (root level)
+CROSS-SLICE DEPENDENCIES (Minimize & Make Explicit):
+  - Import only from other slice's index.ts (public API)
+  - Document why cross-slice dependency is necessary
+  - Consider if functionality should be moved to shared/
+
+BACKEND INTEGRATION:
+  - API routes: server/features/{feature}/ (mirror frontend slice structure)
+  - Database: Feature-specific collections/tables
+  - Services: Feature-specific server services
+
+ROUTING:
+  - Pages: src/features/{feature}/pages/
+  - Routes defined by feature slice ownership
+  - Route parameters typed within slice
 ```
 
 ## Validation Loop
@@ -264,33 +326,41 @@ curl http://localhost:3000/{page} | grep -q "expected-content"
 ### Level 4: Creative & Domain-Specific Validation
 
 ```bash
-# TypeScript/Next.js Specific Validation:
+# TypeScript/React/Vite Specific Validation:
 
 # Production build performance
-npm run build && npm run analyze  # Bundle analyzer if available
+npm run build && npm run preview  # Vite production build and preview
 
-# Type safety validation
-npx tsc --noEmit --strict        # Strict TypeScript checking
+# Type safety validation  
+npm run type-check               # Project-specific TypeScript checking
 
-# Next.js specific checks
-npm run lint:next                # Next.js linting rules if available
+# Bundle analysis (if available)
+npm run analyze                  # Bundle size analysis
 
-# MCP Server Validation Examples:
-# Playwright MCP (for E2E testing)
-playwright-mcp --test-user-flows --browser chromium
+# Vertical Slice Architecture Validation:
+# Check feature slice isolation
+find src/features/{feature} -name "*.ts" -o -name "*.tsx" | xargs grep -l "from.*features/[^{feature}]" 
+# Expected: Minimal or zero cross-slice imports
 
-# Performance MCP (for Lighthouse audits)
-lighthouse-mcp --url http://localhost:3000 --audit performance
+# Validate slice completeness
+ls -la src/features/{feature}/
+# Expected: types/, components/, hooks/, services/, pages/, index.ts
 
-# Accessibility MCP (for a11y testing)
-axe-mcp --scan http://localhost:3000/{pages}
+# Check circular dependencies
+npx madge --circular --extensions ts,tsx src/features/{feature}
+# Expected: No circular dependencies within slice
 
-# Custom TypeScript/React Validation
-# React Testing Library integration tests
-# Storybook visual regression tests (if available)
-# TypeScript strict mode compliance
+# Test slice in isolation
+npm test -- src/features/{feature}
+# Expected: All tests pass without external feature dependencies
 
-# Expected: All creative validations pass, performance/accessibility standards met
+# Custom React/Vite Validation
+# Component isolation testing
+# Hook behavior validation
+# Service integration testing
+# TypeScript strict mode compliance across slice
+
+# Expected: Complete vertical slice functionality, architectural compliance
 ```
 
 ## Final Validation Checklist
@@ -315,7 +385,10 @@ axe-mcp --scan http://localhost:3000/{pages}
 ### Code Quality Validation
 
 - [ ] Follows existing TypeScript/React patterns and naming conventions
-- [ ] File placement matches desired codebase tree structure
+- [ ] File placement matches desired codebase tree structure within feature slice
+- [ ] **Vertical slice architecture maintained**: Feature is self-contained and complete
+- [ ] **Cross-slice dependencies minimized**: Only imports from other slices' public APIs
+- [ ] **Slice boundaries respected**: No violations of existing feature boundaries  
 - [ ] Anti-patterns avoided (check against Anti-Patterns section)
 - [ ] Dependencies properly managed with correct TypeScript typings
 - [ ] Configuration changes properly integrated
@@ -338,9 +411,17 @@ axe-mcp --scan http://localhost:3000/{pages}
 
 ## Anti-Patterns to Avoid
 
+**General Anti-Patterns:**
 - ❌ Don't create new patterns when existing ones work
 - ❌ Don't skip validation because "it should work"
 - ❌ Don't ignore failing tests - fix them
-- ❌ Don't use 'use client' unnecessarily - embrace Server Components
 - ❌ Don't hardcode values that should be config
 - ❌ Don't catch all exceptions - be specific
+
+**Vertical Slice Architecture Anti-Patterns:**
+- ❌ Don't create direct imports between feature slices - use public APIs only
+- ❌ Don't put shared business logic in one slice that others depend on - move to shared/
+- ❌ Don't create incomplete slices missing layers (e.g., UI without corresponding hooks)
+- ❌ Don't violate slice boundaries for "convenience" - maintain architectural discipline
+- ❌ Don't create circular dependencies between slices - each should be independently deployable
+- ❌ Don't bypass the slice's public API (index.ts) when importing from other features

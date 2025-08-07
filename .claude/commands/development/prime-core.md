@@ -11,6 +11,7 @@ Read the README.md file to get an understanding of the project.
 Read key files in the src/ directory
 
 > List any additional files that are important to understand the project.
+claude_md_files/*
 
 Explain back to me:
 - Project structure
