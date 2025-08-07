@@ -75,7 +75,7 @@ describe('useServiceWorker', () => {
   describe('registration callbacks', () => {
     it('should set up interval for checking updates on registration', () => {
       const setIntervalSpy = vi.spyOn(global, 'setInterval')
-      let onRegisteredCallback: ((registration: any) => void) | undefined
+      let onRegisteredCallback: ((registration: ServiceWorkerRegistration) => void) | undefined
       
       mockUseRegisterSW.mockImplementation((config) => {
         onRegisteredCallback = config.onRegistered
@@ -109,7 +109,7 @@ describe('useServiceWorker', () => {
 
     it('should handle registration without setting interval when registration is null', () => {
       const setIntervalSpy = vi.spyOn(global, 'setInterval')
-      let onRegisteredCallback: ((registration: any) => void) | undefined
+      let onRegisteredCallback: ((registration: ServiceWorkerRegistration) => void) | undefined
       
       mockUseRegisterSW.mockImplementation((config) => {
         onRegisteredCallback = config.onRegistered
@@ -253,7 +253,7 @@ describe('useServiceWorker', () => {
   describe('interval cleanup', () => {
     it('should clear interval on unmount', () => {
       const clearIntervalSpy = vi.spyOn(global, 'clearInterval')
-      let onRegisteredCallback: ((registration: any) => void) | undefined
+      let onRegisteredCallback: ((registration: ServiceWorkerRegistration) => void) | undefined
       
       mockUseRegisterSW.mockImplementation((config) => {
         onRegisteredCallback = config.onRegistered
