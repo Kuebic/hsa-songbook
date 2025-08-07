@@ -11,7 +11,22 @@
       "Bash(npm run test:coverage:*)",
       "Bash(git commit:*)",
       "Bash(npm run lint:*)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "Bash(tree:*)",
+      "WebFetch(domain:clerk.com)",
+      "WebFetch(domain:clerk.com)",
+      "WebFetch(domain:gist.github.com)",
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:github.com)",
+      "Bash(mkdir:*)",
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:developer.mozilla.org)",
+      "WebFetch(domain:web.dev)",
+      "WebFetch(domain:developer.chrome.com)",
+      "WebFetch(domain:vite-pwa-org.netlify.app)",
+      "WebFetch(domain:borstch.com)",
+      "WebFetch(domain:blog.bitsrc.io)",
+      "WebFetch(domain:adueck.github.io)"
     ],
     "deny": []
   }
