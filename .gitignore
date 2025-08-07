@@ -17,6 +17,10 @@ PRPs/code_reviews
 .env.server
 .claude/settings.local.json
 
+# Process files
+server.pid
+*.pid
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
