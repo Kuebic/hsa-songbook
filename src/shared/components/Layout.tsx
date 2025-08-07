@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
+import { SignedIn, SignedOut } from '@clerk/clerk-react'
+import { AuthButtons, UserMenu } from '@features/auth'
 
 interface LayoutProps {
   children: ReactNode
@@ -20,11 +22,12 @@ export function Layout({ children }: LayoutProps) {
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <h1 style={{ fontSize: '1.5rem', margin: 0 }}>
-            🎵 HSA Songbook
-          </h1>
-          
-          <div style={{ display: 'flex', gap: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
+            <h1 style={{ fontSize: '1.5rem', margin: 0 }}>
+              🎵 HSA Songbook
+            </h1>
+            
+            <div style={{ display: 'flex', gap: '2rem' }}>
             <NavLink 
               to="/"
               style={({ isActive }) => ({
@@ -65,6 +68,16 @@ export function Layout({ children }: LayoutProps) {
             >
               Setlists
             </NavLink>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <SignedOut>
+              <AuthButtons />
+            </SignedOut>
+            <SignedIn>
+              <UserMenu />
+            </SignedIn>
           </div>
         </div>
       </nav>
