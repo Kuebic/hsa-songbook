@@ -1,10 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { User } from '../../features/users/user.model'
 import { Song } from '../../features/songs/song.model'
 import { Arrangement } from '../../features/arrangements/arrangement.model'
 import { createUserData, createSongData, createArrangementData, getSampleChordPro } from '../../shared/test-utils/factories'
 import { compressionService } from '../../shared/services/compressionService'
 import mongoose from 'mongoose'
+import { ValidationError } from '../../shared/test-utils/test-types'
 
 describe('Model Validation Error Tests', () => {
   // ============================================================================
@@ -19,12 +20,13 @@ describe('Model Validation Error Tests', () => {
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors.clerkId).toBeDefined()
-          expect(error.errors.clerkId.message).toContain('required')
-          expect(error.errors.clerkId.kind).toBe('required')
-          expect(error.errors.clerkId.path).toBe('clerkId')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.clerkId).toBeDefined()
+          expect(validationError.errors?.clerkId.message).toContain('required')
+          expect(validationError.errors?.clerkId.kind).toBe('required')
+          expect(validationError.errors?.clerkId.path).toBe('clerkId')
         }
       })
 
@@ -34,11 +36,12 @@ describe('Model Validation Error Tests', () => {
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors.email).toBeDefined()
-          expect(error.errors.email.message).toContain('required')
-          expect(error.errors.email.kind).toBe('required')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.email).toBeDefined()
+          expect(validationError.errors?.email.message).toContain('required')
+          expect(validationError.errors?.email.kind).toBe('required')
         }
       })
 
@@ -48,11 +51,12 @@ describe('Model Validation Error Tests', () => {
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors.username).toBeDefined()
-          expect(error.errors.username.message).toContain('required')
-          expect(error.errors.username.kind).toBe('required')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.username).toBeDefined()
+          expect(validationError.errors?.username.message).toContain('required')
+          expect(validationError.errors?.username.kind).toBe('required')
         }
       })
 
@@ -65,30 +69,32 @@ describe('Model Validation Error Tests', () => {
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors.clerkId).toBeDefined()
-          expect(error.errors.email).toBeDefined()
-          expect(error.errors.username).toBeDefined()
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.clerkId).toBeDefined()
+          expect(validationError.errors?.email).toBeDefined()
+          expect(validationError.errors?.username).toBeDefined()
           
-          expect(Object.keys(error.errors)).toHaveLength(3)
+          expect(Object.keys(validationError.errors || {})).toHaveLength(3)
         }
       })
     })
 
     describe('Enum Validation', () => {
       it('should provide detailed error for invalid role', async () => {
-        const userData = createUserData({ role: 'INVALID_ROLE' as any })
+        const userData = createUserData({ role: 'INVALID_ROLE' as never })
         
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors.role).toBeDefined()
-          expect(error.errors.role.message).toContain('is not a valid enum value')
-          expect(error.errors.role.kind).toBe('enum')
-          expect(error.errors.role.value).toBe('INVALID_ROLE')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.role).toBeDefined()
+          expect(validationError.errors?.role.message).toContain('is not a valid enum value')
+          expect(validationError.errors?.role.kind).toBe('enum')
+          expect(validationError.errors?.role.value).toBe('INVALID_ROLE')
         }
       })
 
@@ -96,18 +102,19 @@ describe('Model Validation Error Tests', () => {
         const userData = createUserData({ 
           preferences: { 
             fontSize: 16, 
-            theme: 'invalid-theme' as any 
+            theme: 'invalid-theme' as never 
           }
         })
         
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors['preferences.theme']).toBeDefined()
-          expect(error.errors['preferences.theme'].message).toContain('is not a valid enum value')
-          expect(error.errors['preferences.theme'].value).toBe('invalid-theme')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.['preferences.theme']).toBeDefined()
+          expect(validationError.errors?.['preferences.theme'].message).toContain('is not a valid enum value')
+          expect(validationError.errors?.['preferences.theme'].value).toBe('invalid-theme')
         }
       })
 
@@ -116,17 +123,18 @@ describe('Model Validation Error Tests', () => {
           preferences: { 
             fontSize: 16, 
             theme: 'light',
-            defaultKey: 'H' as any 
+            defaultKey: 'H' as never 
           }
         })
         
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors['preferences.defaultKey']).toBeDefined()
-          expect(error.errors['preferences.defaultKey'].message).toContain('is not a valid enum value')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.['preferences.defaultKey']).toBeDefined()
+          expect(validationError.errors?.['preferences.defaultKey'].message).toContain('is not a valid enum value')
         }
       })
     })
@@ -143,11 +151,12 @@ describe('Model Validation Error Tests', () => {
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors['preferences.fontSize']).toBeDefined()
-          expect(error.errors['preferences.fontSize'].kind).toBe('min')
-          expect(error.errors['preferences.fontSize'].value).toBe(11)
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.['preferences.fontSize']).toBeDefined()
+          expect(validationError.errors?.['preferences.fontSize'].kind).toBe('min')
+          expect(validationError.errors?.['preferences.fontSize'].value).toBe(11)
         }
       })
 
@@ -162,11 +171,12 @@ describe('Model Validation Error Tests', () => {
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors['preferences.fontSize']).toBeDefined()
-          expect(error.errors['preferences.fontSize'].kind).toBe('max')
-          expect(error.errors['preferences.fontSize'].value).toBe(25)
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.['preferences.fontSize']).toBeDefined()
+          expect(validationError.errors?.['preferences.fontSize'].kind).toBe('max')
+          expect(validationError.errors?.['preferences.fontSize'].value).toBe(25)
         }
       })
 
@@ -182,10 +192,11 @@ describe('Model Validation Error Tests', () => {
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors['stats.songsCreated']).toBeDefined()
-          expect(error.errors['stats.songsCreated'].kind).toBe('min')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.['stats.songsCreated']).toBeDefined()
+          expect(validationError.errors?.['stats.songsCreated'].kind).toBe('min')
         }
       })
     })
@@ -201,11 +212,12 @@ describe('Model Validation Error Tests', () => {
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors['profile.bio']).toBeDefined()
-          expect(error.errors['profile.bio'].kind).toBe('maxlength')
-          expect(error.errors['profile.bio'].value).toHaveLength(501)
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.['profile.bio']).toBeDefined()
+          expect(validationError.errors?.['profile.bio'].kind).toBe('maxlength')
+          expect(validationError.errors?.['profile.bio'].value).toHaveLength(501)
         }
       })
 
@@ -219,10 +231,11 @@ describe('Model Validation Error Tests', () => {
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors['profile.website']).toBeDefined()
-          expect(error.errors['profile.website'].kind).toBe('maxlength')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.['profile.website']).toBeDefined()
+          expect(validationError.errors?.['profile.website'].kind).toBe('maxlength')
         }
       })
 
@@ -236,10 +249,11 @@ describe('Model Validation Error Tests', () => {
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors['profile.location']).toBeDefined()
-          expect(error.errors['profile.location'].kind).toBe('maxlength')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.['profile.location']).toBeDefined()
+          expect(validationError.errors?.['profile.location'].kind).toBe('maxlength')
         }
       })
     })
@@ -251,11 +265,11 @@ describe('Model Validation Error Tests', () => {
           clerkId: undefined,
           email: undefined,
           // Invalid values
-          role: 'INVALID_ROLE' as any,
+          role: 'INVALID_ROLE' as never,
           preferences: {
             fontSize: 999, // Too large
-            theme: 'invalid-theme' as any,
-            defaultKey: 'Z' as any
+            theme: 'invalid-theme' as never,
+            defaultKey: 'Z' as never
           },
           profile: {
             bio: 'x'.repeat(600), // Too long
@@ -272,19 +286,20 @@ describe('Model Validation Error Tests', () => {
         try {
           await User.create(userData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
           
           // Should have errors for multiple fields
-          expect(Object.keys(error.errors).length).toBeGreaterThan(5)
+          expect(Object.keys(validationError.errors || {}).length).toBeGreaterThan(5)
           
           // Check some specific errors
-          expect(error.errors.clerkId).toBeDefined()
-          expect(error.errors.email).toBeDefined()
-          expect(error.errors.role).toBeDefined()
-          expect(error.errors['preferences.fontSize']).toBeDefined()
-          expect(error.errors['profile.bio']).toBeDefined()
-          expect(error.errors['stats.songsCreated']).toBeDefined()
+          expect(validationError.errors?.clerkId).toBeDefined()
+          expect(validationError.errors?.email).toBeDefined()
+          expect(validationError.errors?.role).toBeDefined()
+          expect(validationError.errors?.['preferences.fontSize']).toBeDefined()
+          expect(validationError.errors?.['profile.bio']).toBeDefined()
+          expect(validationError.errors?.['stats.songsCreated']).toBeDefined()
         }
       })
     })
@@ -302,10 +317,11 @@ describe('Model Validation Error Tests', () => {
         try {
           await Song.create(songData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors.title).toBeDefined()
-          expect(error.errors.title.kind).toBe('required')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.title).toBeDefined()
+          expect(validationError.errors?.title.kind).toBe('required')
         }
       })
 
@@ -315,9 +331,10 @@ describe('Model Validation Error Tests', () => {
         try {
           await Song.create(songData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors['metadata.createdBy']).toBeDefined()
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.['metadata.createdBy']).toBeDefined()
         }
       })
     })
@@ -331,10 +348,11 @@ describe('Model Validation Error Tests', () => {
         try {
           await Song.create(songData)
           // This might pass if no length limit is set
-        } catch (error: any) {
-          if (error.name === 'ValidationError') {
-            expect(error.errors.title).toBeDefined()
-            expect(error.errors.title.kind).toBe('maxlength')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          if (validationError.name === 'ValidationError') {
+            expect(validationError.errors?.title).toBeDefined()
+            expect(validationError.errors?.title.kind).toBe('maxlength')
           }
         }
       })
@@ -348,9 +366,10 @@ describe('Model Validation Error Tests', () => {
           const song = await Song.create(songData)
           // This should pass as empty array might be allowed
           expect(song.themes).toEqual([])
-        } catch (error: any) {
-          if (error.name === 'ValidationError') {
-            expect(error.errors.themes).toBeDefined()
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          if (validationError.name === 'ValidationError') {
+            expect(validationError.errors?.themes).toBeDefined()
           }
         }
       })
@@ -366,9 +385,10 @@ describe('Model Validation Error Tests', () => {
           const song = await Song.create(songData)
           // This might pass if no validation is set
           expect(song.compositionYear).toBe(1200)
-        } catch (error: any) {
-          if (error.name === 'ValidationError') {
-            expect(error.errors.compositionYear).toBeDefined()
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          if (validationError.name === 'ValidationError') {
+            expect(validationError.errors?.compositionYear).toBeDefined()
           }
         }
       })
@@ -382,9 +402,10 @@ describe('Model Validation Error Tests', () => {
           const song = await Song.create(songData)
           // This might pass if no validation is set
           expect(song.compositionYear).toBe(3000)
-        } catch (error: any) {
-          if (error.name === 'ValidationError') {
-            expect(error.errors.compositionYear).toBeDefined()
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          if (validationError.name === 'ValidationError') {
+            expect(validationError.errors?.compositionYear).toBeDefined()
           }
         }
       })
@@ -420,10 +441,11 @@ describe('Model Validation Error Tests', () => {
         try {
           await Arrangement.create(arrangementData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors.name).toBeDefined()
-          expect(error.errors.name.kind).toBe('required')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.name).toBeDefined()
+          expect(validationError.errors?.name.kind).toBe('required')
         }
       })
 
@@ -444,10 +466,11 @@ describe('Model Validation Error Tests', () => {
         try {
           await Arrangement.create(arrangementData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors.songIds).toBeDefined()
-          expect(error.errors.songIds.kind).toBe('required')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.songIds).toBeDefined()
+          expect(validationError.errors?.songIds.kind).toBe('required')
         }
       })
 
@@ -468,10 +491,11 @@ describe('Model Validation Error Tests', () => {
         try {
           await Arrangement.create(arrangementData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors.chordData).toBeDefined()
-          expect(error.errors.chordData.kind).toBe('required')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.chordData).toBeDefined()
+          expect(validationError.errors?.chordData.kind).toBe('required')
         }
       })
     })
@@ -480,16 +504,17 @@ describe('Model Validation Error Tests', () => {
       it('should provide detailed error for invalid difficulty', async () => {
         const arrangementData = createArrangementData()
         arrangementData.chordData = compressedChordData
-        arrangementData.difficulty = 'invalid-difficulty' as any
+        arrangementData.difficulty = 'invalid-difficulty' as never
         
         try {
           await Arrangement.create(arrangementData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors.difficulty).toBeDefined()
-          expect(error.errors.difficulty.kind).toBe('enum')
-          expect(error.errors.difficulty.value).toBe('invalid-difficulty')
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.difficulty).toBeDefined()
+          expect(validationError.errors?.difficulty.kind).toBe('enum')
+          expect(validationError.errors?.difficulty.value).toBe('invalid-difficulty')
         }
       })
     })
@@ -503,9 +528,10 @@ describe('Model Validation Error Tests', () => {
         try {
           await Arrangement.create(arrangementData)
           // This might pass if empty arrays are allowed
-        } catch (error: any) {
-          if (error.name === 'ValidationError') {
-            expect(error.errors.songIds).toBeDefined()
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          if (validationError.name === 'ValidationError') {
+            expect(validationError.errors?.songIds).toBeDefined()
           }
         }
       })
@@ -514,14 +540,15 @@ describe('Model Validation Error Tests', () => {
     describe('Buffer Validation', () => {
       it('should provide detailed error for invalid chordData type', async () => {
         const arrangementData = createArrangementData()
-        arrangementData.chordData = 'not-a-buffer' as any
+        arrangementData.chordData = 'not-a-buffer' as never
         
         try {
           await Arrangement.create(arrangementData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(error.errors.chordData).toBeDefined()
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(validationError.errors?.chordData).toBeDefined()
         }
       })
     })
@@ -534,7 +561,7 @@ describe('Model Validation Error Tests', () => {
           songIds: undefined,
           chordData: undefined,
           // Invalid enum
-          difficulty: 'super-hard' as any,
+          difficulty: 'super-hard' as never,
           // Missing metadata
           createdBy: undefined
         }
@@ -542,15 +569,16 @@ describe('Model Validation Error Tests', () => {
         try {
           await Arrangement.create(arrangementData)
           expect.fail('Should have thrown validation error')
-        } catch (error: any) {
-          expect(error.name).toBe('ValidationError')
-          expect(Object.keys(error.errors).length).toBeGreaterThan(3)
+        } catch (error: unknown) {
+        const validationError = error as ValidationError
+          expect(validationError.name).toBe('ValidationError')
+          expect(Object.keys(validationError.errors || {}).length).toBeGreaterThan(3)
           
-          expect(error.errors.name).toBeDefined()
-          expect(error.errors.songIds).toBeDefined()
-          expect(error.errors.chordData).toBeDefined()
-          expect(error.errors.difficulty).toBeDefined()
-          expect(error.errors.createdBy).toBeDefined()
+          expect(validationError.errors?.name).toBeDefined()
+          expect(validationError.errors?.songIds).toBeDefined()
+          expect(validationError.errors?.chordData).toBeDefined()
+          expect(validationError.errors?.difficulty).toBeDefined()
+          expect(validationError.errors?.createdBy).toBeDefined()
         }
       })
     })
@@ -566,13 +594,14 @@ describe('Model Validation Error Tests', () => {
       const invalidUserData = {
         clerkId: undefined,
         email: 'invalid-email',
-        role: 'INVALID' as any
+        role: 'INVALID' as never
       }
       
       try {
         await User.create(invalidUserData)
         expect.fail('Should have thrown validation error')
-      } catch (userError: any) {
+      } catch (userError: unknown) {
+        const _validationError = userError as ValidationError
         expect(userError.name).toBe('ValidationError')
         expect(userError.errors.clerkId).toBeDefined()
         expect(userError.errors.email).toBeDefined()
@@ -590,7 +619,8 @@ describe('Model Validation Error Tests', () => {
       try {
         await Song.create(invalidSongData)
         expect.fail('Should have thrown validation error')
-      } catch (songError: any) {
+      } catch (songError: unknown) {
+        const _validationError = songError as ValidationError
         expect(songError.name).toBe('ValidationError')
         expect(songError.errors.title).toBeDefined()
       }
@@ -601,22 +631,23 @@ describe('Model Validation Error Tests', () => {
         email: 'not-an-email',
         preferences: {
           fontSize: 999,
-          theme: 'neon-green' as any
+          theme: 'neon-green' as never
         }
       })
       
       try {
         await User.create(userData)
         expect.fail('Should have thrown validation error')
-      } catch (error: any) {
-        expect(error.name).toBe('ValidationError')
+      } catch (error: unknown) {
+        const validationError = error as ValidationError
+        expect(validationError.name).toBe('ValidationError')
         
         // Verify error messages are helpful
-        if (error.errors['preferences.fontSize']) {
-          expect(error.errors['preferences.fontSize'].message).toBeTruthy()
+        if (validationError.errors?.['preferences.fontSize']) {
+          expect(validationError.errors['preferences.fontSize']?.message).toBeTruthy()
         }
-        if (error.errors['preferences.theme']) {
-          expect(error.errors['preferences.theme'].message).toBeTruthy()
+        if (validationError.errors?.['preferences.theme']) {
+          expect(validationError.errors['preferences.theme']?.message).toBeTruthy()
         }
       }
     })
@@ -629,8 +660,8 @@ describe('Model Validation Error Tests', () => {
   describe('Edge Case Validation', () => {
     it('should handle null vs undefined differences', async () => {
       const userDataWithNull = createUserData({ 
-        name: null as any,
-        lastLoginAt: null as any
+        name: null as never,
+        lastLoginAt: null as never
       })
       
       const userDataWithUndefined = createUserData({ 
@@ -649,7 +680,8 @@ describe('Model Validation Error Tests', () => {
         
         expect(userWithNull.name).toBeNull()
         expect(userWithUndefined.name).toBeUndefined()
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const _validationError = error as ValidationError
         // Either should be valid, just checking the difference is handled
         expect(error).toBeTruthy()
       }
@@ -669,10 +701,11 @@ describe('Model Validation Error Tests', () => {
         const user = await User.create(userDataEmptyString)
         expect(user.name).toBe('')
         expect(user.profile.bio).toBe('')
-      } catch (error: any) {
-        if (error.name === 'ValidationError') {
+      } catch (error: unknown) {
+        const validationError = error as ValidationError
+        if (validationError.name === 'ValidationError') {
           // Check if empty strings are handled differently than null/undefined
-          expect(error.errors).toBeDefined()
+          expect(validationError.errors).toBeDefined()
         }
       }
     })

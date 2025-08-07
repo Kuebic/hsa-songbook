@@ -1,5 +1,6 @@
 import { vi } from 'vitest'
 import { Request, Response, NextFunction } from 'express'
+import { TestRequestBody, MockFunction } from './test-types'
 
 // ============================================================================
 // Type Definitions
@@ -30,11 +31,11 @@ interface MockClerkWebhook {
 }
 
 interface MockRequest extends Partial<Request> {
-  body?: Record<string, any>
+  body?: TestRequestBody
   params?: Record<string, string>
-  query?: Record<string, any>
+  query?: TestRequestBody
   headers?: Record<string, string | string[] | undefined>
-  user?: any
+  user?: unknown
 }
 
 interface MockResponse {
@@ -73,7 +74,7 @@ interface JWTPayload {
   sub?: string
   iat?: number
   exp?: number
-  [key: string]: any
+  [key: string]: unknown
 }
 
 // ============================================================================
@@ -182,7 +183,7 @@ export const mockDatabaseError = (errorType: 'connection' | 'timeout' | 'validat
       return new Error('MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017')
     case 'timeout':
       return new Error('MongooseTimeoutError: Operation `users.findOne()` buffering timed out after 10000ms')
-    case 'validation':
+    case 'validation': {
       const validationError = new Error('Validation failed') as DatabaseValidationError
       validationError.name = 'ValidationError'
       validationError.errors = {
@@ -190,10 +191,12 @@ export const mockDatabaseError = (errorType: 'connection' | 'timeout' | 'validat
         username: { message: 'Username must be unique', kind: 'unique' }
       }
       return validationError
-    case 'duplicate':
+    }
+    case 'duplicate': {
       const duplicateError = new Error('E11000 duplicate key error') as DatabaseDuplicateError
       duplicateError.code = 11000
       return duplicateError
+    }
     default:
       return new Error('Database error')
   }
@@ -270,8 +273,8 @@ export const createMockJWT = (payload: Partial<JWTPayload> = {}) => {
 /**
  * Mock authentication middleware
  */
-export const mockAuthMiddleware = (user: object | null = null) => {
-  return (req: Request & { user?: object }, _res: Response, next: NextFunction) => {
+export const mockAuthMiddleware = (user: Record<string, unknown> | null = null) => {
+  return (req: Request & { user?: Record<string, unknown> }, _res: Response, next: NextFunction) => {
     if (user) {
       req.user = user
     }
@@ -293,8 +296,8 @@ export const resetAllMocks = () => {
 /**
  * Mock implementation helper
  */
-export const mockImplementation = <T extends (...args: any[]) => any>(
-  fn: ReturnType<typeof vi.fn>,
+export const mockImplementation = <T extends (...args: unknown[]) => unknown>(
+  fn: MockFunction,
   implementation: T
 ) => {
   return fn.mockImplementation(implementation)

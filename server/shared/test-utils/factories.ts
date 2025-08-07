@@ -4,6 +4,9 @@ import { Song } from '../../features/songs/song.model'
 import { Arrangement } from '../../features/arrangements/arrangement.model'
 import { compressionService } from '../services/compressionService'
 import { IUser, CreateUserFromClerkDto } from '../../features/users/user.types'
+import { ISong } from '../../features/songs/song.types'
+import { IArrangement } from '../../features/arrangements/arrangement.types'
+import { TestDocument, TestRequestBody } from './test-types'
 
 // ============================================================================
 // User Factories
@@ -71,7 +74,7 @@ export const createTestUsers = async (count: number, overrides: Partial<IUser> =
 export const createClerkWebhookPayload = (
   eventType: 'user.created' | 'user.updated' | 'user.deleted',
   overrides: Partial<CreateUserFromClerkDto> = {}
-): any => {
+): TestRequestBody => {
   const baseData = {
     clerkId: `clerk_${Date.now()}_${Math.random().toString(36).substring(7)}`,
     email: `clerk-${Date.now()}@example.com`,
@@ -108,7 +111,7 @@ export const createClerkWebhookPayload = (
 /**
  * Create basic song data for testing
  */
-export const createSongData = (overrides: any = {}): any => ({
+export const createSongData = (overrides: Partial<ISong> = {}): Partial<ISong> => ({
   title: `Test Song ${Date.now()}`,
   artist: 'Test Artist',
   slug: `test-song-${Date.now()}`,
@@ -126,7 +129,7 @@ export const createSongData = (overrides: any = {}): any => ({
 /**
  * Create and save a test song to database
  */
-export const createTestSong = async (overrides: any = {}): Promise<any> => {
+export const createTestSong = async (overrides: Partial<ISong> = {}): Promise<TestDocument<ISong>> => {
   const songData = createSongData(overrides)
   return await Song.create(songData)
 }
@@ -134,8 +137,8 @@ export const createTestSong = async (overrides: any = {}): Promise<any> => {
 /**
  * Create multiple test songs
  */
-export const createTestSongs = async (count: number, overrides: any = {}): Promise<any[]> => {
-  const songs = []
+export const createTestSongs = async (count: number, overrides: Partial<ISong> = {}): Promise<TestDocument<ISong>[]> => {
+  const songs: TestDocument<ISong>[] = []
   
   for (let i = 0; i < count; i++) {
     const songData = createSongData({
@@ -207,7 +210,7 @@ ${verses.join('\n')}`
 /**
  * Create basic arrangement data for testing
  */
-export const createArrangementData = (songIds: string[] = [], overrides: any = {}): any => ({
+export const createArrangementData = (songIds: string[] = [], overrides: Partial<IArrangement> = {}): Partial<IArrangement> => ({
   name: `Test Arrangement ${Date.now()}`,
   songIds: songIds.length > 0 ? songIds : [new mongoose.Types.ObjectId().toString()],
   slug: `test-arrangement-${Date.now()}`,
@@ -231,8 +234,8 @@ export const createArrangementData = (songIds: string[] = [], overrides: any = {
 export const createTestArrangement = async (
   songIds: string[] = [],
   chordProText: string = getSampleChordPro(),
-  overrides: any = {}
-): Promise<any> => {
+  overrides: Partial<IArrangement> = {}
+): Promise<TestDocument<IArrangement>> => {
   const compressed = await compressionService.compressChordPro(chordProText)
   const metrics = compressionService.calculateMetrics(chordProText, compressed)
   
@@ -257,9 +260,9 @@ export const createTestArrangement = async (
 export const createTestArrangements = async (
   count: number,
   songIds: string[] = [],
-  overrides: any = {}
-): Promise<any[]> => {
-  const arrangements = []
+  overrides: Partial<IArrangement> = {}
+): Promise<TestDocument<IArrangement>[]> => {
+  const arrangements: TestDocument<IArrangement>[] = []
   
   for (let i = 0; i < count; i++) {
     const arrangement = await createTestArrangement(

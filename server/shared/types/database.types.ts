@@ -120,11 +120,11 @@ export interface PaginationOptions {
  * MongoDB aggregation pipeline stage types
  */
 export interface AggregationPipeline {
-  $match?: Record<string, any>
+  $match?: Record<string, unknown>
   $sort?: SortOptions
   $limit?: number
   $skip?: number
-  $project?: Record<string, 0 | 1 | any>
+  $project?: Record<string, 0 | 1 | unknown>
   $lookup?: {
     from: string
     localField: string
@@ -136,7 +136,7 @@ export interface AggregationPipeline {
     preserveNullAndEmptyArrays?: boolean
   }
   $group?: {
-    _id: any
-    [key: string]: any
+    _id: unknown
+    [key: string]: unknown
   }
 }

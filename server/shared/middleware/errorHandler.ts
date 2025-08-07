@@ -9,9 +9,9 @@ interface ErrorResponse {
     message: string
     status: string
     code?: string
-    errors?: any[]
+    errors?: string[]
     stack?: string
-    originalError?: any
+    originalError?: Error
   }
 }
 
@@ -20,7 +20,7 @@ const handleCastErrorDB = (err: mongoose.Error.CastError): AppError => {
   return new AppError(message, HttpCode.BAD_REQUEST)
 }
 
-const handleDuplicateFieldsDB = (err: any): AppError => {
+const handleDuplicateFieldsDB = (err: Error & { keyValue?: Record<string, unknown>, code?: number }): AppError => {
   const field = Object.keys(err.keyValue)[0]
   const value = err.keyValue[field]
   const message = `${field} '${value}' already exists`
@@ -102,11 +102,11 @@ export const errorHandler = (
       error = handleCastErrorDB(error)
     } else if (error instanceof mongoose.Error.ValidationError) {
       error = handleValidationErrorDB(error)
-    } else if ((error as any).code === 11000) {
+    } else if ((error as Error & { code?: number }).code === 11000) {
       error = handleDuplicateFieldsDB(error)
-    } else if ((error as any).name === 'JsonWebTokenError') {
+    } else if (error.name === 'JsonWebTokenError') {
       error = handleJWTError()
-    } else if ((error as any).name === 'TokenExpiredError') {
+    } else if (error.name === 'TokenExpiredError') {
       error = handleJWTExpiredError()
     } else {
       // Unknown error

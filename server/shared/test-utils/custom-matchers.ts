@@ -1,5 +1,6 @@
 import { expect } from 'vitest'
 import mongoose from 'mongoose'
+import { TestDocument as _TestDocument } from './test-types'
 
 // ============================================================================
 // MongoDB Document Matchers
@@ -8,7 +9,7 @@ import mongoose from 'mongoose'
 /**
  * Check if value is a valid MongoDB ObjectId
  */
-export const toBeValidObjectId = (received: any) => {
+export const toBeValidObjectId = (received: unknown) => {
   const isValid = mongoose.Types.ObjectId.isValid(received)
   
   return {
@@ -22,7 +23,7 @@ export const toBeValidObjectId = (received: any) => {
 /**
  * Check if document has required MongoDB fields
  */
-export const toHaveMongoFields = (received: any, fields: string[] = ['_id', 'createdAt', 'updatedAt']) => {
+export const toHaveMongoFields = (received: Record<string, unknown>, fields: string[] = ['_id', 'createdAt', 'updatedAt']) => {
   const missing = fields.filter(field => !(field in received))
   const hasAllFields = missing.length === 0
   
@@ -37,7 +38,7 @@ export const toHaveMongoFields = (received: any, fields: string[] = ['_id', 'cre
 /**
  * Check if value is a Buffer (for compressed data)
  */
-export const toBeBuffer = (received: any) => {
+export const toBeBuffer = (received: unknown) => {
   const isBuffer = Buffer.isBuffer(received)
   
   return {
@@ -51,7 +52,7 @@ export const toBeBuffer = (received: any) => {
 /**
  * Check compression ratio within range
  */
-export const toHaveCompressionRatio = (received: any, min: number, max: number = 100) => {
+export const toHaveCompressionRatio = (received: Record<string, unknown>, min: number, max: number = 100) => {
   const ratio = received?.compressionMetrics?.ratio
   const isInRange = ratio >= min && ratio <= max
   
@@ -66,7 +67,7 @@ export const toHaveCompressionRatio = (received: any, min: number, max: number =
 /**
  * Check if user has valid structure
  */
-export const toBeValidUser = (received: any) => {
+export const toBeValidUser = (received: Record<string, unknown>) => {
   const requiredFields = ['clerkId', 'email', 'username', 'role', 'preferences', 'stats']
   const hasRequiredFields = requiredFields.every(field => field in received)
   const hasValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(received.email)
@@ -95,7 +96,7 @@ export const toBeValidUser = (received: any) => {
 /**
  * Check if song has valid structure
  */
-export const toBeValidSong = (received: any) => {
+export const toBeValidSong = (received: Record<string, unknown>) => {
   const requiredFields = ['title', 'slug', 'metadata']
   const hasRequiredFields = requiredFields.every(field => field in received)
   const hasValidMetadata = received.metadata && 
@@ -116,7 +117,7 @@ export const toBeValidSong = (received: any) => {
 /**
  * Check if arrangement has valid structure
  */
-export const toBeValidArrangement = (received: any) => {
+export const toBeValidArrangement = (received: Record<string, unknown>) => {
   const requiredFields = ['name', 'songIds', 'slug', 'chordData', 'difficulty', 'metadata']
   const hasRequiredFields = requiredFields.every(field => field in received)
   const hasValidDifficulty = ['beginner', 'intermediate', 'advanced'].includes(received.difficulty)
@@ -135,7 +136,7 @@ export const toBeValidArrangement = (received: any) => {
 /**
  * Check pagination response structure
  */
-export const toHaveValidPagination = (received: any) => {
+export const toHaveValidPagination = (received: Record<string, unknown>) => {
   const hasPagination = 'pagination' in received
   const hasRequiredPaginationFields = hasPagination && 
     'page' in received.pagination &&
@@ -156,7 +157,7 @@ export const toHaveValidPagination = (received: any) => {
 /**
  * Check error response structure
  */
-export const toHaveErrorStructure = (received: any) => {
+export const toHaveErrorStructure = (received: Record<string, unknown>) => {
   const hasSuccess = 'success' in received && received.success === false
   const hasError = 'error' in received && typeof received.error === 'string'
   
@@ -173,7 +174,7 @@ export const toHaveErrorStructure = (received: any) => {
 /**
  * Check API response structure
  */
-export const toHaveApiResponseStructure = (received: any, expectData: boolean = true) => {
+export const toHaveApiResponseStructure = (received: Record<string, unknown>, expectData: boolean = true) => {
   const hasSuccess = 'success' in received
   const hasMessage = 'message' in received
   const hasData = expectData ? 'data' in received : true
@@ -195,7 +196,7 @@ export const toHaveApiResponseStructure = (received: any, expectData: boolean = 
 /**
  * Check execution time
  */
-export const toExecuteWithin = (_received: () => Promise<any>, _timeLimit: number) => {
+export const toExecuteWithin = (_received: () => Promise<unknown>, _timeLimit: number) => {
   return {
     pass: false,
     message: () => `Use this matcher with async functions: await expect(async () => { ... }).toExecuteWithin(1000)`
@@ -205,7 +206,7 @@ export const toExecuteWithin = (_received: () => Promise<any>, _timeLimit: numbe
 /**
  * Check memory usage
  */
-export const toUseMemoryWithin = (_received: any, memoryLimit: number) => {
+export const toUseMemoryWithin = (_received: unknown, memoryLimit: number) => {
   const memoryUsage = process.memoryUsage().heapUsed
   const isWithinLimit = memoryUsage <= memoryLimit
   
@@ -241,7 +242,7 @@ expect.extend({
 // ============================================================================
 
 declare module 'vitest' {
-  interface Assertion<T = any> {
+  interface Assertion<T = unknown> {
     toBeValidObjectId(): T
     toHaveMongoFields(fields?: string[]): T
     toBeBuffer(): T

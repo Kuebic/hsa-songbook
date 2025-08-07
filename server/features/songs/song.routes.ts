@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { z } from 'zod'
 import { requireAuth, requireRole } from '../../shared/middleware/auth'
 import { validate, validateBody, validateParams, validateQuery } from '../../shared/middleware/validation'
 import {
@@ -51,7 +52,7 @@ router.post(
   '/:id/rate',
   requireAuth,
   validateParams(getSongByIdSchema.shape.params),
-  validateBody(require('zod').z.object({ rating: require('zod').z.number().min(1).max(5) })),
+  validateBody(z.object({ rating: z.number().min(1).max(5) })),
   songController.rateSong
 )
 

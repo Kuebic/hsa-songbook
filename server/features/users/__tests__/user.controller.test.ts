@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import request from 'supertest'
 import app from '../../../app'
-import { User } from '../user.model'
-import { createTestUser, createUserData, createClerkWebhookPayload } from '../../../shared/test-utils/factories'
+import { User as _User } from '../user.model'
+import { createTestUser, createUserData as _createUserData, createClerkWebhookPayload as _createClerkWebhookPayload } from '../../../shared/test-utils/factories'
 import { userService } from '../user.service'
 import mongoose from 'mongoose'
 
@@ -45,7 +45,7 @@ describe('User Controller', () => {
   // ============================================================================
 
   describe('GET /api/v1/users/me', () => {
-    let testUser: any
+    let testUser: unknown
 
     beforeEach(async () => {
       testUser = await createTestUser({ clerkId: 'clerk_me_test' })
@@ -110,7 +110,7 @@ describe('User Controller', () => {
   })
 
   describe('PATCH /api/v1/users/me', () => {
-    let testUser: any
+    let testUser: unknown
 
     beforeEach(async () => {
       testUser = await createTestUser({ clerkId: 'clerk_patch_test' })
@@ -252,7 +252,7 @@ describe('User Controller', () => {
         data: expect.any(Array)
       })
       expect(response.body.data).toHaveLength(3)
-      response.body.data.forEach((user: any) => {
+      response.body.data.forEach((user: unknown) => {
         expect(user).toBeValidUser()
       })
     })
@@ -278,7 +278,7 @@ describe('User Controller', () => {
         .expect(200)
 
       expect(response.body.data).toHaveLength(2)
-      response.body.data.forEach((user: any) => {
+      response.body.data.forEach((user: unknown) => {
         expect(user.isActive).toBe(true)
       })
     })
@@ -330,7 +330,7 @@ describe('User Controller', () => {
   })
 
   describe('GET /api/v1/users/:id', () => {
-    let testUser: any
+    let testUser: unknown
 
     beforeEach(async () => {
       testUser = await createTestUser({ clerkId: 'clerk_get_by_id' })
@@ -400,7 +400,7 @@ describe('User Controller', () => {
   })
 
   describe('PATCH /api/v1/users/:id/role', () => {
-    let testUser: any
+    let testUser: unknown
 
     beforeEach(async () => {
       testUser = await createTestUser({ role: 'USER' })
@@ -519,7 +519,7 @@ describe('User Controller', () => {
   describe('Error Handling', () => {
     it('should handle database connection errors gracefully', async () => {
       // Mock userService to throw database error
-      const originalFindByClerkId = userService.findByClerkId
+      const _originalFindByClerkId = userService.findByClerkId
       vi.spyOn(userService, 'findByClerkId').mockRejectedValueOnce(
         new Error('Database connection failed')
       )
@@ -584,7 +584,7 @@ describe('User Controller', () => {
   // ============================================================================
 
   describe('Security', () => {
-    let testUser: any
+    let testUser: unknown
 
     beforeEach(async () => {
       testUser = await createTestUser()
@@ -656,7 +656,7 @@ describe('User Controller', () => {
   // ============================================================================
 
   describe('Response Format Consistency', () => {
-    let testUser: any
+    let testUser: unknown
 
     beforeEach(async () => {
       testUser = await createTestUser()

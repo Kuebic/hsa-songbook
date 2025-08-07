@@ -1,5 +1,5 @@
 import { User } from './user.model'
-import { CreateUserFromClerkDto, UpdateUserDto, UserResponse } from './user.types'
+import { IUser, CreateUserFromClerkDto, UpdateUserDto, UserResponse } from './user.types'
 import { NotFoundError, ConflictError } from '../../shared/utils/errors'
 
 export class UserService {
@@ -106,7 +106,7 @@ export class UserService {
    * Update user preferences and profile
    */
   async update(id: string, data: UpdateUserDto): Promise<UserResponse> {
-    const updateData: any = {}
+    const updateData: Record<string, unknown> = {}
 
     if (data.name) updateData.name = data.name
     if (data.preferences) {
@@ -137,7 +137,7 @@ export class UserService {
    * Get all users (admin only)
    */
   async findAll(filter: { role?: string; isActive?: boolean } = {}): Promise<UserResponse[]> {
-    const query: any = {}
+    const query: Record<string, unknown> = {}
     
     if (filter.role) query.role = filter.role
     if (filter.isActive !== undefined) query.isActive = filter.isActive
@@ -185,7 +185,7 @@ export class UserService {
   /**
    * Format user response
    */
-  private formatUserResponse(user: any): UserResponse {
+  private formatUserResponse(user: IUser): UserResponse {
     return {
       id: user._id.toString(),
       clerkId: user.clerkId,

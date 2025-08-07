@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { User } from '../../features/users/user.model'
 import { Song } from '../../features/songs/song.model'
 import { Arrangement } from '../../features/arrangements/arrangement.model'
@@ -435,7 +435,7 @@ describe('Database Constraints and Referential Integrity Tests', () => {
             username: `${baseUsername}${index}`,
             clerkId: `${baseClerkId}_${index}`
           })
-        } catch (error) {
+        } catch (_error) {
           return null // Ignore duplicate errors
         }
       })

@@ -8,7 +8,7 @@ import { GetSongsQuery } from './song.validation'
  * Get all songs with filtering and pagination
  */
 export const getSongs = catchAsync(async (
-  req: Request<{}, {}, {}, GetSongsQuery>,
+  req: Request<Record<string, never>, Record<string, never>, Record<string, never>, GetSongsQuery>,
   res: Response
 ) => {
   const filter = {
@@ -105,7 +105,7 @@ export const deleteSong = catchAsync(async (
  * Rate a song
  */
 export const rateSong = catchAsync(async (
-  req: AuthRequest<{ id: string }, {}, { rating: number }>,
+  req: AuthRequest<{ id: string }, Record<string, never>, { rating: number }>,
   res: Response
 ) => {
   const { rating } = req.body

@@ -1,5 +1,6 @@
 import { Arrangement } from './arrangement.model'
 import { 
+  IArrangement,
   CreateArrangementDto, 
   UpdateArrangementDto, 
   ArrangementFilter, 
@@ -213,7 +214,7 @@ export class ArrangementService {
     })
 
     // Prepare arrangement data
-    const arrangementData: any = {
+    const arrangementData: Partial<IArrangement> = {
       name: data.name,
       songIds: data.songIds.map(id => new Types.ObjectId(id)),
       slug: data.slug,
@@ -267,7 +268,7 @@ export class ArrangementService {
       }
     }
 
-    const updateData: any = { ...data }
+    const updateData: Partial<IArrangement> & Partial<UpdateArrangementDto> = { ...data }
     let compressionMetrics = undefined
 
     // If chord data is being updated, compress it
@@ -354,17 +355,15 @@ export class ArrangementService {
    * Format arrangement response
    */
   private formatArrangementResponse(
-    arrangement: any, 
+    arrangement: IArrangement, 
     includeChordData: boolean,
     chordProText?: string,
-    compressionMetrics?: any
+    compressionMetrics?: { originalSize: number, compressedSize: number, ratio: number, savings: number }
   ): ArrangementResponse {
     const response: ArrangementResponse = {
       id: arrangement._id.toString(),
       name: arrangement.name,
-      songIds: arrangement.songIds.map((song: any) => 
-        typeof song === 'object' ? song._id.toString() : song.toString()
-      ),
+      songIds: arrangement.songIds.map((song: Types.ObjectId) => song.toString()),
       slug: arrangement.slug,
       createdBy: arrangement.createdBy.toString(),
       key: arrangement.key,

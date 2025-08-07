@@ -93,7 +93,7 @@ const songSchema = new Schema<ISong>({
   toJSON: {
     virtuals: true,
     transform: (_doc, ret) => {
-      const { _id, __v, documentSize, ...cleanRet } = ret
+      const { _id, __v, _documentSize, ...cleanRet } = ret
       return {
         id: _id,
         ...cleanRet
@@ -126,7 +126,7 @@ songSchema.pre('save', function(next) {
 })
 
 // Static method for text search
-songSchema.statics.searchSongs = async function(query: string, filter: any = {}) {
+songSchema.statics.searchSongs = async function(query: string, filter: Record<string, unknown> = {}) {
   const searchFilter = {
     $text: { $search: query },
     ...filter

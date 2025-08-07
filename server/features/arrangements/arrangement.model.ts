@@ -104,7 +104,7 @@ const arrangementSchema = new Schema<IArrangement>({
   toJSON: {
     virtuals: true,
     transform: (_doc, ret) => {
-      const { _id, __v, documentSize, chordData, ...cleanRet } = ret
+      const { _id, __v, _documentSize, _chordData, ...cleanRet } = ret
       return {
         id: _id,
         ...cleanRet
@@ -173,7 +173,7 @@ arrangementSchema.statics.findBySongId = async function(songId: string) {
 }
 
 // Static method to find public arrangements
-arrangementSchema.statics.findPublic = async function(filter: any = {}) {
+arrangementSchema.statics.findPublic = async function(filter: Record<string, unknown> = {}) {
   return this.find({ ...filter, 'metadata.isPublic': true })
 }
 

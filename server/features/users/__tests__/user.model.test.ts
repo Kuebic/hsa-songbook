@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { User } from '../user.model'
 import { createUserData, createTestUser } from '../../../shared/test-utils/factories'
 import { testTimeout } from '../../../shared/test-utils/timeout-config'
-import mongoose from 'mongoose'
+import * as _mongoose from 'mongoose'
 
 describe('User Model', () => {
   // ============================================================================
@@ -67,7 +67,7 @@ describe('User Model', () => {
     })
 
     it('should validate role enum values', async () => {
-      const userData = createUserData({ role: 'INVALID' as any })
+      const userData = createUserData({ role: 'INVALID' as 'USER' | 'ADMIN' | 'MODERATOR' })
       
       await expect(User.create(userData)).rejects.toThrow('`INVALID` is not a valid enum value')
     })
@@ -75,7 +75,7 @@ describe('User Model', () => {
     it('should accept valid role values', async () => {
       for (const role of ['USER', 'ADMIN', 'MODERATOR']) {
         const userData = createUserData({ 
-          role: role as any,
+          role: role as 'USER' | 'ADMIN' | 'MODERATOR',
           email: `${role.toLowerCase()}@example.com`,
           username: `${role.toLowerCase()}user`,
           clerkId: `clerk_${role}_${Date.now()}`
@@ -162,7 +162,7 @@ describe('User Model', () => {
 
     it('should reject invalid key values', async () => {
       const userData = createUserData({ 
-        preferences: { defaultKey: 'H' as any, fontSize: 16, theme: 'light' }
+        preferences: { defaultKey: 'H' as string, fontSize: 16, theme: 'light' }
       })
       
       await expect(User.create(userData)).rejects.toThrow('`H` is not a valid enum value')
@@ -210,7 +210,7 @@ describe('User Model', () => {
     it('should accept valid theme values', async () => {
       for (const theme of ['light', 'dark', 'stage']) {
         const userData = createUserData({ 
-          preferences: { fontSize: 16, theme: theme as any },
+          preferences: { fontSize: 16, theme: theme as 'light' | 'dark' | 'stage' },
           email: `test-${theme}@example.com`,
           username: `testuser-${theme}`,
           clerkId: `clerk_${theme}_${Date.now()}`
@@ -222,7 +222,7 @@ describe('User Model', () => {
 
     it('should reject invalid theme values', async () => {
       const userData = createUserData({ 
-        preferences: { fontSize: 16, theme: 'rainbow' as any }
+        preferences: { fontSize: 16, theme: 'rainbow' as 'light' | 'dark' | 'stage' }
       })
       
       await expect(User.create(userData)).rejects.toThrow('`rainbow` is not a valid enum value')
@@ -319,7 +319,7 @@ describe('User Model', () => {
   // ============================================================================
 
   describe('Instance Methods', () => {
-    let user: any
+    let user: unknown
 
     beforeEach(async () => {
       user = await createTestUser()
@@ -440,7 +440,7 @@ describe('User Model', () => {
       const indexes = await User.collection.getIndexes()
       
       const clerkIdIndex = Object.keys(indexes).find(indexName => 
-        indexes[indexName].some((field: any) => field[0] === 'clerkId')
+        indexes[indexName].some((field: [string, number]) => field[0] === 'clerkId')
       )
       
       expect(clerkIdIndex).toBeDefined()
@@ -450,7 +450,7 @@ describe('User Model', () => {
       const indexes = await User.collection.getIndexes()
       
       const emailIndex = Object.keys(indexes).find(indexName => 
-        indexes[indexName].some((field: any) => field[0] === 'email')
+        indexes[indexName].some((field: [string, number]) => field[0] === 'email')
       )
       
       expect(emailIndex).toBeDefined()
@@ -460,7 +460,7 @@ describe('User Model', () => {
       const indexes = await User.collection.getIndexes()
       
       const usernameIndex = Object.keys(indexes).find(indexName => 
-        indexes[indexName].some((field: any) => field[0] === 'username')
+        indexes[indexName].some((field: [string, number]) => field[0] === 'username')
       )
       
       expect(usernameIndex).toBeDefined()
@@ -470,7 +470,7 @@ describe('User Model', () => {
       const indexes = await User.collection.getIndexes()
       
       const isActiveIndex = Object.keys(indexes).find(indexName => 
-        indexes[indexName].some((field: any) => field[0] === 'isActive')
+        indexes[indexName].some((field: [string, number]) => field[0] === 'isActive')
       )
       
       expect(isActiveIndex).toBeDefined()
@@ -480,7 +480,7 @@ describe('User Model', () => {
       const indexes = await User.collection.getIndexes()
       
       const roleIndex = Object.keys(indexes).find(indexName => 
-        indexes[indexName].some((field: any) => field[0] === 'role')
+        indexes[indexName].some((field: [string, number]) => field[0] === 'role')
       )
       
       expect(roleIndex).toBeDefined()

@@ -8,7 +8,7 @@ import { GetArrangementsQuery } from './arrangement.validation'
  * Get all arrangements with filtering and pagination
  */
 export const getArrangements = catchAsync(async (
-  req: Request<{}, {}, {}, GetArrangementsQuery>,
+  req: Request<Record<string, never>, Record<string, never>, Record<string, never>, GetArrangementsQuery>,
   res: Response
 ) => {
   const filter = {
@@ -124,7 +124,7 @@ export const deleteArrangement = catchAsync(async (
  * Rate an arrangement
  */
 export const rateArrangement = catchAsync(async (
-  req: AuthRequest<{ id: string }, {}, { rating: number }>,
+  req: AuthRequest<{ id: string }, Record<string, never>, { rating: number }>,
   res: Response
 ) => {
   const { rating } = req.body

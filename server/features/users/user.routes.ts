@@ -68,7 +68,7 @@ router.get(
   requireAuth,
   requireRole('ADMIN'),
   catchAsync(async (req, res) => {
-    const users = await userService.findAll(req.query as any)
+    const users = await userService.findAll(req.query as Record<string, unknown>)
 
     res.json({
       success: true,

@@ -1,12 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { createTestEcosystem, createTestUser, createTestSong, createTestArrangement, getSampleChordPro } from '../../shared/test-utils/factories'
 import { userService } from '../../features/users/user.service'
 import { songService } from '../../features/songs/song.service'
 import { arrangementService } from '../../features/arrangements/arrangement.service'
 import { User } from '../../features/users/user.model'
 import { Song } from '../../features/songs/song.model'
-import { Arrangement } from '../../features/arrangements/arrangement.model'
-import { testTimeout, OPERATION_TIMEOUTS } from '../../shared/test-utils/timeout-config'
+import { testTimeout } from '../../shared/test-utils/timeout-config'
 
 describe('Cross-Service Integration Tests', () => {
   // ============================================================================
@@ -35,7 +34,7 @@ describe('Cross-Service Integration Tests', () => {
       
       // Initial arrangement count should be 0
       const initialSong = await Song.findById(song._id)
-      const initialCount = initialSong?.metadata?.arrangementCount || 0
+      const _initialCount = initialSong?.metadata?.arrangementCount || 0
 
       // Create arrangement for this song
       const arrangement = await createTestArrangement(

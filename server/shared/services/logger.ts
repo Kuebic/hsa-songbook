@@ -16,7 +16,7 @@ interface LogMetadata {
   timestamp: string
   level: string
   context?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 class Logger {
@@ -44,7 +44,7 @@ class Logger {
     }
   }
 
-  private formatMessage(level: string, message: string, metadata?: any): string {
+  private formatMessage(level: string, message: string, metadata?: Record<string, unknown>): string {
     const logData: LogMetadata = {
       timestamp: new Date().toISOString(),
       level,
@@ -93,25 +93,25 @@ class Logger {
     return level >= this.logLevel
   }
 
-  debug(message: string, metadata?: any): void {
+  debug(message: string, metadata?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       console.log(this.formatMessage('DEBUG', message, metadata))
     }
   }
 
-  info(message: string, metadata?: any): void {
+  info(message: string, metadata?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.INFO)) {
       console.log(this.formatMessage('INFO', message, metadata))
     }
   }
 
-  warn(message: string, metadata?: any): void {
+  warn(message: string, metadata?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.WARN)) {
       console.warn(this.formatMessage('WARN', message, metadata))
     }
   }
 
-  error(message: string, error?: Error | any, metadata?: any): void {
+  error(message: string, error?: Error | unknown, metadata?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       const errorData = error instanceof Error ? {
         name: error.name,
@@ -133,7 +133,7 @@ class Logger {
   /**
    * Log performance metrics
    */
-  performance(operation: string, durationMs: number, metadata?: any): void {
+  performance(operation: string, durationMs: number, metadata?: Record<string, unknown>): void {
     this.info(`Performance: ${operation}`, {
       durationMs,
       ...metadata
@@ -143,14 +143,14 @@ class Logger {
   /**
    * Log database operations
    */
-  database(operation: string, collection: string, metadata?: any): void {
+  database(operation: string, collection: string, metadata?: Record<string, unknown>): void {
     this.debug(`Database ${operation}: ${collection}`, metadata)
   }
 
   /**
    * Log HTTP requests
    */
-  http(method: string, path: string, statusCode: number, durationMs: number, metadata?: any): void {
+  http(method: string, path: string, statusCode: number, durationMs: number, metadata?: Record<string, unknown>): void {
     const level = statusCode >= 500 ? 'ERROR' : statusCode >= 400 ? 'WARN' : 'INFO'
     
     if (this.shouldLog(level === 'ERROR' ? LogLevel.ERROR : level === 'WARN' ? LogLevel.WARN : LogLevel.INFO)) {

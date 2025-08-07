@@ -1,5 +1,5 @@
 import { Song } from './song.model'
-import { CreateSongDto, UpdateSongDto, SongFilter, SongResponse } from './song.types'
+import { ISong, CreateSongDto, UpdateSongDto, SongFilter, SongResponse } from './song.types'
 import { NotFoundError, ConflictError } from '../../shared/utils/errors'
 import { Types } from 'mongoose'
 import { SongQuery, SortOptions } from '../../shared/types/database.types'
@@ -204,7 +204,7 @@ export class SongService {
       }
     }
 
-    const updateData: any = { ...data }
+    const updateData: Partial<ISong> & Partial<UpdateSongDto> = { ...data }
     
     // Handle metadata update
     if (data.isPublic !== undefined) {
@@ -272,7 +272,7 @@ export class SongService {
    * @returns Formatted song response object
    * @private
    */
-  private formatSongResponse(song: any): SongResponse {
+  private formatSongResponse(song: ISong): SongResponse {
     return {
       id: song._id.toString(),
       title: song.title,

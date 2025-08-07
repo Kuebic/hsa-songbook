@@ -3,16 +3,16 @@ import { UnauthorizedError, ForbiddenError } from '../utils/errors'
 import config from '../config/env'
 
 export interface AuthRequest<
-  P = any,
-  ResBody = any,
-  ReqBody = any,
-  ReqQuery = any,
-  Locals extends Record<string, any> = Record<string, any>
+  P = Record<string, string>,
+  ResBody = Record<string, unknown>,
+  ReqBody = Record<string, unknown>,
+  ReqQuery = Record<string, unknown>,
+  Locals extends Record<string, unknown> = Record<string, unknown>
 > extends Request<P, ResBody, ReqBody, ReqQuery, Locals> {
   auth?: {
     userId: string
     sessionId?: string
-    sessionClaims?: any
+    sessionClaims?: Record<string, unknown>
   }
 }
 
@@ -91,7 +91,7 @@ export const optionalAuth = async (
     }
     
     next()
-  } catch (error) {
+  } catch (_error) {
     // Optional auth should never fail
     next()
   }

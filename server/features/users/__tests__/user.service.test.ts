@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { userService } from '../user.service'
 import { User } from '../user.model'
-import { createTestUser, createUserData, createClerkWebhookPayload } from '../../../shared/test-utils/factories'
+import { createTestUser, _createUserData, _createClerkWebhookPayload } from '../../../shared/test-utils/factories'
 import { NotFoundError, ConflictError } from '../../../shared/utils/errors'
 import mongoose from 'mongoose'
 
@@ -108,7 +108,7 @@ describe('User Service', () => {
     })
 
     describe('updateFromClerk', () => {
-      let existingUser: any
+      let existingUser: unknown
 
       beforeEach(async () => {
         existingUser = await createTestUser({ clerkId: 'clerk_update_test' })
@@ -165,7 +165,7 @@ describe('User Service', () => {
     })
 
     describe('deleteFromClerk', () => {
-      let existingUser: any
+      let existingUser: unknown
 
       beforeEach(async () => {
         existingUser = await createTestUser({ clerkId: 'clerk_delete_test' })
@@ -350,7 +350,7 @@ describe('User Service', () => {
   // ============================================================================
 
   describe('User Updates', () => {
-    let testUser: any
+    let testUser: unknown
 
     beforeEach(async () => {
       testUser = await createTestUser()
@@ -500,7 +500,7 @@ describe('User Service', () => {
   // ============================================================================
 
   describe('Statistics Management', () => {
-    let testUser: any
+    let testUser: unknown
 
     beforeEach(async () => {
       testUser = await createTestUser()
@@ -642,7 +642,7 @@ describe('User Service', () => {
   describe('Error Handling', () => {
     it('should handle database connection errors gracefully', async () => {
       // Mock mongoose to throw connection error
-      const originalFindOne = User.findOne
+      const _originalFindOne = User.findOne
       vi.spyOn(User, 'findOne').mockRejectedValueOnce(new Error('Database connection failed'))
 
       await expect(userService.findByClerkId('test'))
