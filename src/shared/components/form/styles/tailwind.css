@@ -1,0 +1,98 @@
+/* Scoped Tailwind CSS for Form Components Only */
+@tailwind base;
+@tailwind components; 
+@tailwind utilities;
+
+/* Scoped to form-root class to prevent style bleeding */
+.form-root {
+  @apply form-text-sm form-leading-normal;
+}
+
+/* Form-specific component styles */
+.form-root .form-field {
+  @apply form-mb-field;
+}
+
+.form-root .form-label {
+  @apply form-block form-mb-1 form-font-medium form-text-gray-700;
+}
+
+.form-root .form-label-required::after {
+  content: ' *';
+  @apply form-text-error form-ml-1;
+}
+
+.form-root .form-input {
+  @apply form-w-full form-px-field-padding form-py-field-padding;
+  @apply form-border form-border-border form-rounded-form;
+  @apply form-text-base form-transition-colors form-duration-200;
+  @apply focus:form-border-border-focus focus:form-outline-none;
+}
+
+.form-root .form-input-error {
+  @apply form-border-border-error;
+}
+
+.form-root .form-input:disabled {
+  @apply form-bg-disabled-bg form-cursor-not-allowed form-opacity-60;
+}
+
+.form-root .form-textarea {
+  @apply form-w-full form-px-field-padding form-py-field-padding;
+  @apply form-border form-border-border form-rounded-form;
+  @apply form-text-base form-transition-colors form-duration-200;
+  @apply form-min-h-20 form-resize-y;
+  @apply focus:form-border-border-focus focus:form-outline-none;
+}
+
+.form-root .form-textarea-error {
+  @apply form-border-border-error;
+}
+
+.form-root .form-error {
+  @apply form-text-error form-text-error form-mt-1;
+}
+
+.form-root .form-helper-text {
+  @apply form-text-helper-text form-text-helper form-mt-1;
+}
+
+.form-root .form-button {
+  @apply form-px-4 form-py-field-padding form-text-white form-border-none form-rounded-form form-cursor-pointer;
+  @apply form-transition-colors form-duration-200;
+}
+
+.form-root .form-button-primary {
+  @apply form-bg-success hover:form-bg-green-600;
+}
+
+.form-root .form-button-secondary {
+  @apply form-bg-button-cancel hover:form-bg-slate-600;
+}
+
+.form-root .form-button:disabled {
+  @apply form-opacity-50 form-cursor-not-allowed;
+}
+
+.form-root .form-checkbox {
+  @apply form-w-4 form-h-4 form-text-border-focus form-border-border form-rounded;
+  @apply focus:form-ring-2 focus:form-ring-border-focus focus:form-ring-offset-2;
+}
+
+.form-root .form-radio {
+  @apply form-w-4 form-h-4 form-text-border-focus form-border-border;
+  @apply focus:form-ring-2 focus:form-ring-border-focus focus:form-ring-offset-2;
+}
+
+/* Utility classes for common form layouts */
+.form-root .form-group {
+  @apply form-mb-field;
+}
+
+.form-root .form-row {
+  @apply form-flex form-gap-4;
+}
+
+.form-root .form-actions {
+  @apply form-flex form-gap-2 form-mt-6;
+}
