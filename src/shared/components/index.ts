@@ -4,3 +4,6 @@ export { ErrorBoundary } from './ErrorBoundary'
 
 // Form component library
 export * from './form'
+
+// Modal infrastructure
+export * from './modal'

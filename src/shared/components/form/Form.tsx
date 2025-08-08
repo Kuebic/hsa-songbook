@@ -3,7 +3,7 @@ import { FormProvider } from './context/FormContext'
 import { useFormContext } from './hooks/useFormContext'
 import { formStyles, mergeFormStyles } from './utils/style-converter'
 import type { FormProviderProps } from './context/FormContext'
-import '../styles/tailwind.css'
+import './styles/tailwind.css'
 
 export interface FormProps<T = unknown> extends Omit<FormProviderProps<T>, 'children'> {
   children: React.ReactNode

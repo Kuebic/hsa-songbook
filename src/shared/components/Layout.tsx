@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom'
 import { LazySignedIn, LazySignedOut, ClerkComponentLoader } from '@features/auth/components/LazyClerkComponents'
 import { AuthButtons, UserMenu } from '@features/auth'
 import { ErrorBoundary } from '@features/monitoring'
+import { AddSongButton } from '@features/songs/components/ui/AddSongButton'
 
 interface LayoutProps {
   children: ReactNode
@@ -76,6 +77,7 @@ export function Layout({ children }: LayoutProps) {
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <AddSongButton />
             <Suspense fallback={<ClerkComponentLoader />}>
               <LazySignedOut>
                 <AuthButtons />

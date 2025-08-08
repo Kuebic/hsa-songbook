@@ -1,98 +1,152 @@
-/* Scoped Tailwind CSS for Form Components Only */
-@tailwind base;
-@tailwind components; 
-@tailwind utilities;
+/* Form Component Styles - Compatible with existing codebase inline styling approach */
 
 /* Scoped to form-root class to prevent style bleeding */
 .form-root {
-  @apply form-text-sm form-leading-normal;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 /* Form-specific component styles */
 .form-root .form-field {
-  @apply form-mb-field;
+  margin-bottom: 16px;
 }
 
 .form-root .form-label {
-  @apply form-block form-mb-1 form-font-medium form-text-gray-700;
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  color: #374151;
 }
 
 .form-root .form-label-required::after {
   content: ' *';
-  @apply form-text-error form-ml-1;
+  color: #ef4444;
+  margin-left: 4px;
 }
 
 .form-root .form-input {
-  @apply form-w-full form-px-field-padding form-py-field-padding;
-  @apply form-border form-border-border form-rounded-form;
-  @apply form-text-base form-transition-colors form-duration-200;
-  @apply focus:form-border-border-focus focus:form-outline-none;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+.form-root .form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
 }
 
 .form-root .form-input-error {
-  @apply form-border-border-error;
+  border-color: #ef4444;
 }
 
 .form-root .form-input:disabled {
-  @apply form-bg-disabled-bg form-cursor-not-allowed form-opacity-60;
+  background-color: #f8fafc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .form-root .form-textarea {
-  @apply form-w-full form-px-field-padding form-py-field-padding;
-  @apply form-border form-border-border form-rounded-form;
-  @apply form-text-base form-transition-colors form-duration-200;
-  @apply form-min-h-20 form-resize-y;
-  @apply focus:form-border-border-focus focus:form-outline-none;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-root .form-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
 }
 
 .form-root .form-textarea-error {
-  @apply form-border-border-error;
+  border-color: #ef4444;
 }
 
 .form-root .form-error {
-  @apply form-text-error form-text-error form-mt-1;
+  color: #ef4444;
+  font-size: 14px;
+  margin-top: 4px;
 }
 
 .form-root .form-helper-text {
-  @apply form-text-helper-text form-text-helper form-mt-1;
+  color: #64748b;
+  font-size: 14px;
+  margin-top: 4px;
 }
 
 .form-root .form-button {
-  @apply form-px-4 form-py-field-padding form-text-white form-border-none form-rounded-form form-cursor-pointer;
-  @apply form-transition-colors form-duration-200;
+  padding: 8px 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .form-root .form-button-primary {
-  @apply form-bg-success hover:form-bg-green-600;
+  background-color: #10b981;
+}
+
+.form-root .form-button-primary:hover {
+  background-color: #059669;
 }
 
 .form-root .form-button-secondary {
-  @apply form-bg-button-cancel hover:form-bg-slate-600;
+  background-color: #94a3b8;
+}
+
+.form-root .form-button-secondary:hover {
+  background-color: #64748b;
 }
 
 .form-root .form-button:disabled {
-  @apply form-opacity-50 form-cursor-not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .form-root .form-checkbox {
-  @apply form-w-4 form-h-4 form-text-border-focus form-border-border form-rounded;
-  @apply focus:form-ring-2 focus:form-ring-border-focus focus:form-ring-offset-2;
+  width: 16px;
+  height: 16px;
+  color: #3b82f6;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
+
+.form-root .form-checkbox:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 
 .form-root .form-radio {
-  @apply form-w-4 form-h-4 form-text-border-focus form-border-border;
-  @apply focus:form-ring-2 focus:form-ring-border-focus focus:form-ring-offset-2;
+  width: 16px;
+  height: 16px;
+  color: #3b82f6;
+  border: 1px solid #e2e8f0;
+}
+
+.form-root .form-radio:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 
 /* Utility classes for common form layouts */
 .form-root .form-group {
-  @apply form-mb-field;
+  margin-bottom: 16px;
 }
 
 .form-root .form-row {
-  @apply form-flex form-gap-4;
+  display: flex;
+  gap: 16px;
 }
 
 .form-root .form-actions {
-  @apply form-flex form-gap-2 form-mt-6;
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
 }

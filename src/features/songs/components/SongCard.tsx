@@ -1,13 +1,16 @@
 import { memo, useCallback } from 'react'
 import type { Song } from '../types/song.types'
+import { SongActions } from './ui/SongActions'
 import styles from './SongCard.module.css'
 
 interface SongCardProps {
   song: Song
   onClick?: (song: Song) => void
+  onUpdate?: (song: Song) => void
+  onDelete?: (songId: string) => void
 }
 
-export const SongCard = memo(function SongCard({ song, onClick }: SongCardProps) {
+export const SongCard = memo(function SongCard({ song, onClick, onUpdate, onDelete }: SongCardProps) {
   const handleClick = useCallback(() => {
     onClick?.(song)
   }, [onClick, song])
@@ -42,6 +45,13 @@ export const SongCard = memo(function SongCard({ song, onClick }: SongCardProps)
           ⭐ {song.metadata.ratings.average.toFixed(1)} ({song.metadata.ratings.count} reviews)
         </div>
       )}
+      <div onClick={e => e.stopPropagation()}>
+        <SongActions 
+          song={song}
+          onUpdate={onUpdate}
+          onDelete={onDelete}
+        />
+      </div>
     </div>
   )
 })

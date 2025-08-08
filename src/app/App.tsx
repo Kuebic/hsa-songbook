@@ -4,6 +4,7 @@ import { Layout } from '@shared/components/Layout'
 import { UpdatePrompt, InstallPrompt, OfflineIndicator, LazyRouteWrapper } from '@features/pwa'
 import { setupOfflineHandlers } from '@features/pwa/utils/offline'
 import { ErrorBoundary, useWebVitals } from '@features/monitoring'
+import { NotificationProvider } from '@shared/components/notifications'
 
 // Eagerly load the home page
 import { HomePage } from './pages/HomePage'
@@ -26,9 +27,10 @@ function App() {
 
   return (
     <ErrorBoundary level="app">
-      <BrowserRouter>
-        <Layout>
-          <Routes>
+      <NotificationProvider>
+        <BrowserRouter>
+          <Layout>
+            <Routes>
             <Route path="/" element={
               <ErrorBoundary level="page">
                 <HomePage />
@@ -84,13 +86,14 @@ function App() {
                 </ErrorBoundary>
               } 
             />
-          </Routes>
-          {/* PWA Components */}
-          <OfflineIndicator />
-          <UpdatePrompt />
-          <InstallPrompt />
-        </Layout>
-      </BrowserRouter>
+            </Routes>
+            {/* PWA Components */}
+            <OfflineIndicator />
+            <UpdatePrompt />
+            <InstallPrompt />
+          </Layout>
+        </BrowserRouter>
+      </NotificationProvider>
     </ErrorBoundary>
   )
 }
