@@ -25,9 +25,9 @@ export default defineConfig({
     restoreMocks: true,
     mockReset: true,
     coverage: {
-      enabled: false,
+      enabled: true, // Enable coverage by default
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov'], // Add lcov for CI integration
       exclude: [
         'node_modules/**',
         'dist/**',
@@ -36,8 +36,19 @@ export default defineConfig({
         '**/*.d.ts',
         '**/*.types.ts',
         '**/index.ts',
-        '**/__tests__/**'
-      ]
+        '**/__tests__/**',
+        '**/__mocks__/**',
+        'src/main.tsx', // Entry point
+        'src/vite-env.d.ts'
+      ],
+      thresholds: { // Add coverage thresholds
+        global: {
+          branches: 70,
+          functions: 70,
+          lines: 70,
+          statements: 70
+        }
+      }
     }
   },
   resolve: {

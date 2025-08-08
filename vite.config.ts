@@ -1,6 +1,8 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type PluginOption } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import tailwindcss from '@tailwindcss/vite'
+import { visualizer } from 'rollup-plugin-visualizer'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -10,6 +12,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'apple-touch-icon.svg', 'vite.svg'],
@@ -190,7 +193,15 @@ export default defineConfig({
         navigateFallback: 'index.html',
         suppressWarnings: true
       }
-    })
+    }),
+    // Bundle analysis plugin
+    visualizer({
+      filename: 'dist/stats.html',
+      template: 'treemap',
+      gzipSize: true,
+      brotliSize: true,
+      title: 'HSA Songbook - Bundle Analysis'
+    }) as PluginOption
   ],
   resolve: {
     alias: {
@@ -201,11 +212,13 @@ export default defineConfig({
     },
   },
   build: {
+    sourcemap: true, // Enable for accurate bundle analysis
     rollupOptions: {
       output: {
         manualChunks: {
           'clerk': ['@clerk/clerk-react'],
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'monitoring': ['web-vitals', 'react-error-boundary']
         }
       }
     }

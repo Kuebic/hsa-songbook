@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { NavLink } from 'react-router-dom'
 import { LazySignedIn, LazySignedOut, ClerkComponentLoader } from '@features/auth/components/LazyClerkComponents'
 import { AuthButtons, UserMenu } from '@features/auth'
+import { ErrorBoundary } from '@features/monitoring'
 
 interface LayoutProps {
   children: ReactNode
@@ -11,23 +12,24 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <nav style={{ 
-        backgroundColor: '#1e293b',
-        color: 'white',
-        width: '100%'
-      }}>
-        <div style={{ 
-          maxWidth: '1280px',
-          margin: '0 auto',
-          padding: '1rem 2rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
+      <ErrorBoundary level="section" isolate>
+        <nav style={{ 
+          backgroundColor: '#1e293b',
+          color: 'white',
+          width: '100%'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
-            <h1 style={{ fontSize: '1.5rem', margin: 0 }}>
-              🎵 HSA Songbook
-            </h1>
+          <div style={{ 
+            maxWidth: '1280px',
+            margin: '0 auto',
+            padding: '1rem 2rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
+              <h1 style={{ fontSize: '1.5rem', margin: 0 }}>
+                🎵 HSA Songbook
+              </h1>
             
             <div style={{ display: 'flex', gap: '2rem' }}>
             <NavLink 
@@ -87,6 +89,7 @@ export function Layout({ children }: LayoutProps) {
           </div>
         </div>
       </nav>
+      </ErrorBoundary>
       
       <main style={{ 
         flex: 1,
@@ -98,24 +101,28 @@ export function Layout({ children }: LayoutProps) {
           margin: '0 auto',
           padding: '2rem'
         }}>
-          {children}
+          <ErrorBoundary level="section">
+            {children}
+          </ErrorBoundary>
         </div>
       </main>
       
-      <footer style={{ 
-        backgroundColor: '#1e293b',
-        color: '#94a3b8',
-        width: '100%'
-      }}>
-        <div style={{
-          maxWidth: '1280px',
-          margin: '0 auto',
-          padding: '1rem 2rem',
-          textAlign: 'center'
+      <ErrorBoundary level="section" isolate>
+        <footer style={{ 
+          backgroundColor: '#1e293b',
+          color: '#94a3b8',
+          width: '100%'
         }}>
-          © 2025 HSA Songbook. All rights reserved.
-        </div>
-      </footer>
+          <div style={{
+            maxWidth: '1280px',
+            margin: '0 auto',
+            padding: '1rem 2rem',
+            textAlign: 'center'
+          }}>
+            © 2025 HSA Songbook. All rights reserved.
+          </div>
+        </footer>
+      </ErrorBoundary>
     </div>
   )
 }

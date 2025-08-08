@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout } from '@shared/components/Layout'
 import { UpdatePrompt, InstallPrompt, OfflineIndicator, LazyRouteWrapper } from '@features/pwa'
 import { setupOfflineHandlers } from '@features/pwa/utils/offline'
+import { ErrorBoundary, useWebVitals } from '@features/monitoring'
 
 // Eagerly load the home page
 import { HomePage } from './pages/HomePage'
@@ -15,63 +16,82 @@ const SongDetailPage = lazy(() => import('@features/songs').then(module => ({ de
 const SetlistPage = lazy(() => import('@features/setlists').then(module => ({ default: module.SetlistPage })))
 
 function App() {
+  // Initialize web vitals monitoring
+  useWebVitals()
+
   // Setup offline handlers on mount
   useEffect(() => {
     setupOfflineHandlers()
   }, [])
 
   return (
-    <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route 
-            path="/songs" 
-            element={
-              <LazyRouteWrapper pageName="Songs">
-                <SongListPage />
-              </LazyRouteWrapper>
-            } 
-          />
-          <Route 
-            path="/songs/:slug" 
-            element={
-              <LazyRouteWrapper pageName="Song Details">
-                <SongDetailPage />
-              </LazyRouteWrapper>
-            } 
-          />
-          <Route 
-            path="/search" 
-            element={
-              <LazyRouteWrapper pageName="Search">
-                <SearchPage />
-              </LazyRouteWrapper>
-            } 
-          />
-          <Route 
-            path="/setlists" 
-            element={
-              <LazyRouteWrapper pageName="Setlists">
-                <SetlistPage />
-              </LazyRouteWrapper>
-            } 
-          />
-          <Route 
-            path="/setlists/:id" 
-            element={
-              <LazyRouteWrapper pageName="Setlist Details">
-                <SetlistDetailPage />
-              </LazyRouteWrapper>
-            } 
-          />
-        </Routes>
-        {/* PWA Components */}
-        <OfflineIndicator />
-        <UpdatePrompt />
-        <InstallPrompt />
-      </Layout>
-    </BrowserRouter>
+    <ErrorBoundary level="app">
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            <Route path="/" element={
+              <ErrorBoundary level="page">
+                <HomePage />
+              </ErrorBoundary>
+            } />
+            <Route 
+              path="/songs" 
+              element={
+                <ErrorBoundary level="page">
+                  <LazyRouteWrapper pageName="Songs">
+                    <SongListPage />
+                  </LazyRouteWrapper>
+                </ErrorBoundary>
+              } 
+            />
+            <Route 
+              path="/songs/:slug" 
+              element={
+                <ErrorBoundary level="page">
+                  <LazyRouteWrapper pageName="Song Details">
+                    <SongDetailPage />
+                  </LazyRouteWrapper>
+                </ErrorBoundary>
+              } 
+            />
+            <Route 
+              path="/search" 
+              element={
+                <ErrorBoundary level="page">
+                  <LazyRouteWrapper pageName="Search">
+                    <SearchPage />
+                  </LazyRouteWrapper>
+                </ErrorBoundary>
+              } 
+            />
+            <Route 
+              path="/setlists" 
+              element={
+                <ErrorBoundary level="page">
+                  <LazyRouteWrapper pageName="Setlists">
+                    <SetlistPage />
+                  </LazyRouteWrapper>
+                </ErrorBoundary>
+              } 
+            />
+            <Route 
+              path="/setlists/:id" 
+              element={
+                <ErrorBoundary level="page">
+                  <LazyRouteWrapper pageName="Setlist Details">
+                    <SetlistDetailPage />
+                  </LazyRouteWrapper>
+                </ErrorBoundary>
+              } 
+            />
+          </Routes>
+          {/* PWA Components */}
+          <OfflineIndicator />
+          <UpdatePrompt />
+          <InstallPrompt />
+        </Layout>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 
