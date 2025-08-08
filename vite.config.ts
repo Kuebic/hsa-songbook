@@ -4,12 +4,13 @@ import { VitePWA } from 'vite-plugin-pwa'
 import tailwindcss from '@tailwindcss/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 import path from 'node:path'
+import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(() => ({
   plugins: [
     react(),
     tailwindcss(),
@@ -191,8 +192,10 @@ export default defineConfig({
         enabled: true, // Enable in dev for testing
         type: 'module',
         navigateFallback: 'index.html',
-        suppressWarnings: true
-      }
+        suppressWarnings: false // Show warnings to help debug issues
+      },
+      // Ensure source maps are generated in development
+      buildBase: '/'
     }),
     // Bundle analysis plugin
     visualizer({
@@ -238,6 +241,31 @@ export default defineConfig({
           })
         }
       }
+    },
+    fs: {
+      // Allow serving files from dev-dist directory for PWA in development
+      allow: ['..']
+    }
+  },
+  publicDir: 'public',
+  // Custom middleware to serve PWA files in development
+  configureServer(server: any) {
+    return () => {
+      server.middlewares.use((req: any, res: any, next: any) => {
+        // Serve PWA dev files from dev-dist directory
+        if (req.url && (req.url.includes('workbox-') || req.url.endsWith('.js.map'))) {
+          const filePath = path.join(__dirname, 'dev-dist', path.basename(req.url))
+          
+          if (fs.existsSync(filePath)) {
+            const content = fs.readFileSync(filePath)
+            const contentType = req.url.endsWith('.map') ? 'application/json' : 'application/javascript'
+            res.setHeader('Content-Type', contentType)
+            res.end(content)
+            return
+          }
+        }
+        next()
+      })
     }
   }
-})
+}))
