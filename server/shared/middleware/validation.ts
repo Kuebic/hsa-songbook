@@ -38,6 +38,18 @@ export const validateBody = (schema: z.ZodSchema) => {
           message: err.message
         }))
         
+        // Log validation errors for debugging
+        console.error('❌ Validation failed for request body:', {
+          body: req.body,
+          errors: error.errors.map(err => ({
+            path: err.path.join('.'),
+            message: err.message,
+            code: err.code,
+            expected: (err as any).expected,
+            received: (err as any).received
+          }))
+        })
+        
         next(new ValidationError('Request body validation failed', errors))
       } else {
         next(error)

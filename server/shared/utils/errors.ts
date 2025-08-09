@@ -29,9 +29,9 @@ export class AppError extends Error {
 }
 
 export class ValidationError extends AppError {
-  public errors?: string[]
+  public errors?: any[]
 
-  constructor(message: string, errors?: string[]) {
+  constructor(message: string, errors?: any[]) {
     super(message, HttpCode.BAD_REQUEST)
     this.errors = errors
   }

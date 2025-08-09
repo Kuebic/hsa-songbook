@@ -52,6 +52,11 @@ const sendErrorDev = (err: AppError, res: Response) => {
     }
   }
 
+  // Include validation errors if present
+  if (err instanceof ValidationError && err.errors) {
+    response.error.errors = err.errors
+  }
+
   res.status(err.statusCode).json(response)
 }
 

@@ -4,7 +4,7 @@ export interface IArrangement extends Document {
   name: string
   songIds: Types.ObjectId[]
   slug: string
-  createdBy: Types.ObjectId
+  createdBy: string  // Clerk user ID
   chordData: Buffer  // Compressed ChordPro data
   key?: string
   tempo?: number

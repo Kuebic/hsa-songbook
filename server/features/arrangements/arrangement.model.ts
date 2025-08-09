@@ -22,9 +22,9 @@ const arrangementSchema = new Schema<IArrangement>({
     index: true
   },
   createdBy: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    type: String,  // Store Clerk user ID as string
+    required: true,
+    index: true
   },
   chordData: {
     type: Buffer,
@@ -104,7 +104,7 @@ const arrangementSchema = new Schema<IArrangement>({
   toJSON: {
     virtuals: true,
     transform: (_doc, ret) => {
-      const { _id, __v, _documentSize, _chordData, ...cleanRet } = ret
+      const { _id, __v, documentSize, chordData, ...cleanRet } = ret
       return {
         id: _id,
         ...cleanRet

@@ -218,7 +218,7 @@ export class ArrangementService {
       name: data.name,
       songIds: data.songIds.map(id => new Types.ObjectId(id)),
       slug: data.slug,
-      createdBy: new Types.ObjectId(userId),
+      createdBy: userId,  // Store Clerk user ID directly
       chordData: compressedData,
       key: data.key,
       tempo: data.tempo,
