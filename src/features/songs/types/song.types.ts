@@ -43,3 +43,12 @@ export interface SongFilter {
   tags?: string[]
   themes?: string[]
 }
+
+// Re-export review types for convenience
+export type { 
+  Review,
+  ReviewFormData,
+  ReviewStats,
+  ReviewFilter,
+  ReviewResponse
+} from './review.types'
