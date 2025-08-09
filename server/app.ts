@@ -10,6 +10,7 @@ import config from './shared/config/env'
 import songRoutes from './features/songs/song.routes'
 import arrangementRoutes from './features/arrangements/arrangement.routes'
 import userRoutes from './features/users/user.routes'
+import reviewRoutes from './features/reviews/review.routes'
 
 const app: Express = express()
 
@@ -56,6 +57,7 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/api/v1/songs', songRoutes)
 app.use('/api/v1/arrangements', arrangementRoutes)
 app.use('/api/v1/users', userRoutes)
+app.use('/api/v1/reviews', reviewRoutes)
 
 // 404 handler for unmatched routes
 app.use((req: Request, res: Response) => {
