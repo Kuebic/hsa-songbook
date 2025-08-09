@@ -23,7 +23,7 @@ export default defineConfig({
     },
     clearMocks: true,
     restoreMocks: true,
-    mockReset: true,
+    mockReset: false, // Change from true to false to preserve initial implementations
     coverage: {
       enabled: true, // Enable coverage by default
       provider: 'v8',
