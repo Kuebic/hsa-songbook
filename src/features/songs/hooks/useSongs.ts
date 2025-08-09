@@ -7,26 +7,30 @@ export function useSongs(filter?: SongFilter) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchSongs = async () => {
-      setLoading(true)
-      setError(null)
-      try {
-        const data = filter 
-          ? await songService.searchSongs(filter)
-          : await songService.getAllSongs()
-        setSongs(data || [])
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch songs')
-      } finally {
-        setLoading(false)
-      }
+  const fetchSongs = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = filter 
+        ? await songService.searchSongs(filter)
+        : await songService.getAllSongs()
+      setSongs(data || [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch songs')
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchSongs()
   }, [filter])
 
-  return { songs, loading, error }
+  const refreshSongs = () => {
+    fetchSongs()
+  }
+
+  return { songs, loading, error, refreshSongs }
 }
 
 export function useSong(idOrSlug: string, isSlug = false) {
