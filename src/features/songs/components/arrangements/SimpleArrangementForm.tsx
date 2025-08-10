@@ -21,7 +21,8 @@ export function SimpleArrangementForm({
 }: SimpleArrangementFormProps) {
   const [data, setData] = useState<Partial<ArrangementFormData>>(() => {
     // Generate default ChordPro template if no initial data
-    const defaultChordData = initialData?.chordProText || (songTitle ? 
+    const existingChordData = initialData?.chordProText || (initialData as any)?.chordData
+    const defaultChordData = existingChordData || (songTitle ? 
       `{title: ${songTitle}}
 {key: C}
 {tempo: 120}
@@ -42,7 +43,7 @@ export function SimpleArrangementForm({
       timeSignature: initialData?.timeSignature || '4/4',
       difficulty: initialData?.difficulty || 'intermediate',
       chordProText: defaultChordData,
-      notes: initialData?.notes || ''
+      notes: initialData?.notes || (initialData as any)?.description || ''
     }
   })
 

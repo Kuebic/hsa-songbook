@@ -26,13 +26,32 @@ export interface SongMetadata {
 export interface Arrangement {
   id: string
   name: string
+  slug: string
   songIds: string[]
   key: string
   tempo?: number
   timeSignature?: string
   difficulty: 'beginner' | 'intermediate' | 'advanced'
   tags: string[]
-  chordData: string
+  chordData?: string // Server returns this field name for ChordPro text
+  chordProText?: string // Alias for when sending data to server
+  description?: string
+  createdBy: string
+  metadata?: {
+    isMashup?: boolean
+    mashupSections?: Array<{
+      songId: string
+      title: string
+    }>
+    isPublic: boolean
+    ratings?: {
+      average: number
+      count: number
+    }
+    views: number
+  }
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface SongFilter {

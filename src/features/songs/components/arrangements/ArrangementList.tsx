@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '@features/auth'
 import { useNotification } from '@shared/components/notifications'
 import type { Arrangement } from '@features/songs/types/song.types'
@@ -222,9 +223,23 @@ export function ArrangementList({
               {formatTags(arrangement.tags)}
             </div>
             
-            {showActions && (isSignedIn || isAdmin) && (
+            {showActions && (
               <div style={actionsStyles}>
-                {onEdit && (
+                <Link
+                  to={`/arrangements/${arrangement.slug}`}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    ...actionButtonStyles,
+                    textDecoration: 'none',
+                    color: '#10b981',
+                    borderColor: '#10b981',
+                    display: 'inline-block'
+                  }}
+                >
+                  View
+                </Link>
+                
+                {(isSignedIn || isAdmin) && onEdit && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
@@ -238,6 +253,23 @@ export function ArrangementList({
                   >
                     Edit
                   </button>
+                )}
+                
+                {(isSignedIn || isAdmin) && arrangement.slug && (
+                  <Link
+                    to={`/arrangements/${arrangement.slug}/edit`}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      ...actionButtonStyles,
+                      textDecoration: 'none',
+                      color: '#8b5cf6',
+                      borderColor: '#8b5cf6',
+                      display: 'inline-block'
+                    }}
+                    title="Open in full-screen chord editor"
+                  >
+                    Chord Editor
+                  </Link>
                 )}
                 
                 {onDelete && isAdmin && (

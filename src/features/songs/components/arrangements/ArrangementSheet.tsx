@@ -32,8 +32,8 @@ export function ArrangementSheet({
     tempo: arrangement?.tempo,
     timeSignature: arrangement?.timeSignature || '4/4',
     difficulty: arrangement?.difficulty || 'intermediate',
-    chordProText: arrangement?.chordProText || '',
-    notes: arrangement?.notes || '',
+    chordProText: arrangement?.chordProText || arrangement?.chordData || '', // Handle both field names
+    notes: arrangement?.description || arrangement?.notes || '', // Handle both field names
     tags: arrangement?.tags || [],
     capo: arrangement?.capo,
     duration: arrangement?.duration

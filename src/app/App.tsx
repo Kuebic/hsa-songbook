@@ -8,6 +8,7 @@ import { NotificationProvider } from '@shared/components/notifications'
 
 // Eagerly load the home page
 import { HomePage } from './pages/HomePage'
+import { TestEditorPage } from './pages/TestEditorPage'
 
 // Lazy load other pages for code splitting
 const SearchPage = lazy(() => import('./pages/SearchPage').then(module => ({ default: module.SearchPage })))
@@ -15,6 +16,8 @@ const SetlistDetailPage = lazy(() => import('./pages/SetlistDetailPage').then(mo
 const SongListPage = lazy(() => import('@features/songs').then(module => ({ default: module.SongListPage })))
 const SongDetailPage = lazy(() => import('@features/songs').then(module => ({ default: module.SongDetailPage })))
 const SetlistPage = lazy(() => import('@features/setlists').then(module => ({ default: module.SetlistPage })))
+const ArrangementViewerPage = lazy(() => import('@features/arrangements/pages/ArrangementViewerPage').then(module => ({ default: module.ArrangementViewerPage })))
+const ChordEditingPage = lazy(() => import('@features/arrangements/pages/ChordEditingPage').then(module => ({ default: module.ChordEditingPage })))
 
 function App() {
   // Initialize web vitals monitoring
@@ -36,6 +39,11 @@ function App() {
                 <HomePage />
               </ErrorBoundary>
             } />
+            <Route path="/test-editor" element={
+              <ErrorBoundary level="page">
+                <TestEditorPage />
+              </ErrorBoundary>
+            } />
             <Route 
               path="/songs" 
               element={
@@ -52,6 +60,36 @@ function App() {
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Song Details">
                     <SongDetailPage />
+                  </LazyRouteWrapper>
+                </ErrorBoundary>
+              } 
+            />
+            <Route 
+              path="/arrangements/:slug" 
+              element={
+                <ErrorBoundary level="page">
+                  <LazyRouteWrapper pageName="Arrangement Viewer">
+                    <ArrangementViewerPage />
+                  </LazyRouteWrapper>
+                </ErrorBoundary>
+              } 
+            />
+            <Route 
+              path="/arrangements/:slug/edit" 
+              element={
+                <ErrorBoundary level="page">
+                  <LazyRouteWrapper pageName="Chord Editor">
+                    <ChordEditingPage />
+                  </LazyRouteWrapper>
+                </ErrorBoundary>
+              } 
+            />
+            <Route 
+              path="/arrangements/new" 
+              element={
+                <ErrorBoundary level="page">
+                  <LazyRouteWrapper pageName="New Arrangement">
+                    <ChordEditingPage />
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 
