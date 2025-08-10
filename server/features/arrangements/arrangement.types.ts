@@ -89,7 +89,7 @@ export interface ArrangementResponse {
   songIds: string[]
   slug: string
   createdBy: string
-  chordData?: string  // Decompressed ChordPro text (only included when fetching single arrangement)
+  chordProText?: string  // Decompressed ChordPro text (only included when fetching single arrangement)
   key?: string
   tempo?: number
   timeSignature?: string

@@ -52,12 +52,41 @@ export class CompressionService {
    * @param compressedData - Compressed Buffer from database
    * @returns Original ChordPro text
    */
-  async decompressChordPro(compressedData: Buffer): Promise<string> {
+  async decompressChordPro(compressedData: Buffer | any): Promise<string> {
     try {
-      const decompressed = await decompress(compressedData)
+      // Handle MongoDB lean() which returns Buffer-like objects
+      let buffer: Buffer
+      if (Buffer.isBuffer(compressedData)) {
+        buffer = compressedData
+      } else if (compressedData && compressedData.type === 'Buffer' && Array.isArray(compressedData.data)) {
+        // MongoDB lean() returns { type: 'Buffer', data: [...] }
+        buffer = Buffer.from(compressedData.data)
+      } else if (compressedData instanceof Uint8Array) {
+        buffer = Buffer.from(compressedData)
+      } else if (compressedData && compressedData.buffer && Buffer.isBuffer(compressedData.buffer)) {
+        // Handle MongoDB Binary type (from lean() queries)
+        // Binary objects have a 'buffer' property that contains the actual Buffer
+        buffer = compressedData.buffer
+      } else if (compressedData && compressedData.buffer instanceof ArrayBuffer) {
+        // Handle other ArrayBuffer-based types
+        buffer = Buffer.from(compressedData.buffer)
+      } else if (compressedData && typeof compressedData === 'object' && compressedData.data) {
+        // Handle other potential MongoDB formats
+        if (Buffer.isBuffer(compressedData.data)) {
+          buffer = compressedData.data
+        } else if (Array.isArray(compressedData.data)) {
+          buffer = Buffer.from(compressedData.data)
+        } else {
+          throw new Error('Invalid compressed data format - unknown data property type')
+        }
+      } else {
+        throw new Error('Invalid compressed data format')
+      }
+      
+      const decompressed = await decompress(buffer)
       return decompressed.toString('utf-8')
     } catch (error) {
-      logger.error('Decompression failed', error as Error)
+      logger.error('Decompression failed', { error })
       throw new Error('Failed to decompress chord data')
     }
   }

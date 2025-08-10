@@ -1,0 +1,282 @@
+/* Enhanced Chord Editor Styles */
+
+/* Main container */
+.chord-editor-enhanced {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--editor-bg, #ffffff);
+  border: 1px solid var(--editor-border, #e5e7eb);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Content area with horizontal split */
+.chord-editor-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Editor and preview panes */
+.chord-editor-pane,
+.chord-preview-pane {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+/* Resizable divider */
+.chord-editor-divider {
+  width: 4px;
+  background: var(--editor-border, #e5e7eb);
+  cursor: col-resize;
+  position: relative;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.chord-editor-divider:hover,
+.chord-editor-divider-active {
+  background: var(--editor-divider-hover, #3b82f6);
+}
+
+/* Add visual indicator on hover */
+.chord-editor-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.chord-editor-divider:hover::before,
+.chord-editor-divider-active::before {
+  opacity: 1;
+}
+
+/* Syntax highlighting colors */
+.chord-syntax-container {
+  height: 100%;
+}
+
+.chord-syntax-container .w-tc-editor {
+  height: 100% !important;
+}
+
+.chord-syntax-container .chord {
+  color: #2563eb;
+  font-weight: bold;
+}
+
+.chord-syntax-container .directive {
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+.chord-syntax-container .section {
+  color: #059669;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.chord-syntax-container .comment,
+.chord-syntax-container .comment-line {
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Toolbar styles */
+.chord-editor-enhanced .toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--editor-border, #e5e7eb);
+  background: var(--toolbar-bg, #fafafa);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .chord-editor-enhanced {
+    --editor-bg: #1f2937;
+    --editor-border: #374151;
+    --editor-divider-hover: #60a5fa;
+    --toolbar-bg: #111827;
+  }
+  
+  .chord-syntax-container .chord {
+    color: #60a5fa;
+  }
+  
+  .chord-syntax-container .directive {
+    color: #a78bfa;
+  }
+  
+  .chord-syntax-container .section {
+    color: #34d399;
+  }
+  
+  .chord-syntax-container .comment,
+  .chord-syntax-container .comment-line {
+    color: #9ca3af;
+  }
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .chord-editor-content {
+    flex-direction: column;
+  }
+  
+  .chord-editor-divider {
+    display: none;
+  }
+  
+  .chord-editor-pane,
+  .chord-preview-pane {
+    flex: none;
+    height: 100%;
+    width: 100%;
+  }
+  
+  /* Mobile tab switching animation */
+  .chord-editor-pane,
+  .chord-preview-pane {
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+}
+
+/* Preview pane specific styles */
+.chord-preview-pane {
+  background: var(--preview-bg, #fafafa);
+}
+
+@media (prefers-color-scheme: dark) {
+  .chord-preview-pane {
+    --preview-bg: #0f172a;
+  }
+}
+
+/* Validation message animations */
+.validation-errors,
+.validation-warnings {
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Print styles */
+@media print {
+  .chord-editor-enhanced .toolbar,
+  .chord-editor-divider,
+  .chord-editor-pane {
+    display: none;
+  }
+  
+  .chord-preview-pane {
+    flex: 1;
+    border: none;
+    background: white;
+  }
+  
+  .chord-preview-pane .chord-cell {
+    color: #000 !important;
+  }
+}
+
+/* Loading and error states */
+.chord-editor-enhanced .loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+@media (prefers-color-scheme: dark) {
+  .chord-editor-enhanced .loading-overlay {
+    background: rgba(0, 0, 0, 0.9);
+  }
+}
+
+/* Smooth transitions */
+.chord-editor-enhanced * {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Disable transitions during resize */
+.chord-editor-enhanced.is-resizing * {
+  transition: none !important;
+}
+
+/* Focus styles for accessibility */
+.chord-editor-enhanced button:focus-visible,
+.chord-editor-enhanced textarea:focus-visible,
+.chord-editor-enhanced [tabindex]:focus-visible {
+  outline: 2px solid var(--focus-ring, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar styles */
+.chord-editor-pane::-webkit-scrollbar,
+.chord-preview-pane::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.chord-editor-pane::-webkit-scrollbar-track,
+.chord-preview-pane::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chord-editor-pane::-webkit-scrollbar-thumb,
+.chord-preview-pane::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #cbd5e1);
+  border-radius: 4px;
+}
+
+.chord-editor-pane::-webkit-scrollbar-thumb:hover,
+.chord-preview-pane::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, #94a3b8);
+}
+
+@media (prefers-color-scheme: dark) {
+  .chord-editor-pane::-webkit-scrollbar-thumb,
+  .chord-preview-pane::-webkit-scrollbar-thumb {
+    --scrollbar-thumb: #475569;
+    --scrollbar-thumb-hover: #64748b;
+  }
+}

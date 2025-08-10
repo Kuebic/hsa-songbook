@@ -378,7 +378,7 @@ export class ArrangementService {
     }
 
     if (includeChordData && chordProText) {
-      response.chordData = chordProText
+      response.chordProText = chordProText
     }
 
     if (compressionMetrics) {

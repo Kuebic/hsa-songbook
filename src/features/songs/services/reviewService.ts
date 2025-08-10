@@ -81,7 +81,7 @@ async function fetchReviewAPI<T>(
         lastError = error as Error
         
         // Don't retry on 4xx errors (client errors)
-        if (response && response.status >= 400 && response.status < 500) {
+        if (error instanceof Response && error.status >= 400 && error.status < 500) {
           throw error
         }
         

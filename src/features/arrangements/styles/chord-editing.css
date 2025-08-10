@@ -1,0 +1,143 @@
+/* Mobile optimizations for chord editing */
+@media (max-width: 768px) {
+  .chord-editor-mobile {
+    /* Prevent zoom on input focus in iOS */
+    font-size: 16px !important;
+  }
+  
+  /* Touch-friendly chord syntax highlighting */
+  .chord-syntax-editor {
+    line-height: 1.8;
+    padding: 12px;
+  }
+  
+  /* Improve readability of chord preview on small screens */
+  .chordsheet-preview {
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  
+  .chordsheet-preview .chord {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* Better touch targets for mobile */
+  .chord-editor-controls button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Landscape mobile optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .chord-editor-container {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  /* Reduce header height in landscape */
+  .chord-editor-header {
+    padding: 0.5rem;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .chord-editor-container {
+    gap: 1rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .chordsheet-preview .chord {
+    color: #000;
+    background: #ff0;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  .chord-syntax-editor {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .chord-editor-with-preview * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .chord-syntax-editor {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+  }
+
+  .chordsheet-preview {
+    background-color: #0d0d0d;
+    color: #e0e0e0;
+  }
+
+  .chordsheet-preview .chord {
+    color: #ff6b6b;
+  }
+
+  .chordsheet-preview .section {
+    color: #ffffff;
+  }
+
+  .chordsheet-preview .lyrics {
+    color: #cccccc;
+  }
+}
+
+/* Print styles */
+@media print {
+  .chord-editor-controls,
+  .chord-editor-header,
+  .chord-syntax-editor {
+    display: none;
+  }
+
+  .chordsheet-preview {
+    padding: 0;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  .chordsheet-preview .chord {
+    color: #000;
+    font-weight: bold;
+  }
+}
+
+/* Accessibility improvements */
+.chord-editor-with-preview:focus-within {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Keyboard navigation indicators */
+.chord-editor-with-preview [tabindex]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Screen reader only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

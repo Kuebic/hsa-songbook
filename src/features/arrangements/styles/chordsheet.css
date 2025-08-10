@@ -1,0 +1,221 @@
+/* ChordSheet Display Styles */
+.chord-sheet-container {
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Courier New', Courier, monospace;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chord-sheet-container.dark-mode {
+  background-color: #000000;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+/* ChordSheetJS Generated Classes */
+.chord-sheet .chord {
+  font-weight: bold;
+  color: #2563eb;
+  display: inline;
+  margin-right: 0.25rem;
+  font-size: 0.95em;
+  position: relative;
+  top: -0.1em;
+}
+
+/* ChordSheetJS Table Format */
+.chord-sheet-content .chord-table {
+  border-collapse: collapse;
+  width: auto;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chord-sheet-content .chord-table tr {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chord-sheet-content .chord-table td {
+  padding: 0 2px 0 0;
+  border: none;
+  vertical-align: bottom;
+  white-space: pre;
+  margin: 0;
+}
+
+.chord-sheet-content .chord-cell {
+  color: #2563eb;
+  font-weight: bold;
+  font-size: 0.9em;
+  padding: 0 2px 2px 0;
+  margin: 0;
+}
+
+.chord-sheet-content .lyrics-cell {
+  color: inherit;
+  line-height: 1.4;
+  padding: 0 2px 0 0;
+  margin: 0;
+}
+
+.dark-mode .chord-sheet-content .chord-cell {
+  color: #60a5fa;
+}
+
+.dark-mode .chord-sheet .chord {
+  color: #60a5fa;
+}
+
+.chord-sheet .verse,
+.chord-sheet .chorus,
+.chord-sheet .bridge,
+.chord-sheet .pre-chorus,
+.chord-sheet .outro,
+.chord-sheet .intro {
+  margin-bottom: 1.5rem;
+}
+
+.chord-sheet .verse-label,
+.chord-sheet .chorus-label,
+.chord-sheet .bridge-label,
+.chord-sheet .pre-chorus-label,
+.chord-sheet .outro-label,
+.chord-sheet .intro-label {
+  font-weight: bold;
+  color: #64748b;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.dark-mode .chord-sheet .verse-label,
+.dark-mode .chord-sheet .chorus-label,
+.dark-mode .chord-sheet .bridge-label,
+.dark-mode .chord-sheet .pre-chorus-label,
+.dark-mode .chord-sheet .outro-label,
+.dark-mode .chord-sheet .intro-label {
+  color: #94a3b8;
+}
+
+.chord-sheet .comment {
+  font-style: italic;
+  color: #6b7280;
+  font-size: 0.9em;
+}
+
+.dark-mode .chord-sheet .comment {
+  color: #9ca3af;
+}
+
+/* Line with chords above */
+.chord-sheet .chord-line {
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.chord-sheet .lyric-line {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+/* Chord positioning for inline display */
+.chord-sheet .chord-pair {
+  display: inline-block;
+  position: relative;
+  margin-right: 0.5rem;
+}
+
+.chord-sheet .chord-pair .chord {
+  position: absolute;
+  top: -1.2em;
+  left: 0;
+  white-space: nowrap;
+}
+
+.chord-sheet .chord-pair .lyric {
+  display: inline-block;
+  padding-top: 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chord-sheet-container {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .chord-sheet .chord {
+    font-size: 0.9em;
+  }
+  
+  .chord-sheet .verse-label,
+  .chord-sheet .chorus-label,
+  .chord-sheet .bridge-label {
+    font-size: 0.75rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .chord-sheet-container {
+    background-color: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  
+  .chord-sheet .chord {
+    color: black !important;
+    font-weight: bold !important;
+  }
+  
+  .chord-sheet .verse-label,
+  .chord-sheet .chorus-label,
+  .chord-sheet .bridge-label {
+    color: #333333 !important;
+  }
+}
+
+/* Scrollbar styles for minimal mode */
+.dark-mode::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark-mode::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dark-mode::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+.dark-mode::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Animation for auto-scroll */
+.chord-sheet-container.scrolling {
+  scroll-behavior: smooth;
+}
+
+/* Highlight current playing section (future feature) */
+.chord-sheet .section.active {
+  background-color: rgba(59, 130, 246, 0.1);
+  padding: 0.5rem;
+  margin: -0.5rem;
+  border-radius: 0.25rem;
+}
+
+.dark-mode .chord-sheet .section.active {
+  background-color: rgba(96, 165, 250, 0.1);
+}

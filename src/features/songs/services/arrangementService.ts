@@ -167,6 +167,16 @@ export const arrangementService = {
     return fetchArrangementAPI<Arrangement>(endpoint)
   },
 
+  async getArrangementBySlug(slug: string, includeChordData = true): Promise<Arrangement> {
+    const params = new URLSearchParams()
+    if (!includeChordData) params.append('includeChordData', 'false')
+    
+    const queryString = params.toString()
+    const endpoint = `/arrangements/slug/${slug}${queryString ? `?${queryString}` : ''}`
+    
+    return fetchArrangementAPI<Arrangement>(endpoint)
+  },
+
   async getArrangementsBySong(songId: string): Promise<Arrangement[]> {
     const data = await fetchArrangementAPI<Arrangement[]>(`/arrangements/song/${songId}`)
     return Array.isArray(data) ? data : []
