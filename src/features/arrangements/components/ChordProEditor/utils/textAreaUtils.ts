@@ -3,7 +3,37 @@
  * @description Utility functions for enhanced ChordPro textarea functionality
  */
 
-import type { TextAreaMetrics, ValidationResult, UndoRedoState, AutoCompleteContext } from '../types/textAreaTypes';
+// Define types directly to avoid import issues
+interface TextAreaMetrics {
+  lineCount: number;
+  charCount: number;
+  cursorLine: number;
+  cursorColumn: number;
+  selectionLength: number;
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  line?: number;
+  column?: number;
+}
+
+interface UndoRedoState {
+  value: string;
+  selectionStart: number;
+  selectionEnd: number;
+  timestamp: number;
+}
+
+interface AutoCompleteContext {
+  triggerChar: '{' | '[';
+  triggerPosition: number;
+  filterText: string;
+  isVisible: boolean;
+  selectedIndex: number;
+}
 
 /**
  * Calculate text area metrics
