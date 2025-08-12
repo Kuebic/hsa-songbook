@@ -21,14 +21,14 @@ export interface AutoCompleteContext {
 }
 
 // Directive completion tracking
-interface DirectiveCompletion {
+export interface DirectiveCompletion {
   position: number;
   timestamp: number;
   directiveType: 'chord' | 'directive' | 'comment';
 }
 
 // Keyboard shortcut definition
-interface KeyboardShortcut {
+export interface KeyboardShortcut {
   key: string;
   ctrlKey?: boolean;
   metaKey?: boolean;
@@ -39,7 +39,7 @@ interface KeyboardShortcut {
 }
 
 // Text area theme configuration
-interface TextAreaTheme {
+export interface TextAreaTheme {
   background: string;
   foreground: string;
   caret: string;
@@ -49,7 +49,7 @@ interface TextAreaTheme {
 }
 
 // Text area configuration
-interface TextAreaConfig {
+export interface TextAreaConfig {
   tabSize: number;
   enableUndoRedo: boolean;
   maxUndoHistory: number;
@@ -61,7 +61,7 @@ interface TextAreaConfig {
 }
 
 // Text area metrics
-interface TextAreaMetrics {
+export interface TextAreaMetrics {
   lineCount: number;
   charCount: number;
   cursorLine: number;
@@ -70,7 +70,7 @@ interface TextAreaMetrics {
 }
 
 // Validation result
-interface ValidationResult {
+export interface ValidationResult {
   isValid: boolean;
   errors: string[];
   warnings: string[];
