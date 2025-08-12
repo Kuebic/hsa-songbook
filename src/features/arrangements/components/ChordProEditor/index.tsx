@@ -67,6 +67,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   const [currentFontSize, setCurrentFontSize] = useState(fontSize);
   const [currentTranspose, setCurrentTranspose] = useState(transpose);
   const [currentShowChords, setCurrentShowChords] = useState(showChords);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   // Enhanced textarea functionality
   const textAreaEnhanced = useEnhancedTextArea({
