@@ -5,7 +5,22 @@
 
 import React from 'react';
 import { cn } from '../../../../lib/utils';
-import { TextAreaMetrics, ValidationResult } from './types/textAreaTypes';
+// Define types directly to avoid import issues
+interface TextAreaMetrics {
+  lineCount: number;
+  charCount: number;
+  cursorLine: number;
+  cursorColumn: number;
+  selectionLength: number;
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  line?: number;
+  column?: number;
+}
 
 interface StatusBarProps {
   metrics?: TextAreaMetrics | null;
