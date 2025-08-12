@@ -448,6 +448,17 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
           )}
         </div>
       )}
+
+      {/* Status Bar */}
+      {enableEnhancedFeatures && (
+        <StatusBar
+          metrics={textAreaEnhanced.metrics}
+          validation={textAreaEnhanced.validation}
+          theme={theme}
+          isModified={isDirty}
+          currentMode="ChordPro"
+        />
+      )}
     </div>
   );
 };
