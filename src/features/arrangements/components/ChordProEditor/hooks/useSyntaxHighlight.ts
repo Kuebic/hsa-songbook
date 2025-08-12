@@ -127,8 +127,7 @@ export const useSyntaxHighlight = (content: string): HighlightedSegment[] => {
       segments.push({
         text: match.text,
         type: match.type,
-        className: match.className,
-        style: match.style
+        className: match.className
       });
 
       currentIndex = match.index + match.length;
