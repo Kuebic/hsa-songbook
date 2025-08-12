@@ -4,14 +4,64 @@
  */
 
 import { useCallback, useRef, useState, useEffect, useMemo } from 'react';
-import {
-  UndoRedoState,
-  AutoCompleteContext,
-  TextAreaMetrics,
-  ValidationResult,
-  TextAreaConfig,
-  DirectiveCompletion
-} from '../types/textAreaTypes';
+// Define types directly to avoid import issues
+interface UndoRedoState {
+  value: string;
+  selectionStart: number;
+  selectionEnd: number;
+  timestamp: number;
+}
+
+interface AutoCompleteContext {
+  triggerChar: '{' | '[';
+  triggerPosition: number;
+  filterText: string;
+  isVisible: boolean;
+  selectedIndex: number;
+}
+
+interface TextAreaMetrics {
+  lineCount: number;
+  charCount: number;
+  cursorLine: number;
+  cursorColumn: number;
+  selectionLength: number;
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  line?: number;
+  column?: number;
+}
+
+interface KeyboardShortcut {
+  key: string;
+  ctrlKey?: boolean;
+  metaKey?: boolean;
+  shiftKey?: boolean;
+  altKey?: boolean;
+  action: string;
+  description: string;
+}
+
+interface TextAreaConfig {
+  tabSize: number;
+  enableUndoRedo: boolean;
+  maxUndoHistory: number;
+  debounceMs: number;
+  enableBracketPairs: boolean;
+  enableAutoIndent: boolean;
+  enableCommentToggle: boolean;
+  keyboardShortcuts: KeyboardShortcut[];
+}
+
+interface DirectiveCompletion {
+  position: number;
+  timestamp: number;
+  directiveType: 'chord' | 'directive' | 'comment';
+}
 import {
   calculateTextAreaMetrics,
   validateChordProContent,
