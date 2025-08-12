@@ -377,12 +377,10 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
           }}
         >
           {/* Visual indicator */}
-          <div className={cn(
-            "w-1 h-16 rounded-full opacity-40 group-hover:opacity-70 transition-opacity",
-            theme === 'dark' ? "bg-gray-400" :
-            theme === 'stage' ? "bg-yellow-500" :
-            "bg-gray-600"
-          )} />
+          <div
+            className="w-1 h-16 rounded-full opacity-40 group-hover:opacity-70 transition-opacity"
+            style={{ backgroundColor: 'var(--color-secondary)' }}
+          />
         </div>
       )}
 
