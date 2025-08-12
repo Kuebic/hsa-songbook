@@ -197,17 +197,13 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     >
       {/* Editor Pane */}
       <div
-        className="relative overflow-hidden flex flex-col border-2 border-red-500"
+        className="relative overflow-hidden flex flex-col"
         style={{
-          // Force exact width with inline styles
           width: (showPreview && isPreviewVisible && !isMobile) ? '50%' : '100%',
           flexShrink: 0,
           height: '100%'
         }}
       >
-        <div className="bg-red-300 text-black text-xs p-1">
-          EDITOR: Preview={isPreviewVisible ? 'YES' : 'NO'}, Mobile={isMobile ? 'YES' : 'NO'}
-        </div>
         {/* Toolbar (if enabled) */}
         {showToolbar && (
           <div className={cn(
