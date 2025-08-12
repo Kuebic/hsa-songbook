@@ -181,9 +181,9 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       onKeyDown={handleKeyDown}
     >
       {/* Editor Pane */}
-      <div 
+      <div
         className="relative flex flex-col"
-        style={{ width: showPreview ? `${splitPosition}%` : '100%' }}
+        style={{ width: isPreviewVisible ? `${splitPosition}%` : '100%' }}
       >
         {/* Background layer */}
         <div className={cn('absolute inset-0', getEditorBackgroundClasses())} />
