@@ -79,7 +79,7 @@ export interface ValidationResult {
 }
 
 // Text area events
-type TextAreaEvent = 
+export type TextAreaEvent =
   | 'change'
   | 'selection-change'
   | 'cursor-change'
@@ -93,7 +93,7 @@ type TextAreaEvent =
   | 'comment-toggled';
 
 // Text area event data
-interface TextAreaEventData {
+export interface TextAreaEventData {
   type: TextAreaEvent;
   timestamp: number;
   value: string;
@@ -103,7 +103,7 @@ interface TextAreaEventData {
 }
 
 // Enhanced props for ChordProTextArea
-interface EnhancedChordProTextAreaProps {
+export interface EnhancedChordProTextAreaProps {
   // Core props
   value: string;
   onChange: (value: string) => void;
