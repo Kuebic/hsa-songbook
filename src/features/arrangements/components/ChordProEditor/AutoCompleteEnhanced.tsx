@@ -5,7 +5,14 @@
 
 import React, { useEffect, useRef, useCallback } from 'react';
 import { cn } from '../../../../lib/utils';
-import { AutoCompleteContext } from './types/textAreaTypes';
+// Inline type definition to test
+interface AutoCompleteContext {
+  triggerChar: '{' | '[';
+  triggerPosition: number;
+  filterText: string;
+  isVisible: boolean;
+  selectedIndex: number;
+}
 
 interface AutoCompleteEnhancedProps {
   context: AutoCompleteContext | null;
