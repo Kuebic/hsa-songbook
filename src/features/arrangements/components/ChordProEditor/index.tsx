@@ -328,8 +328,8 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         <div
           className={cn(
             "overflow-hidden flex flex-col border-2 border-blue-500 bg-blue-900",
-            // On desktop, take exactly half width
-            !isMobile && "w-1/2",
+            // On desktop, take exactly half width and don't shrink
+            !isMobile && "w-1/2 flex-shrink-0",
             // On mobile, take full width (stacked below editor)
             isMobile && "w-full"
           )}
