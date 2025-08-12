@@ -34,26 +34,30 @@ export const chordProLanguage = StreamLanguage.define({
     if (stream.peek() === '{') {
       stream.next();
       state.inDirective = true;
-      
+
       // Check for specific directive types
       const directiveMatch = stream.match(/^(title|t|subtitle|st|artist|composer|lyricist|copyright|album|year|key|time|tempo|duration|capo|tuning|instrument):/);
       if (directiveMatch) {
+        state.directiveType = 'keyword';
         return 'keyword';
       }
-      
+
       // Check for section directives
       const sectionMatch = stream.match(/^(start_of_chorus|end_of_chorus|soc|eoc|start_of_verse|end_of_verse|sov|eov|start_of_bridge|end_of_bridge|sob|eob|start_of_tab|end_of_tab|sot|eot|chorus|verse|bridge|tab)/);
       if (sectionMatch) {
+        state.directiveType = 'tag';
         return 'tag';
       }
-      
+
       // Check for comment directive
       const commentMatch = stream.match(/^(comment|c|ci|cb|guitar_comment|gc):/);
       if (commentMatch) {
         state.inComment = true;
+        state.directiveType = 'comment';
         return 'comment';
       }
-      
+
+      state.directiveType = 'keyword';
       return 'keyword';
     }
 
