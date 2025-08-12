@@ -353,7 +353,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         <div
           className="overflow-hidden flex flex-col"
           style={{
-            width: isMobile ? '100%' : 'calc(50% - 1rem)',
+            width: isMobile ? '100%' : `calc(${100 - splitPosition}% - 0.5rem)`,
             flexShrink: 0,
             height: '100%'
           }}
