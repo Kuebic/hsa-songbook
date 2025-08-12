@@ -145,16 +145,3 @@ export interface EnhancedChordProTextAreaProps {
   'aria-invalid'?: boolean;
   'aria-required'?: boolean;
 }
-
-// Export all types - using export keyword directly on interfaces
-export type { UndoRedoState };
-export type { AutoCompleteContext };
-export type { DirectiveCompletion };
-export type { KeyboardShortcut };
-export type { TextAreaTheme };
-export type { TextAreaConfig };
-export type { TextAreaMetrics };
-export type { ValidationResult };
-export type { TextAreaEvent };
-export type { TextAreaEventData };
-export type { EnhancedChordProTextAreaProps };
