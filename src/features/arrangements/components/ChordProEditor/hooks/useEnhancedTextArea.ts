@@ -11,7 +11,7 @@ import {
   ValidationResult,
   TextAreaConfig,
   DirectiveCompletion
-} from '../types/textArea.types';
+} from '../types/textAreaTypes';
 import {
   calculateTextAreaMetrics,
   validateChordProContent,
