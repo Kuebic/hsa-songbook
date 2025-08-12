@@ -35,42 +35,46 @@ export function Layout({ children }: LayoutProps) {
               </h1>
             
             <div style={{ display: 'flex', gap: '2rem' }}>
-            <NavLink 
+            <NavLink
               to="/"
               style={({ isActive }) => ({
-                color: isActive ? '#60a5fa' : 'white',
+                color: isActive ? 'var(--color-primary)' : 'var(--color-foreground)',
                 textDecoration: 'none',
-                fontWeight: isActive ? 'bold' : 'normal'
+                fontWeight: isActive ? 'bold' : 'normal',
+                transition: 'color 0.2s ease'
               })}
             >
               Home
             </NavLink>
-            <NavLink 
+            <NavLink
               to="/songs"
               style={({ isActive }) => ({
-                color: isActive ? '#60a5fa' : 'white',
+                color: isActive ? 'var(--color-primary)' : 'var(--color-foreground)',
                 textDecoration: 'none',
-                fontWeight: isActive ? 'bold' : 'normal'
+                fontWeight: isActive ? 'bold' : 'normal',
+                transition: 'color 0.2s ease'
               })}
             >
               Songs
             </NavLink>
-            <NavLink 
+            <NavLink
               to="/search"
               style={({ isActive }) => ({
-                color: isActive ? '#60a5fa' : 'white',
+                color: isActive ? 'var(--color-primary)' : 'var(--color-foreground)',
                 textDecoration: 'none',
-                fontWeight: isActive ? 'bold' : 'normal'
+                fontWeight: isActive ? 'bold' : 'normal',
+                transition: 'color 0.2s ease'
               })}
             >
               Search
             </NavLink>
-            <NavLink 
+            <NavLink
               to="/setlists"
               style={({ isActive }) => ({
-                color: isActive ? '#60a5fa' : 'white',
+                color: isActive ? 'var(--color-primary)' : 'var(--color-foreground)',
                 textDecoration: 'none',
-                fontWeight: isActive ? 'bold' : 'normal'
+                fontWeight: isActive ? 'bold' : 'normal',
+                transition: 'color 0.2s ease'
               })}
             >
               Setlists
