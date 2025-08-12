@@ -39,7 +39,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   onCancel,
   debounceMs = 300,
   fontSize = 16,
-  theme = 'light',
+  theme = 'dark',
   showPreview = true,
   transpose = 0,
   showChords = true,
@@ -48,7 +48,9 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   height = 600,
   showToolbar = true,
   defaultPreviewVisible = true,
-  autoFocus = false
+  autoFocus = false,
+  enableEnhancedFeatures = true,
+  readOnly = false
 }) => {
   const [content, setContent] = useState(initialContent);
   const [splitPosition, setSplitPosition] = useState(() => {
@@ -60,9 +62,29 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   const [isDirty, setIsDirty] = useState(false);
   const [isPreviewVisible, setIsPreviewVisible] = useState(showPreview && defaultPreviewVisible);
   const [isMobile, setIsMobile] = useState(false);
+  const [currentFontSize, setCurrentFontSize] = useState(fontSize);
+  const [currentTranspose, setCurrentTranspose] = useState(transpose);
+  const [currentShowChords, setCurrentShowChords] = useState(showChords);
+
+  // Enhanced textarea functionality
+  const textAreaEnhanced = useEnhancedTextArea({
+    value: content,
+    onChange: setContent,
+    enableLiveValidation: enableEnhancedFeatures,
+    enableMetrics: enableEnhancedFeatures
+  });
 
   // Debounce content for preview updates
   const debouncedContent = useDebounce(content, debounceMs);
+
+  // Get validation errors for preview
+  const validationErrors = enableEnhancedFeatures && textAreaEnhanced.validation
+    ? textAreaEnhanced.validation.errors.map((error, index) => ({
+        line: index + 1, // This would need proper line detection
+        message: error,
+        type: 'error' as const
+      }))
+    : [];
 
   // Save split position to localStorage
   useEffect(() => {
