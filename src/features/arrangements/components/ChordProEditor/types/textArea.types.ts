@@ -137,3 +137,18 @@ export interface EnhancedChordProTextAreaProps {
   'aria-invalid'?: boolean;
   'aria-required'?: boolean;
 }
+
+// Default export for better module resolution
+export default {
+  UndoRedoState,
+  AutoCompleteContext,
+  DirectiveCompletion,
+  KeyboardShortcut,
+  TextAreaTheme,
+  TextAreaConfig,
+  TextAreaMetrics,
+  ValidationResult,
+  TextAreaEvent,
+  TextAreaEventData,
+  EnhancedChordProTextAreaProps
+};
