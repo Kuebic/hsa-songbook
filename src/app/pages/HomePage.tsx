@@ -5,10 +5,10 @@ export function HomePage() {
 
   return (
     <div style={{ padding: '3rem', textAlign: 'center' }}>
-      <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+      <h1 style={{ fontSize: '3rem', marginBottom: '1rem', color: 'rgba(255, 255, 255, 0.9)' }}>
         Welcome to HSA Songbook
       </h1>
-      <p style={{ fontSize: '1.25rem', color: '#64748b', marginBottom: '3rem' }}>
+      <p style={{ fontSize: '1.25rem', color: '#94a3b8', marginBottom: '3rem' }}>
         Your digital companion for worship songs and setlists
       </p>
 
