@@ -317,16 +317,16 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
                 </button>
               </div>
 
-              {/* Show/hide chords */}
+              {/* Toggle preview visibility */}
               <button
-                onClick={() => setCurrentShowChords(!currentShowChords)}
+                onClick={() => setIsPreviewVisible(!isPreviewVisible)}
                 className={cn(
                   'p-2 rounded-md transition-colors text-sm',
-                  currentShowChords
+                  isPreviewVisible
                     ? 'bg-blue-500 text-white hover:bg-blue-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 )}
-                title={currentShowChords ? "Hide chords" : "Show chords"}
+                title={isPreviewVisible ? "Hide preview" : "Show preview"}
               >
                 👁️
               </button>
