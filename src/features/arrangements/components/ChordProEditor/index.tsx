@@ -197,7 +197,10 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         )}
         style={{
           // Desktop split layout
-          ...(showPreview && isPreviewVisible && !isMobile ? { width: `${splitPosition}%` } : {}),
+          ...(showPreview && isPreviewVisible && !isMobile ? {
+            width: `${splitPosition}%`,
+            height: '100%' // Ensure it doesn't overflow
+          } : {}),
           // Mobile doesn't need explicit height since we use Tailwind classes
         }}
       >
