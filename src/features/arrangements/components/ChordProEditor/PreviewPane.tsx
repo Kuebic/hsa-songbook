@@ -65,7 +65,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
 
   return (
     <div className={cn(getContainerClasses(), className)}>
-      <div className="p-4">
+      <div className="p-6 pl-8">
         {preview}
       </div>
     </div>
