@@ -233,7 +233,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
           />
           
           {/* Preview Pane */}
-          <div className="flex-1 overflow-hidden relative">
+          <div className="flex-1 overflow-hidden relative min-w-0" style={{ minHeight: '400px' }}>
             {/* Preview controls overlay */}
             <div className={cn(
               'absolute top-2 right-2 z-30 flex items-center gap-2',
