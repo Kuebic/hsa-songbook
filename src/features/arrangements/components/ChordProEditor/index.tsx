@@ -328,11 +328,14 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       
       {/* Preview Pane */}
       {showPreview && isPreviewVisible && (
-        <div 
-          className="flex-1 overflow-hidden"
-          style={{
-            height: isMobile ? '50%' : undefined
-          }}
+        <div
+          className={cn(
+            "overflow-hidden flex flex-col",
+            // On desktop: take remaining width
+            !isMobile && "flex-1",
+            // On mobile: take remaining height
+            isMobile && "h-1/2"
+          )}
         >
           <PreviewPane
             content={debouncedContent}
