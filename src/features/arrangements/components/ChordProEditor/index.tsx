@@ -186,7 +186,13 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         getContainerClasses(),
         className
       )}
-      style={{ height: typeof height === 'number' ? `${height}px` : height }}
+      style={{
+        height: typeof height === 'number' ? `${height}px` : height,
+        // Force inline flex styles to override any CSS conflicts
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        flexWrap: 'nowrap'
+      }}
       onKeyDown={handleKeyDown}
     >
       {/* Editor Pane */}
@@ -254,7 +260,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
                           'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     )}
                   >
-                    {isPreviewVisible ? '👁 Preview' : '👁‍🗨 Preview'}
+                    {isPreviewVisible ? '👁 Preview' : '��‍🗨 Preview'}
                   </button>
                 </>
               )}
