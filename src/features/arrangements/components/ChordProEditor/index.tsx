@@ -261,10 +261,10 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
               'text-gray-600'
             )}>
               {isDirty && '• Unsaved changes'}
-              {/* Debug: Show mobile state */}
+              {/* Debug: Show mobile state and preview visibility */}
               {process.env.NODE_ENV === 'development' && (
                 <span className="ml-2 text-orange-500">
-                  [{isMobile ? 'Mobile' : 'Desktop'} - {window.innerWidth}px]
+                  [{isMobile ? 'Mobile' : 'Desktop'} - {window.innerWidth}px - Preview: {isPreviewVisible ? 'ON' : 'OFF'}]
                 </span>
               )}
             </span>
