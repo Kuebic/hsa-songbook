@@ -93,9 +93,10 @@ export function Layout({ children }: LayoutProps) {
       </nav>
       </ErrorBoundary>
       
-      <main style={{ 
+      <main style={{
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#111827',
+        color: 'rgba(255, 255, 255, 0.87)',
         width: '100%'
       }}>
         <div style={{
