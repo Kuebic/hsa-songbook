@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChordEditorEnhanced } from '../components/ChordEditorEnhanced'
+import { ChordProEditor } from '../components/ChordProEditor'
 import { useNotification } from '@shared/components/notifications'
 import { ErrorBoundary } from '@features/monitoring/components/ErrorBoundary'
 import { arrangementService } from '@features/songs/services/arrangementService'
 import { useAuth } from '@features/auth'
-import '../styles/chord-editor-enhanced.css'
 
 export function ChordEditingPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -115,16 +114,18 @@ export function ChordEditingPage() {
 
   return (
     <ErrorBoundary>
-      <ChordEditorEnhanced
+      <ChordProEditor
         initialContent={initialChordData}
         onChange={() => {}} // onChange is handled internally
         onSave={handleSave}
         onCancel={handleCancel}
         height="calc(100vh - 4rem)"
-        showToolbar={true}
+        showPreview={true}
         defaultPreviewVisible={true}
+        theme="dark"
         className="m-4"
         autoFocus={true}
+        enableChordCompletion={true}
       />
     </ErrorBoundary>
   )

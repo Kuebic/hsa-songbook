@@ -5,7 +5,7 @@ export { ArrangementViewerPage } from './pages/ArrangementViewerPage'
 export { ChordSheetViewer } from './components/ChordSheetViewer'
 export { ViewerHeader } from './components/ViewerHeader'
 export { ViewerControls } from './components/ViewerControls'
-export { ChordEditorEnhanced } from './components/ChordEditorEnhanced'
+export { ChordProEditor } from './components/ChordProEditor'
 export { ChordSyntaxHighlight } from './components/ChordSyntaxHighlight'
 export { ChordPreviewPane } from './components/ChordPreviewPane'
 export { EditorToolbar } from './components/EditorToolbar'
@@ -46,6 +46,6 @@ export type {
   TranspositionResult
 } from './types/viewer.types'
 
-export type { ChordEditorEnhancedProps } from './components/ChordEditorEnhanced'
+export type { ChordProEditorProps } from './components/ChordProEditor'
 export type { ChordSyntaxHighlightProps, ChordSyntaxHighlightRef } from './components/ChordSyntaxHighlight'
 export type { ValidationResult } from './hooks/useChordProValidation'

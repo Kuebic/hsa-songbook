@@ -1,6 +1,5 @@
-import { ChordEditorEnhanced } from '@features/arrangements'
+import { ChordProEditor } from '@features/arrangements/components/ChordProEditor'
 import { useState } from 'react'
-import '@features/arrangements/styles/chord-editor-enhanced.css'
 
 export function TestEditorPage() {
   const [content, setContent] = useState(`{title: Amazing Grace}
@@ -23,17 +22,18 @@ Was [G]blind but [D]now I [G]see
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Chord Editor Test</h1>
-      <ChordEditorEnhanced
+      <ChordProEditor
         initialContent={content}
         onChange={setContent}
         onSave={(text) => {
           console.log('Saved:', text)
           alert('Saved!')
         }}
-        height="600px"
-        showToolbar={true}
+        height={600}
+        showPreview={true}
         defaultPreviewVisible={true}
         autoFocus={true}
+        enableChordCompletion={true}
       />
     </div>
   )
