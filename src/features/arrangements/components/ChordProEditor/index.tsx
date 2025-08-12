@@ -313,6 +313,67 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
                   >
                     {isPreviewVisible ? '👁 Preview' : '👁‍🗨 Preview'}
                   </button>
+
+                  {/* Enhanced controls when enhanced features and preview are enabled */}
+                  {enableEnhancedFeatures && isPreviewVisible && (
+                    <>
+                      <div className={cn('w-px h-6', theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300')} />
+
+                      {/* Zoom controls */}
+                      <button
+                        onClick={() => setZoomLevel(Math.max(zoomLevel - 0.1, 0.5))}
+                        disabled={zoomLevel <= 0.5}
+                        className="px-2 py-1 text-xs rounded hover:bg-gray-600 disabled:opacity-50"
+                        title="Zoom out"
+                      >
+                        🔍-
+                      </button>
+                      <span className="text-xs px-1">{Math.round(zoomLevel * 100)}%</span>
+                      <button
+                        onClick={() => setZoomLevel(Math.min(zoomLevel + 0.1, 2))}
+                        disabled={zoomLevel >= 2}
+                        className="px-2 py-1 text-xs rounded hover:bg-gray-600 disabled:opacity-50"
+                        title="Zoom in"
+                      >
+                        🔍+
+                      </button>
+
+                      <div className={cn('w-px h-6', theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300')} />
+
+                      {/* Transpose controls */}
+                      <button
+                        onClick={() => setCurrentTranspose(Math.max(currentTranspose - 1, -11))}
+                        className="px-2 py-1 text-xs rounded hover:bg-gray-600"
+                        title="Transpose down"
+                      >
+                        ♭
+                      </button>
+                      <span className="text-xs px-1 min-w-8 text-center">
+                        {currentTranspose > 0 ? `+${currentTranspose}` : currentTranspose}
+                      </span>
+                      <button
+                        onClick={() => setCurrentTranspose(Math.min(currentTranspose + 1, 11))}
+                        className="px-2 py-1 text-xs rounded hover:bg-gray-600"
+                        title="Transpose up"
+                      >
+                        ♯
+                      </button>
+
+                      <div className={cn('w-px h-6', theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300')} />
+
+                      {/* Show/hide chords */}
+                      <button
+                        onClick={() => setCurrentShowChords(!currentShowChords)}
+                        className={cn(
+                          'px-2 py-1 text-xs rounded transition-colors',
+                          currentShowChords ? 'bg-blue-600 text-white' : 'hover:bg-gray-600'
+                        )}
+                        title={currentShowChords ? "Hide chords" : "Show chords"}
+                      >
+                        {currentShowChords ? '👁' : '👁‍🗨'}
+                      </button>
+                    </>
+                  )}
                 </>
               )}
             </div>
