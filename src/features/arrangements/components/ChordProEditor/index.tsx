@@ -327,23 +327,40 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
                       <div className={cn('w-px h-6', theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300')} />
 
                       {/* Zoom controls */}
-                      <button
-                        onClick={() => setZoomLevel(Math.max(zoomLevel - 0.1, 0.5))}
-                        disabled={zoomLevel <= 0.5}
-                        className="px-2 py-1 text-xs rounded hover:bg-gray-600 disabled:opacity-50"
-                        title="Zoom out"
-                      >
-                        🔍-
-                      </button>
-                      <span className="text-xs px-1">{Math.round(zoomLevel * 100)}%</span>
-                      <button
-                        onClick={() => setZoomLevel(Math.min(zoomLevel + 0.1, 2))}
-                        disabled={zoomLevel >= 2}
-                        className="px-2 py-1 text-xs rounded hover:bg-gray-600 disabled:opacity-50"
-                        title="Zoom in"
-                      >
-                        🔍+
-                      </button>
+                      <div className="flex items-center bg-white rounded-lg shadow-sm border border-gray-200 dark:bg-gray-700 dark:border-gray-600">
+                        <button
+                          onClick={() => setZoomLevel(Math.max(zoomLevel - 0.1, 0.5))}
+                          disabled={zoomLevel <= 0.5}
+                          className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors duration-200 rounded-l-lg"
+                          title="Zoom out"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="21 21l-4.35-4.35"/>
+                            <line x1="8" y1="11" x2="14" y2="11"/>
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => setZoomLevel(1)}
+                          className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 min-w-16 border-x border-gray-200 transition-colors duration-200"
+                          title="Reset zoom"
+                        >
+                          {Math.round(zoomLevel * 100)}%
+                        </button>
+                        <button
+                          onClick={() => setZoomLevel(Math.min(zoomLevel + 0.1, 2))}
+                          disabled={zoomLevel >= 2}
+                          className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors duration-200 rounded-r-lg"
+                          title="Zoom in"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="21 21l-4.35-4.35"/>
+                            <line x1="11" y1="8" x2="11" y2="14"/>
+                            <line x1="8" y1="11" x2="14" y2="11"/>
+                          </svg>
+                        </button>
+                      </div>
 
                       <div className={cn('w-px h-6', theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300')} />
 
