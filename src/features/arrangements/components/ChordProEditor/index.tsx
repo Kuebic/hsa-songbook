@@ -307,17 +307,18 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
                   <button
                     onClick={() => setIsPreviewVisible(!isPreviewVisible)}
                     className={cn(
-                      'px-3 py-1 text-sm rounded transition-colors',
+                      'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 shadow-sm border',
                       isPreviewVisible
-                        ? theme === 'dark' ? 'bg-blue-600 text-white hover:bg-blue-700' :
-                          theme === 'stage' ? 'bg-yellow-600 text-white hover:bg-yellow-700' :
-                          'bg-blue-500 text-white hover:bg-blue-600'
-                        : theme === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' :
-                          theme === 'stage' ? 'bg-gray-800 text-yellow-500 hover:bg-gray-700' :
-                          'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        ? 'bg-blue-500 text-white hover:bg-blue-600 hover:shadow-md border-blue-600'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'
                     )}
+                    title={isPreviewVisible ? 'Hide preview' : 'Show preview'}
                   >
-                    {isPreviewVisible ? '👁 Preview' : '👁‍🗨 Preview'}
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Preview
                   </button>
 
                   {/* Enhanced controls when enhanced features and preview are enabled */}
