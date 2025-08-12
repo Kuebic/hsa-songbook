@@ -142,8 +142,8 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
    * Get container theme classes
    */
   const getContainerClasses = () => {
-    const baseClasses = 'chord-pro-editor-container flex border rounded-lg overflow-hidden';
-    
+    const baseClasses = 'chord-pro-editor-container flex flex-row border rounded-lg overflow-hidden';
+
     switch (theme) {
       case 'dark':
         return cn(baseClasses, 'border-gray-700 bg-gray-900');
