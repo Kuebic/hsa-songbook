@@ -1,17 +1,18 @@
 /**
  * @file textArea.types.ts
  * @description Type definitions for enhanced ChordPro textarea functionality
- * Updated to fix export issues
  */
 
-export interface UndoRedoState {
+// Undo/Redo functionality
+interface UndoRedoState {
   value: string;
   selectionStart: number;
   selectionEnd: number;
   timestamp: number;
 }
 
-export interface AutoCompleteContext {
+// Auto-completion context
+interface AutoCompleteContext {
   triggerChar: '{' | '[';
   triggerPosition: number;
   filterText: string;
@@ -19,13 +20,15 @@ export interface AutoCompleteContext {
   selectedIndex: number;
 }
 
-export interface DirectiveCompletion {
+// Directive completion tracking
+interface DirectiveCompletion {
   position: number;
   timestamp: number;
   directiveType: 'chord' | 'directive' | 'comment';
 }
 
-export interface KeyboardShortcut {
+// Keyboard shortcut definition
+interface KeyboardShortcut {
   key: string;
   ctrlKey?: boolean;
   metaKey?: boolean;
@@ -35,7 +38,8 @@ export interface KeyboardShortcut {
   description: string;
 }
 
-export interface TextAreaTheme {
+// Text area theme configuration
+interface TextAreaTheme {
   background: string;
   foreground: string;
   caret: string;
@@ -44,7 +48,8 @@ export interface TextAreaTheme {
   placeholder: string;
 }
 
-export interface TextAreaConfig {
+// Text area configuration
+interface TextAreaConfig {
   tabSize: number;
   enableUndoRedo: boolean;
   maxUndoHistory: number;
@@ -55,7 +60,8 @@ export interface TextAreaConfig {
   keyboardShortcuts: KeyboardShortcut[];
 }
 
-export interface TextAreaMetrics {
+// Text area metrics
+interface TextAreaMetrics {
   lineCount: number;
   charCount: number;
   cursorLine: number;
@@ -63,7 +69,8 @@ export interface TextAreaMetrics {
   selectionLength: number;
 }
 
-export interface ValidationResult {
+// Validation result
+interface ValidationResult {
   isValid: boolean;
   errors: string[];
   warnings: string[];
@@ -71,7 +78,8 @@ export interface ValidationResult {
   column?: number;
 }
 
-export type TextAreaEvent = 
+// Text area events
+type TextAreaEvent = 
   | 'change'
   | 'selection-change'
   | 'cursor-change'
@@ -84,7 +92,8 @@ export type TextAreaEvent =
   | 'bracket-paired'
   | 'comment-toggled';
 
-export interface TextAreaEventData {
+// Text area event data
+interface TextAreaEventData {
   type: TextAreaEvent;
   timestamp: number;
   value: string;
@@ -93,10 +102,8 @@ export interface TextAreaEventData {
   payload?: any;
 }
 
-/**
- * Enhanced props for ChordProTextArea with all new features
- */
-export interface EnhancedChordProTextAreaProps {
+// Enhanced props for ChordProTextArea
+interface EnhancedChordProTextAreaProps {
   // Core props
   value: string;
   onChange: (value: string) => void;
@@ -138,3 +145,32 @@ export interface EnhancedChordProTextAreaProps {
   'aria-invalid'?: boolean;
   'aria-required'?: boolean;
 }
+
+// Explicit exports at the end
+export {
+  UndoRedoState,
+  AutoCompleteContext,
+  DirectiveCompletion,
+  KeyboardShortcut,
+  TextAreaTheme,
+  TextAreaConfig,
+  TextAreaMetrics,
+  ValidationResult,
+  TextAreaEvent,
+  TextAreaEventData,
+  EnhancedChordProTextAreaProps
+};
+
+export type {
+  UndoRedoState,
+  AutoCompleteContext,
+  DirectiveCompletion,
+  KeyboardShortcut,
+  TextAreaTheme,
+  TextAreaConfig,
+  TextAreaMetrics,
+  ValidationResult,
+  TextAreaEvent,
+  TextAreaEventData,
+  EnhancedChordProTextAreaProps
+};
