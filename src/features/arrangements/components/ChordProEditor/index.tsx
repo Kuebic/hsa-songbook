@@ -241,14 +241,11 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     <div
       className={cn(
         getContainerClasses(),
+        'flex flex-col', // Always column for main container
         className
       )}
       style={{
         height: typeof height === 'number' ? `${height}px` : height,
-        // Force inline flex styles to override any CSS conflicts
-        display: 'flex',
-        flexDirection: isMobile ? 'column' : 'row',
-        flexWrap: 'nowrap'
       }}
       onKeyDown={handleKeyDown}
     >
