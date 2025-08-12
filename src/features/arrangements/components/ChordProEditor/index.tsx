@@ -199,7 +199,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       <div
         className="relative overflow-hidden flex flex-col"
         style={{
-          width: (showPreview && isPreviewVisible && !isMobile) ? '50%' : '100%',
+          width: (showPreview && isPreviewVisible && !isMobile) ? 'calc(50% - 1rem)' : '100%',
           flexShrink: 0,
           height: '100%'
         }}
