@@ -5,7 +5,14 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { validateChordProContent } from '../utils/textAreaUtils';
-import { ValidationResult } from '../types/textAreaTypes';
+// Define ValidationResult directly to avoid import issues
+interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  line?: number;
+  column?: number;
+}
 
 interface UseChordProValidationProps {
   content: string;
