@@ -59,23 +59,24 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   // Check for mobile viewport
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
+      setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // On mobile, default to preview hidden and full-width panes
+  // Initialize preview visibility based on props and viewport
   useEffect(() => {
     if (isMobile) {
+      // On mobile, start with preview hidden but allow toggle
       setIsPreviewVisible(false);
       setSplitPosition(50); // Reset for when desktop view returns
-    } else if (showPreview && defaultPreviewVisible) {
-      // Ensure preview is visible on desktop when it should be
-      setIsPreviewVisible(true);
+    } else {
+      // On desktop, show preview by default if enabled
+      setIsPreviewVisible(showPreview && defaultPreviewVisible);
     }
   }, [isMobile, showPreview, defaultPreviewVisible]);
 
