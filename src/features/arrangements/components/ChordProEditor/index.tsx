@@ -60,6 +60,11 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   // Debounce content for preview updates
   const debouncedContent = useDebounce(content, debounceMs);
 
+  // Save split position to localStorage
+  useEffect(() => {
+    localStorage.setItem('chordpro-editor-split-position', splitPosition.toString());
+  }, [splitPosition]);
+
   // Check for mobile viewport - tablets and below go vertical, desktop goes horizontal
   useEffect(() => {
     const checkMobile = () => {
