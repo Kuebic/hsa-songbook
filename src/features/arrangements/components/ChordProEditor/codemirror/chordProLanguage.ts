@@ -14,6 +14,7 @@ export const chordProLanguage = StreamLanguage.define({
     inComment: false,
     inChord: false,
     inTab: false,
+    directiveType: null as 'keyword' | 'tag' | 'comment' | null,
   }),
 
   token(stream, state) {
