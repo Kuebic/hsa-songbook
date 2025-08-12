@@ -51,6 +51,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   });
   const [isDragging, setIsDragging] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(showPreview);
   const [currentTranspose, setCurrentTranspose] = useState(transpose);
   const [currentShowChords, setCurrentShowChords] = useState(showChords);
 
