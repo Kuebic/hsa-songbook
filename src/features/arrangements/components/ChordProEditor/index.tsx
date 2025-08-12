@@ -385,8 +385,6 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
                         </button>
                       </div>
 
-                      <div className={cn('w-px h-6', theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300')} />
-
                       {/* Show/hide chords */}
                       <button
                         onClick={() => setCurrentShowChords(!currentShowChords)}
