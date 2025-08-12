@@ -193,8 +193,8 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       <div
         className={cn(
           "relative overflow-hidden flex flex-col border-2 border-red-500",
-          // When preview is visible on desktop, take exactly half width
-          showPreview && isPreviewVisible && !isMobile && "w-1/2",
+          // When preview is visible on desktop, take exactly half width and don't shrink
+          showPreview && isPreviewVisible && !isMobile && "w-1/2 flex-shrink-0",
           // When preview is hidden, take full width
           (!showPreview || !isPreviewVisible) && "w-full",
           // On mobile with preview, take full width (stacked)
