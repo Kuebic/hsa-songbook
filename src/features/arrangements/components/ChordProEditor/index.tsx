@@ -120,25 +120,34 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   }, [isDirty, content, handleSave, onCancel]);
 
   /**
-   * Handle splitter drag
+   * Handle splitter drag for both mouse and touch
    */
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     setIsDragging(true);
   }, []);
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
+  const getClientX = useCallback((e: MouseEvent | TouchEvent): number => {
+    if ('touches' in e) {
+      return e.touches[0]?.clientX || 0;
+    }
+    return e.clientX;
+  }, []);
+
+  const handleMouseMove = useCallback((e: MouseEvent | TouchEvent) => {
     if (!isDragging) return;
-    
+
     const container = document.querySelector('.chord-pro-editor-container');
     if (!container) return;
-    
+
     const rect = container.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    const clientX = getClientX(e);
+    const x = clientX - rect.left;
     const percentage = (x / rect.width) * 100;
-    
+
+    // Constrain between 20% and 80% for usability
     setSplitPosition(Math.max(20, Math.min(80, percentage)));
-  }, [isDragging]);
+  }, [isDragging, getClientX]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
