@@ -330,13 +330,13 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       {/* Preview Pane */}
       {showPreview && isPreviewVisible && (
         <div
-          className={cn(
-            "overflow-hidden flex flex-col border-2 border-blue-500 bg-blue-900",
-            // On desktop, take exactly half width and don't shrink
-            !isMobile && "w-1/2 flex-shrink-0",
-            // On mobile, take full width (stacked below editor)
-            isMobile && "w-full"
-          )}
+          className="overflow-hidden flex flex-col border-2 border-blue-500 bg-blue-900"
+          style={{
+            // Force exact width with inline styles
+            width: isMobile ? '100%' : '50%',
+            flexShrink: 0,
+            height: '100%'
+          }}
         >
           <div className="bg-blue-300 text-black text-xs p-1">
             PREVIEW: Mobile={isMobile ? 'YES' : 'NO'}
