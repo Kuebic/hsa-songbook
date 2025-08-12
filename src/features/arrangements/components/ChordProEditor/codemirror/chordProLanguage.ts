@@ -65,9 +65,11 @@ export const chordProLanguage = StreamLanguage.define({
     if (state.inDirective) {
       if (stream.peek() === '}') {
         stream.next();
+        const tokenType = state.directiveType || 'keyword';
         state.inDirective = false;
         state.inComment = false;
-        return state.inComment ? 'comment' : 'keyword';
+        state.directiveType = null;
+        return tokenType;
       }
       
       if (state.inComment) {
