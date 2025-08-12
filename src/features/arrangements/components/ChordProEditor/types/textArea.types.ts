@@ -10,16 +10,13 @@ export interface UndoRedoState {
   timestamp: number;
 }
 
-export interface AutoCompleteContextType {
+export interface AutoCompleteContext {
   triggerChar: '{' | '[';
   triggerPosition: number;
   filterText: string;
   isVisible: boolean;
   selectedIndex: number;
 }
-
-// Also export with the original name for backward compatibility
-export type AutoCompleteContext = AutoCompleteContextType;
 
 export interface DirectiveCompletion {
   position: number;
