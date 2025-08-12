@@ -261,10 +261,11 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         {/* Toolbar (if enabled) */}
         {showToolbar && (
           <div className={cn(
-            'flex items-center justify-between px-4 py-2 border-b',
-            theme === 'dark' ? 'bg-gray-800 border-gray-700' :
-            theme === 'stage' ? 'bg-gray-900 border-yellow-700' :
-            'bg-gray-50 border-gray-200'
+            'flex items-center justify-between px-6 py-4 border-b shadow-sm',
+            'bg-gradient-to-r from-white via-gray-50 to-white',
+            theme === 'dark' && 'from-gray-800 via-gray-750 to-gray-800 border-gray-700' ,
+            theme === 'stage' && 'from-gray-900 via-black to-gray-900 border-yellow-600/20',
+            theme === 'light' && 'border-gray-200'
           )}>
             <div className="flex items-center gap-2">
               <button
