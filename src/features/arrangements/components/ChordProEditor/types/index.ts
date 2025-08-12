@@ -1,7 +1,6 @@
 /**
- * @file src/features/songs/types/index.ts
- * @description Export TypeScript types for songs feature
+ * @file index.ts
+ * @description Re-exports for ChordPro editor types
  */
 
-export * from './chord.types';
-export * from './search.types';
+export * from './textArea.types';
