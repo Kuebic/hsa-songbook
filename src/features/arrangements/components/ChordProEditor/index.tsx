@@ -420,14 +420,30 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
             height: '100%'
           }}
         >
-          <PreviewPane
-            content={debouncedContent}
-            transpose={transpose}
-            fontSize={fontSize}
-            showChords={showChords}
-            theme={theme}
-            className="h-full"
-          />
+          {enableEnhancedFeatures ? (
+            <PreviewPaneEnhanced
+              content={debouncedContent}
+              transpose={currentTranspose}
+              fontSize={currentFontSize}
+              showChords={currentShowChords}
+              theme={theme}
+              className="h-full"
+              onTransposeChange={setCurrentTranspose}
+              onFontSizeChange={setCurrentFontSize}
+              onShowChordsChange={setCurrentShowChords}
+              validationErrors={validationErrors}
+              readOnly={readOnly}
+            />
+          ) : (
+            <PreviewPane
+              content={debouncedContent}
+              transpose={currentTranspose}
+              fontSize={currentFontSize}
+              showChords={currentShowChords}
+              theme={theme}
+              className="h-full"
+            />
+          )}
         </div>
       )}
     </div>
