@@ -225,7 +225,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       </div>
 
       {/* Splitter */}
-      {showPreview && (
+      {isPreviewVisible && (
         <>
           <div 
             className={cn(
