@@ -312,16 +312,40 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         />
       )}
       
-      {/* Visual Gap */}
+      {/* Draggable Splitter */}
       {showPreview && isPreviewVisible && !isMobile && (
         <div
           className={cn(
-            "w-4",
+            "w-4 cursor-col-resize flex items-center justify-center group hover:bg-blue-500/20 transition-colors duration-200",
+            isDragging && "bg-blue-500/30",
             theme === 'dark' ? "bg-gray-800" :
             theme === 'stage' ? "bg-gray-900" :
             "bg-gray-100"
           )}
-        />
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleMouseDown}
+          role="separator"
+          aria-label="Resize panels"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            // Keyboard accessibility for resizing
+            if (e.key === 'ArrowLeft') {
+              e.preventDefault();
+              setSplitPosition(Math.max(20, splitPosition - 5));
+            } else if (e.key === 'ArrowRight') {
+              e.preventDefault();
+              setSplitPosition(Math.min(80, splitPosition + 5));
+            }
+          }}
+        >
+          {/* Visual indicator */}
+          <div className={cn(
+            "w-1 h-16 rounded-full opacity-40 group-hover:opacity-70 transition-opacity",
+            theme === 'dark' ? "bg-gray-400" :
+            theme === 'stage' ? "bg-yellow-500" :
+            "bg-gray-600"
+          )} />
+        </div>
       )}
 
       {/* Preview Pane */}
