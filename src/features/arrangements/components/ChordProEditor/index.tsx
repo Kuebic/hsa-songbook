@@ -329,21 +329,10 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       {showPreview && isPreviewVisible && (
         <div
           className={cn(
-            "overflow-hidden flex flex-col border-l-2 border-blue-500",
-            // On desktop: take remaining width
-            !isMobile && "bg-blue-50",
-            // On mobile: take remaining height
-            isMobile && "h-1/2 bg-green-50"
+            "overflow-hidden flex flex-col",
+            // Debug coloring - will remove later
+            "border-l-2 border-blue-500 bg-blue-50"
           )}
-          style={{
-            // Desktop: take remaining width with explicit constraints
-            ...(!isMobile ? {
-              width: `${100 - splitPosition}%`,
-              maxWidth: `${100 - splitPosition}%`,
-              minWidth: `${100 - splitPosition}%`,
-              flex: 'none' // Don't grow or shrink
-            } : {}),
-          }}
         >
           <div className="p-2 bg-yellow-200 text-xs font-bold">
             PREVIEW PANE - {isMobile ? 'Mobile' : 'Desktop'} Mode
