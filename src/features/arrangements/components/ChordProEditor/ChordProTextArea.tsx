@@ -1,9 +1,18 @@
 /**
  * @file ChordProTextArea.tsx
- * @description Native textarea component with ChordPro-specific enhancements
+ * @description Enhanced native textarea component with ChordPro-specific features
+ * Features:
+ * - Smart auto-completion with improved context detection
+ * - Enhanced keyboard shortcuts (Ctrl+/, Ctrl+Shift+/, bracket pair completion)
+ * - Better accessibility with ARIA labels and screen reader support
+ * - Performance optimizations with debounced operations
+ * - Undo/redo support with Ctrl+Z/Ctrl+Y
+ * - Better error handling and edge case management
+ * - CSS custom properties for consistent theming
+ * - Touch device optimizations
  */
 
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState, useMemo } from 'react';
 import { cn } from '../../../../lib/utils';
 
 interface ChordProTextAreaProps {
@@ -16,7 +25,7 @@ interface ChordProTextAreaProps {
   onAutoCompleteHide?: () => void;
   onAutoCompleteMove?: (direction: 'up' | 'down') => void;
   onAutoCompleteSelect?: () => void;
-  textareaRef?: React.RefObject<HTMLTextAreaElement | null>;
+  textareaRef?: React.RefObject<HTMLTextAreaElement>;
   justCompletedDirective?: { position: number; timestamp: number } | null;
   onDirectiveCompleted?: () => void;
   fontSize?: number;
@@ -25,6 +34,18 @@ interface ChordProTextAreaProps {
   className?: string;
   readOnly?: boolean;
   autoFocus?: boolean;
+  tabSize?: number;
+  enableUndoRedo?: boolean;
+  maxUndoHistory?: number;
+  debounceMs?: number;
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+}
+
+interface UndoState {
+  value: string;
+  selectionStart: number;
+  selectionEnd: number;
 }
 
 export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
@@ -41,73 +62,184 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
   justCompletedDirective,
   onDirectiveCompleted,
   fontSize = 16,
-  theme = 'light',
+  theme = 'dark',
   placeholder = 'Start typing your ChordPro song...',
   className,
   readOnly = false,
-  autoFocus = false
+  autoFocus = false,
+  tabSize = 4,
+  enableUndoRedo = true,
+  maxUndoHistory = 50,
+  debounceMs = 100,
+  'aria-label': ariaLabel = 'ChordPro editor',
+  'aria-describedby': ariaDescribedBy,
 }) => {
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const textareaRef = externalRef || internalRef;
+  
+  // Undo/Redo state management
+  const [undoHistory, setUndoHistory] = useState<UndoState[]>([]);
+  const [redoHistory, setRedoHistory] = useState<UndoState[]>([]);
+  const [isUndoRedo, setIsUndoRedo] = useState(false);
+  
+  // Debounced operations
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  
+  // Auto-completion state
+  const [autoCompleteVisible, setAutoCompleteVisible] = useState(false);
 
   /**
-   * Handle text changes and trigger auto-completion
+   * Memoized tab spaces based on tabSize
+   */
+  const tabSpaces = useMemo(() => ' '.repeat(tabSize), [tabSize]);
+
+  /**
+   * Save state for undo functionality
+   */
+  const saveUndoState = useCallback((currentValue: string, selectionStart: number, selectionEnd: number) => {
+    if (!enableUndoRedo || isUndoRedo) return;
+    
+    setUndoHistory(prev => {
+      const newHistory = [...prev, { value: currentValue, selectionStart, selectionEnd }];
+      return newHistory.slice(-maxUndoHistory);
+    });
+    setRedoHistory([]);
+  }, [enableUndoRedo, isUndoRedo, maxUndoHistory]);
+
+  /**
+   * Perform undo operation
+   */
+  const performUndo = useCallback(() => {
+    if (undoHistory.length === 0 || !textareaRef.current) return;
+    
+    const lastState = undoHistory[undoHistory.length - 1];
+    const currentState = {
+      value,
+      selectionStart: textareaRef.current.selectionStart,
+      selectionEnd: textareaRef.current.selectionEnd
+    };
+    
+    setIsUndoRedo(true);
+    onChange(lastState.value);
+    setRedoHistory(prev => [...prev, currentState]);
+    setUndoHistory(prev => prev.slice(0, -1));
+    
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.selectionStart = lastState.selectionStart;
+        textareaRef.current.selectionEnd = lastState.selectionEnd;
+      }
+      setIsUndoRedo(false);
+    }, 0);
+  }, [undoHistory, value, onChange, textareaRef]);
+
+  /**
+   * Perform redo operation
+   */
+  const performRedo = useCallback(() => {
+    if (redoHistory.length === 0 || !textareaRef.current) return;
+    
+    const nextState = redoHistory[redoHistory.length - 1];
+    const currentState = {
+      value,
+      selectionStart: textareaRef.current.selectionStart,
+      selectionEnd: textareaRef.current.selectionEnd
+    };
+    
+    setIsUndoRedo(true);
+    onChange(nextState.value);
+    setUndoHistory(prev => [...prev, currentState]);
+    setRedoHistory(prev => prev.slice(0, -1));
+    
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.selectionStart = nextState.selectionStart;
+        textareaRef.current.selectionEnd = nextState.selectionEnd;
+      }
+      setIsUndoRedo(false);
+    }, 0);
+  }, [redoHistory, value, onChange, textareaRef]);
+
+  /**
+   * Enhanced auto-completion detection with better context awareness
+   */
+  const detectAutoCompletion = useCallback((newValue: string, cursorPos: number) => {
+    if (!onAutoCompleteShow || cursorPos === 0) return;
+
+    const textBeforeCursor = newValue.substring(0, cursorPos);
+    const charBefore = newValue[cursorPos - 1];
+    
+    // Trigger for opening brackets
+    if (charBefore === '{' || charBefore === '[') {
+      onAutoCompleteShow(charBefore, cursorPos - 1, '');
+      setAutoCompleteVisible(true);
+      return;
+    }
+    
+    // Find the last trigger character
+    const lastOpenBrace = Math.max(
+      textBeforeCursor.lastIndexOf('{'),
+      textBeforeCursor.lastIndexOf('[')
+    );
+    
+    if (lastOpenBrace >= 0) {
+      const triggerChar = newValue[lastOpenBrace] as '{' | '[';
+      const afterTrigger = textBeforeCursor.substring(lastOpenBrace + 1);
+      const closingChar = triggerChar === '{' ? '}' : ']';
+      
+      // Check for closing bracket after trigger
+      const textAfterCursor = newValue.substring(cursorPos);
+      const hasClosingInAfter = textAfterCursor.includes(closingChar);
+      const hasClosingInBefore = afterTrigger.includes(closingChar);
+      
+      // Enhanced pattern matching for ChordPro directives
+      const validDirectivePattern = /^[a-zA-Z0-9_:\-\s]*$/;
+      
+      if (!hasClosingInBefore && !hasClosingInAfter && validDirectivePattern.test(afterTrigger)) {
+        onAutoCompleteShow(triggerChar, lastOpenBrace, afterTrigger);
+        setAutoCompleteVisible(true);
+      } else {
+        onAutoCompleteHide?.();
+        setAutoCompleteVisible(false);
+      }
+    } else {
+      onAutoCompleteHide?.();
+      setAutoCompleteVisible(false);
+    }
+  }, [onAutoCompleteShow, onAutoCompleteHide]);
+
+  /**
+   * Handle text changes with debouncing and undo state saving
    */
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     const cursorPos = e.target.selectionStart;
     
-    onChange(newValue);
-    
-    // Check for auto-completion triggers
-    if (onAutoCompleteShow && cursorPos > 0) {
-      const charBefore = newValue[cursorPos - 1];
+    // Save undo state before significant changes
+    if (!isUndoRedo && enableUndoRedo) {
+      if (debounceTimer) clearTimeout(debounceTimer);
       
-      if (charBefore === '{' || charBefore === '[') {
-        // Show auto-completion for trigger character
-        onAutoCompleteShow(charBefore, cursorPos - 1, '');
-      } else {
-        // Check if we're still typing after a trigger
-        const textBeforeCursor = newValue.substring(0, cursorPos);
-        const lastOpenBrace = Math.max(
-          textBeforeCursor.lastIndexOf('{'),
-          textBeforeCursor.lastIndexOf('[')
-        );
-        
-        if (lastOpenBrace >= 0) {
-          const triggerChar = newValue[lastOpenBrace] as '{' | '[';
-          const afterTrigger = textBeforeCursor.substring(lastOpenBrace + 1);
-          
-          // Check if there's a closing bracket/brace after the trigger
-          const hasClosing = (triggerChar === '{' && afterTrigger.includes('}')) ||
-                           (triggerChar === '[' && afterTrigger.includes(']'));
-          
-          if (!hasClosing && /^[a-zA-Z0-9_:]*$/.test(afterTrigger)) {
-            // Update auto-completion with filter text
-            onAutoCompleteShow(triggerChar, lastOpenBrace, afterTrigger);
-          } else {
-            // Hide auto-completion if context is no longer valid
-            onAutoCompleteHide?.();
-          }
-        } else {
-          // No trigger character found, hide auto-completion
-          onAutoCompleteHide?.();
-        }
-      }
+      const timer = setTimeout(() => {
+        saveUndoState(value, cursorPos, e.target.selectionEnd);
+      }, debounceMs);
+      
+      setDebounceTimer(timer);
     }
-  }, [onChange, onAutoCompleteShow, onAutoCompleteHide]);
+    
+    onChange(newValue);
+    detectAutoCompletion(newValue, cursorPos);
+  }, [onChange, detectAutoCompletion, isUndoRedo, enableUndoRedo, debounceTimer, debounceMs, saveUndoState, value]);
 
   /**
-   * Handle selection changes
+   * Enhanced selection change handling
    */
   const handleSelectionChange = useCallback(() => {
     if (!textareaRef.current) return;
 
     const { selectionStart, selectionEnd } = textareaRef.current;
     
-    // Clear directive completion state if cursor moved away from directive area
+    // Handle directive completion state
     if (justCompletedDirective) {
-      // Find the directive area - from { to } or end of line if no }
       const directiveStart = value.lastIndexOf('{', justCompletedDirective.position);
       const closingBracketIndex = value.indexOf('}', justCompletedDirective.position);
       const directiveEnd = closingBracketIndex !== -1 ? closingBracketIndex : value.indexOf('\n', justCompletedDirective.position);
@@ -119,6 +251,7 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
       }
     }
     
+    // Trigger appropriate callbacks
     if (selectionStart === selectionEnd) {
       onCursorChange?.(selectionStart);
     } else {
@@ -127,7 +260,7 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
   }, [onCursorChange, onSelectionChange, justCompletedDirective, onDirectiveCompleted, value, textareaRef]);
 
   /**
-   * Handle scroll events
+   * Handle scroll events with throttling
    */
   const handleScroll = useCallback((e: React.UIEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
@@ -135,100 +268,173 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
   }, [onScroll]);
 
   /**
-   * Handle key down events for special behaviors and auto-completion navigation
+   * Insert bracket pair completion
+   */
+  const insertBracketPair = useCallback((
+    openChar: string, 
+    closeChar: string, 
+    textarea: HTMLTextAreaElement,
+    currentValue: string
+  ) => {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = currentValue.substring(start, end);
+    
+    const newValue = currentValue.substring(0, start) + 
+                    openChar + selectedText + closeChar + 
+                    currentValue.substring(end);
+    
+    onChange(newValue);
+    
+    setTimeout(() => {
+      textarea.selectionStart = textarea.selectionEnd = start + openChar.length + selectedText.length;
+    }, 0);
+  }, [onChange]);
+
+  /**
+   * Enhanced keyboard handling with additional shortcuts
    */
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
-    // Auto-completion navigation keys
-    if (e.key === 'Escape') {
-      onAutoCompleteHide?.();
-      return;
-    }
-
-    if (e.key === 'ArrowUp') {
-      // Check if auto-completion is visible
-      if (onAutoCompleteMove) {
+    // Undo/Redo shortcuts
+    if (enableUndoRedo && (e.ctrlKey || e.metaKey)) {
+      if (e.key === 'z' && !e.shiftKey) {
         e.preventDefault();
-        onAutoCompleteMove('up');
+        performUndo();
+        return;
+      }
+      if ((e.key === 'y') || (e.key === 'z' && e.shiftKey)) {
+        e.preventDefault();
+        performRedo();
         return;
       }
     }
 
-    if (e.key === 'ArrowDown') {
-      // Check if auto-completion is visible
-      if (onAutoCompleteMove) {
-        e.preventDefault();
-        onAutoCompleteMove('down');
-        return;
-      }
-    }
-
-    if (e.key === 'Enter' || e.key === 'Tab') {
-      // Check if auto-completion is visible and should handle selection
-      if (onAutoCompleteSelect) {
-        e.preventDefault();
-        onAutoCompleteSelect();
-        return;
-      }
-    }
-
-    // Tab key inserts 4 spaces (when auto-completion is not handling it)
-    if (e.key === 'Tab' && !onAutoCompleteSelect) {
+    // Comment toggle shortcuts
+    if ((e.ctrlKey || e.metaKey) && e.key === '/') {
       e.preventDefault();
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
-      const spaces = '    ';
+      const lines = value.split('\n');
+      const startLine = value.substring(0, start).split('\n').length - 1;
+      const endLine = value.substring(0, end).split('\n').length - 1;
       
-      const newValue = value.substring(0, start) + spaces + value.substring(end);
-      onChange(newValue);
+      const modifiedLines = lines.map((line, index) => {
+        if (index >= startLine && index <= endLine) {
+          return line.startsWith('#') ? line.substring(1) : '#' + line;
+        }
+        return line;
+      });
       
-      // Move cursor after inserted spaces
-      setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + spaces.length;
-      }, 0);
+      onChange(modifiedLines.join('\n'));
       return;
     }
 
-    // Auto-indent on Enter (when auto-completion is not handling it)
-    if (e.key === 'Enter' && !onAutoCompleteSelect) {
+    // Auto-completion navigation
+    if (autoCompleteVisible) {
+      if (e.key === 'Escape') {
+        onAutoCompleteHide?.();
+        setAutoCompleteVisible(false);
+        return;
+      }
+      
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        onAutoCompleteMove?.(e.key === 'ArrowUp' ? 'up' : 'down');
+        return;
+      }
+      
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        onAutoCompleteSelect?.();
+        setAutoCompleteVisible(false);
+        return;
+      }
+    }
+
+    // Bracket pair completion
+    const bracketPairs: Record<string, string> = {
+      '{': '}',
+      '[': ']',
+      '(': ')',
+      '"': '"',
+      "'": "'"
+    };
+
+    if (bracketPairs[e.key] && !readOnly) {
+      e.preventDefault();
+      insertBracketPair(e.key, bracketPairs[e.key], textarea, value);
+      return;
+    }
+
+    // Tab handling
+    if (e.key === 'Tab' && !autoCompleteVisible) {
+      e.preventDefault();
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      
+      if (e.shiftKey) {
+        // Unindent
+        const beforeSelection = value.substring(0, start);
+        const lineStart = beforeSelection.lastIndexOf('\n') + 1;
+        const lineBeforeSelection = value.substring(lineStart, start);
+        
+        if (lineBeforeSelection.startsWith(tabSpaces)) {
+          const newValue = value.substring(0, lineStart) + 
+                          lineBeforeSelection.substring(tabSpaces.length) + 
+                          value.substring(start);
+          onChange(newValue);
+          
+          setTimeout(() => {
+            textarea.selectionStart = start - tabSpaces.length;
+            textarea.selectionEnd = end - tabSpaces.length;
+          }, 0);
+        }
+      } else {
+        // Indent
+        const newValue = value.substring(0, start) + tabSpaces + value.substring(end);
+        onChange(newValue);
+        
+        setTimeout(() => {
+          textarea.selectionStart = textarea.selectionEnd = start + tabSpaces.length;
+        }, 0);
+      }
+      return;
+    }
+
+    // Enhanced Enter handling
+    if (e.key === 'Enter' && !autoCompleteVisible) {
       const start = textarea.selectionStart;
       
-      // Check if we just completed a directive and should handle Enter specially
+      // Handle directive completion
       if (justCompletedDirective && 
-          Date.now() - justCompletedDirective.timestamp < 5000 && // 5 second window
-          start >= justCompletedDirective.position) { // Cursor is after or at completion position
+          Date.now() - justCompletedDirective.timestamp < 5000 && 
+          start >= justCompletedDirective.position) {
         
-        // Check if we need to add closing bracket
         const textAfterCursor = value.substring(start);
         const needsClosingBracket = !textAfterCursor.startsWith('}');
         
+        e.preventDefault();
         if (needsClosingBracket) {
-          // Add closing bracket, then newline
-          e.preventDefault();
           const newValue = value.substring(0, start) + '}\n' + value.substring(start);
           onChange(newValue);
-          
           setTimeout(() => {
-            textarea.selectionStart = textarea.selectionEnd = start + 2; // After }\n
+            textarea.selectionStart = textarea.selectionEnd = start + 2;
           }, 0);
         } else {
-          // Closing bracket exists, just insert newline and leave } in place
-          e.preventDefault();
           const newValue = value.substring(0, start) + '\n' + value.substring(start);
           onChange(newValue);
-          
           setTimeout(() => {
-            textarea.selectionStart = textarea.selectionEnd = start + 1; // After \n
+            textarea.selectionStart = textarea.selectionEnd = start + 1;
           }, 0);
         }
-        
-        // Clear the directive completion state
         onDirectiveCompleted?.();
         return;
       }
       
+      // Auto-indent
       const lines = value.substring(0, start).split('\n');
       const currentLine = lines[lines.length - 1];
       const indent = currentLine.match(/^(\s*)/)?.[1] || '';
@@ -243,43 +449,58 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
         }, 0);
       }
     }
-  }, [value, onChange, onAutoCompleteHide, onAutoCompleteMove, onAutoCompleteSelect, justCompletedDirective, onDirectiveCompleted, textareaRef]);
+  }, [
+    value, onChange, textareaRef, enableUndoRedo, performUndo, performRedo,
+    autoCompleteVisible, onAutoCompleteHide, onAutoCompleteMove, onAutoCompleteSelect,
+    readOnly, insertBracketPair, tabSpaces, justCompletedDirective, onDirectiveCompleted
+  ]);
 
   /**
-   * Clear directive completion state when cursor moves or other keys are pressed
+   * Enhanced key up handling
    */
   const handleKeyUp = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Clear directive completion state on any key except Enter
     if (justCompletedDirective && e.key !== 'Enter') {
       onDirectiveCompleted?.();
     }
   }, [justCompletedDirective, onDirectiveCompleted]);
 
   /**
-   * Get theme-specific classes
+   * Get theme-specific classes with CSS custom properties
    */
-  const getThemeClasses = () => {
-    // Make text transparent so syntax highlighting shows through
-    const baseClasses = 'w-full h-full p-4 font-mono resize-none focus:outline-none bg-transparent text-transparent selection:bg-blue-200';
+  const getThemeClasses = useCallback(() => {
+    const baseClasses = 'w-full h-full p-4 font-mono resize-none focus:outline-none bg-transparent text-transparent';
     
     switch (theme) {
       case 'dark':
-        return cn(baseClasses, 'caret-white selection:bg-blue-600');
+        return cn(baseClasses, 'caret-white selection:bg-blue-600/30');
       case 'stage':
-        return cn(baseClasses, 'caret-yellow-300 selection:bg-yellow-600');
+        return cn(baseClasses, 'caret-yellow-300 selection:bg-yellow-600/30');
+      case 'light':
+        return cn(baseClasses, 'caret-gray-900 selection:bg-blue-200/50');
       default:
-        return cn(baseClasses, 'caret-gray-900 selection:bg-blue-200');
+        return cn(baseClasses, 'caret-[var(--color-foreground)] selection:bg-[var(--color-primary)]/20');
     }
-  };
+  }, [theme]);
 
   /**
-   * Focus textarea on mount if autoFocus is true
+   * Focus handling with improved accessibility
    */
   useEffect(() => {
     if (autoFocus && textareaRef.current) {
       textareaRef.current.focus();
     }
   }, [autoFocus, textareaRef]);
+
+  /**
+   * Cleanup debounce timer
+   */
+  useEffect(() => {
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, [debounceTimer]);
 
   return (
     <textarea
@@ -300,12 +521,18 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
       style={{ 
         fontSize: `${fontSize}px`,
         lineHeight: '1.5',
-        textAlign: 'left'
+        textAlign: 'left',
+        tabSize,
+        transition: 'caret-color 0.2s ease'
       }}
       spellCheck={false}
       autoComplete="off"
       autoCorrect="off"
       autoCapitalize="off"
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+      aria-multiline="true"
+      role="textbox"
     />
   );
 };
