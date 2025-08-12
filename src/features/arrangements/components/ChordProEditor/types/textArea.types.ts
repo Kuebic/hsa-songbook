@@ -4,7 +4,7 @@
  */
 
 // Undo/Redo functionality
-interface UndoRedoState {
+export interface UndoRedoState {
   value: string;
   selectionStart: number;
   selectionEnd: number;
@@ -12,7 +12,7 @@ interface UndoRedoState {
 }
 
 // Auto-completion context
-interface AutoCompleteContext {
+export interface AutoCompleteContext {
   triggerChar: '{' | '[';
   triggerPosition: number;
   filterText: string;
