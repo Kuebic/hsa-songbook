@@ -37,7 +37,6 @@ export const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
     }
   }, [scrollTop, scrollLeft]);
 
-
   /**
    * Render highlighted content
    */
