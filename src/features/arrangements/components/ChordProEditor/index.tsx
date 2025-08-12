@@ -160,14 +160,14 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
    * Get container theme classes
    */
   const getContainerClasses = () => {
-    const baseClasses = 'chord-pro-editor-container border rounded-lg overflow-hidden flex';
+    const baseClasses = 'chord-pro-editor-container border rounded-lg overflow-hidden';
 
-    // Determine flex layout based on state
-    let layoutClasses = '';
+    // Force explicit flex properties
+    let layoutClasses = 'flex flex-nowrap';
     if (isMobile) {
-      layoutClasses = 'flex-col';
+      layoutClasses += ' flex-col';
     } else {
-      layoutClasses = 'flex-row';
+      layoutClasses += ' flex-row';
     }
 
     switch (theme) {
