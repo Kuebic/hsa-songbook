@@ -326,7 +326,14 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       {/* Preview Pane */}
       {showPreview && isPreviewVisible && (
         <div
-          className="overflow-hidden flex flex-col"
+          className={cn(
+            "overflow-hidden flex flex-col",
+            // Add left border on desktop for visual separation
+            !isMobile && "border-l",
+            theme === 'dark' ? "border-gray-600" :
+            theme === 'stage' ? "border-yellow-700" :
+            "border-gray-300"
+          )}
           style={{
             width: isMobile ? '100%' : '50%',
             flexShrink: 0,
