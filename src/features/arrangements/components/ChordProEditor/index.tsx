@@ -343,13 +343,18 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
           className={cn(
             "overflow-hidden flex flex-col border-l-2 border-blue-500",
             // On desktop: take remaining width
-            !isMobile && "flex-1 bg-blue-50",
+            !isMobile && "bg-blue-50",
             // On mobile: take remaining height
             isMobile && "h-1/2 bg-green-50"
           )}
           style={{
-            minWidth: isMobile ? 'auto' : '300px', // Ensure minimum width on desktop
-            height: !isMobile ? '100%' : undefined // Full height on desktop
+            // Desktop: take remaining width with explicit constraints
+            ...(!isMobile ? {
+              width: `${100 - splitPosition}%`,
+              maxWidth: `${100 - splitPosition}%`,
+              minWidth: `${100 - splitPosition}%`,
+              flex: 'none' // Don't grow or shrink
+            } : {}),
           }}
         >
           <div className="p-2 bg-yellow-200 text-xs font-bold">
