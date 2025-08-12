@@ -11,6 +11,7 @@ import { PreviewPaneEnhanced } from './PreviewPaneEnhanced';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useEnhancedTextArea } from './hooks/useEnhancedTextArea';
 import { validateChordProContent } from './utils/textAreaUtils';
+import { StatusBar } from './StatusBar';
 
 export interface ChordProEditorProps {
   initialContent?: string;
