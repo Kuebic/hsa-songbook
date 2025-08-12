@@ -365,23 +365,29 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
                       <div className={cn('w-px h-6', theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300')} />
 
                       {/* Transpose controls */}
-                      <button
-                        onClick={() => setCurrentTranspose(Math.max(currentTranspose - 1, -11))}
-                        className="px-2 py-1 text-xs rounded hover:bg-gray-600"
-                        title="Transpose down"
-                      >
-                        ♭
-                      </button>
-                      <span className="text-xs px-1 min-w-8 text-center">
-                        {currentTranspose > 0 ? `+${currentTranspose}` : currentTranspose}
-                      </span>
-                      <button
-                        onClick={() => setCurrentTranspose(Math.min(currentTranspose + 1, 11))}
-                        className="px-2 py-1 text-xs rounded hover:bg-gray-600"
-                        title="Transpose up"
-                      >
-                        ♯
-                      </button>
+                      <div className="flex items-center bg-white rounded-lg shadow-sm border border-gray-200 dark:bg-gray-700 dark:border-gray-600">
+                        <button
+                          onClick={() => setCurrentTranspose(Math.max(currentTranspose - 1, -11))}
+                          className="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors duration-200 rounded-l-lg"
+                          title="Transpose down"
+                        >
+                          ♭
+                        </button>
+                        <button
+                          onClick={() => setCurrentTranspose(0)}
+                          className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 min-w-12 border-x border-gray-200 transition-colors duration-200"
+                          title="Reset transpose"
+                        >
+                          {currentTranspose === 0 ? '0' : currentTranspose > 0 ? `+${currentTranspose}` : currentTranspose}
+                        </button>
+                        <button
+                          onClick={() => setCurrentTranspose(Math.min(currentTranspose + 1, 11))}
+                          className="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors duration-200 rounded-r-lg"
+                          title="Transpose up"
+                        >
+                          ♯
+                        </button>
+                      </div>
 
                       <div className={cn('w-px h-6', theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300')} />
 
