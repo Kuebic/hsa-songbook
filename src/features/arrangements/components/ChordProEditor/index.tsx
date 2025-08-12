@@ -347,7 +347,8 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
             isMobile && "h-1/2 bg-green-50"
           )}
           style={{
-            minWidth: isMobile ? 'auto' : '300px' // Ensure minimum width on desktop
+            minWidth: isMobile ? 'auto' : '300px', // Ensure minimum width on desktop
+            height: !isMobile ? '100%' : undefined // Full height on desktop
           }}
         >
           <div className="p-2 bg-yellow-200 text-xs font-bold">
