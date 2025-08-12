@@ -11,7 +11,7 @@ export interface UndoRedoState {
   timestamp: number;
 }
 
-// Auto-completion context
+// Auto-completion context - explicitly exported
 export interface AutoCompleteContext {
   triggerChar: '{' | '[';
   triggerPosition: number;
@@ -79,7 +79,7 @@ export interface ValidationResult {
 }
 
 // Text area events
-export type TextAreaEvent =
+export type TextAreaEvent = 
   | 'change'
   | 'selection-change'
   | 'cursor-change'
@@ -145,3 +145,6 @@ export interface EnhancedChordProTextAreaProps {
   'aria-invalid'?: boolean;
   'aria-required'?: boolean;
 }
+
+// Force TypeScript to see this as a module with exports
+export {};
