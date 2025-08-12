@@ -146,5 +146,5 @@ export const useSyntaxHighlight = (content: string): HighlightedSegment[] => {
     }
 
     return segments;
-  }, [content, theme]);
+  }, [content]);
 };
