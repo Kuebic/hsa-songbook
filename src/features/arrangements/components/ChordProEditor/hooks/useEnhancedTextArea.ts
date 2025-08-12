@@ -4,14 +4,14 @@
  */
 
 import { useCallback, useRef, useState, useEffect, useMemo } from 'react';
-import { 
-  UndoRedoState, 
-  AutoCompleteContext, 
-  TextAreaMetrics, 
+import {
+  UndoRedoState,
+  AutoCompleteContext,
+  TextAreaMetrics,
   ValidationResult,
   TextAreaConfig,
   DirectiveCompletion
-} from '../types/textArea.types';
+} from '../types';
 import {
   calculateTextAreaMetrics,
   validateChordProContent,
