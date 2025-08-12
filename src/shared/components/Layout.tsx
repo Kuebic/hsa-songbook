@@ -101,9 +101,10 @@ export function Layout({ children }: LayoutProps) {
       
       <main style={{
         flex: 1,
-        backgroundColor: '#111827',
-        color: 'rgba(255, 255, 255, 0.87)',
-        width: '100%'
+        backgroundColor: 'var(--color-background)',
+        color: 'var(--color-foreground)',
+        width: '100%',
+        transition: 'background-color 0.3s ease, color 0.3s ease'
       }}>
         <div style={{
           maxWidth: '1280px',
@@ -115,12 +116,14 @@ export function Layout({ children }: LayoutProps) {
           </ErrorBoundary>
         </div>
       </main>
-      
+
       <ErrorBoundary level="section" isolate>
-        <footer style={{ 
-          backgroundColor: '#1e293b',
-          color: '#94a3b8',
-          width: '100%'
+        <footer style={{
+          backgroundColor: 'var(--color-card)',
+          color: 'var(--color-secondary)',
+          borderTop: '1px solid var(--color-border)',
+          width: '100%',
+          transition: 'background-color 0.3s ease'
         }}>
           <div style={{
             maxWidth: '1280px',
