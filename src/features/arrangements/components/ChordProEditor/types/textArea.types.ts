@@ -20,6 +20,9 @@ export interface AutoCompleteContext {
   selectedIndex: number;
 }
 
+// Also export as a type alias to ensure compatibility
+export type AutoCompleteContextType = AutoCompleteContext;
+
 // Directive completion tracking
 export interface DirectiveCompletion {
   position: number;
