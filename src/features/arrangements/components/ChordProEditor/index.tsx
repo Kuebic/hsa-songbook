@@ -6,6 +6,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { cn } from '../../../../lib/utils';
 import { ChordProCodeMirror } from './ChordProCodeMirror';
+import { PreviewPane } from './PreviewPane';
 import { PreviewPaneEnhanced } from './PreviewPaneEnhanced';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useEnhancedTextArea } from './hooks/useEnhancedTextArea';
