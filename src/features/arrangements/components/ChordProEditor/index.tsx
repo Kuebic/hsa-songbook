@@ -267,7 +267,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
             theme === 'stage' && 'from-gray-900 via-black to-gray-900 border-yellow-600/20',
             theme === 'light' && 'border-gray-200'
           )}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <button
                 onClick={() => handleSave(content)}
                 disabled={!isDirty}
