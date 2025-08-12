@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { cn } from '../../../../lib/utils';
-import { TextAreaMetrics, ValidationResult } from './types/textArea.types';
+import { TextAreaMetrics, ValidationResult } from './types/textAreaTypes';
 
 interface StatusBarProps {
   metrics?: TextAreaMetrics | null;
