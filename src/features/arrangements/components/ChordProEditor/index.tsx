@@ -327,7 +327,11 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
               fontSize={fontSize}
               showChords={currentShowChords}
               theme={theme}
-              className="h-full"
+              className={cn(
+                "h-full w-full",
+                theme === 'dark' ? 'bg-gray-800' :
+                theme === 'stage' ? 'bg-gray-900' : 'bg-white'
+              )}
             />
           </div>
         </>
