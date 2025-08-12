@@ -56,10 +56,10 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   // Debounce content for preview updates
   const debouncedContent = useDebounce(content, debounceMs);
 
-  // Check for mobile viewport - use 1024px to ensure side-by-side works on tablets
+  // Check for mobile viewport - tablets and below go vertical, desktop goes horizontal
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
+      setIsMobile(window.innerWidth < 768);
     };
 
     checkMobile();
