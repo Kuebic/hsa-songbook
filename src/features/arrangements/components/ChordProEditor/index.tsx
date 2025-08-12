@@ -197,15 +197,13 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     >
       {/* Editor Pane */}
       <div
-        className={cn(
-          "relative overflow-hidden flex flex-col border-2 border-red-500",
-          // When preview is visible on desktop, take exactly half width and don't shrink
-          showPreview && isPreviewVisible && !isMobile && "w-1/2 flex-shrink-0",
-          // When preview is hidden, take full width
-          (!showPreview || !isPreviewVisible) && "w-full",
-          // On mobile with preview, take full width (stacked)
-          isMobile && "w-full"
-        )}
+        className="relative overflow-hidden flex flex-col border-2 border-red-500"
+        style={{
+          // Force exact width with inline styles
+          width: (showPreview && isPreviewVisible && !isMobile) ? '50%' : '100%',
+          flexShrink: 0,
+          height: '100%'
+        }}
       >
         <div className="bg-red-300 text-black text-xs p-1">
           EDITOR: Preview={isPreviewVisible ? 'YES' : 'NO'}, Mobile={isMobile ? 'YES' : 'NO'}
@@ -260,7 +258,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
                           'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     )}
                   >
-                    {isPreviewVisible ? '👁 Preview' : '��‍🗨 Preview'}
+                    {isPreviewVisible ? '👁 Preview' : '👁‍🗨 Preview'}
                   </button>
                 </>
               )}
