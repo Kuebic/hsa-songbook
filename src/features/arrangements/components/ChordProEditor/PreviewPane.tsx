@@ -66,7 +66,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
   }, [content, transpose, fontSize, showChords, theme]);
 
   return (
-    <div className={cn(getContainerClasses(), className)}>
+    <div className={cn(getContainerClasses(), className)} style={style}>
       <div className="p-6 pl-8">
         {preview}
       </div>
