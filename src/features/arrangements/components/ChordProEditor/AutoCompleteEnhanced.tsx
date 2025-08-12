@@ -7,9 +7,6 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { cn } from '../../../../lib/utils';
 import { AutoCompleteContext } from './types/textArea.types';
 
-// Test import
-console.log('AutoCompleteContext imported successfully');
-
 interface AutoCompleteEnhancedProps {
   context: AutoCompleteContext | null;
   suggestions: string[];
