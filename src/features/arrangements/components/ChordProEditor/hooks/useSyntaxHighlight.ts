@@ -100,8 +100,7 @@ export const useSyntaxHighlight = (content: string): HighlightedSegment[] => {
             length: match[0].length,
             text: match[0],
             type: pattern.type,
-            className: pattern.className,
-            style: pattern.style
+            className: pattern.className
           });
         }
       }
