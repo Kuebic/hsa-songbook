@@ -25,7 +25,7 @@ export const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   className
 }) => {
   const highlightRef = useRef<HTMLDivElement>(null);
-  const segments = useSyntaxHighlight(content, theme);
+  const segments = useSyntaxHighlight(content);
 
   /**
    * Sync scroll position with textarea
@@ -36,6 +36,32 @@ export const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
       highlightRef.current.scrollLeft = scrollLeft;
     }
   }, [scrollTop, scrollLeft]);
+
+  /**
+   * Get theme-specific classes for syntax elements
+   */
+  const getThemeClasses = (baseClassName: string) => {
+    if (!baseClassName) return '';
+    
+    switch (theme) {
+      case 'dark':
+        return baseClassName
+          .replace('text-blue-600', 'text-blue-400')
+          .replace('text-green-600', 'text-green-400')
+          .replace('text-purple-600', 'text-purple-400')
+          .replace('text-gray-500', 'text-gray-400')
+          .replace('bg-blue-50', 'bg-blue-900/20');
+      case 'stage':
+        return baseClassName
+          .replace('text-blue-600', 'text-yellow-300')
+          .replace('text-green-600', 'text-green-300')
+          .replace('text-purple-600', 'text-purple-300')
+          .replace('text-gray-500', 'text-gray-300')
+          .replace('bg-blue-50', 'bg-yellow-900/20');
+      default:
+        return baseClassName;
+    }
+  };
 
   /**
    * Render highlighted content
@@ -55,25 +81,12 @@ export const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
       return (
         <span
           key={index}
-          className={segment.className}
-          style={segment.style}
+          className={getThemeClasses(segment.className)}
         >
           {segment.text}
         </span>
       );
     });
-  };
-
-  // Get text color based on theme
-  const getTextColor = () => {
-    switch (theme) {
-      case 'dark':
-        return '#e5e7eb'; // gray-200
-      case 'stage':
-        return '#fef3c7'; // yellow-100
-      default:
-        return '#111827'; // gray-900
-    }
   };
 
   return (
@@ -85,8 +98,7 @@ export const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
       )}
       style={{ 
         fontSize: `${fontSize}px`,
-        lineHeight: '1.5',
-        color: getTextColor()
+        lineHeight: '1.5'
       }}
       aria-hidden="true"
     >
