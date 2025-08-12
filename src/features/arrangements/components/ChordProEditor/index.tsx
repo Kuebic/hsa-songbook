@@ -47,7 +47,11 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   autoFocus = false
 }) => {
   const [content, setContent] = useState(initialContent);
-  const [splitPosition, setSplitPosition] = useState(50);
+  const [splitPosition, setSplitPosition] = useState(() => {
+    // Load saved split position from localStorage
+    const saved = localStorage.getItem('chordpro-editor-split-position');
+    return saved ? parseFloat(saved) : 50;
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [isPreviewVisible, setIsPreviewVisible] = useState(showPreview && defaultPreviewVisible);
