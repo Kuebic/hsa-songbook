@@ -1,6 +1,7 @@
 /**
  * @file textArea.types.ts
  * @description Type definitions for enhanced ChordPro textarea functionality
+ * Updated to fix export issues
  */
 
 export interface UndoRedoState {
