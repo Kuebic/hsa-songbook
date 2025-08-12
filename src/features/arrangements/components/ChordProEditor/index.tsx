@@ -214,6 +214,19 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         )}>
           <span>Line {content.substring(0, content.length).split('\n').length}, {content.length} characters</span>
           <div className="flex items-center gap-3">
+            {/* Preview toggle button - always visible */}
+            <button
+              onClick={() => setIsPreviewVisible(!isPreviewVisible)}
+              className={cn(
+                'px-2 py-1 rounded text-xs transition-colors',
+                isPreviewVisible
+                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+              )}
+              title={isPreviewVisible ? "Hide preview" : "Show preview"}
+            >
+              👁️ Preview
+            </button>
             {currentTranspose !== 0 && (
               <span>Transpose: {currentTranspose > 0 ? `+${currentTranspose}` : currentTranspose}</span>
             )}
