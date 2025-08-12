@@ -1,10 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  prefix: 'form-',
-  content: ['./src/shared/components/form/**/*.{ts,tsx}'],
+  content: [
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
+  ],
   theme: {
     extend: {
       colors: {
+        // Form-specific colors
         border: '#e2e8f0',
         'border-error': '#ef4444',
         'border-focus': '#3b82f6',
