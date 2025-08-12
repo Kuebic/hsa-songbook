@@ -14,10 +14,12 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <ErrorBoundary level="section" isolate>
-        <nav style={{ 
-          backgroundColor: '#1e293b',
-          color: 'white',
-          width: '100%'
+        <nav style={{
+          backgroundColor: 'var(--color-card)',
+          borderBottom: '1px solid var(--color-border)',
+          color: 'var(--color-foreground)',
+          width: '100%',
+          transition: 'background-color 0.3s ease'
         }}>
           <div style={{ 
             maxWidth: '1280px',
