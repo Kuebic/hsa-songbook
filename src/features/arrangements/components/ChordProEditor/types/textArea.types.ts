@@ -137,6 +137,3 @@ export interface EnhancedChordProTextAreaProps {
   'aria-invalid'?: boolean;
   'aria-required'?: boolean;
 }
-
-// Explicit re-exports to ensure they're available
-export { AutoCompleteContext } from './textArea.types';
