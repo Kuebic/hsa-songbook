@@ -5,7 +5,14 @@
 
 import React, { useEffect, useRef, useCallback } from 'react';
 import { cn } from '../../../../lib/utils';
-import type { AutoCompleteContext } from './types/textAreaTypes';
+// Define types directly to avoid import issues
+interface AutoCompleteContext {
+  triggerChar: '{' | '[';
+  triggerPosition: number;
+  filterText: string;
+  isVisible: boolean;
+  selectedIndex: number;
+}
 
 interface AutoCompleteEnhancedProps {
   context: AutoCompleteContext | null;
