@@ -162,14 +162,16 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   const getContainerClasses = () => {
     const baseClasses = 'chord-pro-editor-container flex border rounded-lg overflow-hidden';
     const layoutClasses = isMobile ? 'flex-col' : 'flex-row';
+    // Ensure the container doesn't wrap and maintains proper flex behavior
+    const flexClasses = 'flex-nowrap items-stretch';
 
     switch (theme) {
       case 'dark':
-        return cn(baseClasses, layoutClasses, 'border-gray-700 bg-gray-900');
+        return cn(baseClasses, layoutClasses, flexClasses, 'border-gray-700 bg-gray-900');
       case 'stage':
-        return cn(baseClasses, layoutClasses, 'border-yellow-600 bg-black');
+        return cn(baseClasses, layoutClasses, flexClasses, 'border-yellow-600 bg-black');
       default:
-        return cn(baseClasses, layoutClasses, 'border-gray-300 bg-white');
+        return cn(baseClasses, layoutClasses, flexClasses, 'border-gray-300 bg-white');
     }
   };
 
