@@ -330,13 +330,19 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       {showPreview && isPreviewVisible && (
         <div
           className={cn(
-            "overflow-hidden flex flex-col",
+            "overflow-hidden flex flex-col border-l-2 border-blue-500",
             // On desktop: take remaining width
-            !isMobile && "flex-1",
+            !isMobile && "flex-1 bg-blue-50",
             // On mobile: take remaining height
-            isMobile && "h-1/2"
+            isMobile && "h-1/2 bg-green-50"
           )}
+          style={{
+            minWidth: isMobile ? 'auto' : '300px' // Ensure minimum width on desktop
+          }}
         >
+          <div className="p-2 bg-yellow-200 text-xs font-bold">
+            PREVIEW PANE - {isMobile ? 'Mobile' : 'Desktop'} Mode
+          </div>
           <PreviewPane
             content={debouncedContent}
             transpose={transpose}
