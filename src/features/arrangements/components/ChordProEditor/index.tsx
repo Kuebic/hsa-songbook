@@ -328,15 +328,8 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       {/* Preview Pane */}
       {showPreview && isPreviewVisible && (
         <div
-          className={cn(
-            "overflow-hidden flex flex-col",
-            // Debug coloring - will remove later
-            "border-l-2 border-blue-500 bg-blue-50"
-          )}
+          className="overflow-hidden flex flex-col"
         >
-          <div className="p-2 bg-yellow-200 text-xs font-bold">
-            PREVIEW PANE - {isMobile ? 'Mobile' : 'Desktop'} Mode
-          </div>
           <PreviewPane
             content={debouncedContent}
             transpose={transpose}
