@@ -185,13 +185,13 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       {/* Editor Pane */}
       <div
         className={cn(
-          "relative overflow-hidden flex flex-col",
+          "relative overflow-hidden flex flex-col border-r-2 border-red-500",
           // Full width when preview is hidden
-          (!showPreview || !isPreviewVisible) && "w-full",
+          (!showPreview || !isPreviewVisible) && "w-full bg-red-50",
           // On desktop with preview visible: use split position
-          showPreview && isPreviewVisible && !isMobile && "flex-shrink-0",
+          showPreview && isPreviewVisible && !isMobile && "flex-shrink-0 bg-red-100",
           // On mobile with preview visible: 50% height
-          isMobile && isPreviewVisible && "h-1/2"
+          isMobile && isPreviewVisible && "h-1/2 bg-orange-100"
         )}
         style={{
           // Desktop split layout
@@ -199,6 +199,11 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
           // Mobile doesn't need explicit height since we use Tailwind classes
         }}
       >
+        {showPreview && isPreviewVisible && (
+          <div className="p-1 bg-pink-200 text-xs font-bold">
+            EDITOR PANE - {splitPosition}% width - {isMobile ? 'Mobile' : 'Desktop'}
+          </div>
+        )}
         {/* Toolbar (if enabled) */}
         {showToolbar && (
           <div className={cn(
