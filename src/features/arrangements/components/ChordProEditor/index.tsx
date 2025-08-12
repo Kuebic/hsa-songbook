@@ -190,29 +190,14 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       {/* Editor Pane */}
       <div
         className={cn(
-          "relative overflow-hidden flex flex-col border-r-2 border-red-500",
-          // Full width when preview is hidden
-          (!showPreview || !isPreviewVisible) && "w-full bg-red-50",
-          // On desktop with preview visible: use explicit constraints
-          showPreview && isPreviewVisible && !isMobile && "bg-red-100",
-          // On mobile with preview visible: 50% height
-          isMobile && isPreviewVisible && "h-1/2 bg-orange-100"
+          "relative overflow-hidden flex flex-col",
+          // Debug coloring - will remove later
+          "border-r-2 border-red-500 bg-red-100"
         )}
-        style={{
-          // Desktop split layout - force exact widths
-          ...(showPreview && isPreviewVisible && !isMobile ? {
-            width: `${splitPosition}%`,
-            maxWidth: `${splitPosition}%`,
-            minWidth: `${splitPosition}%`,
-            flex: 'none' // Don't grow or shrink
-          } : {}),
-        }}
       >
-        {showPreview && isPreviewVisible && (
-          <div className="p-1 bg-pink-200 text-xs font-bold">
-            EDITOR PANE - {splitPosition}% width - {isMobile ? 'Mobile' : 'Desktop'}
-          </div>
-        )}
+        <div className="p-1 bg-pink-200 text-xs font-bold">
+          EDITOR PANE - Grid Layout - {isMobile ? 'Mobile' : 'Desktop'}
+        </div>
         {/* Toolbar (if enabled) */}
         {showToolbar && (
           <div className={cn(
