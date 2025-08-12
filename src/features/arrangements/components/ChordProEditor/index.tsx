@@ -196,15 +196,8 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     >
       {/* Editor Pane */}
       <div
-        className={cn(
-          "relative overflow-hidden flex flex-col",
-          // Debug coloring - will remove later
-          "border-r-2 border-red-500 bg-red-100"
-        )}
+        className="relative overflow-hidden flex flex-col"
       >
-        <div className="p-1 bg-pink-200 text-xs font-bold">
-          EDITOR PANE - Grid Layout - {isMobile ? 'Mobile' : 'Desktop'}
-        </div>
         {/* Toolbar (if enabled) */}
         {showToolbar && (
           <div className={cn(
