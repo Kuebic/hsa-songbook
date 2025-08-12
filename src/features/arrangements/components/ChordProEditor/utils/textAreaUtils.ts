@@ -3,7 +3,7 @@
  * @description Utility functions for enhanced ChordPro textarea functionality
  */
 
-import { TextAreaMetrics, ValidationResult, UndoRedoState, AutoCompleteContext } from '../types/textArea.types';
+import type { TextAreaMetrics, ValidationResult, UndoRedoState, AutoCompleteContext } from '../types/textArea.types';
 
 /**
  * Calculate text area metrics
