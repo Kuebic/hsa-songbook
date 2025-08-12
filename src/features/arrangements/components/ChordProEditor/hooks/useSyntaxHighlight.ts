@@ -41,40 +41,35 @@ export const useSyntaxHighlight = (content: string): HighlightedSegment[] => {
       {
         regex: /\[([^\]]+)\]/g,
         type: 'chord' as const,
-        style: getThemeStyle('chord'),
-        className: ''
+        className: getClassName('chord')
       },
 
       // Comment directives - {comment:...}, {c:...} (most specific first)
       {
         regex: /\{(comment|c):\s*([^}]*)\}/g,
         type: 'comment' as const,
-        style: getThemeStyle('comment'),
-        className: ''
+        className: getClassName('comment')
       },
 
       // Other value directives - {title:...}, {key:...}, etc.
       {
         regex: /\{([^}:]+):\s*([^}]*)\}/g,
         type: 'directive' as const,
-        style: getThemeStyle('directive'),
-        className: ''
+        className: getClassName('directive')
       },
 
       // Section directives - {start_of_chorus}, {soc}, etc. (before catch-all)
       {
         regex: /\{(start_of_chorus|end_of_chorus|soc|eoc|start_of_verse|end_of_verse|sov|eov|start_of_bridge|end_of_bridge|sob|eob|start_of_tab|end_of_tab|sot|eot)\}/g,
         type: 'section' as const,
-        style: getThemeStyle('section'),
-        className: ''
+        className: getClassName('section')
       },
 
       // Simple directives without colons - {chorus}, {verse}, etc. (catch-all last)
       {
         regex: /\{([^}]+)\}/g,
         type: 'directive' as const,
-        style: getThemeStyle('directive'),
-        className: ''
+        className: getClassName('directive')
       }
     ];
 
