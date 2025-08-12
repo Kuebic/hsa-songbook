@@ -413,14 +413,14 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
                 </>
               )}
             </div>
-            <span className={cn(
-              'text-xs',
-              theme === 'dark' ? 'text-gray-400' :
-              theme === 'stage' ? 'text-yellow-500' :
-              'text-gray-600'
-            )}>
-              {isDirty && '• Unsaved changes'}
-            </span>
+            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+              {isDirty && (
+                <div className="flex items-center gap-2 px-3 py-1 bg-orange-50 border border-orange-200 rounded-lg">
+                  <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                  <span className="text-orange-700 font-medium">Unsaved changes</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
         
