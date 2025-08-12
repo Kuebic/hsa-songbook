@@ -323,6 +323,9 @@ export const ChordProCodeMirror: React.FC<ChordProCodeMirrorProps> = ({
     }
   }, [autoFocus]);
 
+  // Determine CodeMirror theme
+  const codeMirrorTheme = theme === 'dark' || theme === 'stage' ? oneDark : 'light';
+
   return (
     <div className={cn('chord-pro-codemirror', className)}>
       <CodeMirror
@@ -331,7 +334,7 @@ export const ChordProCodeMirror: React.FC<ChordProCodeMirrorProps> = ({
         height={typeof height === 'number' ? `${height}px` : height}
         extensions={extensions}
         onChange={handleChange}
-        theme={undefined} // We handle theming in extensions
+        theme={codeMirrorTheme}
         basicSetup={false} // We configure everything manually
       />
     </div>
