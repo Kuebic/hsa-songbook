@@ -6,8 +6,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { cn } from '../../../../lib/utils';
 import { ChordProCodeMirror } from './ChordProCodeMirror';
-import { PreviewPane } from './PreviewPane';
+import { PreviewPaneEnhanced } from './PreviewPaneEnhanced';
 import { useDebounce } from '../../hooks/useDebounce';
+import { useEnhancedTextArea } from './hooks/useEnhancedTextArea';
+import { validateChordProContent } from './utils/textAreaUtils';
 
 export interface ChordProEditorProps {
   initialContent?: string;
@@ -26,6 +28,8 @@ export interface ChordProEditorProps {
   showToolbar?: boolean;
   defaultPreviewVisible?: boolean;
   autoFocus?: boolean;
+  enableEnhancedFeatures?: boolean;
+  readOnly?: boolean;
 }
 
 export const ChordProEditor: React.FC<ChordProEditorProps> = ({
