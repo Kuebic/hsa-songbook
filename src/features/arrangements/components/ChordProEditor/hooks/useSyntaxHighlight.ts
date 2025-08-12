@@ -9,88 +9,67 @@ export interface HighlightedSegment {
   text: string;
   type: 'text' | 'chord' | 'directive' | 'comment' | 'section' | 'tab';
   className: string;
-  style?: React.CSSProperties;
 }
 
-export const useSyntaxHighlight = (content: string, theme: 'light' | 'dark' | 'stage' = 'light'): HighlightedSegment[] => {
+export const useSyntaxHighlight = (content: string): HighlightedSegment[] => {
   return useMemo(() => {
     if (!content) return [];
 
     const segments: HighlightedSegment[] = [];
     let currentIndex = 0;
 
-    // Get theme-specific styles
-    const getThemeStyle = (type: string): React.CSSProperties => {
+    // Get className for each type
+    const getClassName = (type: string): string => {
       switch (type) {
         case 'chord':
-          return {
-            color: theme === 'dark' ? '#60a5fa' : theme === 'stage' ? '#fde047' : '#2563eb',
-            fontWeight: 600,
-            backgroundColor: theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : theme === 'stage' ? 'rgba(253, 224, 71, 0.1)' : 'rgba(37, 99, 235, 0.1)',
-            padding: '0 4px',
-            borderRadius: '3px'
-          };
+          return 'text-blue-600 font-semibold bg-blue-50 px-1 rounded';
         case 'section':
-          return {
-            color: theme === 'dark' ? '#c084fc' : theme === 'stage' ? '#d8b4fe' : '#9333ea',
-            fontWeight: 500,
-            fontStyle: 'italic'
-          };
+          return 'text-purple-600 font-medium italic';
         case 'comment':
-          return {
-            color: theme === 'dark' ? '#9ca3af' : theme === 'stage' ? '#d1d5db' : '#6b7280',
-            fontStyle: 'italic'
-          };
+          return 'text-gray-500 italic';
         case 'directive':
-          return {
-            color: theme === 'dark' ? '#4ade80' : theme === 'stage' ? '#86efac' : '#16a34a',
-            fontWeight: 500
-          };
+          return 'text-green-600 font-medium';
         default:
-          return {};
+          return '';
       }
     };
 
     // Regex patterns for different ChordPro elements
+    // Order matters - more specific patterns first!
     const patterns = [
       // Chord brackets - [Am], [G/B], etc.
-      { 
-        regex: /\[([^\]]+)\]/g, 
-        type: 'chord' as const, 
-        style: getThemeStyle('chord'),
-        className: '' 
+      {
+        regex: /\[([^\]]+)\]/g,
+        type: 'chord' as const,
+        className: getClassName('chord')
       },
-      
-      // Section directives - {start_of_chorus}, {soc}, etc.
-      { 
-        regex: /\{(start_of_chorus|end_of_chorus|soc|eoc|start_of_verse|end_of_verse|sov|eov|start_of_bridge|end_of_bridge|sob|eob|start_of_tab|end_of_tab|sot|eot)\}/g, 
-        type: 'section' as const, 
-        style: getThemeStyle('section'),
-        className: '' 
+
+      // Comment directives - {comment:...}, {c:...} (most specific first)
+      {
+        regex: /\{(comment|c):\s*([^}]*)\}/g,
+        type: 'comment' as const,
+        className: getClassName('comment')
       },
-      
-      // Comment directives - {comment:...}, {c:...}
-      { 
-        regex: /\{(comment|c):\s*([^}]*)\}/g, 
-        type: 'comment' as const, 
-        style: getThemeStyle('comment'),
-        className: '' 
+
+      // Other value directives - {title:...}, {key:...}, etc.
+      {
+        regex: /\{([^}:]+):\s*([^}]*)\}/g,
+        type: 'directive' as const,
+        className: getClassName('directive')
       },
-      
-      // Other directives - {title:...}, {key:...}, etc.
-      { 
-        regex: /\{([^}:]+):\s*([^}]*)\}/g, 
-        type: 'directive' as const, 
-        style: getThemeStyle('directive'),
-        className: '' 
+
+      // Section directives - {start_of_chorus}, {soc}, etc. (before catch-all)
+      {
+        regex: /\{(start_of_chorus|end_of_chorus|soc|eoc|start_of_verse|end_of_verse|sov|eov|start_of_bridge|end_of_bridge|sob|eob|start_of_tab|end_of_tab|sot|eot)\}/g,
+        type: 'section' as const,
+        className: getClassName('section')
       },
-      
-      // Simple directives without colons - {chorus}, {verse}, etc.
-      { 
-        regex: /\{([^}]+)\}/g, 
-        type: 'directive' as const, 
-        style: getThemeStyle('directive'),
-        className: '' 
+
+      // Simple directives without colons - {chorus}, {verse}, etc. (catch-all last)
+      {
+        regex: /\{([^}]+)\}/g,
+        type: 'directive' as const,
+        className: getClassName('directive')
       }
     ];
 
@@ -101,7 +80,6 @@ export const useSyntaxHighlight = (content: string, theme: 'light' | 'dark' | 's
       text: string;
       type: 'chord' | 'directive' | 'comment' | 'section' | 'tab';
       className: string;
-      style?: React.CSSProperties;
     }> = [];
 
     patterns.forEach(pattern => {
@@ -122,8 +100,7 @@ export const useSyntaxHighlight = (content: string, theme: 'light' | 'dark' | 's
             length: match[0].length,
             text: match[0],
             type: pattern.type,
-            className: pattern.className,
-            style: pattern.style
+            className: pattern.className
           });
         }
       }
@@ -150,8 +127,7 @@ export const useSyntaxHighlight = (content: string, theme: 'light' | 'dark' | 's
       segments.push({
         text: match.text,
         type: match.type,
-        className: match.className,
-        style: match.style
+        className: match.className
       });
 
       currentIndex = match.index + match.length;
@@ -170,5 +146,5 @@ export const useSyntaxHighlight = (content: string, theme: 'light' | 'dark' | 's
     }
 
     return segments;
-  }, [content, theme]);
+  }, [content]);
 };

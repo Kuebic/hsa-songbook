@@ -14,10 +14,12 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <ErrorBoundary level="section" isolate>
-        <nav style={{ 
-          backgroundColor: '#1e293b',
-          color: 'white',
-          width: '100%'
+        <nav style={{
+          backgroundColor: 'var(--color-card)',
+          borderBottom: '1px solid var(--color-border)',
+          color: 'var(--color-foreground)',
+          width: '100%',
+          transition: 'background-color 0.3s ease'
         }}>
           <div style={{ 
             maxWidth: '1280px',
@@ -33,42 +35,46 @@ export function Layout({ children }: LayoutProps) {
               </h1>
             
             <div style={{ display: 'flex', gap: '2rem' }}>
-            <NavLink 
+            <NavLink
               to="/"
               style={({ isActive }) => ({
-                color: isActive ? '#60a5fa' : 'white',
+                color: isActive ? 'var(--color-primary)' : 'var(--color-foreground)',
                 textDecoration: 'none',
-                fontWeight: isActive ? 'bold' : 'normal'
+                fontWeight: isActive ? 'bold' : 'normal',
+                transition: 'color 0.2s ease'
               })}
             >
               Home
             </NavLink>
-            <NavLink 
+            <NavLink
               to="/songs"
               style={({ isActive }) => ({
-                color: isActive ? '#60a5fa' : 'white',
+                color: isActive ? 'var(--color-primary)' : 'var(--color-foreground)',
                 textDecoration: 'none',
-                fontWeight: isActive ? 'bold' : 'normal'
+                fontWeight: isActive ? 'bold' : 'normal',
+                transition: 'color 0.2s ease'
               })}
             >
               Songs
             </NavLink>
-            <NavLink 
+            <NavLink
               to="/search"
               style={({ isActive }) => ({
-                color: isActive ? '#60a5fa' : 'white',
+                color: isActive ? 'var(--color-primary)' : 'var(--color-foreground)',
                 textDecoration: 'none',
-                fontWeight: isActive ? 'bold' : 'normal'
+                fontWeight: isActive ? 'bold' : 'normal',
+                transition: 'color 0.2s ease'
               })}
             >
               Search
             </NavLink>
-            <NavLink 
+            <NavLink
               to="/setlists"
               style={({ isActive }) => ({
-                color: isActive ? '#60a5fa' : 'white',
+                color: isActive ? 'var(--color-primary)' : 'var(--color-foreground)',
                 textDecoration: 'none',
-                fontWeight: isActive ? 'bold' : 'normal'
+                fontWeight: isActive ? 'bold' : 'normal',
+                transition: 'color 0.2s ease'
               })}
             >
               Setlists
@@ -93,10 +99,12 @@ export function Layout({ children }: LayoutProps) {
       </nav>
       </ErrorBoundary>
       
-      <main style={{ 
+      <main style={{
         flex: 1,
-        backgroundColor: '#f8fafc',
-        width: '100%'
+        backgroundColor: 'var(--color-background)',
+        color: 'var(--color-foreground)',
+        width: '100%',
+        transition: 'background-color 0.3s ease, color 0.3s ease'
       }}>
         <div style={{
           maxWidth: '1280px',
@@ -108,12 +116,14 @@ export function Layout({ children }: LayoutProps) {
           </ErrorBoundary>
         </div>
       </main>
-      
+
       <ErrorBoundary level="section" isolate>
-        <footer style={{ 
-          backgroundColor: '#1e293b',
-          color: '#94a3b8',
-          width: '100%'
+        <footer style={{
+          backgroundColor: 'var(--color-card)',
+          color: 'var(--color-secondary)',
+          borderTop: '1px solid var(--color-border)',
+          width: '100%',
+          transition: 'background-color 0.3s ease'
         }}>
           <div style={{
             maxWidth: '1280px',

@@ -1,6 +1,6 @@
 /**
  * @file index.tsx
- * @description Main ChordPro editor component with CodeMirror and split-pane layout
+ * @description Main ChordPro editor component with clean split-pane layout
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -23,9 +23,8 @@ export interface ChordProEditorProps {
   enableChordCompletion?: boolean;
   className?: string;
   height?: number | string;
-  showToolbar?: boolean;
-  defaultPreviewVisible?: boolean;
   autoFocus?: boolean;
+  readOnly?: boolean;
 }
 
 export const ChordProEditor: React.FC<ChordProEditorProps> = ({
@@ -35,49 +34,34 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   onCancel,
   debounceMs = 300,
   fontSize = 16,
-  theme = 'light',
+  theme = 'dark',
   showPreview = true,
   transpose = 0,
   showChords = true,
   enableChordCompletion = true,
   className,
   height = 600,
-  showToolbar = true,
-  defaultPreviewVisible = true,
-  autoFocus = false
+  autoFocus = false,
+  readOnly = false
 }) => {
   const [content, setContent] = useState(initialContent);
-  const [splitPosition, setSplitPosition] = useState(50);
+  const [splitPosition, setSplitPosition] = useState(() => {
+    const saved = localStorage.getItem('chordpro-editor-split-position');
+    return saved ? parseFloat(saved) : 50;
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
-  const [isPreviewVisible, setIsPreviewVisible] = useState(showPreview && defaultPreviewVisible);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(showPreview);
+  const [currentTranspose, setCurrentTranspose] = useState(transpose);
+  const [currentShowChords, setCurrentShowChords] = useState(showChords);
 
   // Debounce content for preview updates
   const debouncedContent = useDebounce(content, debounceMs);
 
-  // Check for mobile viewport
+  // Save split position to localStorage
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // On mobile, default to preview hidden and full-width panes
-  useEffect(() => {
-    if (isMobile) {
-      setIsPreviewVisible(false);
-      setSplitPosition(50); // Reset for when desktop view returns
-    } else if (showPreview && defaultPreviewVisible) {
-      // Ensure preview is visible on desktop when it should be
-      setIsPreviewVisible(true);
-    }
-  }, [isMobile, showPreview, defaultPreviewVisible]);
+    localStorage.setItem('chordpro-editor-split-position', splitPosition.toString());
+  }, [splitPosition]);
 
   /**
    * Handle content change
@@ -128,14 +112,14 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
-    
+
     const container = document.querySelector('.chord-pro-editor-container');
     if (!container) return;
-    
+
     const rect = container.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = (x / rect.width) * 100;
-    
+
     setSplitPosition(Math.max(20, Math.min(80, percentage)));
   }, [isDragging]);
 
@@ -144,7 +128,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   }, []);
 
   // Add/remove global mouse event listeners
-  React.useEffect(() => {
+  useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -159,8 +143,8 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
    * Get container theme classes
    */
   const getContainerClasses = () => {
-    const baseClasses = 'chord-pro-editor-container flex border rounded-lg overflow-hidden';
-    
+    const baseClasses = 'chord-pro-editor-container flex flex-row border rounded-lg overflow-hidden';
+
     switch (theme) {
       case 'dark':
         return cn(baseClasses, 'border-gray-700 bg-gray-900');
@@ -171,102 +155,41 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     }
   };
 
+  /**
+   * Get editor background theme classes
+   */
+  const getEditorBackgroundClasses = () => {
+    switch (theme) {
+      case 'dark':
+        return 'bg-gray-900 text-gray-100';
+      case 'stage':
+        return 'bg-black text-yellow-400';
+      default:
+        return 'bg-white text-gray-900';
+    }
+  };
+
   return (
-    <div 
-      className={cn(
-        getContainerClasses(),
-        isMobile ? 'flex-col' : 'flex-row',
-        className
-      )}
-      style={{ height: typeof height === 'number' ? `${height}px` : height }}
+    <div
+      className={cn(getContainerClasses(), className)}
+      style={{
+        height: typeof height === 'number' ? `${height}px` : height,
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'stretch'
+      }}
       onKeyDown={handleKeyDown}
     >
       {/* Editor Pane */}
-      <div 
-        className={cn(
-          "relative overflow-hidden flex flex-col",
-          !showPreview || !isPreviewVisible ? "w-full" : "",
-          showPreview && isPreviewVisible && !isMobile ? "flex-shrink-0" : ""
-        )}
-        style={{ 
-          ...(showPreview && isPreviewVisible && !isMobile ? { width: `${splitPosition}%` } : {}),
-          ...(isMobile && isPreviewVisible ? { height: '50%' } : {})
-        }}
+      <div
+        className="relative flex flex-col"
+        style={{ width: isPreviewVisible ? `${splitPosition}%` : '100%' }}
       >
-        {/* Toolbar (if enabled) */}
-        {showToolbar && (
-          <div className={cn(
-            'flex items-center justify-between px-4 py-2 border-b',
-            theme === 'dark' ? 'bg-gray-800 border-gray-700' :
-            theme === 'stage' ? 'bg-gray-900 border-yellow-700' :
-            'bg-gray-50 border-gray-200'
-          )}>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleSave(content)}
-                disabled={!isDirty}
-                className={cn(
-                  'px-3 py-1 text-sm rounded transition-colors',
-                  isDirty 
-                    ? 'bg-green-600 text-white hover:bg-green-700' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                )}
-              >
-                Save
-              </button>
-              {onCancel && (
-                <button
-                  onClick={onCancel}
-                  className="px-3 py-1 text-sm rounded bg-gray-500 text-white hover:bg-gray-600 transition-colors"
-                >
-                  Cancel
-                </button>
-              )}
-              {showPreview && (
-                <>
-                  <div className={cn(
-                    'w-px h-6',
-                    theme === 'dark' ? 'bg-gray-600' :
-                    theme === 'stage' ? 'bg-yellow-700' :
-                    'bg-gray-300'
-                  )} />
-                  <button
-                    onClick={() => setIsPreviewVisible(!isPreviewVisible)}
-                    className={cn(
-                      'px-3 py-1 text-sm rounded transition-colors',
-                      isPreviewVisible
-                        ? theme === 'dark' ? 'bg-blue-600 text-white hover:bg-blue-700' :
-                          theme === 'stage' ? 'bg-yellow-600 text-white hover:bg-yellow-700' :
-                          'bg-blue-500 text-white hover:bg-blue-600'
-                        : theme === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' :
-                          theme === 'stage' ? 'bg-gray-800 text-yellow-500 hover:bg-gray-700' :
-                          'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    )}
-                  >
-                    {isPreviewVisible ? '👁 Preview' : '👁‍🗨 Preview'}
-                  </button>
-                </>
-              )}
-            </div>
-            <span className={cn(
-              'text-xs',
-              theme === 'dark' ? 'text-gray-400' :
-              theme === 'stage' ? 'text-yellow-500' :
-              'text-gray-600'
-            )}>
-              {isDirty && '• Unsaved changes'}
-              {/* Debug: Show mobile state */}
-              {process.env.NODE_ENV === 'development' && (
-                <span className="ml-2 text-orange-500">
-                  [{isMobile ? 'Mobile' : 'Desktop'} - {window.innerWidth}px]
-                </span>
-              )}
-            </span>
-          </div>
-        )}
+        {/* Background layer */}
+        <div className={cn('absolute inset-0', getEditorBackgroundClasses())} />
         
         {/* CodeMirror Editor */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 relative z-10">
           <ChordProCodeMirror
             value={content}
             onChange={handleChange}
@@ -284,59 +207,154 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         
         {/* Status bar */}
         <div className={cn(
-          'px-3 py-1 text-xs flex justify-between border-t',
+          'absolute bottom-0 left-0 right-0 px-3 py-1 text-xs flex justify-between border-t z-20',
           theme === 'dark' ? 'bg-gray-800 border-gray-700 text-gray-400' :
           theme === 'stage' ? 'bg-gray-900 border-yellow-700 text-yellow-500' :
           'bg-gray-50 border-gray-200 text-gray-600'
         )}>
-          <span>{content.length} characters</span>
-          <span>{content.split('\n').length} lines</span>
+          <span>Line {content.substring(0, content.length).split('\n').length}, {content.length} characters</span>
+          <div className="flex items-center gap-3">
+            {/* Preview toggle button - always visible */}
+            <button
+              onClick={() => setIsPreviewVisible(!isPreviewVisible)}
+              className={cn(
+                'px-2 py-1 rounded text-xs transition-colors',
+                isPreviewVisible
+                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+              )}
+              title={isPreviewVisible ? "Hide preview" : "Show preview"}
+            >
+              👁️ Preview
+            </button>
+            {currentTranspose !== 0 && (
+              <span>Transpose: {currentTranspose > 0 ? `+${currentTranspose}` : currentTranspose}</span>
+            )}
+            {isDirty && (
+              <span className="text-orange-500">• Unsaved</span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Splitter - only show on desktop */}
-      {showPreview && isPreviewVisible && !isMobile && (
-        <div 
-          className={cn(
-            'w-1 cursor-col-resize hover:bg-blue-500 transition-colors',
-            isDragging ? 'bg-blue-500' : 
-            theme === 'dark' ? 'bg-gray-700' :
-            theme === 'stage' ? 'bg-yellow-700' :
-            'bg-gray-300'
-          )}
-          onMouseDown={handleMouseDown}
-        />
-      )}
-
-      {/* Mobile horizontal divider */}
-      {showPreview && isPreviewVisible && isMobile && (
-        <div 
-          className={cn(
-            'h-1 w-full',
-            theme === 'dark' ? 'bg-gray-700' :
-            theme === 'stage' ? 'bg-yellow-700' :
-            'bg-gray-300'
-          )}
-        />
-      )}
-      
-      {/* Preview Pane */}
-      {showPreview && isPreviewVisible && (
-        <div 
-          className="flex-1 overflow-hidden"
-          style={{
-            height: isMobile ? '50%' : undefined
-          }}
-        >
-          <PreviewPane
-            content={debouncedContent}
-            transpose={transpose}
-            fontSize={fontSize}
-            showChords={showChords}
-            theme={theme}
-            className="h-full"
+      {/* Splitter */}
+      {isPreviewVisible && (
+        <>
+          <div 
+            className={cn(
+              'w-1 cursor-col-resize hover:bg-blue-500 transition-colors',
+              isDragging ? 'bg-blue-500' : 
+              theme === 'dark' ? 'bg-gray-700' :
+              theme === 'stage' ? 'bg-yellow-700' :
+              'bg-gray-300'
+            )}
+            onMouseDown={handleMouseDown}
           />
-        </div>
+          
+          {/* Preview Pane */}
+          <div
+            className="flex-1 overflow-hidden relative min-w-0 border-2 border-red-500"
+            style={{
+              minHeight: '400px',
+              backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+              minWidth: '300px'
+            }}
+          >
+            {/* Debug indicator */}
+            <div className="absolute top-0 left-0 bg-red-500 text-white p-2 text-sm z-50">
+              PREVIEW PANE
+            </div>
+
+            {/* Preview controls overlay */}
+            <div className={cn(
+              'absolute top-2 right-2 z-30 flex items-center gap-2',
+              'bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-lg border',
+              theme === 'dark' && 'bg-gray-800/90 border-gray-600',
+              theme === 'stage' && 'bg-black/90 border-yellow-600/30'
+            )}>
+              {/* Save button */}
+              {onSave && (
+                <button
+                  onClick={() => handleSave(content)}
+                  disabled={!isDirty}
+                  className={cn(
+                    'p-2 rounded-md transition-colors text-sm',
+                    isDirty
+                      ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  )}
+                  title={isDirty ? 'Save changes (Ctrl+S)' : 'No changes to save'}
+                >
+                  💾
+                </button>
+              )}
+
+              {/* Cancel button */}
+              {onCancel && (
+                <button
+                  onClick={onCancel}
+                  className="p-2 rounded-md transition-colors text-sm bg-gray-500 text-white hover:bg-gray-600"
+                  title="Cancel editing (Esc)"
+                >
+                  ❌
+                </button>
+              )}
+
+              <div className={cn(
+                'w-px h-6',
+                theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'
+              )} />
+
+              {/* Transpose controls */}
+              <div className="flex items-center">
+                <button
+                  onClick={() => setCurrentTranspose(Math.max(currentTranspose - 1, -11))}
+                  className="p-1 rounded-l-md bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm"
+                  title="Transpose down"
+                >
+                  ♭
+                </button>
+                <button
+                  onClick={() => setCurrentTranspose(0)}
+                  className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs min-w-[2rem] border-x border-gray-200"
+                  title="Reset transpose"
+                >
+                  {currentTranspose === 0 ? '0' : currentTranspose > 0 ? `+${currentTranspose}` : currentTranspose}
+                </button>
+                <button
+                  onClick={() => setCurrentTranspose(Math.min(currentTranspose + 1, 11))}
+                  className="p-1 rounded-r-md bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm"
+                  title="Transpose up"
+                >
+                  ♯
+                </button>
+              </div>
+
+              {/* Toggle preview visibility */}
+              <button
+                onClick={() => setIsPreviewVisible(!isPreviewVisible)}
+                className={cn(
+                  'p-2 rounded-md transition-colors text-sm',
+                  isPreviewVisible
+                    ? 'bg-blue-500 text-white hover:bg-blue-600'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                )}
+                title={isPreviewVisible ? "Hide preview" : "Show preview"}
+              >
+                👁️
+              </button>
+            </div>
+
+            <PreviewPane
+              content={debouncedContent}
+              transpose={currentTranspose}
+              fontSize={fontSize}
+              showChords={currentShowChords}
+              theme={theme}
+              className="h-full w-full"
+            />
+          </div>
+        </>
       )}
     </div>
   );

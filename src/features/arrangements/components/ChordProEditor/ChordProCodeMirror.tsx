@@ -5,6 +5,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
+import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorView, keymap, lineNumbers, highlightActiveLineGutter, drawSelection, dropCursor, highlightActiveLine, placeholder as placeholderExtension } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
@@ -322,6 +323,9 @@ export const ChordProCodeMirror: React.FC<ChordProCodeMirrorProps> = ({
     }
   }, [autoFocus]);
 
+  // Determine CodeMirror theme
+  const codeMirrorTheme = theme === 'dark' || theme === 'stage' ? oneDark : 'light';
+
   return (
     <div className={cn('chord-pro-codemirror', className)}>
       <CodeMirror
@@ -330,7 +334,7 @@ export const ChordProCodeMirror: React.FC<ChordProCodeMirrorProps> = ({
         height={typeof height === 'number' ? `${height}px` : height}
         extensions={extensions}
         onChange={handleChange}
-        theme={undefined} // We handle theming in extensions
+        theme={codeMirrorTheme}
         basicSetup={false} // We configure everything manually
       />
     </div>

@@ -14,6 +14,7 @@ interface PreviewPaneProps {
   showChords?: boolean;
   theme?: 'light' | 'dark' | 'stage';
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export const PreviewPane: React.FC<PreviewPaneProps> = ({
@@ -22,7 +23,8 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
   fontSize = 16,
   showChords = true,
   theme = 'light',
-  className
+  className,
+  style
 }) => {
   /**
    * Get theme-specific container classes
@@ -64,8 +66,8 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
   }, [content, transpose, fontSize, showChords, theme]);
 
   return (
-    <div className={cn(getContainerClasses(), className)}>
-      <div className="p-4">
+    <div className={cn(getContainerClasses(), className)} style={style}>
+      <div className="p-6 pl-8">
         {preview}
       </div>
     </div>
