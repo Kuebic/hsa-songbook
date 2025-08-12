@@ -169,9 +169,14 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   };
 
   return (
-    <div 
+    <div
       className={cn(getContainerClasses(), className)}
-      style={{ height: typeof height === 'number' ? `${height}px` : height }}
+      style={{
+        height: typeof height === 'number' ? `${height}px` : height,
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'stretch'
+      }}
       onKeyDown={handleKeyDown}
     >
       {/* Editor Pane */}
