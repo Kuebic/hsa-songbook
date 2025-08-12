@@ -9,45 +9,28 @@ export interface HighlightedSegment {
   text: string;
   type: 'text' | 'chord' | 'directive' | 'comment' | 'section' | 'tab';
   className: string;
-  style?: React.CSSProperties;
 }
 
-export const useSyntaxHighlight = (content: string, theme: 'light' | 'dark' | 'stage' = 'light'): HighlightedSegment[] => {
+export const useSyntaxHighlight = (content: string): HighlightedSegment[] => {
   return useMemo(() => {
     if (!content) return [];
 
     const segments: HighlightedSegment[] = [];
     let currentIndex = 0;
 
-    // Get theme-specific styles
-    const getThemeStyle = (type: string): React.CSSProperties => {
+    // Get className for each type
+    const getClassName = (type: string): string => {
       switch (type) {
         case 'chord':
-          return {
-            color: theme === 'dark' ? '#60a5fa' : theme === 'stage' ? '#fde047' : '#2563eb',
-            fontWeight: 600,
-            backgroundColor: theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : theme === 'stage' ? 'rgba(253, 224, 71, 0.1)' : 'rgba(37, 99, 235, 0.1)',
-            padding: '0 4px',
-            borderRadius: '3px'
-          };
+          return 'text-blue-600 font-semibold bg-blue-50 px-1 rounded';
         case 'section':
-          return {
-            color: theme === 'dark' ? '#c084fc' : theme === 'stage' ? '#d8b4fe' : '#9333ea',
-            fontWeight: 500,
-            fontStyle: 'italic'
-          };
+          return 'text-purple-600 font-medium italic';
         case 'comment':
-          return {
-            color: theme === 'dark' ? '#9ca3af' : theme === 'stage' ? '#d1d5db' : '#6b7280',
-            fontStyle: 'italic'
-          };
+          return 'text-gray-500 italic';
         case 'directive':
-          return {
-            color: theme === 'dark' ? '#4ade80' : theme === 'stage' ? '#86efac' : '#16a34a',
-            fontWeight: 500
-          };
+          return 'text-green-600 font-medium';
         default:
-          return {};
+          return '';
       }
     };
 
