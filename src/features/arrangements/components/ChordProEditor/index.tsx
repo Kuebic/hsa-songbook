@@ -160,28 +160,23 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
    * Get container theme classes
    */
   const getContainerClasses = () => {
-    const baseClasses = 'chord-pro-editor-container border rounded-lg overflow-hidden grid';
+    const baseClasses = 'chord-pro-editor-container border rounded-lg overflow-hidden flex';
 
-    // Determine grid layout based on state
-    let gridClasses = '';
-    if (!showPreview || !isPreviewVisible) {
-      // Single pane - editor only
-      gridClasses = 'grid-cols-1';
-    } else if (isMobile) {
-      // Mobile - stack vertically
-      gridClasses = 'grid-rows-2 grid-cols-1';
+    // Determine flex layout based on state
+    let layoutClasses = '';
+    if (isMobile) {
+      layoutClasses = 'flex-col';
     } else {
-      // Desktop - side by side
-      gridClasses = 'grid-cols-2 grid-rows-1';
+      layoutClasses = 'flex-row';
     }
 
     switch (theme) {
       case 'dark':
-        return cn(baseClasses, gridClasses, 'border-gray-700 bg-gray-900');
+        return cn(baseClasses, layoutClasses, 'border-gray-700 bg-gray-900');
       case 'stage':
-        return cn(baseClasses, gridClasses, 'border-yellow-600 bg-black');
+        return cn(baseClasses, layoutClasses, 'border-yellow-600 bg-black');
       default:
-        return cn(baseClasses, gridClasses, 'border-gray-300 bg-white');
+        return cn(baseClasses, layoutClasses, 'border-gray-300 bg-white');
     }
   };
 
