@@ -153,14 +153,24 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     setIsDragging(false);
   }, []);
 
-  // Add/remove global mouse event listeners
+  // Add/remove global mouse and touch event listeners
   React.useEffect(() => {
     if (isDragging) {
+      // Add both mouse and touch event listeners
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleMouseMove);
+      document.addEventListener('touchend', handleMouseUp);
+
+      // Prevent scrolling during drag on touch devices
+      document.body.style.overflow = 'hidden';
+
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('touchmove', handleMouseMove);
+        document.removeEventListener('touchend', handleMouseUp);
+        document.body.style.overflow = '';
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
