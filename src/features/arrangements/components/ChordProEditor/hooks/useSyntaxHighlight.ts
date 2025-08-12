@@ -80,7 +80,6 @@ export const useSyntaxHighlight = (content: string): HighlightedSegment[] => {
       text: string;
       type: 'chord' | 'directive' | 'comment' | 'section' | 'tab';
       className: string;
-      style?: React.CSSProperties;
     }> = [];
 
     patterns.forEach(pattern => {
