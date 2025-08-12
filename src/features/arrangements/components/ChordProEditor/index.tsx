@@ -293,17 +293,15 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         </div>
       </div>
 
-      {/* Splitter - only show on desktop */}
+      {/* Visual Splitter - show between panes on desktop */}
       {showPreview && isPreviewVisible && !isMobile && (
-        <div 
+        <div
           className={cn(
-            'w-1 cursor-col-resize hover:bg-blue-500 transition-colors',
-            isDragging ? 'bg-blue-500' : 
-            theme === 'dark' ? 'bg-gray-700' :
-            theme === 'stage' ? 'bg-yellow-700' :
-            'bg-gray-300'
+            'w-px bg-gray-300 border-l',
+            theme === 'dark' ? 'border-gray-600 bg-gray-600' :
+            theme === 'stage' ? 'border-yellow-700 bg-yellow-700' :
+            'border-gray-300'
           )}
-          onMouseDown={handleMouseDown}
         />
       )}
 
