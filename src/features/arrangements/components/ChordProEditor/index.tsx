@@ -344,12 +344,22 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       {showPreview && isPreviewVisible && !isMobile && (
         <div
           className={cn(
-            "w-4 cursor-col-resize flex items-center justify-center group hover:bg-blue-500/20 transition-colors duration-200",
-            isDragging && "bg-blue-500/30",
-            theme === 'dark' ? "bg-gray-800" :
-            theme === 'stage' ? "bg-gray-900" :
-            "bg-gray-100"
+            "w-4 cursor-col-resize flex items-center justify-center group transition-colors duration-200",
+            isDragging && "opacity-80"
           )}
+          style={{
+            backgroundColor: 'var(--color-card)',
+            borderLeft: '1px solid var(--color-border)',
+            borderRight: '1px solid var(--color-border)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--color-card-hover)';
+          }}
+          onMouseLeave={(e) => {
+            if (!isDragging) {
+              e.currentTarget.style.backgroundColor = 'var(--color-card)';
+            }
+          }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleMouseDown}
           role="separator"
