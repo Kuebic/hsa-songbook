@@ -299,17 +299,6 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         </div>
       </div>
 
-      {/* Visual Splitter - show between panes on desktop */}
-      {showPreview && isPreviewVisible && !isMobile && (
-        <div
-          className={cn(
-            'w-px bg-gray-300 border-l',
-            theme === 'dark' ? 'border-gray-600 bg-gray-600' :
-            theme === 'stage' ? 'border-yellow-700 bg-yellow-700' :
-            'border-gray-300'
-          )}
-        />
-      )}
 
       {/* Mobile horizontal divider */}
       {showPreview && isPreviewVisible && isMobile && (
