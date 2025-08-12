@@ -5,7 +5,7 @@
 
 import React, { useEffect, useRef, useCallback } from 'react';
 import { cn } from '../../../../lib/utils';
-import { AutoCompleteContext } from './types/textArea.types';
+import { AutoCompleteContext } from './types/textArea.types'; // Force refresh
 
 interface AutoCompleteEnhancedProps {
   context: AutoCompleteContext | null;
