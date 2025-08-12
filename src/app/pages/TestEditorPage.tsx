@@ -30,6 +30,7 @@ Was [G]blind but [D]now I [G]see
           alert('Saved!')
         }}
         height={600}
+        theme="dark"
         showPreview={true}
         defaultPreviewVisible={true}
         autoFocus={true}
