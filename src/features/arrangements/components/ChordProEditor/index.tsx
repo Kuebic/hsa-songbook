@@ -360,8 +360,6 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
                         </button>
                       </div>
 
-                      <div className={cn('w-px h-6', theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300')} />
-
                       {/* Transpose controls */}
                       <div className="flex items-center bg-white rounded-lg shadow-sm border border-gray-200 dark:bg-gray-700 dark:border-gray-600">
                         <button
