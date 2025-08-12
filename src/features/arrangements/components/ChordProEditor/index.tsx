@@ -312,19 +312,24 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         />
       )}
       
+      {/* Visual Gap */}
+      {showPreview && isPreviewVisible && !isMobile && (
+        <div
+          className={cn(
+            "w-4",
+            theme === 'dark' ? "bg-gray-800" :
+            theme === 'stage' ? "bg-gray-900" :
+            "bg-gray-100"
+          )}
+        />
+      )}
+
       {/* Preview Pane */}
       {showPreview && isPreviewVisible && (
         <div
-          className={cn(
-            "overflow-hidden flex flex-col",
-            // Add left border on desktop for visual separation
-            !isMobile && "border-l",
-            theme === 'dark' ? "border-gray-600" :
-            theme === 'stage' ? "border-yellow-700" :
-            "border-gray-300"
-          )}
+          className="overflow-hidden flex flex-col"
           style={{
-            width: isMobile ? '100%' : '50%',
+            width: isMobile ? '100%' : 'calc(50% - 1rem)',
             flexShrink: 0,
             height: '100%'
           }}
