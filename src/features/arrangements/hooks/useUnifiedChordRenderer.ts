@@ -52,48 +52,179 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
   }, []);
 
   /**
-   * Apply preference styles to rendered HTML
+   * Process ChordSheetJS HTML output to add proper styling and structure
+   */
+  const processChordSheetHTML = useCallback((html: string): string => {
+    let processed = html;
+
+    // Remove duplicate title and subtitle elements from ChordSheetJS output
+    processed = processed.replace(/<h1 class="title">[^<]*<\/h1>/g, '');
+    processed = processed.replace(/<h2 class="subtitle">[^<]*<\/h2>/g, '');
+
+    // Add enhanced row styling with flexbox layout for proper alignment
+    processed = processed.replace(
+      /<div class="row">([^<]*(?:<[^>]*>[^<]*)*?)<\/div>/g,
+      '<div class="row chord-row">$1</div>'
+    );
+
+    // Add column styling for precise chord-lyrics alignment
+    processed = processed.replace(
+      /<div class="column">([^<]*(?:<[^>]*>[^<]*)*?)<\/div>/g,
+      '<div class="column chord-column">$1</div>'
+    );
+
+    // Process chord elements with theme awareness
+    processed = processed.replace(
+      /<div class="chord">([^<]+)<\/div>/g,
+      '<div class="chord chord-element">$1</div>'
+    );
+
+    // Handle empty chord slots (for proper alignment)
+    processed = processed.replace(
+      /<div class="chord"><\/div>/g,
+      '<div class="chord chord-empty"></div>'
+    );
+
+    // Add lyrics styling
+    processed = processed.replace(
+      /<div class="lyrics">([^<]*)<\/div>/g,
+      '<div class="lyrics chord-lyrics">$1</div>'
+    );
+
+    // Add section styling based on ChordSheetJS structure
+    processed = processed.replace(
+      /<div class="paragraph verse">([^]*?)<\/div>/g,
+      '<div class="paragraph verse chord-verse">$1</div>'
+    );
+
+    processed = processed.replace(
+      /<div class="paragraph chorus">([^]*?)<\/div>/g,
+      '<div class="paragraph chorus chord-chorus">$1</div>'
+    );
+
+    processed = processed.replace(
+      /<div class="paragraph bridge">([^]*?)<\/div>/g,
+      '<div class="paragraph bridge chord-bridge">$1</div>'
+    );
+
+    return processed;
+  }, []);
+
+  /**
+   * Apply preference styles with inline CSS injection
    */
   const applyPreferenceStyles = useCallback((html: string, options?: RenderOptions): string => {
     const fontSize = options?.fontSize || preferences.fontSize;
     const fontFamily = options?.fontFamily || preferences.fontFamily;
     
-    // Create a wrapper div with inline styles
-    const wrapperStyles = `
-      font-size: ${fontSize}px;
-      font-family: ${fontFamily};
-      line-height: ${preferences.lineHeight};
-      color: ${preferences.lyricColor};
-    `.trim();
+    // Get theme colors
+    const getThemeColors = () => {
+      switch (preferences.theme) {
+        case 'dark':
+          return {
+            chord: '#60a5fa',
+            lyric: '#f3f4f6',
+            comment: '#9ca3af',
+            section: '#a78bfa',
+            background: '#1f2937'
+          };
+        case 'stage':
+          return {
+            chord: '#fbbf24',
+            lyric: '#ffffff',
+            comment: '#d1d5db',
+            section: '#f59e0b',
+            background: '#000000'
+          };
+        default: // light
+          return {
+            chord: '#2563eb',
+            lyric: '#111827',
+            comment: '#6b7280',
+            section: '#7c3aed',
+            background: '#ffffff'
+          };
+      }
+    };
 
-    // Inject chord color styles
-    const chordStyles = `
+    const colors = getThemeColors();
+    const processedHtml = processChordSheetHTML(html);
+
+    // Inline CSS for precise positioning (matches reference implementation)
+    const inlineCSS = `
       <style>
-        .chord-sheet-rendered .chord {
-          color: ${preferences.chordColor} !important;
+        .chord-sheet-content .chord-row {
+          display: flex;
+          align-items: flex-end;
+          min-height: 2.5em;
+          margin-bottom: 0.25rem;
+        }
+        
+        .chord-sheet-content .chord-column {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          margin-right: 0.125rem;
+          position: relative;
+        }
+        
+        .chord-sheet-content .chord {
+          line-height: 1;
+          margin-bottom: 0.125rem;
+          white-space: nowrap;
+          min-height: 1.2em;
+          color: ${colors.chord};
           font-weight: 600;
         }
-        .chord-sheet-rendered .chord-sheet .chord {
-          color: ${preferences.chordColor} !important;
+        
+        .chord-sheet-content .chord-empty {
+          visibility: hidden;
         }
-        .chord-sheet-rendered .comment {
+        
+        .chord-sheet-content .chord-lyrics {
+          line-height: 1.4;
+          white-space: pre;
+          color: ${colors.lyric};
+        }
+        
+        /* Ensure proper spacing and alignment */
+        .chord-sheet-content .chord-column:last-child {
+          margin-right: 0;
+        }
+        
+        /* Handle empty lyrics (for chords at word end) */
+        .chord-sheet-content .chord-lyrics:empty::after {
+          content: ' ';
+          white-space: pre;
+        }
+
+        /* Section styling */
+        .chord-sheet-content .chord-verse,
+        .chord-sheet-content .chord-chorus,
+        .chord-sheet-content .chord-bridge {
+          margin-bottom: 1.5em;
+        }
+
+        /* Comment and directive styling */
+        .chord-sheet-content .comment {
+          color: ${colors.comment};
           font-style: italic;
-          color: ${preferences.theme === 'dark' ? '#9ca3af' : '#6b7280'};
         }
-        .chord-sheet-rendered .directive {
+
+        .chord-sheet-content .directive {
+          color: ${colors.section};
           font-weight: bold;
-          color: ${preferences.theme === 'dark' ? '#a78bfa' : '#7c3aed'};
         }
       </style>
     `;
 
     return `
-      ${chordStyles}
-      <div class="chord-sheet-rendered" style="${wrapperStyles}">
-        ${html}
+      ${inlineCSS}
+      <div class="chord-sheet-rendered chord-sheet-content" data-theme="${preferences.theme}" style="font-size: ${fontSize}px; font-family: ${fontFamily}; line-height: ${preferences.lineHeight};">
+        ${processedHtml}
       </div>
     `;
-  }, [preferences]);
+  }, [preferences, processChordSheetHTML]);
 
   /**
    * Render ChordPro content to HTML

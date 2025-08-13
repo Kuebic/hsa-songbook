@@ -22,35 +22,34 @@
 
 .chord-sheet-rendered .row {
   display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 0.5em;
-  align-items: baseline;
+  align-items: flex-end;
+  min-height: 2.5em;
+  margin-bottom: 0.25rem;
 }
 
 .chord-sheet-rendered .column {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-right: 0.5em;
+  margin-right: 0.125rem;
+  position: relative;
 }
 
 .chord-sheet-rendered .chord {
+  line-height: 1;
+  margin-bottom: 0.125rem;
+  white-space: nowrap;
+  min-height: 1.2em;
   font-weight: 600;
-  margin-bottom: 2px;
-  display: block;
   font-size: 0.95em;
   letter-spacing: 0.02em;
-  line-height: 1;
-  height: auto;
-  min-height: 1em;
 }
 
 .chord-sheet-rendered .lyrics {
-  display: block;
-  line-height: 1.5;
+  line-height: 1.4;
+  white-space: pre;
   margin: 0;
   padding: 0;
-  vertical-align: baseline;
 }
 
 /* Paragraph and section styles */
