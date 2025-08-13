@@ -1,8 +1,17 @@
-#root {
+/* Default root styles - overridden for specific pages */
+#root:not(.editor-page) {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+}
+
+/* Full width for editor pages */
+#root.editor-page {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
 }
 
 .logo {

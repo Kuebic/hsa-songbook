@@ -1,0 +1,162 @@
+/* ChordPro Editor Theme System */
+
+/* Light Theme (Default) */
+:root {
+  /* Editor backgrounds */
+  --editor-bg: #ffffff;
+  --editor-toolbar-bg: #f9fafb;
+  --editor-preview-bg: #ffffff;
+  --editor-divider: #e5e7eb;
+  
+  /* Text colors */
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  
+  /* Syntax highlighting */
+  --syntax-chord: #2563eb;
+  --syntax-directive: #7c3aed;
+  --syntax-section: #059669;
+  --syntax-comment: #6b7280;
+  --syntax-error: #dc2626;
+  --syntax-annotation: #f59e0b;
+  
+  /* Interactive elements */
+  --selection-bg: rgba(59, 130, 246, 0.3);
+  --focus-ring: #3b82f6;
+  --hover-bg: #f3f4f6;
+  --active-bg: #e5e7eb;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  
+  /* Status colors */
+  --status-success: #10b981;
+  --status-warning: #f59e0b;
+  --status-error: #dc2626;
+  --status-info: #3b82f6;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  /* Editor backgrounds */
+  --editor-bg: #1f2937;
+  --editor-toolbar-bg: #111827;
+  --editor-preview-bg: #0f172a;
+  --editor-divider: #374151;
+  
+  /* Text colors */
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  
+  /* Syntax highlighting */
+  --syntax-chord: #60a5fa;
+  --syntax-directive: #a78bfa;
+  --syntax-section: #34d399;
+  --syntax-comment: #9ca3af;
+  --syntax-error: #f87171;
+  --syntax-annotation: #fbbf24;
+  
+  /* Interactive elements */
+  --selection-bg: rgba(96, 165, 250, 0.3);
+  --focus-ring: #60a5fa;
+  --hover-bg: #374151;
+  --active-bg: #4b5563;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.2);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.2);
+  
+  /* Status colors */
+  --status-success: #34d399;
+  --status-warning: #fbbf24;
+  --status-error: #f87171;
+  --status-info: #60a5fa;
+}
+
+/* Stage Theme (High Contrast for Performance) */
+[data-theme="stage"] {
+  /* Editor backgrounds */
+  --editor-bg: #000000;
+  --editor-toolbar-bg: #0a0a0a;
+  --editor-preview-bg: #000000;
+  --editor-divider: #333333;
+  
+  /* Text colors */
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+  --text-tertiary: #a0a0a0;
+  
+  /* Syntax highlighting - High visibility colors */
+  --syntax-chord: #ffeb3b;
+  --syntax-directive: #ff9800;
+  --syntax-section: #4caf50;
+  --syntax-comment: #757575;
+  --syntax-error: #f44336;
+  --syntax-annotation: #00bcd4;
+  
+  /* Interactive elements */
+  --selection-bg: rgba(255, 235, 59, 0.4);
+  --focus-ring: #ffeb3b;
+  --hover-bg: #1a1a1a;
+  --active-bg: #2a2a2a;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(255 255 255 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(255 255 255 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(255 255 255 / 0.1);
+  
+  /* Status colors */
+  --status-success: #4caf50;
+  --status-warning: #ff9800;
+  --status-error: #f44336;
+  --status-info: #2196f3;
+}
+
+/* System preference support */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    /* Use dark theme by default if user prefers dark */
+    --editor-bg: #1f2937;
+    --editor-toolbar-bg: #111827;
+    --editor-preview-bg: #0f172a;
+    --editor-divider: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-tertiary: #9ca3af;
+    --syntax-chord: #60a5fa;
+    --syntax-directive: #a78bfa;
+    --syntax-section: #34d399;
+    --syntax-comment: #9ca3af;
+    --syntax-error: #f87171;
+    --syntax-annotation: #fbbf24;
+    --selection-bg: rgba(96, 165, 250, 0.3);
+    --focus-ring: #60a5fa;
+    --hover-bg: #374151;
+    --active-bg: #4b5563;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.2);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.2);
+    --status-success: #34d399;
+    --status-warning: #fbbf24;
+    --status-error: #f87171;
+    --status-info: #60a5fa;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --editor-divider: #000000;
+    --focus-ring: #0066cc;
+  }
+  
+  [data-theme="dark"] {
+    --editor-divider: #ffffff;
+    --focus-ring: #66b3ff;
+  }
+}

@@ -26,10 +26,23 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow: hidden; /* Prevent body scroll */
 }
 
 #root {
   width: 100%;
+  height: 100vh; /* Use fixed height instead of min-height */
+  overflow: hidden; /* Prevent root scroll */
+}
+
+/* Allow scrolling only within specific containers */
+#root.editor-page {
+  overflow: hidden;
+}
+
+#root:not(.editor-page) {
+  overflow: auto; /* Allow scrolling on non-editor pages */
+  height: auto;
   min-height: 100vh;
 }
 

@@ -19,7 +19,6 @@ interface ChordProTextAreaProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement | null>;
   justCompletedDirective?: { position: number; timestamp: number } | null;
   onDirectiveCompleted?: () => void;
-  fontSize?: number;
   theme?: 'light' | 'dark' | 'stage';
   placeholder?: string;
   className?: string;
@@ -40,7 +39,6 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
   textareaRef: externalRef,
   justCompletedDirective,
   onDirectiveCompleted,
-  fontSize = 16,
   theme = 'light',
   placeholder = 'Start typing your ChordPro song...',
   className,
@@ -138,41 +136,33 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
    * Handle key down events for special behaviors and auto-completion navigation
    */
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    // Auto-completion navigation keys
-    if (e.key === 'Escape') {
-      onAutoCompleteHide?.();
-      return;
-    }
-
-    if (e.key === 'ArrowUp') {
-      // Check if auto-completion is visible
-      if (onAutoCompleteMove) {
+    // First check if autocomplete should handle this key
+    if (onAutoCompleteMove || onAutoCompleteSelect || onAutoCompleteHide) {
+      // These would be handled by the autocomplete system
+      if (e.key === 'ArrowUp' && onAutoCompleteMove) {
         e.preventDefault();
         onAutoCompleteMove('up');
         return;
       }
-    }
-
-    if (e.key === 'ArrowDown') {
-      // Check if auto-completion is visible
-      if (onAutoCompleteMove) {
+      if (e.key === 'ArrowDown' && onAutoCompleteMove) {
         e.preventDefault();
         onAutoCompleteMove('down');
         return;
       }
-    }
-
-    if (e.key === 'Enter' || e.key === 'Tab') {
-      // Check if auto-completion is visible and should handle selection
-      if (onAutoCompleteSelect) {
+      if ((e.key === 'Enter' || e.key === 'Tab') && onAutoCompleteSelect) {
         e.preventDefault();
         onAutoCompleteSelect();
         return;
       }
+      if (e.key === 'Escape' && onAutoCompleteHide) {
+        onAutoCompleteHide();
+        return;
+      }
     }
+    
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
 
     // Tab key inserts 4 spaces (when auto-completion is not handling it)
     if (e.key === 'Tab' && !onAutoCompleteSelect) {
@@ -259,16 +249,17 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
    * Get theme-specific classes
    */
   const getThemeClasses = () => {
-    // Make text transparent so syntax highlighting shows through
-    const baseClasses = 'w-full h-full p-4 font-mono resize-none focus:outline-none bg-transparent text-transparent selection:bg-blue-200';
+    // Base classes for the textarea - text-transparent allows syntax to show through
+    // The debug class is added separately to make text visible in red
+    const baseClasses = 'resize-none focus:outline-none bg-transparent text-transparent';
     
     switch (theme) {
       case 'dark':
-        return cn(baseClasses, 'caret-white selection:bg-blue-600');
+        return cn(baseClasses, 'caret-white');
       case 'stage':
-        return cn(baseClasses, 'caret-yellow-300 selection:bg-yellow-600');
+        return cn(baseClasses, 'caret-yellow-300');
       default:
-        return cn(baseClasses, 'caret-gray-900 selection:bg-blue-200');
+        return cn(baseClasses, 'caret-gray-900');
     }
   };
 
@@ -296,12 +287,7 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
       onScroll={handleScroll}
       placeholder={placeholder}
       readOnly={readOnly}
-      className={cn(getThemeClasses(), 'absolute inset-0 z-10', className)}
-      style={{ 
-        fontSize: `${fontSize}px`,
-        lineHeight: '1.5',
-        textAlign: 'left'
-      }}
+      className={cn(getThemeClasses(), 'chord-editor-textarea', className)}
       spellCheck={false}
       autoComplete="off"
       autoCorrect="off"

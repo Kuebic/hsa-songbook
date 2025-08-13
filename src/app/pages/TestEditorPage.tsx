@@ -2,9 +2,9 @@ import { ChordProEditor } from '@features/arrangements/components/ChordProEditor
 import { useState } from 'react'
 
 export function TestEditorPage() {
-  const [content, setContent] = useState(`{title: Amazing Grace}
-{key: G}
-{tempo: 72}
+  const [content, setContent] = useState(`{title:Amazing Grace}
+{key:G}
+{tempo:72}
 
 [Verse 1]
 [G]Amazing grace, how [G7]sweet the [C]sound
@@ -20,21 +20,29 @@ Was [G]blind but [D]now I [G]see
 {end_of_chorus}`)
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Chord Editor Test</h1>
-      <ChordProEditor
+    <div className="h-full flex flex-col bg-gray-900 overflow-hidden">
+      <div className="border-b border-gray-700 bg-gray-800 flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <h1 className="text-xl font-semibold text-gray-100">Chord Editor Test</h1>
+        </div>
+      </div>
+      <div className="flex-1 min-h-0 bg-gray-900">
+        <div className="h-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+          <ChordProEditor
         initialContent={content}
         onChange={setContent}
         onSave={(text) => {
           console.log('Saved:', text)
           alert('Saved!')
         }}
-        height={600}
+        height="100%"
         showPreview={true}
         defaultPreviewVisible={true}
         autoFocus={true}
         enableChordCompletion={true}
-      />
+          />
+        </div>
+      </div>
     </div>
   )
 }

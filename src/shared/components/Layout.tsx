@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { Suspense } from 'react'
-import { NavLink } from 'react-router-dom'
+import { Suspense, useEffect } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import { LazySignedIn, LazySignedOut, ClerkComponentLoader } from '@features/auth/components/LazyClerkComponents'
 import { AuthButtons, UserMenu } from '@features/auth'
 import { ErrorBoundary } from '@features/monitoring'
@@ -11,8 +11,37 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
+  const location = useLocation()
+  const isEditorPage = location.pathname === '/test-editor' || 
+                       location.pathname.includes('/arrangements/') ||
+                       location.pathname.includes('/edit')
+
+  // Add class to root element for CSS targeting
+  useEffect(() => {
+    const root = document.getElementById('root')
+    if (root) {
+      if (isEditorPage) {
+        root.classList.add('editor-page')
+      } else {
+        root.classList.remove('editor-page')
+      }
+    }
+    return () => {
+      const root = document.getElementById('root')
+      if (root) {
+        root.classList.remove('editor-page')
+      }
+    }
+  }, [isEditorPage])
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ 
+      height: isEditorPage ? '100vh' : 'auto',
+      minHeight: isEditorPage ? 'unset' : '100vh', 
+      display: 'flex', 
+      flexDirection: 'column',
+      overflow: isEditorPage ? 'hidden' : 'visible'
+    }}>
       <ErrorBoundary level="section" isolate>
         <nav style={{ 
           backgroundColor: '#1e293b',
@@ -98,15 +127,29 @@ export function Layout({ children }: LayoutProps) {
         backgroundColor: '#f8fafc',
         width: '100%'
       }}>
-        <div style={{
-          maxWidth: '1280px',
-          margin: '0 auto',
-          padding: '2rem'
-        }}>
-          <ErrorBoundary level="section">
-            {children}
-          </ErrorBoundary>
-        </div>
+        {isEditorPage ? (
+          // Full width for editor pages
+          <div style={{
+            width: '100%',
+            height: '100%',
+            overflow: 'hidden'
+          }}>
+            <ErrorBoundary level="section">
+              {children}
+            </ErrorBoundary>
+          </div>
+        ) : (
+          // Standard width for other pages
+          <div style={{
+            maxWidth: '1280px',
+            margin: '0 auto',
+            padding: '2rem'
+          }}>
+            <ErrorBoundary level="section">
+              {children}
+            </ErrorBoundary>
+          </div>
+        )}
       </main>
       
       <ErrorBoundary level="section" isolate>

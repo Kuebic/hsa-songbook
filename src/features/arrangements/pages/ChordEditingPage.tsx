@@ -122,7 +122,6 @@ export function ChordEditingPage() {
         height="calc(100vh - 4rem)"
         showPreview={true}
         defaultPreviewVisible={true}
-        theme="dark"
         className="m-4"
         autoFocus={true}
         enableChordCompletion={true}

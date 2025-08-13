@@ -1,0 +1,254 @@
+/* ChordPro Editor Perfect Alignment Styles */
+/* Critical: Both layers must have IDENTICAL properties */
+
+/* Base alignment styles for both textarea and syntax highlighter */
+.chord-editor-textarea,
+.syntax-highlighter {
+  /* Typography - must match exactly */
+  font-family: 'Courier New', Courier, monospace !important;
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  tab-size: 4 !important;
+  
+  /* Prevent any font-weight or style inheritance */
+  font-weight: 400 !important;
+  font-style: normal !important;
+  
+  /* Lock character spacing */
+  font-kerning: none !important;
+  font-variant-ligatures: none !important;
+  font-variant-numeric: tabular-nums !important;
+  
+  /* Text rendering optimization for perfect alignment */
+  text-rendering: geometricPrecision;
+  font-feature-settings: "liga" 0, "clig" 0, "kern" 0;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  
+  /* Box model - must be identical */
+  padding: 16px !important;
+  margin: 0 !important;
+  border: 1px solid transparent !important;
+  box-sizing: border-box !important;
+  
+  /* Text behavior */
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  text-align: left !important;
+  
+  /* Prevent sub-pixel rendering issues */
+  transform: translateZ(0);
+  will-change: transform;
+  contain: layout style;
+  
+  /* Disable browser text adjustments */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Specific textarea adjustments */
+.chord-editor-textarea {
+  /* Make text transparent but keep caret visible */
+  color: transparent !important;
+  caret-color: var(--text-primary, #111827);
+  
+  /* Remove default textarea styling */
+  resize: none;
+  outline: none;
+  background: transparent;
+  
+  /* Ensure proper stacking */
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+/* Syntax highlighter specific styles */
+.syntax-highlighter {
+  /* Position behind textarea */
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  
+  /* Prevent interaction */
+  pointer-events: none;
+  user-select: none;
+  
+  /* Ensure scrolling matches textarea */
+  overflow: auto;
+  
+  /* Hide scrollbar since textarea handles scrolling */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.syntax-highlighter::-webkit-scrollbar {
+  display: none;
+}
+
+/* Debug mode - make textarea text visible in red */
+.chord-editor-textarea.debug {
+  color: rgba(255, 0, 0, 0.5) !important;
+}
+
+/* Alignment debugger overlay */
+.alignment-debugger {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  /* Grid lines every 24px (line-height 1.5 * 16px font-size) */
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 23px,
+      rgba(255, 0, 0, 0.1) 23px,
+      rgba(255, 0, 0, 0.1) 24px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 9.6px, /* Average character width */
+      rgba(0, 0, 255, 0.05) 9.6px,
+      rgba(0, 0, 255, 0.05) 10.6px
+    );
+}
+
+/* Editor wrapper to contain both layers */
+.editor-layers-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Responsive font scaling - must apply to both layers */
+@media (max-width: 767px) {
+  .chord-editor-textarea,
+  .syntax-highlighter {
+    font-size: 16px !important; /* Prevent iOS zoom */
+    line-height: 1.5 !important;
+    padding: 12px !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .chord-editor-textarea,
+  .syntax-highlighter {
+    font-size: 18px !important;
+    line-height: 1.5 !important;
+    padding: 16px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .chord-editor-textarea,
+  .syntax-highlighter {
+    font-size: 20px !important;
+    line-height: 1.6 !important;
+    padding: 20px !important;
+  }
+}
+
+/* High DPI screen optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .chord-editor-textarea,
+  .syntax-highlighter {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Print styles */
+@media print {
+  .chord-editor-textarea {
+    display: none !important;
+  }
+  
+  .syntax-highlighter {
+    position: static !important;
+    color: black !important;
+    background: white !important;
+  }
+}
+
+/* Webkit-specific fixes */
+@supports (-webkit-appearance: none) {
+  .chord-editor-textarea,
+  .syntax-highlighter {
+    /* Force GPU acceleration for better alignment */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
+
+/* Firefox-specific fixes */
+@-moz-document url-prefix() {
+  .chord-editor-textarea,
+  .syntax-highlighter {
+    /* Firefox handles geometricPrecision differently */
+    text-rendering: auto;
+  }
+}
+
+/* Selection styles */
+.chord-editor-textarea::selection {
+  background: var(--selection-bg, rgba(59, 130, 246, 0.3));
+  color: transparent;
+}
+
+.chord-editor-textarea::-moz-selection {
+  background: var(--selection-bg, rgba(59, 130, 246, 0.3));
+  color: transparent;
+}
+
+/* Placeholder styles */
+.chord-editor-textarea::placeholder {
+  color: var(--text-tertiary, #9ca3af);
+  opacity: 0.5;
+}
+
+.chord-editor-textarea::-webkit-input-placeholder {
+  color: var(--text-tertiary, #9ca3af);
+  opacity: 0.5;
+}
+
+.chord-editor-textarea::-moz-placeholder {
+  color: var(--text-tertiary, #9ca3af);
+  opacity: 0.5;
+}
+
+/* Focus styles */
+.chord-editor-textarea:focus {
+  outline: none;
+  /* Add focus ring to container instead */
+}
+
+.editor-layers-container:has(.chord-editor-textarea:focus) {
+  outline: 2px solid var(--focus-ring, #3b82f6);
+  outline-offset: -2px;
+  border-radius: 0.375rem;
+}
+
+/* Loading state */
+.editor-layers-container.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Error state */
+.editor-layers-container.error {
+  border: 2px solid var(--syntax-error, #dc2626);
+}
+
+/* Virtual keyboard adjustments */
+.editor-layers-container[data-keyboard-visible="true"] {
+  /* Adjust height when virtual keyboard is visible */
+  max-height: calc(100vh - var(--keyboard-height, 0px));
+}

@@ -1,0 +1,507 @@
+/* ChordPro Editor Enhanced Styles */
+
+/* Import theme variables */
+@import './themes.css';
+@import './alignment.css'; /* Import standardized font definitions */
+
+/* Main container wrapper - adds max-width on desktop */
+.chord-pro-editor-wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0 auto;
+  background: var(--editor-bg);
+}
+
+/* Desktop max-width constraint */
+@media (min-width: 1024px) {
+  .chord-pro-editor-wrapper {
+    max-width: 1440px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Large desktop constraint */
+@media (min-width: 1536px) {
+  .chord-pro-editor-wrapper {
+    max-width: 1600px;
+  }
+}
+
+/* Extra large screens */
+@media (min-width: 1920px) {
+  .chord-pro-editor-wrapper {
+    max-width: 1800px;
+    border-left: 1px solid var(--editor-divider);
+    border-right: 1px solid var(--editor-divider);
+  }
+}
+
+/* Main container */
+.chord-editor-enhanced {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--editor-bg);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Keep compatibility with existing class */
+.chord-pro-editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--editor-bg);
+  color: var(--text-primary);
+  text-align: left !important;
+  width: 100%;
+}
+
+.chord-pro-editor-container * {
+  text-align: left !important;
+}
+
+/* Toolbar */
+.chord-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--editor-toolbar-bg);
+  border-bottom: 1px solid var(--editor-divider);
+  box-shadow: var(--shadow-sm);
+  min-height: 56px;
+  gap: 1rem;
+  z-index: 100;
+}
+
+.toolbar-left,
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toolbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--focus-ring);
+  color: white;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+  border-color: var(--editor-divider);
+}
+
+.btn-secondary:hover {
+  background: var(--active-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Content area */
+.chord-editor-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Editor pane */
+.chord-editor-pane,
+.editor-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Editor layers - Critical for proper stacking */
+.editor-layers {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+  /* Use standardized font from alignment.css */
+  font-family: var(--editor-font-family, 'Courier New', Courier, monospace);
+  font-size: var(--editor-font-size, 16px);
+  line-height: var(--editor-line-height, 1.5);
+}
+
+/* Background layer for editor */
+.chord-editor-background,
+.editor-background {
+  position: absolute;
+  inset: 0;
+  background: var(--editor-bg);
+  z-index: 0;
+}
+
+/* Syntax highlighting layer */
+.chord-editor-highlight,
+.editor-syntax {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: auto; /* Allow scrolling for sync with textarea */
+  box-sizing: border-box;
+  padding: 16px; /* Same padding as textarea */
+}
+
+/* Hide webkit scrollbar for syntax layer */
+.chord-editor-highlight::-webkit-scrollbar,
+.editor-syntax::-webkit-scrollbar {
+  display: none;
+}
+
+/* Textarea layer - user input layer */
+.chord-editor-textarea {
+  /* Positioning - fills container */
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  
+  /* Spacing */
+  padding: 16px;
+  margin: 0;
+  box-sizing: border-box;
+  
+  /* Visual */
+  background: transparent;
+  color: transparent; /* Change to rgba(255, 0, 0, 0.5) for debugging */
+  caret-color: var(--text-primary);
+  
+  /* Font - must match syntax highlighter exactly */
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: normal;
+  
+  /* Text behavior */
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+  
+  /* Disable browser defaults */
+  resize: none;
+  border: none;
+  outline: none;
+}
+
+/* Apply red text for debugging when needed */
+.chord-editor-textarea.debug {
+  color: rgba(255, 0, 0, 0.5) !important;
+}
+
+/* Syntax highlighter content */
+.syntax-highlighter {
+  /* Font - must match textarea exactly */
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: normal;
+  
+  /* Text behavior - must match textarea */
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+  
+  /* Visual */
+  color: var(--text-primary); /* Ensure text is visible */
+  
+  /* Layout */
+  margin: 0;
+  padding: 0; /* Padding is on container, not content */
+  display: block;
+  box-sizing: border-box;
+}
+
+/* Textarea selection colors */
+.editor-input::selection,
+.chord-pro-editor-container textarea::selection {
+  background: var(--selection-bg);
+  color: transparent;
+}
+
+.editor-input::-moz-selection,
+.chord-pro-editor-container textarea::-moz-selection {
+  background: var(--selection-bg);
+  color: transparent;
+}
+
+/* Status bar */
+.chord-editor-statusbar,
+.editor-status {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: var(--editor-toolbar-bg);
+  border-top: 1px solid var(--editor-divider);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  min-height: 32px;
+  align-items: center;
+  flex-shrink: 0;
+  z-index: 10;
+  position: relative;
+}
+
+/* Divider */
+.chord-editor-divider {
+  width: 4px;
+  background: var(--editor-divider);
+  cursor: col-resize;
+  position: relative;
+  transition: background 0.2s ease;
+  user-select: none;
+}
+
+.chord-editor-divider:hover {
+  background: var(--focus-ring);
+}
+
+.chord-editor-divider::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+}
+
+.chord-editor-divider.dragging {
+  background: var(--focus-ring);
+}
+
+/* Preview pane */
+.chord-preview-pane {
+  flex: 1;
+  overflow: auto;
+  background: var(--editor-preview-bg);
+  padding: 1.5rem;
+  min-width: 0;
+  position: relative;
+}
+
+/* Syntax highlighting classes */
+.syntax-text {
+  color: var(--text-primary);
+}
+
+/* Default text color for syntax highlighter */
+.syntax-highlighter {
+  color: var(--text-primary);
+}
+
+/* Ensure all syntax elements inherit proper font properties */
+.syntax-highlighter span {
+  font-weight: inherit !important;
+  font-style: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  letter-spacing: inherit !important;
+}
+
+/* Syntax container for scroll synchronization */
+.syntax-container {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.syntax-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.syntax-chord {
+  color: var(--syntax-chord);
+  /* Use text-shadow for bold effect without changing character width */
+  text-shadow: 0.5px 0 0 currentColor;
+  background: rgba(59, 130, 246, 0.1);
+  /* Remove padding to prevent spacing issues */
+  border-radius: 2px;
+}
+
+.syntax-directive {
+  color: var(--syntax-directive);
+  /* Subtle bold effect using text-shadow */
+  text-shadow: 0.3px 0 0 currentColor;
+}
+
+.syntax-section {
+  color: var(--syntax-section);
+  /* Use underline for visual distinction without layout change */
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.syntax-comment {
+  color: var(--syntax-comment);
+  /* Use background and opacity instead of italic */
+  opacity: 0.7;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.syntax-annotation {
+  color: var(--syntax-annotation);
+  /* Stronger background instead of italic */
+  background: rgba(245, 158, 11, 0.15);
+  border-radius: 2px;
+}
+
+.syntax-error {
+  color: var(--syntax-error);
+  text-decoration: wavy underline;
+  text-decoration-color: var(--syntax-error);
+}
+
+/* Focus states */
+.chord-editor-enhanced *:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* Scrollbar styling */
+.editor-layers::-webkit-scrollbar,
+.chord-preview-pane::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.editor-layers::-webkit-scrollbar-track,
+.chord-preview-pane::-webkit-scrollbar-track {
+  background: var(--hover-bg);
+  border-radius: 4px;
+}
+
+.editor-layers::-webkit-scrollbar-thumb,
+.chord-preview-pane::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: 4px;
+}
+
+.editor-layers::-webkit-scrollbar-thumb:hover,
+.chord-preview-pane::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Ensure monospace font is applied */
+.chord-pro-editor-container .font-mono,
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}
+
+/* Preview pane content styles */
+.chord-sheet-content {
+  text-align: left !important;
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.8;
+}
+
+/* Validation messages */
+.validation-message {
+  padding: 0.5rem 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-left: 3px solid var(--syntax-error);
+  color: var(--syntax-error);
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+}
+
+.validation-success {
+  background: rgba(16, 185, 129, 0.1);
+  border-left-color: var(--status-success);
+  color: var(--status-success);
+}
+
+.validation-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border-left-color: var(--status-warning);
+  color: var(--status-warning);
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--text-tertiary);
+  border-top-color: var(--focus-ring);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Utility classes */
+.hidden {
+  display: none !important;
+}
+
+.mobile-hidden {
+  display: none !important;
+}
+
+@media (min-width: 768px) {
+  .mobile-hidden {
+    display: initial !important;
+  }
+}
+
+.desktop-hidden {
+  display: initial !important;
+}
+
+@media (min-width: 768px) {
+  .desktop-hidden {
+    display: none !important;
+  }
+}

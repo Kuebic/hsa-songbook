@@ -1,343 +1,298 @@
-/**
- * @file index.tsx
- * @description Main ChordPro editor component with CodeMirror and split-pane layout
- */
-
-import React, { useState, useCallback, useEffect } from 'react';
-import { cn } from '../../../../lib/utils';
-import { ChordProCodeMirror } from './ChordProCodeMirror';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { SyntaxHighlighter } from './SyntaxHighlighter';
 import { PreviewPane } from './PreviewPane';
-import { useDebounce } from '../../hooks/useDebounce';
+import { ChordProTextArea } from './ChordProTextArea';
+import { MobileToggle } from './components/MobileToggle';
+import { ThemeSelector } from './components/ThemeSelector';
+import { EditorSplitter } from './components/EditorSplitter';
+import { AutoCompleteDropdown } from './components/AutoCompleteDropdown';
+import { AlignmentDebugger } from './components/AlignmentDebugger';
+import { useEditorState } from './hooks/useEditorState';
+import { useEditorTheme } from './hooks/useEditorTheme';
+import { useResponsiveLayout } from './hooks/useResponsiveLayout';
+import { useVirtualKeyboard } from './hooks/useVirtualKeyboard';
+import { useMobileAutocomplete } from './hooks/useMobileAutocomplete';
+import './styles/themes.css';
+import './styles/editor.css';
+import './styles/responsive.css';
+import './styles/animations.css';
+import './styles/preview.css';
+import './styles/alignment.css';
+import './styles/autocomplete.css';
 
 export interface ChordProEditorProps {
   initialContent?: string;
   onChange?: (content: string) => void;
   onSave?: (content: string) => void;
   onCancel?: () => void;
-  debounceMs?: number;
-  fontSize?: number;
-  theme?: 'light' | 'dark' | 'stage';
-  showPreview?: boolean;
-  transpose?: number;
-  showChords?: boolean;
-  enableChordCompletion?: boolean;
-  className?: string;
   height?: number | string;
-  showToolbar?: boolean;
+  showPreview?: boolean;
   defaultPreviewVisible?: boolean;
   autoFocus?: boolean;
+  enableChordCompletion?: boolean;
+  className?: string;
 }
 
 export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   initialContent = '',
   onChange,
   onSave,
-  onCancel,
-  debounceMs = 300,
-  fontSize = 16,
-  theme = 'light',
-  showPreview = true,
-  transpose = 0,
-  showChords = true,
-  enableChordCompletion = true,
-  className,
   height = 600,
-  showToolbar = true,
+  showPreview = true,
   defaultPreviewVisible = true,
-  autoFocus = false
+  autoFocus = false,
+  className = '',
 }) => {
-  const [content, setContent] = useState(initialContent);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const syntaxRef = useRef<HTMLDivElement | null>(null);
   const [splitPosition, setSplitPosition] = useState(50);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
-  const [isPreviewVisible, setIsPreviewVisible] = useState(showPreview && defaultPreviewVisible);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Debounce content for preview updates
-  const debouncedContent = useDebounce(content, debounceMs);
-
-  // Check for mobile viewport
+  const [previewVisible, setPreviewVisible] = useState(defaultPreviewVisible);
+  
+  // Debug mode - set to true to see red text overlay for alignment checking
+  const [debugMode] = useState(true); // Set to true for debugging text alignment
+  const [showAlignmentDebugger] = useState(false); // Set to true for alignment grid
+  
+  // Use enhanced hooks for theme and responsive layout
+  const { currentTheme, setTheme } = useEditorTheme('light');
+  const layout = useResponsiveLayout();
+  
+  // Use text alignment hook for perfect sync
+  // Note: alignment is now handled entirely through CSS
+  
+  // Use virtual keyboard detection for mobile
+  const { isKeyboardVisible } = useVirtualKeyboard();
+  
+  // Log keyboard visibility for debugging
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
+    if (isKeyboardVisible) {
+      console.log('Virtual keyboard is visible');
+    }
+  }, [isKeyboardVisible]);
+  
+  const {
+    content,
+    cursorPosition,
+    updateContent,
+    setCursorPosition,
+  } = useEditorState({
+    initialContent,
+    onChange
+  });
+
+  // Use mobile autocomplete hook
+  const autocomplete = useMobileAutocomplete(
+    textareaRef,
+    content,
+    {
+      enabled: true,
+      maxSuggestions: layout.isMobile ? 10 : 20,
+      debounceMs: layout.isMobile ? 200 : 100,
+      onSelect: (item, _trigger, position) => {
+        // Autocomplete will handle the insertion
+        console.log('Selected:', item.label, 'at position:', position);
+      }
+    }
+  );
+
+  // Handle content changes from ChordProTextArea
+  const handleContentChange = useCallback((newContent: string) => {
+    updateContent(newContent);
+    // Trigger autocomplete input handler
+    autocomplete.handleInput();
+  }, [updateContent, autocomplete]);
+
+  // Handle cursor position changes
+  const handleCursorChange = useCallback((position: number) => {
+    setCursorPosition(position);
+  }, [setCursorPosition]);
+
+  // Handle selection range changes
+  const handleSelectionRangeChange = useCallback((range: [number, number]) => {
+    // We can expand this later if needed
+    setCursorPosition(range[0]);
+  }, [setCursorPosition]);
+
+  // Calculate line and column
+  const getLineAndColumn = () => {
+    const textBeforeCursor = content.substring(0, cursorPosition);
+    const lines = textBeforeCursor.split('\n');
+    const line = lines.length;
+    const column = lines[lines.length - 1].length + 1;
+    return { line, column };
+  };
+
+  const { line, column } = getLineAndColumn();
+
+  // Handle responsive layout changes
+  useEffect(() => {
+    // Hide preview on mobile by default when switching to mobile
+    if (layout.isMobile && previewVisible) {
+      setPreviewVisible(false);
+    }
+  }, [layout.isMobile]);
+
+  // Handle splitter resize from EditorSplitter component
+  const handleSplitterResize = useCallback((leftWidth: number) => {
+    setSplitPosition(leftWidth);
   }, []);
 
-  // On mobile, default to preview hidden and full-width panes
-  useEffect(() => {
-    if (isMobile) {
-      setIsPreviewVisible(false);
-      setSplitPosition(50); // Reset for when desktop view returns
-    } else if (showPreview && defaultPreviewVisible) {
-      // Ensure preview is visible on desktop when it should be
-      setIsPreviewVisible(true);
-    }
-  }, [isMobile, showPreview, defaultPreviewVisible]);
+  // Handle mobile preview toggle
+  const handleMobileToggle = useCallback(() => {
+    setPreviewVisible(!previewVisible);
+  }, [previewVisible]);
 
-  /**
-   * Handle content change
-   */
-  const handleChange = useCallback((newContent: string) => {
-    setContent(newContent);
-    setIsDirty(true);
-    if (onChange) {
-      onChange(newContent);
-    }
-  }, [onChange]);
-
-  /**
-   * Handle save
-   */
-  const handleSave = useCallback((contentToSave: string) => {
-    if (onSave) {
-      onSave(contentToSave);
-      setIsDirty(false);
-    }
-  }, [onSave]);
-
-  /**
-   * Handle keyboard shortcuts
-   */
+  // Handle keyboard shortcuts
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     // Ctrl/Cmd + S for save
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
-      if (isDirty) {
-        handleSave(content);
+      if (onSave) {
+        onSave(content);
       }
     }
-    
-    // Escape for cancel
-    if (e.key === 'Escape' && onCancel) {
-      onCancel();
-    }
-  }, [isDirty, content, handleSave, onCancel]);
-
-  /**
-   * Handle splitter drag
-   */
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging) return;
-    
-    const container = document.querySelector('.chord-pro-editor-container');
-    if (!container) return;
-    
-    const rect = container.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = (x / rect.width) * 100;
-    
-    setSplitPosition(Math.max(20, Math.min(80, percentage)));
-  }, [isDragging]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  // Add/remove global mouse event listeners
-  React.useEffect(() => {
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
-
-  /**
-   * Get container theme classes
-   */
-  const getContainerClasses = () => {
-    const baseClasses = 'chord-pro-editor-container flex border rounded-lg overflow-hidden';
-    
-    switch (theme) {
-      case 'dark':
-        return cn(baseClasses, 'border-gray-700 bg-gray-900');
-      case 'stage':
-        return cn(baseClasses, 'border-yellow-600 bg-black');
-      default:
-        return cn(baseClasses, 'border-gray-300 bg-white');
-    }
-  };
+  }, [content, onSave]);
 
   return (
     <div 
-      className={cn(
-        getContainerClasses(),
-        isMobile ? 'flex-col' : 'flex-row',
-        className
-      )}
-      style={{ height: typeof height === 'number' ? `${height}px` : height }}
-      onKeyDown={handleKeyDown}
+      className={`chord-pro-editor-wrapper h-full flex flex-col ${className}`}
+      data-theme={currentTheme}
+      data-device={layout.deviceType}
     >
-      {/* Editor Pane */}
-      <div 
-        className={cn(
-          "relative overflow-hidden flex flex-col",
-          !showPreview || !isPreviewVisible ? "w-full" : "",
-          showPreview && isPreviewVisible && !isMobile ? "flex-shrink-0" : ""
-        )}
-        style={{ 
-          ...(showPreview && isPreviewVisible && !isMobile ? { width: `${splitPosition}%` } : {}),
-          ...(isMobile && isPreviewVisible ? { height: '50%' } : {})
-        }}
-      >
-        {/* Toolbar (if enabled) */}
-        {showToolbar && (
-          <div className={cn(
-            'flex items-center justify-between px-4 py-2 border-b',
-            theme === 'dark' ? 'bg-gray-800 border-gray-700' :
-            theme === 'stage' ? 'bg-gray-900 border-yellow-700' :
-            'bg-gray-50 border-gray-200'
-          )}>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleSave(content)}
-                disabled={!isDirty}
-                className={cn(
-                  'px-3 py-1 text-sm rounded transition-colors',
-                  isDirty 
-                    ? 'bg-green-600 text-white hover:bg-green-700' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                )}
-              >
-                Save
-              </button>
-              {onCancel && (
-                <button
-                  onClick={onCancel}
-                  className="px-3 py-1 text-sm rounded bg-gray-500 text-white hover:bg-gray-600 transition-colors"
-                >
-                  Cancel
-                </button>
-              )}
-              {showPreview && (
-                <>
-                  <div className={cn(
-                    'w-px h-6',
-                    theme === 'dark' ? 'bg-gray-600' :
-                    theme === 'stage' ? 'bg-yellow-700' :
-                    'bg-gray-300'
-                  )} />
-                  <button
-                    onClick={() => setIsPreviewVisible(!isPreviewVisible)}
-                    className={cn(
-                      'px-3 py-1 text-sm rounded transition-colors',
-                      isPreviewVisible
-                        ? theme === 'dark' ? 'bg-blue-600 text-white hover:bg-blue-700' :
-                          theme === 'stage' ? 'bg-yellow-600 text-white hover:bg-yellow-700' :
-                          'bg-blue-500 text-white hover:bg-blue-600'
-                        : theme === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' :
-                          theme === 'stage' ? 'bg-gray-800 text-yellow-500 hover:bg-gray-700' :
-                          'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    )}
-                  >
-                    {isPreviewVisible ? '👁 Preview' : '👁‍🗨 Preview'}
-                  </button>
-                </>
-              )}
-            </div>
-            <span className={cn(
-              'text-xs',
-              theme === 'dark' ? 'text-gray-400' :
-              theme === 'stage' ? 'text-yellow-500' :
-              'text-gray-600'
-            )}>
-              {isDirty && '• Unsaved changes'}
-              {/* Debug: Show mobile state */}
-              {process.env.NODE_ENV === 'development' && (
-                <span className="ml-2 text-orange-500">
-                  [{isMobile ? 'Mobile' : 'Desktop'} - {window.innerWidth}px]
-                </span>
-              )}
-            </span>
-          </div>
-        )}
-        
-        {/* CodeMirror Editor */}
-        <div className="flex-1 overflow-hidden">
-          <ChordProCodeMirror
-            value={content}
-            onChange={handleChange}
-            onSave={handleSave}
-            theme={theme}
-            fontSize={fontSize}
-            autoFocus={autoFocus}
-            height="100%"
-            showLineNumbers={true}
-            showFoldGutter={true}
-            enableAutocomplete={enableChordCompletion}
-            enableLinting={true}
+      {/* Enhanced toolbar with theme selector and mobile toggle */}
+      <div className="chord-editor-toolbar">
+        <div className="toolbar-left">
+          <ThemeSelector 
+            currentTheme={currentTheme}
+            onThemeChange={setTheme}
           />
         </div>
         
-        {/* Status bar */}
-        <div className={cn(
-          'px-3 py-1 text-xs flex justify-between border-t',
-          theme === 'dark' ? 'bg-gray-800 border-gray-700 text-gray-400' :
-          theme === 'stage' ? 'bg-gray-900 border-yellow-700 text-yellow-500' :
-          'bg-gray-50 border-gray-200 text-gray-600'
-        )}>
-          <span>{content.length} characters</span>
-          <span>{content.split('\n').length} lines</span>
+        <div className="toolbar-center">
+          {layout.isMobile && showPreview && (
+            <MobileToggle
+              showPreview={previewVisible}
+              onToggle={handleMobileToggle}
+            />
+          )}
+        </div>
+        
+        <div className="toolbar-right">
+          {/* Space for additional toolbar items */}
         </div>
       </div>
-
-      {/* Splitter - only show on desktop */}
-      {showPreview && isPreviewVisible && !isMobile && (
-        <div 
-          className={cn(
-            'w-1 cursor-col-resize hover:bg-blue-500 transition-colors',
-            isDragging ? 'bg-blue-500' : 
-            theme === 'dark' ? 'bg-gray-700' :
-            theme === 'stage' ? 'bg-yellow-700' :
-            'bg-gray-300'
-          )}
-          onMouseDown={handleMouseDown}
-        />
-      )}
-
-      {/* Mobile horizontal divider */}
-      {showPreview && isPreviewVisible && isMobile && (
-        <div 
-          className={cn(
-            'h-1 w-full',
-            theme === 'dark' ? 'bg-gray-700' :
-            theme === 'stage' ? 'bg-yellow-700' :
-            'bg-gray-300'
-          )}
-        />
-      )}
       
-      {/* Preview Pane */}
-      {showPreview && isPreviewVisible && (
+      <div 
+        className="chord-pro-editor-container flex-1 flex chord-editor-main"
+        style={{ 
+          height: typeof height === 'number' ? `${height}px` : height,
+          flexDirection: layout.isMobile ? 'column' : 'row'
+        }}
+        onKeyDown={handleKeyDown}
+      >
+        {/* Editor Pane */}
         <div 
-          className="flex-1 overflow-hidden"
-          style={{
-            height: isMobile ? '50%' : undefined
+          className="chord-editor-pane editor-pane"
+          style={{ 
+            width: !layout.isMobile && showPreview && previewVisible ? `${splitPosition}%` : '100%',
+            height: layout.isMobile && previewVisible ? '50%' : layout.isMobile ? '100%' : 'auto'
           }}
         >
-          <PreviewPane
-            content={debouncedContent}
-            transpose={transpose}
-            fontSize={fontSize}
-            showChords={showChords}
-            theme={theme}
-            className="h-full"
-          />
+          {/* Editor layers container - ensures proper stacking */}
+          <div className="editor-layers" style={{ flex: 1 }}>
+            {/* Syntax highlighting layer - behind textarea */}
+            <div 
+              ref={syntaxRef}
+              className="syntax-container"
+              style={{ 
+                position: 'absolute', 
+                inset: 0, 
+                overflow: 'auto', 
+                pointerEvents: 'none',
+                zIndex: 1
+              }}
+            >
+              <SyntaxHighlighter 
+                content={content} 
+                theme={currentTheme}
+                className="syntax-highlighter"
+              />
+            </div>
+            
+            {/* Transparent textarea layer - user input */}
+            <ChordProTextArea
+              value={content}
+              onChange={handleContentChange}
+              onCursorChange={handleCursorChange}
+              onSelectionChange={handleSelectionRangeChange}
+              onScroll={(scrollTop, scrollLeft) => {
+                // Sync scroll position with syntax highlighter
+                if (syntaxRef.current) {
+                  syntaxRef.current.scrollTop = scrollTop;
+                  syntaxRef.current.scrollLeft = scrollLeft;
+                }
+              }}
+              textareaRef={textareaRef}
+              theme={currentTheme === 'light' ? 'light' : 'dark'}
+              placeholder="Start typing your ChordPro song..."
+              className={debugMode ? 'debug' : ''}
+              autoFocus={autoFocus}
+            />
+            
+            {/* Alignment debugger overlay */}
+            {showAlignmentDebugger && (
+              <AlignmentDebugger 
+                enabled={true}
+                showGrid={true}
+                showMetrics={true}
+                className="alignment-debugger"
+              />
+            )}
+          </div>
+          
+          {/* Status bar */}
+          <div className="chord-editor-statusbar">
+            <span>Line {line}, Column {column}</span>
+            <span>{content.length} characters</span>
+          </div>
         </div>
-      )}
+
+        {/* Enhanced Splitter - only show on tablet/desktop */}
+        {!layout.isMobile && showPreview && previewVisible && (
+          <EditorSplitter
+            onResize={handleSplitterResize}
+            defaultPosition={splitPosition}
+            minWidth={200}
+            maxWidth={80}
+          />
+        )}
+        
+        {/* Mobile horizontal divider */}
+        {layout.isMobile && showPreview && previewVisible && (
+          <div className="chord-editor-divider-mobile" />
+        )}
+        
+        {/* Preview Pane */}
+        {showPreview && previewVisible && (
+          <div className={`chord-editor-pane preview-pane ${layout.isMobile ? 'mobile-preview' : 'desktop-preview'}`}>
+            <div className="chord-preview-container">
+              <div className="chord-preview-content">
+                <PreviewPane content={content} theme={currentTheme} />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Autocomplete dropdown */}
+      <AutoCompleteDropdown
+        items={autocomplete.items}
+        selectedIndex={autocomplete.selectedIndex}
+        onSelect={autocomplete.handleItemSelect}
+        anchorEl={autocomplete.anchorEl}
+        isOpen={autocomplete.isOpen}
+        isMobile={layout.isMobile}
+        onClose={autocomplete.closeAutocomplete}
+      />
     </div>
   );
 };

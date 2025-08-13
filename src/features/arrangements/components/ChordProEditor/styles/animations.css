@@ -1,0 +1,391 @@
+/* ChordPro Editor Animations & Transitions */
+
+/* Smooth transitions for theme changes */
+.chord-editor-enhanced * {
+  transition-property: none;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+.chord-editor-enhanced *:where(:not(.no-transition)) {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+}
+
+/* Slide animations for mobile pane switching */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Mobile pane transitions */
+[data-device="mobile"] .chord-editor-pane,
+[data-device="mobile"] .chord-preview-pane {
+  animation-duration: 0.3s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+[data-device="mobile"] .chord-editor-pane:not(.mobile-hidden) {
+  animation-name: slideIn;
+  animation-direction: reverse;
+}
+
+[data-device="mobile"] .chord-preview-pane:not(.mobile-hidden) {
+  animation-name: slideIn;
+}
+
+/* Loading states */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.loading {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.loading-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--editor-bg) 25%,
+    var(--hover-bg) 50%,
+    var(--editor-bg) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+/* Validation message animation */
+@keyframes validationSlide {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-2px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(2px);
+  }
+}
+
+.validation-message {
+  animation: validationSlide 0.3s ease-out;
+}
+
+.validation-error {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Focus ring animation */
+@keyframes focusRing {
+  0% {
+    box-shadow: 0 0 0 0 var(--focus-ring);
+  }
+  100% {
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+
+.chord-editor-enhanced *:focus-visible {
+  animation: focusRing 0.4s ease-out;
+}
+
+/* Button hover effects */
+@keyframes buttonPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.btn-primary,
+.btn-secondary {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover,
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active,
+.btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+  transition-duration: 0.05s;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  transform: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Resizer hover effect */
+@keyframes resizerPulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.chord-editor-divider {
+  position: relative;
+  overflow: hidden;
+}
+
+.chord-editor-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 40px;
+  background: var(--focus-ring);
+  transform: translate(-50%, -50%) scaleY(0);
+  transition: transform 0.2s ease;
+  border-radius: 1px;
+}
+
+.chord-editor-divider:hover::after {
+  transform: translate(-50%, -50%) scaleY(1);
+}
+
+.chord-editor-divider.dragging::after {
+  animation: resizerPulse 1s ease-in-out infinite;
+}
+
+/* Tooltip animations */
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltip {
+  animation: tooltipFadeIn 0.2s ease-out;
+}
+
+/* Theme transition */
+.chord-editor-enhanced {
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.chord-editor-toolbar,
+.editor-status {
+  transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+/* Syntax highlighting transitions */
+.syntax-chord,
+.syntax-directive,
+.syntax-section,
+.syntax-comment,
+.syntax-annotation {
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+/* Smooth scrolling */
+.editor-layers,
+.chord-preview-pane {
+  scroll-behavior: smooth;
+}
+
+/* Tab switching animation */
+@keyframes tabSwitch {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tab-content {
+  animation: tabSwitch 0.2s ease-out;
+}
+
+/* Success animation */
+@keyframes success {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-indicator {
+  animation: success 0.4s ease-out;
+}
+
+/* Error shake animation */
+@keyframes errorShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.error-shake {
+  animation: errorShake 0.3s ease-in-out;
+}
+
+/* Fade animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s ease-out;
+}
+
+/* Rotate animation (for loading spinners) */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotating {
+  animation: rotate 1s linear infinite;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .chord-editor-enhanced *,
+  .chord-editor-enhanced *::before,
+  .chord-editor-enhanced *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Keep essential feedback */
+  .validation-message,
+  .success-indicator,
+  .error-shake {
+    animation-duration: 0.1s !important;
+  }
+}
+
+/* Performance optimization - disable animations during resize */
+.chord-editor-enhanced.resizing *,
+.chord-editor-enhanced.resizing *::before,
+.chord-editor-enhanced.resizing *::after {
+  transition: none !important;
+  animation: none !important;
+}
