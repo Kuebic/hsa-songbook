@@ -146,11 +146,15 @@
 /* Theme: Dark */
 [data-theme="dark"] .chord-sheet-rendered {
   background-color: #1f2937;
-  color: #f3f4f6;
+  color: #f9fafb;
 }
 
 [data-theme="dark"] .chord-sheet-rendered .chord {
   color: #60a5fa;
+}
+
+[data-theme="dark"] .chord-sheet-rendered .lyrics {
+  color: #f9fafb;
 }
 
 [data-theme="dark"] .chord-sheet-rendered .paragraph-label {
@@ -158,7 +162,7 @@
 }
 
 [data-theme="dark"] .chord-sheet-rendered .comment {
-  color: #9ca3af;
+  color: #d1d5db;
 }
 
 [data-theme="dark"] .chord-sheet-rendered .directive {
@@ -175,6 +179,10 @@
   color: #fbbf24;
   font-weight: 700;
   font-size: 1.1em;
+}
+
+[data-theme="stage"] .chord-sheet-rendered .lyrics {
+  color: #ffffff;
 }
 
 [data-theme="stage"] .chord-sheet-rendered .paragraph-label {

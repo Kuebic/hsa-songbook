@@ -116,15 +116,15 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
   const applyPreferenceStyles = useCallback((html: string, options?: RenderOptions): string => {
     const fontSize = options?.fontSize || preferences.fontSize;
     const fontFamily = options?.fontFamily || preferences.fontFamily;
-    
+
     // Get theme colors
     const getThemeColors = () => {
       switch (preferences.theme) {
         case 'dark':
           return {
             chord: '#60a5fa',
-            lyric: '#f3f4f6',
-            comment: '#9ca3af',
+            lyric: '#f9fafb',
+            comment: '#d1d5db',
             section: '#a78bfa',
             background: '#1f2937'
           };
@@ -159,7 +159,7 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
           min-height: 2.5em;
           margin-bottom: 0.25rem;
         }
-        
+
         .chord-sheet-content .chord-column {
           display: flex;
           flex-direction: column;
@@ -167,7 +167,7 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
           margin-right: 0.125rem;
           position: relative;
         }
-        
+
         .chord-sheet-content .chord {
           line-height: 1;
           margin-bottom: 0.125rem;
@@ -176,22 +176,23 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
           color: ${colors.chord};
           font-weight: 600;
         }
-        
+
         .chord-sheet-content .chord-empty {
           visibility: hidden;
         }
-        
+
+        .chord-sheet-content .lyrics,
         .chord-sheet-content .chord-lyrics {
           line-height: 1.4;
           white-space: pre;
           color: ${colors.lyric};
         }
-        
+
         /* Ensure proper spacing and alignment */
         .chord-sheet-content .chord-column:last-child {
           margin-right: 0;
         }
-        
+
         /* Handle empty lyrics (for chords at word end) */
         .chord-sheet-content .chord-lyrics:empty::after {
           content: ' ';
@@ -268,7 +269,7 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
    */
   const isValidChordPro = useCallback((content: string): boolean => {
     if (!content || !content.trim()) return false;
-    
+
     try {
       const parser = new ChordSheetJS.ChordProParser();
       parser.parse(content);
