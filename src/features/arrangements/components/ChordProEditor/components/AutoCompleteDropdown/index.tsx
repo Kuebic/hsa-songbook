@@ -9,6 +9,8 @@ import {
   FloatingPortal,
 } from '@floating-ui/react';
 import type { AutocompleteItem } from '../../data/chordProDirectives';
+import { highlightMatches } from '../../utils/fuzzyMatch';
+import { useVirtualKeyboard } from '../../hooks/useVirtualKeyboard';
 import '../../styles/autocomplete.css';
 
 interface AutoCompleteDropdownProps {
@@ -36,26 +38,45 @@ export const AutoCompleteDropdown: React.FC<AutoCompleteDropdownProps> = ({
 }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const { isKeyboardVisible, keyboardHeight } = useVirtualKeyboard();
+
+  // Determine placement based on keyboard visibility
+  const getPlacement = () => {
+    if (isMobile && isKeyboardVisible) {
+      // When keyboard is visible on mobile, prefer top placement
+      return 'top-start';
+    } else if (isMobile) {
+      // When keyboard is hidden, can use bottom
+      return 'bottom-start';
+    }
+    // Desktop default
+    return 'bottom-start';
+  };
 
   // Configure Floating UI positioning
   const { refs, floatingStyles } = useFloating({
     open: isOpen,
-    placement: isMobile ? 'top-start' : 'bottom-start',
+    placement: getPlacement(),
     middleware: [
-      offset(4),
+      offset(isMobile && isKeyboardVisible ? 8 : 4),
       flip({
         fallbackPlacements: isMobile 
           ? ['bottom-start', 'top-end', 'bottom-end']
           : ['top-start', 'bottom-end', 'top-end'],
       }),
       shift({ 
-        padding: 8,
+        padding: isMobile ? 16 : 8,
         crossAxis: true,
       }),
       size({
         apply({ availableHeight, elements }) {
+          // Adjust max height based on keyboard presence
+          const maxHeight = isMobile && isKeyboardVisible
+            ? Math.min(availableHeight - keyboardHeight - 20, 200)
+            : Math.min(availableHeight - 10, isMobile ? 250 : 300);
+          
           Object.assign(elements.floating.style, {
-            maxHeight: `${Math.min(availableHeight - 10, isMobile ? 200 : 300)}px`,
+            maxHeight: `${maxHeight}px`,
           });
         },
       }),
@@ -167,7 +188,11 @@ export const AutoCompleteDropdown: React.FC<AutoCompleteDropdownProps> = ({
                 </span>
               )}
               <span className="autocomplete-item-content">
-                <span className="autocomplete-item-label">{item.label}</span>
+                <span className="autocomplete-item-label">
+                  {item.fuzzyMatches && item.fuzzyMatches.length > 0
+                    ? highlightMatches(item.label, item.fuzzyMatches)
+                    : item.label}
+                </span>
                 {item.description && (
                   <span className="autocomplete-item-description">
                     {item.description}

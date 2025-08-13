@@ -18,14 +18,13 @@
 
 /* Mobile-specific dropdown */
 .autocomplete-mobile {
-  position: fixed !important;
-  bottom: calc(var(--keyboard-height, 0px) + 8px);
-  left: 8px;
-  right: 8px;
-  max-height: calc(50vh - var(--keyboard-height, 0px));
-  max-width: none;
-  min-width: auto;
-  width: auto;
+  /* Let Floating UI handle positioning */
+  min-width: calc(100vw - 32px);
+  max-width: calc(100vw - 32px);
+  /* Add touch-friendly styles */
+  font-size: 16px;
+  /* Ensure visibility above keyboard */
+  z-index: 9999;
 }
 
 /* Autocomplete list container */
@@ -173,6 +172,22 @@
   }
 }
 
+/* Fuzzy match highlighting */
+.fuzzy-match-highlight {
+  font-weight: 700;
+  color: var(--focus-ring, #3b82f6);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  text-decoration-color: var(--focus-ring, #3b82f6);
+}
+
+/* When item is selected, adjust highlight color */
+.autocomplete-item.selected .fuzzy-match-highlight {
+  color: #ffffff;
+  text-decoration-color: rgba(255, 255, 255, 0.5);
+}
+
 /* Dark theme adjustments */
 [data-theme="dark"] .autocomplete-dropdown {
   background: var(--editor-bg, #1f2937);
@@ -180,6 +195,12 @@
   box-shadow: 
     0 10px 15px -3px rgba(0, 0, 0, 0.3),
     0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark theme fuzzy highlight */
+[data-theme="dark"] .fuzzy-match-highlight {
+  color: var(--accent-bright, #60a5fa);
+  text-decoration-color: var(--accent-bright, #60a5fa);
 }
 
 [data-theme="dark"] .autocomplete-item:hover:not(.selected) {
@@ -197,6 +218,12 @@
   box-shadow: 
     0 10px 15px -3px rgba(255, 235, 59, 0.2),
     0 4px 6px -2px rgba(255, 235, 59, 0.1);
+}
+
+/* Stage theme fuzzy highlight */
+[data-theme="stage"] .fuzzy-match-highlight {
+  color: #ffeb3b;
+  text-decoration-color: #ffeb3b;
 }
 
 [data-theme="stage"] .autocomplete-item {

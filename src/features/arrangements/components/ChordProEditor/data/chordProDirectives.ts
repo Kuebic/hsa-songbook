@@ -2,12 +2,16 @@
  * ChordPro directive definitions for autocomplete
  */
 
+import { fuzzyMatch, sortByFuzzyScore } from '../utils/fuzzyMatch';
+
 export interface AutocompleteItem {
   value: string;
   label: string;
   description?: string;
   category?: string;
   icon?: string;
+  fuzzyScore?: number;
+  fuzzyMatches?: number[];
 }
 
 /**
@@ -99,14 +103,53 @@ export const getDirectivesByCategory = (category: string): AutocompleteItem[] =>
 };
 
 /**
- * Get directives that match a search term
+ * Get directives that match a search term using fuzzy matching
  */
 export const searchDirectives = (searchTerm: string): AutocompleteItem[] => {
-  const term = searchTerm.toLowerCase();
-  return CHORDPRO_DIRECTIVES.filter(d => 
-    d.label.toLowerCase().includes(term) ||
-    d.description?.toLowerCase().includes(term)
+  if (!searchTerm) {
+    return getCommonDirectives();
+  }
+  
+  // Use fuzzy matching with ChordPro-optimized settings
+  const results = sortByFuzzyScore(
+    CHORDPRO_DIRECTIVES,
+    searchTerm,
+    item => item.label,
+    {
+      prioritizePrefix: true,
+      prioritizeCamelCase: true,
+      caseSensitive: false,
+      threshold: 0
+    }
   );
+  
+  // Also try matching against descriptions
+  const descriptionMatches = CHORDPRO_DIRECTIVES
+    .filter(directive => {
+      // Don't include if already in results
+      if (results.some(r => r.label === directive.label)) {
+        return false;
+      }
+      
+      // Try fuzzy match on description
+      if (directive.description) {
+        const match = fuzzyMatch(searchTerm, directive.description, {
+          prioritizePrefix: false,
+          prioritizeCamelCase: false,
+          caseSensitive: false
+        });
+        return match && match.score > 50;
+      }
+      return false;
+    })
+    .map(item => ({
+      ...item,
+      fuzzyScore: 50, // Lower score for description matches
+      fuzzyMatches: []
+    }));
+  
+  // Combine and limit results
+  return [...results, ...descriptionMatches].slice(0, 20);
 };
 
 /**

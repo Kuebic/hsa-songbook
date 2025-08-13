@@ -12,6 +12,8 @@ import { useEditorTheme } from './hooks/useEditorTheme';
 import { useResponsiveLayout } from './hooks/useResponsiveLayout';
 import { useVirtualKeyboard } from './hooks/useVirtualKeyboard';
 import { useMobileAutocomplete } from './hooks/useMobileAutocomplete';
+import { useBracketCompletion } from './hooks/useBracketCompletion';
+import { getBrowserSpecificStyles } from './utils/browserDetection';
 import './styles/themes.css';
 import './styles/editor.css';
 import './styles/responsive.css';
@@ -49,7 +51,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   const [previewVisible, setPreviewVisible] = useState(defaultPreviewVisible);
   
   // Debug mode - set to true to see red text overlay for alignment checking
-  const [debugMode] = useState(true); // Set to true for debugging text alignment
+  const [debugMode] = useState(false); // Set to true for debugging text alignment
   const [showAlignmentDebugger] = useState(false); // Set to true for alignment grid
   
   // Use enhanced hooks for theme and responsive layout
@@ -68,6 +70,24 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       console.log('Virtual keyboard is visible');
     }
   }, [isKeyboardVisible]);
+
+  // Apply browser-specific styles for perfect alignment
+  useEffect(() => {
+    const browserStyles = getBrowserSpecificStyles();
+    
+    // Apply to textarea
+    if (textareaRef.current) {
+      Object.assign(textareaRef.current.style, browserStyles);
+    }
+    
+    // Apply to syntax highlighter
+    if (syntaxRef.current) {
+      const syntaxHighlighter = syntaxRef.current.querySelector('.syntax-highlighter') as HTMLElement;
+      if (syntaxHighlighter) {
+        Object.assign(syntaxHighlighter.style, browserStyles);
+      }
+    }
+  }, []);
   
   const {
     content,
@@ -86,7 +106,19 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     {
       enabled: true,
       maxSuggestions: layout.isMobile ? 10 : 20,
-      debounceMs: layout.isMobile ? 200 : 100,
+      debounceMs: 20, // Reduced for instant filtering
+      onChange: (newContent, cursorPos) => {
+        // Update content through React state
+        updateContent(newContent);
+        
+        // Set cursor position after React updates
+        setTimeout(() => {
+          if (textareaRef.current) {
+            textareaRef.current.setSelectionRange(cursorPos, cursorPos);
+            textareaRef.current.focus();
+          }
+        }, 0);
+      },
       onSelect: (item, _trigger, position) => {
         // Autocomplete will handle the insertion
         console.log('Selected:', item.label, 'at position:', position);
@@ -94,12 +126,62 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     }
   );
 
+  // Use smart bracket completion hook
+  const bracketCompletion = useBracketCompletion(
+    textareaRef,
+    content,
+    (newContent, cursorPos) => {
+      // Update content through React state
+      updateContent(newContent);
+      
+      // Set cursor position after React updates
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.setSelectionRange(cursorPos, cursorPos);
+          textareaRef.current.focus();
+        }
+      }, 0);
+    },
+    {
+      enabled: true,
+      autoCloseBrackets: true,
+      autoDeletePairs: true,
+      autoOvertype: true
+    }
+  );
+
   // Handle content changes from ChordProTextArea
   const handleContentChange = useCallback((newContent: string) => {
     updateContent(newContent);
-    // Trigger autocomplete input handler
-    autocomplete.handleInput();
-  }, [updateContent, autocomplete]);
+  }, [updateContent]);
+
+  // Combined keyboard handler for autocomplete and bracket completion
+  const handleCombinedKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // First try bracket completion
+    const bracketHandled = bracketCompletion.handleKeyDown(e);
+    if (bracketHandled) return;
+    
+    // Then try autocomplete
+    const autocompleteHandled = autocomplete.handleKeyDown(e);
+    if (autocompleteHandled) return;
+    
+    // Additional keyboard shortcuts can be added here
+  }, [bracketCompletion, autocomplete]);
+
+  // Handle scroll synchronization between textarea and syntax highlighter
+  const handleScroll = useCallback((scrollTop: number, scrollLeft: number) => {
+    if (syntaxRef.current) {
+      // Use transform for better performance
+      requestAnimationFrame(() => {
+        if (syntaxRef.current) {
+          const syntaxHighlighter = syntaxRef.current.querySelector('.syntax-highlighter') as HTMLElement;
+          if (syntaxHighlighter) {
+            syntaxHighlighter.style.transform = `translate(-${scrollLeft}px, -${scrollTop}px)`;
+          }
+        }
+      });
+    }
+  }, []);
 
   // Handle cursor position changes
   const handleCursorChange = useCallback((position: number) => {
@@ -141,8 +223,8 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     setPreviewVisible(!previewVisible);
   }, [previewVisible]);
 
-  // Handle keyboard shortcuts
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+  // Handle keyboard shortcuts for save
+  const handleSaveShortcut = useCallback((e: React.KeyboardEvent) => {
     // Ctrl/Cmd + S for save
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
@@ -187,7 +269,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
           height: typeof height === 'number' ? `${height}px` : height,
           flexDirection: layout.isMobile ? 'column' : 'row'
         }}
-        onKeyDown={handleKeyDown}
+        onKeyDown={handleSaveShortcut}
       >
         {/* Editor Pane */}
         <div 
@@ -203,13 +285,6 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
             <div 
               ref={syntaxRef}
               className="syntax-container"
-              style={{ 
-                position: 'absolute', 
-                inset: 0, 
-                overflow: 'auto', 
-                pointerEvents: 'none',
-                zIndex: 1
-              }}
             >
               <SyntaxHighlighter 
                 content={content} 
@@ -224,13 +299,10 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
               onChange={handleContentChange}
               onCursorChange={handleCursorChange}
               onSelectionChange={handleSelectionRangeChange}
-              onScroll={(scrollTop, scrollLeft) => {
-                // Sync scroll position with syntax highlighter
-                if (syntaxRef.current) {
-                  syntaxRef.current.scrollTop = scrollTop;
-                  syntaxRef.current.scrollLeft = scrollLeft;
-                }
-              }}
+              onScroll={handleScroll}
+              onKeyDown={handleCombinedKeyDown}
+              onInput={autocomplete.handleInput}
+              onBeforeInput={bracketCompletion.handleBeforeInput}
               textareaRef={textareaRef}
               theme={currentTheme === 'light' ? 'light' : 'dark'}
               placeholder="Start typing your ChordPro song..."

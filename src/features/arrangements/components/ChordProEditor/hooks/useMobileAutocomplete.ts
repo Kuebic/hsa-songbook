@@ -11,6 +11,7 @@ import {
 
 interface UseMobileAutocompleteOptions {
   onSelect?: (item: AutocompleteItem, trigger: string, position: number) => void;
+  onChange?: (newContent: string, cursorPos: number) => void;
   maxSuggestions?: number;
   debounceMs?: number;
   enabled?: boolean;
@@ -37,8 +38,9 @@ export const useMobileAutocomplete = (
 ) => {
   const {
     onSelect,
+    onChange,
     maxSuggestions = 20,
-    debounceMs = 150,
+    debounceMs = 50, // Reduced for instant filtering
     enabled = true,
   } = options;
 
@@ -170,12 +172,87 @@ export const useMobileAutocomplete = (
   }, [textareaRef, state.isOpen, debouncedUpdateSearchTerm, checkForTrigger]);
 
   /**
+   * Force open autocomplete with current context
+   */
+  const forceOpenAutocomplete = useCallback(() => {
+    if (!enabled || !textareaRef.current) return;
+    
+    const text = textareaRef.current.value;
+    const cursorPosition = textareaRef.current.selectionStart || 0;
+    
+    // Find the most recent trigger character before cursor
+    let triggerPos = -1;
+    let trigger: '{' | '[' | null = null;
+    
+    // Search backwards for an unclosed trigger
+    for (let i = cursorPosition - 1; i >= 0; i--) {
+      const char = text[i];
+      
+      if (char === '{') {
+        // Check if this bracket is closed
+        const closePos = text.indexOf('}', i);
+        if (closePos === -1 || closePos >= cursorPosition) {
+          trigger = '{';
+          triggerPos = i;
+          break;
+        }
+      } else if (char === '[') {
+        // Check if this bracket is closed
+        const closePos = text.indexOf(']', i);
+        if (closePos === -1 || closePos >= cursorPosition) {
+          trigger = '[';
+          triggerPos = i;
+          break;
+        }
+      }
+      
+      // Stop searching if we hit a newline
+      if (char === '\n') break;
+    }
+    
+    if (trigger && triggerPos >= 0) {
+      const searchTerm = text.substring(triggerPos + 1, cursorPosition);
+      const suggestions = getSuggestions(trigger, searchTerm);
+      
+      setState({
+        isOpen: true,
+        items: suggestions.slice(0, maxSuggestions),
+        selectedIndex: 0,
+        trigger,
+        triggerPosition: triggerPos,
+        searchTerm,
+        anchorEl: textareaRef.current,
+      });
+    } else {
+      // No trigger found, show common directives
+      const suggestions = getCommonDirectives();
+      
+      setState({
+        isOpen: true,
+        items: suggestions.slice(0, maxSuggestions),
+        selectedIndex: 0,
+        trigger: '{',
+        triggerPosition: cursorPosition,
+        searchTerm: '',
+        anchorEl: textareaRef.current,
+      });
+    }
+  }, [enabled, textareaRef, getSuggestions, maxSuggestions]);
+
+  /**
    * Handle keyboard navigation
    */
   const handleKeyDown = useCallback((
     event: React.KeyboardEvent<HTMLTextAreaElement>
   ): boolean => {
     lastKeyRef.current = event.key;
+
+    // Handle Ctrl+Space to force open autocomplete
+    if (event.key === ' ' && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      forceOpenAutocomplete();
+      return true;
+    }
 
     if (!state.isOpen) return false;
 
@@ -224,7 +301,7 @@ export const useMobileAutocomplete = (
     }
 
     return false;
-  }, [state.isOpen, state.items, state.selectedIndex, state.trigger]);
+  }, [state.isOpen, state.items, state.selectedIndex, state.trigger, forceOpenAutocomplete]);
 
   /**
    * Insert selected suggestion
@@ -254,17 +331,22 @@ export const useMobileAutocomplete = (
       cursorOffset = insertText.length; // Position after closing bracket
     }
     
-    // Update textarea value
+    // Update textarea value through React
     const newText = text.substring(0, startPos) + insertText + text.substring(endPos);
-    textarea.value = newText;
-    
-    // Set cursor position
     const newCursorPos = startPos + cursorOffset;
-    textarea.setSelectionRange(newCursorPos, newCursorPos);
     
-    // Trigger input event for React
-    const inputEvent = new Event('input', { bubbles: true });
-    textarea.dispatchEvent(inputEvent);
+    // Call onChange to update React state
+    if (onChange) {
+      onChange(newText, newCursorPos);
+    } else {
+      // Fallback: directly update textarea and dispatch event
+      textarea.value = newText;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+      
+      // Trigger input event for React
+      const inputEvent = new Event('input', { bubbles: true });
+      textarea.dispatchEvent(inputEvent);
+    }
     
     // Focus textarea
     textarea.focus();
@@ -274,7 +356,7 @@ export const useMobileAutocomplete = (
     
     // Close autocomplete
     closeAutocomplete();
-  }, [textareaRef, state.triggerPosition, state.trigger, onSelect]);
+  }, [textareaRef, state.triggerPosition, state.trigger, onSelect, onChange]);
 
   /**
    * Close autocomplete

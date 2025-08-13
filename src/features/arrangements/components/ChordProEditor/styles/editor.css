@@ -156,7 +156,7 @@
 /* Editor layers - Critical for proper stacking */
 .editor-layers {
   flex: 1;
-  position: relative;
+  display: grid;
   overflow: auto;
   /* Use standardized font from alignment.css */
   font-family: var(--editor-font-family, 'Courier New', Courier, monospace);
@@ -175,27 +175,26 @@
 
 /* Syntax highlighting layer */
 .chord-editor-highlight,
-.editor-syntax {
-  position: absolute;
-  inset: 0;
+.editor-syntax,
+.syntax-container {
+  grid-area: 1 / 1; /* Same grid cell as textarea */
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
   pointer-events: none;
   z-index: 1;
-  overflow: auto; /* Allow scrolling for sync with textarea */
+  overflow: hidden !important; /* No individual scrolling */
   box-sizing: border-box;
   padding: 16px; /* Same padding as textarea */
 }
 
-/* Hide webkit scrollbar for syntax layer */
-.chord-editor-highlight::-webkit-scrollbar,
-.editor-syntax::-webkit-scrollbar {
-  display: none;
-}
-
 /* Textarea layer - user input layer */
 .chord-editor-textarea {
-  /* Positioning - fills container */
-  position: absolute;
-  inset: 0;
+  /* Grid positioning for perfect layering */
+  grid-area: 1 / 1; /* Same grid cell as syntax layer */
+  position: relative;
+  width: 100%;
+  min-height: 100vh; /* Ensure it fills viewport minimum */
   z-index: 2;
   
   /* Spacing */
@@ -218,6 +217,9 @@
   white-space: pre-wrap;
   word-break: break-word;
   text-align: left;
+  
+  /* No individual scrolling */
+  overflow: hidden !important;
   
   /* Disable browser defaults */
   resize: none;

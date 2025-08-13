@@ -12,6 +12,9 @@ interface ChordProTextAreaProps {
   onCursorChange?: (position: number) => void;
   onSelectionChange?: (range: [number, number]) => void;
   onScroll?: (scrollTop: number, scrollLeft: number) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => boolean | void;
+  onInput?: () => void;
+  onBeforeInput?: (e: InputEvent) => boolean;
   onAutoCompleteShow?: (triggerChar: '{' | '[', position: number, filterText: string) => void;
   onAutoCompleteHide?: () => void;
   onAutoCompleteMove?: (direction: 'up' | 'down') => void;
@@ -32,6 +35,9 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
   onCursorChange,
   onSelectionChange,
   onScroll,
+  onKeyDown,
+  onInput,
+  onBeforeInput,
   onAutoCompleteShow,
   onAutoCompleteHide,
   onAutoCompleteMove,
@@ -53,47 +59,12 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
    */
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
-    const cursorPos = e.target.selectionStart;
     
     onChange(newValue);
     
-    // Check for auto-completion triggers
-    if (onAutoCompleteShow && cursorPos > 0) {
-      const charBefore = newValue[cursorPos - 1];
-      
-      if (charBefore === '{' || charBefore === '[') {
-        // Show auto-completion for trigger character
-        onAutoCompleteShow(charBefore, cursorPos - 1, '');
-      } else {
-        // Check if we're still typing after a trigger
-        const textBeforeCursor = newValue.substring(0, cursorPos);
-        const lastOpenBrace = Math.max(
-          textBeforeCursor.lastIndexOf('{'),
-          textBeforeCursor.lastIndexOf('[')
-        );
-        
-        if (lastOpenBrace >= 0) {
-          const triggerChar = newValue[lastOpenBrace] as '{' | '[';
-          const afterTrigger = textBeforeCursor.substring(lastOpenBrace + 1);
-          
-          // Check if there's a closing bracket/brace after the trigger
-          const hasClosing = (triggerChar === '{' && afterTrigger.includes('}')) ||
-                           (triggerChar === '[' && afterTrigger.includes(']'));
-          
-          if (!hasClosing && /^[a-zA-Z0-9_:]*$/.test(afterTrigger)) {
-            // Update auto-completion with filter text
-            onAutoCompleteShow(triggerChar, lastOpenBrace, afterTrigger);
-          } else {
-            // Hide auto-completion if context is no longer valid
-            onAutoCompleteHide?.();
-          }
-        } else {
-          // No trigger character found, hide auto-completion
-          onAutoCompleteHide?.();
-        }
-      }
-    }
-  }, [onChange, onAutoCompleteShow, onAutoCompleteHide]);
+    // Call onInput for autocomplete handling
+    onInput?.();
+  }, [onChange, onInput]);
 
   /**
    * Handle selection changes
@@ -136,27 +107,11 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
    * Handle key down events for special behaviors and auto-completion navigation
    */
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // First check if autocomplete should handle this key
-    if (onAutoCompleteMove || onAutoCompleteSelect || onAutoCompleteHide) {
-      // These would be handled by the autocomplete system
-      if (e.key === 'ArrowUp' && onAutoCompleteMove) {
-        e.preventDefault();
-        onAutoCompleteMove('up');
-        return;
-      }
-      if (e.key === 'ArrowDown' && onAutoCompleteMove) {
-        e.preventDefault();
-        onAutoCompleteMove('down');
-        return;
-      }
-      if ((e.key === 'Enter' || e.key === 'Tab') && onAutoCompleteSelect) {
-        e.preventDefault();
-        onAutoCompleteSelect();
-        return;
-      }
-      if (e.key === 'Escape' && onAutoCompleteHide) {
-        onAutoCompleteHide();
-        return;
+    // First, let external handler process the event (autocomplete)
+    if (onKeyDown) {
+      const handled = onKeyDown(e);
+      if (handled) {
+        return; // Event was handled by autocomplete
       }
     }
     
@@ -164,8 +119,8 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
     if (!textarea) return;
 
 
-    // Tab key inserts 4 spaces (when auto-completion is not handling it)
-    if (e.key === 'Tab' && !onAutoCompleteSelect) {
+    // Tab key inserts 4 spaces
+    if (e.key === 'Tab') {
       e.preventDefault();
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
@@ -181,8 +136,8 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
       return;
     }
 
-    // Auto-indent on Enter (when auto-completion is not handling it)
-    if (e.key === 'Enter' && !onAutoCompleteSelect) {
+    // Auto-indent on Enter
+    if (e.key === 'Enter') {
       const start = textarea.selectionStart;
       
       // Check if we just completed a directive and should handle Enter specially
@@ -233,7 +188,7 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
         }, 0);
       }
     }
-  }, [value, onChange, onAutoCompleteHide, onAutoCompleteMove, onAutoCompleteSelect, justCompletedDirective, onDirectiveCompleted, textareaRef]);
+  }, [value, onChange, onKeyDown, justCompletedDirective, onDirectiveCompleted, textareaRef]);
 
   /**
    * Clear directive completion state when cursor moves or other keys are pressed
@@ -244,6 +199,18 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
       onDirectiveCompleted?.();
     }
   }, [justCompletedDirective, onDirectiveCompleted]);
+
+  /**
+   * Handle beforeInput event for bracket completion
+   */
+  const handleBeforeInput = useCallback((e: any) => {
+    if (onBeforeInput) {
+      const handled = onBeforeInput(e as InputEvent);
+      if (handled) {
+        return; // Event was handled by bracket completion
+      }
+    }
+  }, [onBeforeInput]);
 
   /**
    * Get theme-specific classes
@@ -284,6 +251,7 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
         handleKeyUp(e);
       }}
       onKeyDown={handleKeyDown}
+      onBeforeInput={handleBeforeInput}
       onScroll={handleScroll}
       placeholder={placeholder}
       readOnly={readOnly}

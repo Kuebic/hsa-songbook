@@ -60,33 +60,48 @@
   outline: none;
   background: transparent;
   
-  /* Ensure proper stacking */
-  position: absolute;
-  inset: 0;
+  /* Grid positioning for perfect layering */
+  grid-area: 1 / 1;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
   z-index: 2;
+  
+  /* Allow scrolling for sync */
+  overflow: auto !important;
+  scroll-behavior: auto;
+}
+
+/* Syntax container - grid positioning */
+.syntax-container {
+  grid-area: 1 / 1; /* Same grid cell as textarea */
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden !important;
 }
 
 /* Syntax highlighter specific styles */
 .syntax-highlighter {
-  /* Position behind textarea */
+  /* Absolute positioning for transform-based scroll sync */
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  min-height: 100%;
+  width: 100%;
   z-index: 1;
+  
+  /* Transform origin for scroll sync */
+  transform-origin: 0 0;
   
   /* Prevent interaction */
   pointer-events: none;
   user-select: none;
   
-  /* Ensure scrolling matches textarea */
-  overflow: auto;
-  
-  /* Hide scrollbar since textarea handles scrolling */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.syntax-highlighter::-webkit-scrollbar {
-  display: none;
+  /* No individual scrolling */
+  overflow: visible !important;
 }
 
 /* Debug mode - make textarea text visible in red */
