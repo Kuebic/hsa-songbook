@@ -1,0 +1,141 @@
+/* Character-level chord positioning */
+.chord-line-container {
+  position: relative;
+  line-height: 2.2;
+  font-family: 'Courier New', Courier, monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.lyric-with-chords {
+  position: relative;
+}
+
+/* Zero-width chord positioning technique */
+.chord-anchor {
+  position: relative;
+}
+
+.chord-anchor::before {
+  content: attr(data-chord);
+  position: absolute;
+  top: -1.2em;
+  left: 0;
+  color: var(--syntax-chord, #2563eb);
+  font-weight: 600;
+  font-size: 0.875em;
+  white-space: nowrap;
+  /* Ensure chord doesn't affect text flow */
+  pointer-events: none;
+  /* Remove background to prevent overlap issues */
+  /* Use text shadow for better visibility instead */
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.8),
+               0 0 6px rgba(255, 255, 255, 0.6);
+  padding: 0 2px;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .chord-anchor::before {
+  color: var(--syntax-chord-dark, #60a5fa);
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.8),
+               0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Stage mode support */
+[data-theme="stage"] .chord-anchor::before {
+  color: #fbbf24;
+  font-weight: bold;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.9),
+               0 0 6px rgba(0, 0, 0, 0.7);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .chord-line-container {
+    font-size: 14px;
+    line-height: 2;
+  }
+  
+  .chord-anchor::before {
+    font-size: 0.8em;
+    top: -1.1em;
+  }
+}
+
+/* Print optimization */
+@media print {
+  .chord-anchor::before {
+    color: black;
+    font-weight: bold;
+    background: none;
+  }
+}
+
+/* Prevent selection issues */
+.chord-anchor::selection,
+.chord-anchor::before::selection {
+  background: transparent;
+}
+
+/* Chord-only line styling (for intro chords like [G][D/G][G][D/G]) */
+.chord-only-line {
+  display: inline-block;
+  color: var(--syntax-chord, #2563eb);
+  font-weight: 600;
+  font-size: 1em;
+  line-height: 1.8;
+}
+
+.inline-chord {
+  display: inline;
+  padding: 0 2px;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Dark mode for chord-only lines */
+[data-theme="dark"] .chord-only-line {
+  color: var(--syntax-chord-dark, #60a5fa);
+}
+
+/* Stage mode for chord-only lines */
+[data-theme="stage"] .chord-only-line {
+  color: #fbbf24;
+}
+
+/* Ensure proper spacing and alignment */
+.chord-line-container + .chord-line-container {
+  margin-top: 0.5em;
+}
+
+/* Handle empty lines properly */
+.chord-line-container:empty {
+  height: 1.2em;
+}
+
+/* Improve readability for overlapping chords */
+.chord-anchor + .chord-anchor::before {
+  z-index: 10;
+}
+
+/* Accessibility improvements */
+.chord-anchor[data-chord]:focus::before,
+.chord-anchor[data-chord]:hover::before {
+  /* Use outline instead of background to prevent overlap */
+  outline: 1px solid var(--syntax-chord, #2563eb);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .chord-anchor::before {
+    background: white;
+    border: 1px solid black;
+    color: black;
+  }
+  
+  [data-theme="dark"] .chord-anchor::before {
+    background: black;
+    border: 1px solid white;
+    color: white;
+  }
+}

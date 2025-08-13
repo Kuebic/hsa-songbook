@@ -2,7 +2,7 @@
  * ChordPro directive definitions for autocomplete
  */
 
-import { fuzzyMatch, sortByFuzzyScore } from '../utils/fuzzyMatch';
+import { fuzzyMatch, sortByFuzzyScore, normalizeForComparison } from '../utils/fuzzyMatch';
 
 export interface AutocompleteItem {
   value: string;
@@ -103,6 +103,14 @@ export const getDirectivesByCategory = (category: string): AutocompleteItem[] =>
 };
 
 /**
+ * Normalize directive label for better matching
+ * Handles ChordPro-specific patterns like underscores
+ */
+export const normalizeDirective = (directive: string): string => {
+  return normalizeForComparison(directive);
+};
+
+/**
  * Get directives that match a search term using fuzzy matching
  */
 export const searchDirectives = (searchTerm: string): AutocompleteItem[] => {
@@ -118,16 +126,46 @@ export const searchDirectives = (searchTerm: string): AutocompleteItem[] => {
     {
       prioritizePrefix: true,
       prioritizeCamelCase: true,
+      prioritizeTypoTolerance: true,
       caseSensitive: false,
-      threshold: 0
+      threshold: 0,
+      maxLevenshteinDistance: 2  // Allow up to 2 character typos
     }
   );
+  
+  // Also try matching against normalized versions
+  const normalizedSearchTerm = normalizeDirective(searchTerm);
+  const normalizedMatches = CHORDPRO_DIRECTIVES
+    .filter(directive => {
+      // Don't include if already in results
+      if (results.some(r => r.label === directive.label)) {
+        return false;
+      }
+      
+      // Try normalized matching
+      const normalizedLabel = normalizeDirective(directive.label);
+      const match = fuzzyMatch(normalizedSearchTerm, normalizedLabel, {
+        prioritizePrefix: true,
+        prioritizeCamelCase: false,
+        prioritizeTypoTolerance: true,
+        caseSensitive: false,
+        maxLevenshteinDistance: 1
+      });
+      
+      return match && match.score > 100;
+    })
+    .map(item => ({
+      ...item,
+      fuzzyScore: 600, // Medium score for normalized matches
+      fuzzyMatches: []
+    }));
   
   // Also try matching against descriptions
   const descriptionMatches = CHORDPRO_DIRECTIVES
     .filter(directive => {
-      // Don't include if already in results
-      if (results.some(r => r.label === directive.label)) {
+      // Don't include if already in results or normalized matches
+      if (results.some(r => r.label === directive.label) ||
+          normalizedMatches.some(n => n.label === directive.label)) {
         return false;
       }
       
@@ -136,7 +174,9 @@ export const searchDirectives = (searchTerm: string): AutocompleteItem[] => {
         const match = fuzzyMatch(searchTerm, directive.description, {
           prioritizePrefix: false,
           prioritizeCamelCase: false,
-          caseSensitive: false
+          prioritizeTypoTolerance: true,
+          caseSensitive: false,
+          maxLevenshteinDistance: 2
         });
         return match && match.score > 50;
       }
@@ -148,8 +188,12 @@ export const searchDirectives = (searchTerm: string): AutocompleteItem[] => {
       fuzzyMatches: []
     }));
   
-  // Combine and limit results
-  return [...results, ...descriptionMatches].slice(0, 20);
+  // Combine and sort all results by score
+  const allResults = [...results, ...normalizedMatches, ...descriptionMatches]
+    .sort((a, b) => (b.fuzzyScore || 0) - (a.fuzzyScore || 0))
+    .slice(0, 20);
+  
+  return allResults;
 };
 
 /**

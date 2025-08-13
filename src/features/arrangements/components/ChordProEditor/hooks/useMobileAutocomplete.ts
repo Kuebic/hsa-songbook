@@ -25,6 +25,7 @@ interface AutocompleteState {
   triggerPosition: number;
   searchTerm: string;
   anchorEl: HTMLElement | null;
+  isSearching?: boolean;
 }
 
 /**
@@ -52,6 +53,7 @@ export const useMobileAutocomplete = (
     triggerPosition: -1,
     searchTerm: '',
     anchorEl: null,
+    isSearching: false,
   });
 
   const lastKeyRef = useRef<string>('');
@@ -137,6 +139,9 @@ export const useMobileAutocomplete = (
       return;
     }
 
+    // Set searching state
+    setState(prev => ({ ...prev, isSearching: true }));
+
     // Update suggestions based on search term
     const suggestions = getSuggestions(state.trigger!, searchTerm);
     
@@ -145,6 +150,7 @@ export const useMobileAutocomplete = (
       searchTerm,
       items: suggestions.slice(0, maxSuggestions),
       selectedIndex: 0,
+      isSearching: false,
     }));
   }, [state.isOpen, state.triggerPosition, state.trigger, textareaRef, getSuggestions, maxSuggestions]);
 
@@ -370,6 +376,7 @@ export const useMobileAutocomplete = (
       triggerPosition: -1,
       searchTerm: '',
       anchorEl: null,
+      isSearching: false,
     });
   }, []);
 
@@ -430,6 +437,7 @@ export const useMobileAutocomplete = (
     items: state.items,
     selectedIndex: state.selectedIndex,
     anchorEl: state.anchorEl,
+    isSearching: state.isSearching,
     
     // Handlers
     handleInput,

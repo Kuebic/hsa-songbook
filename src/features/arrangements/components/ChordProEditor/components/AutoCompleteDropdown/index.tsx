@@ -20,6 +20,7 @@ interface AutoCompleteDropdownProps {
   anchorEl: HTMLElement | null;
   isOpen: boolean;
   isMobile: boolean;
+  isSearching?: boolean;
   onClose?: () => void;
 }
 
@@ -34,6 +35,7 @@ export const AutoCompleteDropdown: React.FC<AutoCompleteDropdownProps> = ({
   anchorEl,
   isOpen,
   isMobile,
+  isSearching = false,
   onClose,
 }) => {
   const listRef = useRef<HTMLDivElement>(null);
@@ -157,6 +159,17 @@ export const AutoCompleteDropdown: React.FC<AutoCompleteDropdownProps> = ({
       aria-activedescendant={selectedIndex >= 0 ? `suggestion-${selectedIndex}` : undefined}
     >
       <div className="autocomplete-list">
+        {isSearching && items.length === 0 && (
+          <div className="autocomplete-searching">
+            <span className="searching-indicator">Searching...</span>
+          </div>
+        )}
+        {!isSearching && items.length === 0 && (
+          <div className="autocomplete-no-results">
+            <span>No matches found</span>
+            <span className="no-results-hint">Try a different search term</span>
+          </div>
+        )}
         {items.map((item, index) => {
           const isSelected = index === selectedIndex;
           

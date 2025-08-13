@@ -1,0 +1,141 @@
+import React, { useEffect, useRef, useMemo } from 'react';
+import * as ChordSheetJS from 'chordsheetjs';
+import { parseSongWithCache, debounce } from './utils/chordProCache';
+import { CharacterChordRenderer } from './utils/chordRenderer';
+import { CustomChordProRenderer } from './utils/customChordProRenderer';
+import './styles/preview.css';
+import './styles/chordAlignment.css';
+
+interface PreviewPaneProps {
+  content: string;
+  theme?: 'light' | 'dark' | 'stage';
+  className?: string;
+}
+
+export const PreviewPane: React.FC<PreviewPaneProps> = ({ 
+  content, 
+  theme = 'light',
+  className = '' 
+}) => {
+  const previewRef = useRef<HTMLDivElement>(null);
+  const rendererRef = useRef(new CharacterChordRenderer());
+  const customRendererRef = useRef(new CustomChordProRenderer());
+  
+  // Debounced preview update for performance
+  const updatePreview = useMemo(
+    () => debounce((content: string) => {
+      if (!previewRef.current) return;
+      
+      if (!content.trim()) {
+        previewRef.current.innerHTML = `
+          <div class="preview-empty">
+            <div class="preview-empty-icon">🎵</div>
+            <div class="preview-empty-text">Start typing to see the preview</div>
+            <div class="preview-empty-hint">Enter ChordPro notation with chords in [brackets] and directives in {braces}</div>
+          </div>
+        `;
+        return;
+      }
+      
+      try {
+        // Use cached parsing for better performance
+        const song = parseSongWithCache(content);
+        if (!song) return;
+        
+        // Try using HtmlDivFormatter for better flexibility
+        try {
+          const formatter = new ChordSheetJS.HtmlDivFormatter();
+          const html = formatter.format(song);
+          
+          // Post-process HTML to apply character-level chord positioning
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = html;
+          
+          // Find chord-lyric lines and enhance them with character positioning
+          const chordLines = tempDiv.querySelectorAll('.row');
+          chordLines.forEach(row => {
+            const chordCells = row.querySelectorAll('.chord');
+            const lyricCells = row.querySelectorAll('.lyrics');
+            
+            if (chordCells.length > 0 && lyricCells.length > 0) {
+              // Try to reconstruct ChordPro notation for character positioning
+              let reconstructedLine = '';
+              for (let i = 0; i < Math.max(chordCells.length, lyricCells.length); i++) {
+                const chord = chordCells[i]?.textContent?.trim() || '';
+                const lyric = lyricCells[i]?.textContent || '';
+                
+                if (chord && lyric) {
+                  reconstructedLine += `[${chord}]${lyric}`;
+                } else if (lyric) {
+                  reconstructedLine += lyric;
+                }
+              }
+              
+              if (reconstructedLine) {
+                const enhancedLine = rendererRef.current.renderLine(reconstructedLine);
+                row.replaceWith(enhancedLine);
+              }
+            }
+          });
+          
+          // Build the complete preview HTML without duplicate title
+          previewRef.current.innerHTML = `
+            <div class="chord-sheet-wrapper">
+              <div class="chord-sheet-content">
+                ${tempDiv.innerHTML}
+              </div>
+            </div>
+          `;
+          
+        } catch (divFormatterError) {
+          console.warn('HtmlDivFormatter failed, using custom renderer:', divFormatterError);
+          
+          // Fallback to custom renderer for better chord positioning
+          const customHtml = customRendererRef.current.parseAndRender(content);
+          
+          previewRef.current.innerHTML = `
+            <div class="chord-sheet-wrapper">
+              ${customHtml}
+            </div>
+          `;
+        }
+        
+        // Apply theme-specific classes to chord elements
+        const chordElements = previewRef.current.querySelectorAll('.chord');
+        chordElements.forEach(el => {
+          el.classList.add('syntax-chord');
+        });
+        
+        // Apply theme-specific classes to section labels
+        const sectionLabels = previewRef.current.querySelectorAll('.paragraph-label');
+        sectionLabels.forEach(el => {
+          el.classList.add('section-label');
+        });
+        
+      } catch (error) {
+        console.error('Error parsing ChordPro:', error);
+        previewRef.current.innerHTML = `
+          <div class="preview-error">
+            <div class="preview-error-title">Error parsing ChordPro</div>
+            <pre>${error instanceof Error ? error.message : 'Unknown error'}</pre>
+          </div>
+        `;
+      }
+    }, 100), // 100ms debounce delay
+    []
+  );
+  
+  useEffect(() => {
+    updatePreview(content);
+  }, [content, theme, updatePreview]);
+  
+  return (
+    <div 
+      ref={previewRef}
+      className={`preview-pane ${className}`}
+      data-theme={theme}
+      role="document"
+      aria-label="Chord sheet preview"
+    />
+  );
+};

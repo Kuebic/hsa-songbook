@@ -226,6 +226,40 @@
   text-decoration-color: #ffeb3b;
 }
 
+/* Searching indicator */
+.autocomplete-searching,
+.autocomplete-no-results {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.875rem;
+}
+
+.searching-indicator {
+  display: inline-block;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.autocomplete-no-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.no-results-hint {
+  font-size: 0.75rem;
+  color: var(--text-tertiary, #9ca3af);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 [data-theme="stage"] .autocomplete-item {
   color: #ffffff;
 }

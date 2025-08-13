@@ -15,10 +15,6 @@ interface ChordProTextAreaProps {
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => boolean | void;
   onInput?: () => void;
   onBeforeInput?: (e: InputEvent) => boolean;
-  onAutoCompleteShow?: (triggerChar: '{' | '[', position: number, filterText: string) => void;
-  onAutoCompleteHide?: () => void;
-  onAutoCompleteMove?: (direction: 'up' | 'down') => void;
-  onAutoCompleteSelect?: () => void;
   textareaRef?: React.RefObject<HTMLTextAreaElement | null>;
   justCompletedDirective?: { position: number; timestamp: number } | null;
   onDirectiveCompleted?: () => void;
@@ -38,10 +34,6 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
   onKeyDown,
   onInput,
   onBeforeInput,
-  onAutoCompleteShow,
-  onAutoCompleteHide,
-  onAutoCompleteMove,
-  onAutoCompleteSelect,
   textareaRef: externalRef,
   justCompletedDirective,
   onDirectiveCompleted,
@@ -203,9 +195,10 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
   /**
    * Handle beforeInput event for bracket completion
    */
-  const handleBeforeInput = useCallback((e: any) => {
+  const handleBeforeInput = useCallback((e: React.FormEvent<HTMLTextAreaElement>) => {
     if (onBeforeInput) {
-      const handled = onBeforeInput(e as InputEvent);
+      // Cast to unknown first, then to InputEvent to satisfy TypeScript
+      const handled = onBeforeInput(e as unknown as InputEvent);
       if (handled) {
         return; // Event was handled by bracket completion
       }

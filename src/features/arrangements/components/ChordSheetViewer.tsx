@@ -1,9 +1,9 @@
 import { useMemo, useRef } from 'react'
-import { ChordProParser, HtmlTableFormatter } from 'chordsheetjs'
 import { clsx } from 'clsx'
 import { useTransposition } from '../hooks/useTransposition'
-import { useChordSheetSettings } from '../hooks/useChordSheetSettings'
+import { useUnifiedChordRenderer } from '../hooks/useUnifiedChordRenderer'
 import type { ChordSheetViewerProps } from '../types/viewer.types'
+import '../styles/unified-chord-display.css'
 import '../styles/chordsheet.css'
 
 export function ChordSheetViewer({ 
@@ -13,7 +13,7 @@ export function ChordSheetViewer({
 }: ChordSheetViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const { transposition } = useTransposition()
-  const { fontSize, fontFamily } = useChordSheetSettings()
+  const { renderChordSheet, preferences } = useUnifiedChordRenderer()
   
   const formattedHtml = useMemo(() => {
     if (!chordProText) {
@@ -21,27 +21,17 @@ export function ChordSheetViewer({
     }
     
     try {
-      const parser = new ChordProParser()
-      const song = parser.parse(chordProText)
-      
-      if (transposition !== 0) {
-        song.transpose(transposition)
-      }
-      
-      // Use HtmlTableFormatter for better inline chord display
-      const formatter = new HtmlTableFormatter()
-      const html = formatter.format(song)
-      
-      // Add our custom classes for styling
-      return html
-        .replace(/<table/g, '<table class="chord-table"')
-        .replace(/<td class="chord">/g, '<td class="chord-cell">')
-        .replace(/<td class="lyrics">/g, '<td class="lyrics-cell">')
+      // Use unified renderer for consistency with preview
+      return renderChordSheet(chordProText, { 
+        transpose: transposition,
+        fontSize: preferences.fontSize,
+        fontFamily: preferences.fontFamily
+      })
     } catch (error) {
       console.error('ChordSheet parse error:', error)
       return '<div class="error">Unable to parse chord sheet</div>'
     }
-  }, [chordProText, transposition])
+  }, [chordProText, transposition, renderChordSheet, preferences])
   
   const handleCenterTap = (e: React.MouseEvent) => {
     const rect = containerRef.current?.getBoundingClientRect()
@@ -67,14 +57,12 @@ export function ChordSheetViewer({
       ref={containerRef}
       className={clsx("chord-sheet-container", className)}
       onClick={handleCenterTap}
-      style={{
-        fontSize: `${fontSize}px`,
-        fontFamily
-      }}
+      style={{ height: '100%', overflow: 'hidden' }}
     >
       <div 
         className="chord-sheet-content"
         dangerouslySetInnerHTML={{ __html: formattedHtml }}
+        style={{ height: '100%', overflow: 'auto' }}
       />
     </div>
   )

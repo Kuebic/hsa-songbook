@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react'
 import { Button } from './ui/button'
 import { Tabs, TabsList, TabsTrigger } from './ui/tabs'
-import { Separator } from './ui/separator'
 import { Toggle } from './ui/toggle'
 import { ChordSyntaxEditor } from './ChordSyntaxEditor'
 import { ChordPreview } from './ChordPreview'

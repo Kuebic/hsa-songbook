@@ -5,15 +5,19 @@
  * - Prefix matching
  * - CamelCase matching
  * - Fuzzy substring matching
+ * - Levenshtein distance for typo tolerance
  */
 
 import React from 'react';
+import { levenshteinDistance, normalizedLevenshteinDistance } from '../../../../songs/validation/utils/levenshtein';
 
 export interface FuzzyMatchOptions {
   caseSensitive?: boolean;
   prioritizePrefix?: boolean;
   prioritizeCamelCase?: boolean;
-  threshold?: number; // 0-1, higher means more strict
+  prioritizeTypoTolerance?: boolean;
+  threshold?: number; // 0-1000, higher means more strict
+  maxLevenshteinDistance?: number; // Maximum typo distance to consider
 }
 
 export interface FuzzyMatchResult {
@@ -154,6 +158,43 @@ function fuzzyMatchWithDistance(
 }
 
 /**
+ * Normalize text for comparison (remove punctuation, standardize spaces)
+ */
+export function normalizeForComparison(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/_/g, ' ')           // Replace underscores with spaces
+    .replace(/[^a-z0-9\s]/g, '')  // Remove punctuation
+    .replace(/\s+/g, ' ')         // Normalize spaces
+    .trim();
+}
+
+/**
+ * Check for typo tolerance using Levenshtein distance
+ */
+function matchWithTypoTolerance(
+  query: string,
+  target: string,
+  maxDistance: number
+): FuzzyMatchResult | null {
+  const distance = levenshteinDistance(query.toLowerCase(), target.toLowerCase());
+  
+  if (distance <= maxDistance) {
+    // Calculate score based on distance (closer = higher score)
+    const normalizedDist = normalizedLevenshteinDistance(query, target);
+    const score = Math.round(700 * (1 - normalizedDist));
+    
+    // For Levenshtein matches, we don't have specific character positions
+    // So we'll highlight the beginning characters up to query length
+    const matches = Array.from({ length: Math.min(query.length, target.length) }, (_, i) => i);
+    
+    return { score, matches };
+  }
+  
+  return null;
+}
+
+/**
  * Main fuzzy matching function
  * Returns match result with score and matched positions
  */
@@ -166,7 +207,9 @@ export function fuzzyMatch(
     caseSensitive = false,
     prioritizePrefix = true,
     prioritizeCamelCase = true,
-    threshold = 0
+    prioritizeTypoTolerance = true,
+    threshold = 0,
+    maxLevenshteinDistance = 2
   } = options;
   
   if (!query || !target) {
@@ -185,6 +228,16 @@ export function fuzzyMatch(
     };
   }
   
+  // Also check normalized versions for exact match
+  const qNorm = normalizeForComparison(query);
+  const tNorm = normalizeForComparison(target);
+  if (qNorm === tNorm) {
+    return {
+      score: 950,
+      matches: Array.from({ length: Math.min(query.length, target.length) }, (_, i) => i)
+    };
+  }
+  
   // Fast path: prefix match (high priority for ChordPro)
   if (prioritizePrefix && t.startsWith(q)) {
     return {
@@ -198,6 +251,14 @@ export function fuzzyMatch(
     const camelCaseResult = matchCamelCase(query, target);
     if (camelCaseResult) {
       return camelCaseResult;
+    }
+  }
+  
+  // Typo tolerance with Levenshtein distance
+  if (prioritizeTypoTolerance && query.length >= 3) { // Only for queries 3+ chars
+    const typoResult = matchWithTypoTolerance(query, target, maxLevenshteinDistance);
+    if (typoResult) {
+      return typoResult;
     }
   }
   

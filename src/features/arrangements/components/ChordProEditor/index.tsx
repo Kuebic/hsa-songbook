@@ -7,6 +7,7 @@ import { ThemeSelector } from './components/ThemeSelector';
 import { EditorSplitter } from './components/EditorSplitter';
 import { AutoCompleteDropdown } from './components/AutoCompleteDropdown';
 import { AlignmentDebugger } from './components/AlignmentDebugger';
+import { FontPreferences } from '../FontPreferences';
 import { useEditorState } from './hooks/useEditorState';
 import { useEditorTheme } from './hooks/useEditorTheme';
 import { useResponsiveLayout } from './hooks/useResponsiveLayout';
@@ -259,7 +260,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         </div>
         
         <div className="toolbar-right">
-          {/* Space for additional toolbar items */}
+          <FontPreferences showCompact={true} />
         </div>
       </div>
       
@@ -363,6 +364,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         anchorEl={autocomplete.anchorEl}
         isOpen={autocomplete.isOpen}
         isMobile={layout.isMobile}
+        isSearching={autocomplete.isSearching}
         onClose={autocomplete.closeAutocomplete}
       />
     </div>

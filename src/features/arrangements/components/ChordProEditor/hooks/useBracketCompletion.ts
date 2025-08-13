@@ -90,8 +90,9 @@ export const useBracketCompletion = (
           onChange(newContent, position + selectedText.length + 1);
         } else {
           // Insert bracket pair
-          const nextChar = content[position] || '';
-          // const shouldAddSpace = autoCloseBefore.includes(nextChar); // For future use
+          // For future use: check next character for auto-spacing
+          // const nextChar = content[position] || '';
+          // const shouldAddSpace = autoCloseBefore.includes(nextChar);
           
           const newContent = 
             content.slice(0, position) + 
