@@ -1,4 +1,4 @@
-import { NORMALIZED_THEMES, THEME_MAPPINGS, type NormalizedTheme } from '../constants/themes'
+import { NORMALIZED_THEMES, THEME_MAPPINGS } from '../constants/themes'
 import { levenshteinDistance } from './levenshtein'
 
 /**

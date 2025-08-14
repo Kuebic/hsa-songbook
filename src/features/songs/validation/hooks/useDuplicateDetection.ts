@@ -49,7 +49,7 @@ export function useDuplicateDetection(
 ): UseDuplicateDetectionReturn {
   const {
     debounceDelay = 500,
-    checkOnMount = false,
+    checkOnMount: _checkOnMount = false,
     onDuplicatesFound,
     onNoDuplicates,
     ...detectionOptions

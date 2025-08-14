@@ -83,7 +83,7 @@ export function BulkOperations() {
   
   const executeBulkOperation = async (
     operation: 'delete' | 'make-public' | 'make-private' | 'update-theme',
-    data?: Record<string, unknown> // eslint-disable-line @typescript-eslint/no-explicit-any
+    data?: Record<string, unknown>
   ): Promise<BulkOperationResult> => {
     const token = await getToken()
     const selectedArray = Array.from(selectedSongs)

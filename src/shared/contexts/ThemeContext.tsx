@@ -1,15 +1,7 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-
-export type Theme = 'light' | 'dark' | 'stage';
-
-interface ThemeContextType {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-  toggleTheme: () => void;
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+import type { Theme } from './theme-types';
+import { ThemeContext } from './theme-context';
 
 const getInitialTheme = (): Theme => {
   if (typeof window !== 'undefined') {
@@ -54,10 +46,3 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within ThemeProvider');
-  }
-  return context;
-}

@@ -1,8 +1,9 @@
-import { createContext, useState, useCallback, useRef } from 'react'
-import type { Notification, NotificationContextValue } from './Notification.types'
+import { useState, useCallback, useRef } from 'react'
+import type { Notification } from './Notification.types'
 import { NotificationContainer } from './NotificationContainer'
+import { NotificationContext } from './NotificationContext'
 
-export const NotificationContext = createContext<NotificationContextValue | null>(null)
+export { NotificationContext }
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([])

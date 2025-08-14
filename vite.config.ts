@@ -1,4 +1,6 @@
-import { defineConfig, type PluginOption } from 'vite'
+import { defineConfig, type PluginOption, type ViteDevServer } from 'vite'
+import type { Connect } from 'vite'
+import type * as http from 'node:http'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import tailwindcss from '@tailwindcss/vite'
@@ -249,9 +251,9 @@ export default defineConfig(() => ({
   },
   publicDir: 'public',
   // Custom middleware to serve PWA files in development
-  configureServer(server: any) {
+  configureServer(server: ViteDevServer) {
     return () => {
-      server.middlewares.use((req: any, res: any, next: any) => {
+      server.middlewares.use((req: Connect.IncomingMessage, res: http.ServerResponse, next: Connect.NextFunction) => {
         // Serve PWA dev files from dev-dist directory
         if (req.url && (req.url.includes('workbox-') || req.url.endsWith('.js.map'))) {
           const filePath = path.join(__dirname, 'dev-dist', path.basename(req.url))

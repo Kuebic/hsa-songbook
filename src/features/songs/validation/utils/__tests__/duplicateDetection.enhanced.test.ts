@@ -8,7 +8,7 @@ import {
   type DuplicateDetectionOptions
 } from '../duplicateDetection'
 import { levenshteinDistance } from '../levenshtein'
-import { songFactory, duplicateFactory } from '../../../test-utils/factories'
+import { songFactory } from '../../../test-utils/factories'
 import type { Song } from '../../../types/song.types'
 
 // Mock levenshtein distance for controlled testing
@@ -63,7 +63,6 @@ describe('duplicateDetection', () => {
     })
 
     it('finds exact title matches without artist', () => {
-      const targetSong = songFactory.build({ title: 'Amazing Grace' })
       const songs = [
         songFactory.build({ title: 'Amazing Grace', artist: 'John Newton' }),
         songFactory.build({ title: 'How Great Thou Art', artist: 'Carl Boberg' })
@@ -553,8 +552,8 @@ describe('duplicateDetection', () => {
 
     it('handles null/undefined song properties gracefully', () => {
       const songs = [
-        { ...songFactory.build(), title: null } as any,
-        { ...songFactory.build(), artist: null } as any,
+        { ...songFactory.build(), title: null } as Song & { title: null },
+        { ...songFactory.build(), artist: null } as Song & { artist: null },
         songFactory.build({ title: 'Valid Song' })
       ]
 

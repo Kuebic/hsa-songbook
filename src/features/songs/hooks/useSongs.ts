@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { Song, SongFilter } from '../types/song.types'
 import { songService } from '../services/songService'
 
@@ -7,7 +7,7 @@ export function useSongs(filter?: SongFilter) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchSongs = async () => {
+  const fetchSongs = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -20,11 +20,11 @@ export function useSongs(filter?: SongFilter) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filter])
 
   useEffect(() => {
     fetchSongs()
-  }, [filter])
+  }, [filter, fetchSongs])
 
   const refreshSongs = () => {
     fetchSongs()

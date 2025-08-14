@@ -452,7 +452,7 @@ describe('DuplicateManager', () => {
     })
 
     it('shows loading states during operations', async () => {
-      const user = userEvent.setup()
+      const _user = userEvent.setup()
       
       // Mock loading state
       vi.mocked(vi.importActual('../../../hooks/useSongMutations')).useSongMutations = () => ({
@@ -485,7 +485,7 @@ describe('DuplicateManager', () => {
     })
 
     it('supports keyboard navigation', async () => {
-      const _user = userEvent.setup() // eslint-disable-line @typescript-eslint/no-unused-vars
+      const user = userEvent.setup()
       
       renderWithClerk(
         <DuplicateManager />,

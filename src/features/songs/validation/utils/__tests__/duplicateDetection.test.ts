@@ -1,15 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import { 
   findSimilarSongs, 
-  normalizeTitle,
-  isDuplicateSong,
-  getDuplicateSummary
+  normalizeTitle
 } from '../duplicateDetection'
 import { 
-  levenshteinDistance,
-  normalizedLevenshteinDistance,
-  stringSimilarity,
-  areSimilar
+  levenshteinDistance
 } from '../levenshtein'
 import type { Song } from '../../../types/song.types'
 

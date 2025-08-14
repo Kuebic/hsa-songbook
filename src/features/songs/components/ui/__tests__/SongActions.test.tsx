@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { SongActions } from '../SongActions'
 import { NotificationProvider } from '@shared/components/notifications'
+import type { TestUser } from '@shared/types/test'
 
 // Mock dependencies
 vi.mock('@features/auth/hooks/useAuth')
@@ -18,9 +19,15 @@ const mockDeleteSong = vi.fn()
 const mockOnUpdate = vi.fn()
 const mockOnDelete = vi.fn()
 
+interface SongFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: Record<string, unknown>) => void;
+}
+
 // Mock SongFormModal
 vi.mock('../../forms/SongFormModal', () => ({
-  SongFormModal: ({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClose: () => void; onSubmit: (data: Record<string, unknown>) => void }) => (
+  SongFormModal: ({ isOpen, onClose, onSubmit }: SongFormModalProps) => (
     isOpen ? (
       <div role="dialog">
         <h2>Edit Song</h2>
@@ -108,7 +115,7 @@ describe('SongActions', () => {
 
   it('shows edit and delete buttons for song owner', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,
@@ -132,7 +139,7 @@ describe('SongActions', () => {
 
   it('shows edit and delete buttons for admin even if not owner', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: 'other-user' } as any,
+      user: { id: 'other-user', email: 'other@example.com' } as TestUser,
       userId: 'other-user',
       sessionId: 'session-456',
       isLoaded: true,
@@ -156,7 +163,7 @@ describe('SongActions', () => {
 
   it('does not show buttons for non-owner, non-admin users', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: 'other-user' } as any,
+      user: { id: 'other-user', email: 'other@example.com' } as TestUser,
       userId: 'other-user',
       sessionId: 'session-456',
       isLoaded: true,
@@ -181,7 +188,7 @@ describe('SongActions', () => {
   it('opens edit modal when edit button is clicked', async () => {
     const user = userEvent.setup()
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,
@@ -210,7 +217,7 @@ describe('SongActions', () => {
   it('shows delete confirmation dialog when delete button is clicked', async () => {
     const user = userEvent.setup()
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,
@@ -242,7 +249,7 @@ describe('SongActions', () => {
     const updatedSong = { ...mockSong, title: 'Updated Song' }
     
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,
@@ -276,7 +283,7 @@ describe('SongActions', () => {
     const user = userEvent.setup()
     
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,
@@ -312,7 +319,7 @@ describe('SongActions', () => {
     const user = userEvent.setup()
     
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,

@@ -62,7 +62,7 @@ export function useSlugGeneration(
   options: UseSlugGenerationOptions = {}
 ): UseSlugGenerationReturn {
   const {
-    autoGenerate = true,
+    autoGenerate: _autoGenerate = true,
     debounceDelay = 500,
     validateSlug = true,
     onSlugGenerated,
@@ -140,7 +140,7 @@ export function useSlugGeneration(
   /**
    * Generate slug with debouncing for auto-generation
    */
-  const generateSlugDebounced = useCallback(
+  const _generateSlugDebounced = useCallback(
     (title: string, artist?: string) => {
       clearDebounce()
 

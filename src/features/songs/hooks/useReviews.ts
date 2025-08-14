@@ -3,7 +3,6 @@ import { useAuth } from '@features/auth'
 import { reviewService } from '../services/reviewService'
 import type { 
   Review, 
-  ReviewResponse, 
   ReviewStats, 
   ReviewFilter 
 } from '../types/review.types'
@@ -63,7 +62,7 @@ export function useReviews(songId: string, initialFilter?: ReviewFilter) {
               filter.arrangementId
             )
             setCurrentUserReview(userReview)
-          } catch (err) {
+          } catch (_err) {
             // User hasn't reviewed yet, which is fine
             setCurrentUserReview(null)
           }

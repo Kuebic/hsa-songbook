@@ -67,7 +67,7 @@ export function FormTextarea({
         spellCheck={spellCheck}
         focused={focused}
         onFocus={() => setFocused(true)}
-        onBlur={(e) => {
+        onBlur={(_e) => {
           setFocused(false)
           // FormField will handle onBlur for validation
         }}

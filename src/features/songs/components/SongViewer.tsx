@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { SongTitleEdit } from './SongTitleEdit'
 import { ArrangementSwitcher } from './arrangements/ArrangementSwitcher'
 import type { Song, Arrangement } from '../types/song.types'
@@ -33,7 +33,10 @@ export function SongViewer({
   }, [selectedArrangementId])
   
   // Determine which arrangements to use (backward compatibility)
-  const effectiveArrangements = arrangements || (arrangement ? [arrangement] : [])
+  const effectiveArrangements = useMemo(() => 
+    arrangements || (arrangement ? [arrangement] : []),
+    [arrangements, arrangement]
+  )
   
   // Auto-select first arrangement if none selected
   useEffect(() => {

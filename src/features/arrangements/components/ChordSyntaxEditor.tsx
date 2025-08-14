@@ -131,7 +131,7 @@ function highlightChordPro(text: string): string {
   if (!text) return ''
   
   // Escape HTML to prevent XSS
-  let html = text
+  const html = text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')

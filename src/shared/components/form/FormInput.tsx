@@ -73,7 +73,7 @@ export function FormInput({
         inputMode={inputMode}
         focused={focused}
         onFocus={() => setFocused(true)}
-        onBlur={(e) => {
+        onBlur={(_e) => {
           setFocused(false)
           // FormField will handle onBlur for validation
         }}

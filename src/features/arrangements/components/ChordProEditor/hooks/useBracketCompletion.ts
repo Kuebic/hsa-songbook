@@ -39,7 +39,7 @@ export const useBracketCompletion = (
   const {
     enabled = true,
     autoCloseBrackets = true,
-    autoCloseBefore = ' \t\n)}]>',
+    autoCloseBefore: _autoCloseBefore = ' \t\n)}]>',
     autoDeletePairs = true,
     autoOvertype = true,
   } = options;
@@ -132,7 +132,7 @@ export const useBracketCompletion = (
     }
     
     return false;
-  }, [enabled, textareaRef, content, onChange, autoCloseBrackets, autoOvertype, autoCloseBefore]);
+  }, [enabled, textareaRef, content, onChange, autoCloseBrackets, autoOvertype]);
 
   /**
    * Handle keyboard events for smart deletion

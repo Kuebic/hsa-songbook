@@ -111,7 +111,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   // Update transposition when content changes externally
   useEffect(() => {
     transposition.updateOriginalContent(content);
-  }, [content]);
+  }, [content, transposition]);
 
   // Use mobile autocomplete hook
   const autocomplete = useMobileAutocomplete(
@@ -225,7 +225,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     if (layout.isMobile && previewVisible) {
       setPreviewVisible(false);
     }
-  }, [layout.isMobile]);
+  }, [layout.isMobile, previewVisible]);
 
   // Handle splitter resize from EditorSplitter component
   const handleSplitterResize = useCallback((leftWidth: number) => {

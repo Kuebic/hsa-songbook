@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { SongForm } from '../SongForm'
-import { songFactory, duplicateFactory } from '../../../test-utils/factories'
+import { songFactory } from '../../../test-utils/factories'
 import type { Song } from '../../../types/song.types'
 
 // Mock the auth hook

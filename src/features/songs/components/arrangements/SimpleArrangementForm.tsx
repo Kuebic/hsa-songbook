@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { SimpleSection, SimpleInput, SimpleTextarea } from '../forms/utils/SimpleFormInputs'
 import { SimpleChordEditor } from './SimpleChordEditor'
 import { DIFFICULTY_LEVELS } from '../../validation/constants/musicalKeys'
@@ -53,10 +53,15 @@ export function SimpleArrangementForm({
     onChange(newData)
   }
   
-  // Call onChange with initial data when component mounts or songTitle changes
+  const hasInitialized = useRef(false)
+  
+  // Call onChange with initial data when component mounts
   useEffect(() => {
-    onChange(data)
-  }, []) // Only run once on mount
+    if (!hasInitialized.current) {
+      onChange(data)
+      hasInitialized.current = true
+    }
+  }, [onChange, data])
 
   const handleChordDataChange = (value: string) => {
     const newData = { ...data, chordProText: value }

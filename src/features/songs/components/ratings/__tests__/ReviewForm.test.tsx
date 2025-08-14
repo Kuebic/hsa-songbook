@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { screen, fireEvent, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithClerk } from '@shared/test-utils/clerk-test-utils'
 import { createMockUser } from '@shared/test-utils/clerk-test-helpers'
@@ -294,7 +294,7 @@ describe('ReviewForm', () => {
 
   describe('loading states', () => {
     it('shows loading state during submission', async () => {
-      const user = userEvent.setup()
+      const _user = userEvent.setup()
       
       // Mock the hook to return loading state
       vi.mocked(vi.importActual('../../hooks/useReviewMutations')).useReviewMutations = () => ({

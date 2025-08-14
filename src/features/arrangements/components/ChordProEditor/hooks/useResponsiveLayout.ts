@@ -89,7 +89,7 @@ export function useIsTouchDevice(): boolean {
       setIsTouch(
         'ontouchstart' in window ||
         navigator.maxTouchPoints > 0 ||
-        // @ts-ignore - vendor prefix
+        // @ts-expect-error - vendor prefix property
         navigator.msMaxTouchPoints > 0
       )
     }

@@ -152,7 +152,7 @@ export const useMobileAutocomplete = (
       selectedIndex: 0,
       isSearching: false,
     }));
-  }, [state.isOpen, state.triggerPosition, state.trigger, textareaRef, getSuggestions, maxSuggestions]);
+  }, [state.isOpen, state.triggerPosition, state.trigger, textareaRef, getSuggestions, maxSuggestions, closeAutocomplete]);
 
   /**
    * Debounced update for performance
@@ -307,7 +307,7 @@ export const useMobileAutocomplete = (
     }
 
     return false;
-  }, [state.isOpen, state.items, state.selectedIndex, state.trigger, forceOpenAutocomplete]);
+  }, [state.isOpen, state.items, state.selectedIndex, state.trigger, forceOpenAutocomplete, insertSuggestion, closeAutocomplete]);
 
   /**
    * Insert selected suggestion
@@ -362,7 +362,7 @@ export const useMobileAutocomplete = (
     
     // Close autocomplete
     closeAutocomplete();
-  }, [textareaRef, state.triggerPosition, state.trigger, onSelect, onChange]);
+  }, [textareaRef, state.triggerPosition, state.trigger, onSelect, onChange, closeAutocomplete]);
 
   /**
    * Close autocomplete

@@ -30,7 +30,7 @@ export function ReviewList({
   isLoading = false,
   className = ''
 }: ReviewListProps) {
-  const { user } = useAuth()
+  const { user: _user } = useAuth()
   const { addNotification } = useNotification()
   const [votingReviews, setVotingReviews] = useState<Set<string>>(new Set())
   const [deletingReviews, setDeletingReviews] = useState<Set<string>>(new Set())

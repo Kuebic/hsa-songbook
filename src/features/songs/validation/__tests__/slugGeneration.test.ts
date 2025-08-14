@@ -133,7 +133,7 @@ describe('slugGeneration', () => {
       const originalRandom = Math.random
       Math.random = vi.fn().mockReturnValue(0.5)
 
-      const existingSlugs = Array(20).fill('').map((_, i) => 
+      const existingSlugs = Array(20).fill('').map(() => 
         `test-song-${'n'.repeat(5)}`
       )
 

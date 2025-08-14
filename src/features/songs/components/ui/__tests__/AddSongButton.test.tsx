@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AddSongButton } from '../AddSongButton'
 import { NotificationProvider } from '@shared/components/notifications'
+import type { TestUser } from '@shared/types/test'
 
 // Mock dependencies  
 vi.mock('@features/auth/hooks/useAuth')
@@ -15,9 +16,15 @@ const mockUseAuth = vi.mocked(useAuth)
 const mockUseSongMutations = vi.mocked(useSongMutations)
 const mockCreateSong = vi.fn()
 
+interface SongFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: Record<string, unknown>) => void;
+}
+
 // Mock SongFormModal since we're testing the button, not the modal
 vi.mock('../../forms/SongFormModal', () => ({
-  SongFormModal: ({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClose: () => void; onSubmit: (data: Record<string, unknown>) => void }) => (
+  SongFormModal: ({ isOpen, onClose, onSubmit }: SongFormModalProps) => (
     isOpen ? (
       <div role="dialog" data-testid="song-form-modal">
         <h2>Add New Song</h2>
@@ -90,7 +97,7 @@ describe('AddSongButton', () => {
 
   it('renders when user is signed in', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,
@@ -115,7 +122,7 @@ describe('AddSongButton', () => {
 
   it('should not show modal initially', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,
@@ -139,7 +146,7 @@ describe('AddSongButton', () => {
   it('should show modal when button clicked', async () => {
     const user = userEvent.setup()
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,
@@ -168,7 +175,7 @@ describe('AddSongButton', () => {
   it('should hide modal when close button clicked', async () => {
     const user = userEvent.setup()
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,
@@ -200,7 +207,7 @@ describe('AddSongButton', () => {
   it('opens modal when clicked', async () => {
     const user = userEvent.setup()
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,
@@ -229,7 +236,7 @@ describe('AddSongButton', () => {
   it('closes modal when close button is clicked', async () => {
     const user = userEvent.setup()
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,
@@ -267,7 +274,7 @@ describe('AddSongButton', () => {
     const mockSong = { id: '123', title: 'Test Song', slug: 'test-song' }
     
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,
@@ -306,7 +313,7 @@ describe('AddSongButton', () => {
     const mockError = new Error('Failed to create song')
     
     mockUseAuth.mockReturnValue({
-      user: { id: 'test-user' } as any,
+      user: { id: 'test-user', email: 'test@example.com' } as TestUser,
       userId: 'test-user',
       sessionId: 'session-123',
       isLoaded: true,

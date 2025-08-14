@@ -6,7 +6,7 @@ import {
   isValidTheme,
   themeStats
 } from '../utils/themeNormalization'
-import { NORMALIZED_THEMES, THEME_MAPPINGS } from '../constants/themes'
+import { NORMALIZED_THEMES } from '../constants/themes'
 
 describe('themeNormalization', () => {
   describe('normalizeTheme', () => {

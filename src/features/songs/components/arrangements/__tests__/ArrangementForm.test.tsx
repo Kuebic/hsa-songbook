@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { screen, fireEvent, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { render } from '@testing-library/react'
 import { ArrangementForm } from '../ArrangementForm'
 
 // Mock the ChordEditor component
 vi.mock('../ChordEditor', () => ({
-  ChordEditor: ({ value, onChange, onKeyChange }: any) => (
+  ChordEditor: ({ value, onChange, onKeyChange }: { value: string; onChange: (value: string) => void; onKeyChange?: (key: string) => void }) => (
     <textarea
       data-testid="chord-editor"
       value={value}

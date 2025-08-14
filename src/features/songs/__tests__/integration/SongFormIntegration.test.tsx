@@ -345,7 +345,7 @@ describe('Song Form Integration', () => {
           song={existingSong}
           onSubmit={async (data) => {
             // Only send changed fields
-            const changedFields: any = {}
+            const changedFields: Record<string, unknown> = {}
             if (data.artist !== existingSong.artist) {
               changedFields.artist = data.artist
             }
@@ -461,7 +461,7 @@ describe('Song Form Integration', () => {
       )
       
       // Mock a batch creation UI
-      const batchCreate = async (songsData: any[]) => {
+      const batchCreate = async (songsData: Array<{ title: string; themes: string[] }>) => {
         const response = await fetch('/api/v1/songs/batch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

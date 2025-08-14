@@ -39,7 +39,7 @@ export const ChordSyntaxHighlight = forwardRef<ChordSyntaxHighlightRef, ChordSyn
       if (!debouncedValue) return ''
       
       // Escape HTML to prevent XSS
-      let html = debouncedValue
+      const html = debouncedValue
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
