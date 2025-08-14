@@ -83,7 +83,7 @@ function normalizeChordForAnalysis(chord: string): string {
     } else {
       return root; // Major (default)
     }
-  } catch (error) {
+  } catch (_error) {
     return chord;
   }
 }

@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
+import { z, ZodIssue } from 'zod'
 import { ValidationError } from '../utils/errors'
+
+// Extended type for ZodIssue with optional expected and received properties
+interface ExtendedZodIssue extends ZodIssue {
+  expected?: unknown;
+  received?: unknown;
+}
 
 export const validate = (schema: z.ZodSchema) => {
   return (req: Request, _res: Response, next: NextFunction) => {
@@ -41,13 +47,16 @@ export const validateBody = (schema: z.ZodSchema) => {
         // Log validation errors for debugging
         console.error('❌ Validation failed for request body:', {
           body: req.body,
-          errors: error.errors.map(err => ({
-            path: err.path.join('.'),
-            message: err.message,
-            code: err.code,
-            expected: (err as any).expected,
-            received: (err as any).received
-          }))
+          errors: error.errors.map(err => {
+            const extendedErr = err as ExtendedZodIssue;
+            return {
+              path: err.path.join('.'),
+              message: err.message,
+              code: err.code,
+              expected: extendedErr.expected,
+              received: extendedErr.received
+            };
+          })
         })
         
         next(new ValidationError('Request body validation failed', errors))

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, renderAsAdmin, renderAsUser, screen, waitFor, userEvent } from '../../test-utils/render'
+import { render, renderAsAdmin, screen, waitFor, userEvent } from '../../test-utils/render'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import { SongForm } from '../../components/forms/SongForm'
 import { SongFormModal } from '../../components/forms/SongFormModal'
@@ -172,7 +172,6 @@ describe('Song Form Accessibility', () => {
         <ThemeCombobox
           value={[]}
           onChange={mockOnChange}
-          availableThemes={['worship', 'praise', 'prayer']}
         />
       )
       
@@ -474,7 +473,6 @@ describe('Song Form Accessibility', () => {
         <ThemeCombobox
           value={[]}
           onChange={mockOnChange}
-          availableThemes={['worship', 'praise']}
         />
       )
       

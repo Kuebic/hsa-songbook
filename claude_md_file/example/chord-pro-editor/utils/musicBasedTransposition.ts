@@ -273,7 +273,7 @@ function calculateTargetKey(originalKey: string, distance: number): string {
     const originalPosition = getLineOfFifthsPosition(originalKey);
     const targetPosition = originalPosition + distance;
     return getNoteAtLineOfFifthsPosition(targetPosition);
-  } catch (error) {
+  } catch (_error) {
     // Fallback to simple calculation
     return originalKey;
   }
@@ -282,7 +282,7 @@ function calculateTargetKey(originalKey: string, distance: number): string {
 function calculateSemitoneDistance(fromKey: string, toKey: string): number {
   try {
     return getTranspositionDistance(fromKey, toKey);
-  } catch (error) {
+  } catch (_error) {
     return 0;
   }
 }

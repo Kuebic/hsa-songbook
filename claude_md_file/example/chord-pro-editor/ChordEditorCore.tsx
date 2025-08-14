@@ -58,13 +58,13 @@ export const ChordEditorCore = React.memo<ChordEditorCoreProps>(({
       themeModule,
       langToolsModule
     ] = await Promise.all([
-      // @ts-ignore - Dynamic ace imports
+      // @ts-expect-error - Dynamic ace imports
       import('ace-builds/src-noconflict/ace'),
-      // @ts-ignore - Dynamic ace imports
+      // @ts-expect-error - Dynamic ace imports
       import('ace-builds/src-noconflict/mode-text'),
-      // @ts-ignore - Dynamic ace imports
+      // @ts-expect-error - Dynamic ace imports
       import(`ace-builds/src-noconflict/${getAceTheme(theme).replace('ace/', '')}`),
-      // @ts-ignore - Dynamic ace imports
+      // @ts-expect-error - Dynamic ace imports
       autoComplete ? import('ace-builds/src-noconflict/ext-language_tools') : Promise.resolve(null)
     ]);
     

@@ -52,15 +52,15 @@ export class CompressionService {
    * @param compressedData - Compressed Buffer from database
    * @returns Original ChordPro text
    */
-  async decompressChordPro(compressedData: Buffer | any): Promise<string> {
+  async decompressChordPro(compressedData: Buffer | { type: 'Buffer'; data: number[] } | Uint8Array | unknown): Promise<string> {
     try {
       // Handle MongoDB lean() which returns Buffer-like objects
       let buffer: Buffer
       if (Buffer.isBuffer(compressedData)) {
         buffer = compressedData
-      } else if (compressedData && compressedData.type === 'Buffer' && Array.isArray(compressedData.data)) {
+      } else if (compressedData && typeof compressedData === 'object' && 'type' in compressedData && 'data' in compressedData && compressedData.type === 'Buffer' && Array.isArray(compressedData.data)) {
         // MongoDB lean() returns { type: 'Buffer', data: [...] }
-        buffer = Buffer.from(compressedData.data)
+        buffer = Buffer.from(compressedData.data as number[])
       } else if (compressedData instanceof Uint8Array) {
         buffer = Buffer.from(compressedData)
       } else if (compressedData && compressedData.buffer && Buffer.isBuffer(compressedData.buffer)) {

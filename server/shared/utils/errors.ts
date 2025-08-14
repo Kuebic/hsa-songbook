@@ -28,10 +28,18 @@ export class AppError extends Error {
   }
 }
 
-export class ValidationError extends AppError {
-  public errors?: any[]
+interface ValidationErrorDetail {
+  path: string;
+  message: string;
+  code?: string;
+  expected?: unknown;
+  received?: unknown;
+}
 
-  constructor(message: string, errors?: any[]) {
+export class ValidationError extends AppError {
+  public errors?: ValidationErrorDetail[]
+
+  constructor(message: string, errors?: ValidationErrorDetail[]) {
     super(message, HttpCode.BAD_REQUEST)
     this.errors = errors
   }

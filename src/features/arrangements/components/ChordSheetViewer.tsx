@@ -2,7 +2,6 @@ import { useMemo, useRef, useEffect } from 'react'
 import { clsx } from 'clsx'
 import { useUnifiedChordRenderer } from '../hooks/useUnifiedChordRenderer'
 import { useChordSheetSettings } from '../hooks/useChordSheetSettings'
-import { extractKeyFromChordPro } from '../utils/chordProUtils'
 import type { ChordSheetViewerProps } from '../types/viewer.types'
 import '../styles/unified-chord-display.css'
 import '../styles/chordsheet.css'
@@ -23,10 +22,6 @@ export function ChordSheetViewer({
   isScrolling: externalIsScrolling,
   scrollSpeed: externalScrollSpeed
 }: EnhancedChordSheetViewerProps) {
-  // Extract the original key from the ChordPro content
-  const originalKeyFromContent = useMemo(() => {
-    return extractKeyFromChordPro(chordProText || '')
-  }, [chordProText])
   const containerRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const { renderChordSheet, preferences } = useUnifiedChordRenderer()

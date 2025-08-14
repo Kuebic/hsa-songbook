@@ -3,7 +3,7 @@
  * @description React hook for fetching search results with React Query integration
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   SearchFilters,
   SearchResult,
@@ -288,7 +288,6 @@ export function useSearchResults(
  * Useful for preloading likely search results
  */
 export function usePrefetchSearchResults() {
-  const { useQueryClient } = require('@tanstack/react-query');
   const queryClient = useQueryClient();
   
   const prefetchSearch = async (filters: SearchFilters) => {
@@ -307,7 +306,6 @@ export function usePrefetchSearchResults() {
  * Useful when songs are added/updated/deleted
  */
 export function useInvalidateSearchResults() {
-  const { useQueryClient } = require('@tanstack/react-query');
   const queryClient = useQueryClient();
   
   const invalidateSearch = async (filters?: Partial<SearchFilters>) => {

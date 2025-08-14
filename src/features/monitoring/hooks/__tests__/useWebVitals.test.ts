@@ -21,6 +21,15 @@ vi.mock('web-vitals/attribution', () => ({
 import { performanceService } from '../../services/performanceService';
 import * as webVitals from 'web-vitals/attribution';
 
+// Type the mocked functions
+const mockedWebVitals = webVitals as unknown as {
+  onCLS: ReturnType<typeof vi.fn>;
+  onINP: ReturnType<typeof vi.fn>;
+  onLCP: ReturnType<typeof vi.fn>;
+  onFCP: ReturnType<typeof vi.fn>;
+  onTTFB: ReturnType<typeof vi.fn>;
+};
+
 describe('useWebVitals', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -38,9 +47,9 @@ describe('useWebVitals', () => {
     renderHook(() => useWebVitals(mockReporter));
 
     // Verify web-vitals is not imported in dev
-    expect(webVitals.onCLS).not.toHaveBeenCalled();
-    expect(webVitals.onINP).not.toHaveBeenCalled();
-    expect(webVitals.onLCP).not.toHaveBeenCalled();
+    expect(mockedWebVitals.onCLS).not.toHaveBeenCalled();
+    expect(mockedWebVitals.onINP).not.toHaveBeenCalled();
+    expect(mockedWebVitals.onLCP).not.toHaveBeenCalled();
   });
 
   it('loads web vitals in production mode', async () => {
@@ -56,19 +65,19 @@ describe('useWebVitals', () => {
     const mockFCPMetric = { name: 'FCP', value: 1800, id: '4' };
     const mockTTFBMetric = { name: 'TTFB', value: 100, id: '5' };
 
-    webVitals.onCLS.mockImplementation((callback) => {
+    mockedWebVitals.onCLS.mockImplementation((callback: any) => {
       setTimeout(() => callback(mockCLSMetric), 0);
     });
-    webVitals.onINP.mockImplementation((callback) => {
+    mockedWebVitals.onINP.mockImplementation((callback: any) => {
       setTimeout(() => callback(mockINPMetric), 0);
     });
-    webVitals.onLCP.mockImplementation((callback) => {
+    mockedWebVitals.onLCP.mockImplementation((callback: any) => {
       setTimeout(() => callback(mockLCPMetric), 0);
     });
-    webVitals.onFCP.mockImplementation((callback) => {
+    mockedWebVitals.onFCP.mockImplementation((callback: any) => {
       setTimeout(() => callback(mockFCPMetric), 0);
     });
-    webVitals.onTTFB.mockImplementation((callback) => {
+    mockedWebVitals.onTTFB.mockImplementation((callback: any) => {
       setTimeout(() => callback(mockTTFBMetric), 0);
     });
 
@@ -94,7 +103,7 @@ describe('useWebVitals', () => {
     const mockCLSMetric = { name: 'CLS', value: 0.1, id: '1' };
     
     // Configure the mocked CLS function to call its callback
-    webVitals.onCLS.mockImplementation((callback) => {
+    mockedWebVitals.onCLS.mockImplementation((callback: any) => {
       setTimeout(() => callback(mockCLSMetric), 0);
     });
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeAll, afterAll, afterEach } from 'vitest'
-import { render, renderAsAdmin, screen, waitFor, userEvent } from '../../test-utils/render'
+import { renderAsAdmin, screen, waitFor, userEvent } from '../../test-utils/render'
 import { setupServer } from 'msw/node'
 import { http, HttpResponse } from 'msw'
 import { SongFormModal } from '../../components/forms/SongFormModal'
@@ -10,7 +10,7 @@ import type { Song } from '../../types/song.types'
 const server = setupServer(
   // Mock API endpoints
   http.post('/api/v1/songs', async ({ request }) => {
-    const data = await request.json()
+    const data = await request.json() as Record<string, unknown> & { title?: string; themes?: string[] }
     
     // Validate request
     if (!data.title) {
@@ -51,7 +51,7 @@ const server = setupServer(
       success: true,
       data: {
         ...songFactory.build(),
-        ...data,
+        ...(data as Record<string, unknown>),
         id: params.id as string
       }
     })

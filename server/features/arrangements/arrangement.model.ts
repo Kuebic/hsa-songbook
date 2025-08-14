@@ -104,7 +104,7 @@ const arrangementSchema = new Schema<IArrangement>({
   toJSON: {
     virtuals: true,
     transform: (_doc, ret) => {
-      const { _id, __v, documentSize, chordData, ...cleanRet } = ret
+      const { _id, __v, ...cleanRet } = ret
       return {
         id: _id,
         ...cleanRet
