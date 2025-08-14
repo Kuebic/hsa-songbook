@@ -1,0 +1,226 @@
+/**
+ * Reusable animations for form interactions
+ * Following modern design principles and performance best practices
+ */
+
+/* Form entry animations */
+@keyframes formFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Field state animations */
+@keyframes shake {
+  0%, 100% { 
+    transform: translateX(0); 
+  }
+  10%, 30%, 50%, 70%, 90% { 
+    transform: translateX(-2px); 
+  }
+  20%, 40%, 60%, 80% { 
+    transform: translateX(2px); 
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Success animations */
+@keyframes checkmark {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes successFade {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Loading animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes dots {
+  0%, 80%, 100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+/* Modal animations */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Utility classes for animations */
+.form-field-enter {
+  animation: slideIn 300ms ease-out;
+}
+
+.form-field-error {
+  animation: shake 300ms ease-in-out;
+}
+
+.form-field-success {
+  animation: successFade 400ms ease-out;
+}
+
+.form-loading {
+  animation: spin 1s linear infinite;
+}
+
+.form-shimmer {
+  animation: shimmer 2s linear infinite;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Smooth transitions for form elements */
+.form-transition {
+  transition: all 150ms ease-in-out;
+}
+
+.form-transition-slow {
+  transition: all 350ms ease-in-out;
+}
+
+/* Focus ring animation */
+.form-focus-ring {
+  position: relative;
+}
+
+.form-focus-ring:focus {
+  outline: none;
+}
+
+.form-focus-ring:focus::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border: 2px solid #3b82f6;
+  border-radius: inherit;
+  animation: pulse 1.5s infinite;
+}
+
+/* Hover lift effect */
+.form-hover-lift {
+  transition: transform 150ms ease-in-out, box-shadow 150ms ease-in-out;
+}
+
+.form-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Active press effect */
+.form-active-press {
+  transition: transform 100ms ease-in-out;
+}
+
+.form-active-press:active {
+  transform: scale(0.98);
+}

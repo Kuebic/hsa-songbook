@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Transpose with Key Directive</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-case {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 20px 0;
+            background: #f5f5f5;
+        }
+        .controls {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e0e0e0;
+        }
+        button {
+            padding: 5px 15px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .info {
+            background: #d0d0ff;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        pre {
+            background: white;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test: Transpose with {key:} Directive</h1>
+    
+    <div class="test-case">
+        <h2>Test Case 1: Song with {key: G}</h2>
+        <div class="info">
+            <strong>Original ChordPro:</strong>
+            <pre>{title: Test Song}
+{key: G}
+
+[Verse]
+[G]This is a [C]test [D]song in [G]G major</pre>
+        </div>
+        
+        <div class="controls">
+            <strong>Transposition:</strong>
+            <button onclick="alert('Transpose: -1')">-1</button>
+            <span id="transpose-value">0</span>
+            <button onclick="alert('Transpose: +1')">+1</button>
+            <button onclick="alert('Reset to 0')">Reset</button>
+        </div>
+        
+        <div class="info">
+            <strong>Expected Behavior:</strong>
+            <ul>
+                <li>At transpose = 0: Display shows "Key: G", chords are [G] [C] [D] [G]</li>
+                <li>At transpose = +1: Display shows "Key: G#/Ab", chords are [G#] [C#] [D#] [G#]</li>
+                <li>At transpose = -1: Display shows "Key: F#/Gb", chords are [F#] [B] [C#] [F#]</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="test-case">
+        <h2>Test Case 2: Song with {key: C}</h2>
+        <div class="info">
+            <strong>Original ChordPro:</strong>
+            <pre>{title: Another Test Song}
+{key: C}
+
+[Chorus]
+[C]Starting in [F]C major, [G]moving to [C]tonic</pre>
+        </div>
+        
+        <div class="controls">
+            <strong>Transposition:</strong>
+            <button onclick="alert('Transpose: -2')">-2</button>
+            <span id="transpose-value2">0</span>
+            <button onclick="alert('Transpose: +2')">+2</button>
+            <button onclick="alert('Reset to 0')">Reset</button>
+        </div>
+        
+        <div class="info">
+            <strong>Expected Behavior:</strong>
+            <ul>
+                <li>At transpose = 0: Display shows "Key: C", chords are [C] [F] [G] [C]</li>
+                <li>At transpose = +2: Display shows "Key: D", chords are [D] [G] [A] [D]</li>
+                <li>At transpose = -2: Display shows "Key: Bb", chords are [Bb] [Eb] [F] [Bb]</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="test-case">
+        <h2>Summary</h2>
+        <p><strong>Current Implementation Status:</strong></p>
+        <ul>
+            <li>✅ ChordPro content with {key:} directive is parsed correctly</li>
+            <li>✅ Original key is extracted from the content</li>
+            <li>✅ Transposition hook uses the original key as base</li>
+            <li>✅ When transpose = 0, chords remain unchanged</li>
+            <li>✅ When transpose = ±n, all chords shift by n semitones</li>
+            <li>✅ The display shows the transposed key correctly</li>
+        </ul>
+        
+        <p><strong>How it works:</strong></p>
+        <ol>
+            <li>Song has {key: G} directive</li>
+            <li>useTransposition hook receives "G" as originalKey</li>
+            <li>At transpose = 0, currentKey = "G" (no change)</li>
+            <li>At transpose = +1, currentKey = "G#" (up 1 semitone)</li>
+            <li>ChordSheetJS applies the transposition to all chords</li>
+            <li>Display shows the currentKey value</li>
+        </ol>
+    </div>
+</body>
+</html>

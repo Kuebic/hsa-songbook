@@ -4,18 +4,21 @@
  */
 
 import {
-  ChordSheetParser,
+  ChordProParser,
+  ChordsOverWordsParser,
   ChordProFormatter,
   TextFormatter,
   HtmlDivFormatter,
   HtmlTableFormatter,
   Song,
+  Chord,
 } from 'chordsheetjs';
 import type {
   ChordProMetadata,
   ValidationError,
   ValidationWarning,
 } from '../types/editor.types';
+import { enharmonicService } from './enharmonicService';
 
 /**
  * Supported export formats
@@ -47,10 +50,14 @@ export interface ParseResult {
  * ChordPro service class
  */
 export class ChordProService {
-  private parser: ChordSheetParser;
+  private chordProParser: ChordProParser;
+  private plainParser: ChordsOverWordsParser;
 
   constructor() {
-    this.parser = new ChordSheetParser();
+    // Use ChordProParser for ChordPro format (with directives)
+    this.chordProParser = new ChordProParser();
+    // Use ChordsOverWordsParser for plain chord sheets
+    this.plainParser = new ChordsOverWordsParser();
   }
 
   /**
@@ -63,8 +70,13 @@ export class ChordProService {
     let metadata: ChordProMetadata = {};
 
     try {
+      // Determine which parser to use based on content
+      // If content has ChordPro directives (starting with {), use ChordProParser
+      const hasDirectives = content.includes('{') && content.includes('}');
+      const parser = hasDirectives ? this.chordProParser : this.plainParser;
+      
       // Parse the content
-      song = this.parser.parse(content);
+      song = parser.parse(content);
       
       // Extract metadata
       metadata = this.extractMetadata(song);
@@ -156,6 +168,48 @@ export class ChordProService {
     const formatter = new ChordProFormatter();
     return formatter.format(song);
   }
+  
+  /**
+   * Transpose with enharmonic preference
+   */
+  transposeWithEnharmonic(
+    content: string, 
+    semitones: number, 
+    enharmonicPreference?: 'sharp' | 'flat' | 'auto'
+  ): string {
+    const { song } = this.parse(content);
+    
+    // Apply transposition
+    song.transpose(semitones);
+    
+    // Apply enharmonic preference if specified
+    if (enharmonicPreference && enharmonicPreference !== 'auto') {
+      const modifier = enharmonicPreference === 'sharp' ? '#' : 'b';
+      
+      song.lines.forEach(line => {
+        if (line.items) {
+          line.items.forEach((item: any) => {
+            if ('chords' in item && item.chords) {
+              if (typeof item.chords === 'string') {
+                const chord = Chord.parse(item.chords);
+                if (chord) {
+                  item.chords = chord.useModifier(modifier).toString();
+                }
+              } else if (Array.isArray(item.chords)) {
+                item.chords = item.chords.map((chordStr: string) => {
+                  const chord = Chord.parse(chordStr);
+                  return chord ? chord.useModifier(modifier).toString() : chordStr;
+                });
+              }
+            }
+          });
+        }
+      });
+    }
+    
+    const formatter = new ChordProFormatter();
+    return formatter.format(song);
+  }
 
   /**
    * Format ChordPro content
@@ -166,6 +220,63 @@ export class ChordProService {
     return formatter.format(song);
   }
 
+  /**
+   * Detect song key from content
+   */
+  detectSongKey(content: string): { key: string; confidence: number } {
+    const { song } = this.parse(content);
+    const songData = song as any;
+    
+    // Check for explicit key directive
+    if (songData.key) {
+      return { key: songData.key, confidence: 1.0 };
+    }
+    
+    // Analyze chord progression for key detection
+    const chords = this.getChords(content);
+    
+    if (chords.length === 0) {
+      return { key: 'C', confidence: 0 };
+    }
+    
+    // Simple key detection based on first and last chords
+    // This is a simplified version - a real implementation would use
+    // more sophisticated music theory analysis
+    const firstChord = chords[0];
+    const lastChord = chords[chords.length - 1];
+    
+    // If first and last are the same, likely the key
+    if (firstChord === lastChord) {
+      return { key: firstChord, confidence: 0.8 };
+    }
+    
+    // Otherwise, use the first chord with lower confidence
+    return { key: firstChord, confidence: 0.5 };
+  }
+  
+  /**
+   * Apply enharmonic preference to parsed song
+   */
+  applyEnharmonicPreference(song: Song, preference: 'sharp' | 'flat'): void {
+    const modifier = preference === 'sharp' ? '#' : 'b';
+    
+    song.lines.forEach(line => {
+      if (line.items) {
+        line.items.forEach((item: any) => {
+          if ('chords' in item && item.chords) {
+            if (typeof item.chords === 'string') {
+              item.chords = enharmonicService.convertChord(item.chords, modifier);
+            } else if (Array.isArray(item.chords)) {
+              item.chords = item.chords.map((chord: string) => 
+                enharmonicService.convertChord(chord, modifier)
+              );
+            }
+          }
+        });
+      }
+    });
+  }
+  
   /**
    * Get all chords used in the song
    */

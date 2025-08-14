@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { SongFormModal } from '../forms/SongFormModal'
 import { useSongMutations } from '@features/songs/hooks/mutations/useSongMutations'
@@ -11,6 +11,15 @@ export function AddSongButton() {
   const { createSong } = useSongMutations()
   const { addNotification } = useNotification()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  const handleOpenModal = useCallback(() => {
+    setShowModal(true)
+  }, [])
+  
+  const handleCloseModal = useCallback(() => {
+    setShowModal(false)
+    setIsSubmitting(false) // Reset submission state
+  }, [])
   
   if (!isSignedIn) return null
   
@@ -32,14 +41,13 @@ export function AddSongButton() {
         }
       })
       
-      setShowModal(false)
+      handleCloseModal() // Use the callback
     } catch (error) {
       addNotification({
         type: 'error',
         title: 'Failed to create song',
         message: error instanceof Error ? error.message : 'Please try again'
       })
-    } finally {
       setIsSubmitting(false)
     }
   }
@@ -49,7 +57,7 @@ export function AddSongButton() {
     alignItems: 'center',
     gap: '8px',
     padding: '8px 16px',
-    backgroundColor: '#10b981',
+    backgroundColor: 'var(--status-success)',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
@@ -66,27 +74,30 @@ export function AddSongButton() {
   return (
     <>
       <button
-        onClick={() => setShowModal(true)}
+        onClick={handleOpenModal}
         style={buttonStyles}
         onMouseEnter={e => {
-          e.currentTarget.style.backgroundColor = '#059669'
+          e.currentTarget.style.opacity = '0.9'
         }}
         onMouseLeave={e => {
-          e.currentTarget.style.backgroundColor = '#10b981'
+          e.currentTarget.style.opacity = '1'
         }}
         aria-label="Add new song"
         title="Add new song"
+        data-testid="add-song-button"
       >
         <span style={iconStyles}>➕</span>
         <span>Add Song</span>
       </button>
       
-      <SongFormModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-      />
+      {showModal && (
+        <SongFormModal
+          isOpen={showModal}
+          onClose={handleCloseModal}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </>
   )
 }

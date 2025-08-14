@@ -8,9 +8,17 @@ export interface ViewerHeaderProps {
   arrangement: ArrangementViewerData
 }
 
+import type { EnhancedTranspositionState } from '../hooks/useTransposition'
+
 export interface ViewerControlsProps {
-  currentKey: string
-  onTranspose: (semitones: number) => void
+  // Legacy props for backward compatibility
+  currentKey?: string
+  onTranspose?: (semitones: number) => void
+  // Enhanced transposition
+  transposition?: EnhancedTranspositionState & {
+    transpose: (steps: number) => void
+    reset: () => void
+  }
   fontSize: number
   onFontSizeChange: (size: number) => void
   scrollSpeed: number

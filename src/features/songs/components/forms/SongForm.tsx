@@ -204,9 +204,9 @@ export function SongForm({
       {/* Arrangement Section */}
       <div style={{
         padding: '20px',
-        backgroundColor: '#f8fafc',
+        backgroundColor: 'var(--color-secondary)',
         borderRadius: '8px',
-        border: '1px solid #e2e8f0'
+        border: '1px solid var(--color-border)'
       }}>
         <SimpleCheckbox
           name="includeArrangement"

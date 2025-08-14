@@ -1,3 +1,4 @@
+import { useCallback, useEffect } from 'react'
 import { Modal } from '@shared/components/modal'
 import { SongForm } from './SongForm'
 import type { Song } from '../../types/song.types'
@@ -20,20 +21,35 @@ export function SongFormModal({
   existingSongs = [],
   isSubmitting = false
 }: SongFormModalProps) {
+  // Ensure modal closes on unmount
+  useEffect(() => {
+    return () => {
+      if (isOpen) {
+        onClose()
+      }
+    }
+  }, [isOpen, onClose])
+  
   const handleSubmit = async (data: SongFormData) => {
     try {
       await onSubmit(data)
-      // Parent component will close modal on success
+      // Parent component handles closing
     } catch (error) {
-      // Error handling should be done by parent component
       console.error('Error submitting form:', error)
+      // Keep modal open on error
     }
   }
+  
+  const handleClose = useCallback(() => {
+    if (!isSubmitting) {
+      onClose()
+    }
+  }, [isSubmitting, onClose])
   
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title={song ? `Edit Song: ${song.title}` : 'Add New Song'}
       description={
         song 
@@ -44,12 +60,13 @@ export function SongFormModal({
       closeOnEsc={!isSubmitting}
       closeOnOverlayClick={!isSubmitting}
       showCloseButton={!isSubmitting}
+      data-testid="song-form-modal"
     >
       <SongForm
         initialData={song}
         existingSongs={existingSongs}
         onSubmit={handleSubmit}
-        onCancel={onClose}
+        onCancel={handleClose}
         isSubmitting={isSubmitting}
       />
     </Modal>

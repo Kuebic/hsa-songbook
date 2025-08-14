@@ -1,19 +1,40 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useEffect } from 'react'
 import { clsx } from 'clsx'
-import { useTransposition } from '../hooks/useTransposition'
 import { useUnifiedChordRenderer } from '../hooks/useUnifiedChordRenderer'
+import { useChordSheetSettings } from '../hooks/useChordSheetSettings'
+import { extractKeyFromChordPro } from '../utils/chordProUtils'
 import type { ChordSheetViewerProps } from '../types/viewer.types'
 import '../styles/unified-chord-display.css'
 import '../styles/chordsheet.css'
 
+interface EnhancedChordSheetViewerProps extends ChordSheetViewerProps {
+  isStageMode?: boolean
+  transposition?: number
+  isScrolling?: boolean
+  scrollSpeed?: number
+}
+
 export function ChordSheetViewer({ 
   chordProText, 
   onCenterTap,
-  className 
-}: ChordSheetViewerProps) {
+  className,
+  isStageMode = false,
+  transposition = 0,
+  isScrolling: externalIsScrolling,
+  scrollSpeed: externalScrollSpeed
+}: EnhancedChordSheetViewerProps) {
+  // Extract the original key from the ChordPro content
+  const originalKeyFromContent = useMemo(() => {
+    return extractKeyFromChordPro(chordProText || '')
+  }, [chordProText])
   const containerRef = useRef<HTMLDivElement>(null)
-  const { transposition } = useTransposition()
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const { renderChordSheet, preferences } = useUnifiedChordRenderer()
+  const { isScrolling: localIsScrolling, scrollSpeed: localScrollSpeed } = useChordSheetSettings()
+  
+  // Use external props if provided, otherwise use local settings
+  const isScrolling = externalIsScrolling !== undefined ? externalIsScrolling : localIsScrolling
+  const scrollSpeed = externalScrollSpeed !== undefined ? externalScrollSpeed : localScrollSpeed
   
   const formattedHtml = useMemo(() => {
     if (!chordProText) {
@@ -32,6 +53,26 @@ export function ChordSheetViewer({
       return '<div class="error">Unable to parse chord sheet</div>'
     }
   }, [chordProText, transposition, renderChordSheet, preferences])
+  
+  // Handle auto-scroll within the content container
+  useEffect(() => {
+    if (isScrolling && scrollContainerRef.current) {
+      const container = scrollContainerRef.current
+      const pixelsPerFrame = scrollSpeed / 60 // Convert to pixels per frame (60fps)
+      
+      const scrollInterval = setInterval(() => {
+        // Scroll the container, not the window
+        container.scrollTop += pixelsPerFrame
+        
+        // Stop scrolling when we reach the bottom
+        if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
+          clearInterval(scrollInterval)
+        }
+      }, 1000 / 60) // 60fps
+      
+      return () => clearInterval(scrollInterval)
+    }
+  }, [isScrolling, scrollSpeed])
   
   const handleCenterTap = (e: React.MouseEvent) => {
     const rect = containerRef.current?.getBoundingClientRect()
@@ -55,15 +96,36 @@ export function ChordSheetViewer({
   return (
     <div 
       ref={containerRef}
-      className={clsx("chord-sheet-container", className)}
+      className={clsx(
+        "chord-sheet-container",
+        isStageMode && "stage-mode-content",
+        className
+      )}
       onClick={handleCenterTap}
-      style={{ height: '100%', overflow: 'hidden' }}
+      style={{ 
+        height: '100%',
+        overflow: 'hidden',
+        position: 'relative'
+      }}
     >
       <div 
-        className="chord-sheet-content"
-        dangerouslySetInnerHTML={{ __html: formattedHtml }}
-        style={{ height: '100%', overflow: 'auto' }}
-      />
+        ref={scrollContainerRef}
+        className="chord-sheet-scroll-container"
+        style={{ 
+          height: '100%',
+          overflow: 'auto',
+          position: 'relative'
+        }}
+      >
+        <div 
+          className="chord-sheet-content"
+          dangerouslySetInnerHTML={{ __html: formattedHtml }}
+          style={{ 
+            minHeight: '100%',
+            padding: isStageMode ? '2rem' : '1rem'
+          }}
+        />
+      </div>
     </div>
   )
 }

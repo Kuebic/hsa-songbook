@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { TransposeControls } from './TransposeControls'
 import type { ViewerControlsProps } from '../types/viewer.types'
 
 export function ViewerControls({
   currentKey,
   onTranspose,
+  transposition,
   fontSize,
   onFontSizeChange,
   scrollSpeed,
@@ -15,18 +17,29 @@ export function ViewerControls({
 }: ViewerControlsProps) {
   const [showSettings, setShowSettings] = useState(false)
   
+  // Use enhanced transposition if available, fallback to legacy
   const handleTransposeUp = () => {
-    onTranspose(1)
+    if (transposition) {
+      transposition.transpose(1)
+    } else if (onTranspose) {
+      onTranspose(1)
+    }
   }
   
   const handleTransposeDown = () => {
-    onTranspose(-1)
+    if (transposition) {
+      transposition.transpose(-1)
+    } else if (onTranspose) {
+      onTranspose(-1)
+    }
   }
   
+  const displayKey = transposition?.currentKey || currentKey
+  
   if (isMinimalMode) {
-    // In minimal mode, show only essential floating controls
+    // In minimal/stage mode, show only essential floating controls
     return (
-      <div style={{
+      <div className="viewer-controls minimal" style={{
         position: 'fixed',
         bottom: '1rem',
         right: '1rem',
@@ -34,21 +47,92 @@ export function ViewerControls({
         gap: '0.5rem',
         zIndex: 1000
       }}>
+        {/* Exit button */}
         <button
           onClick={onToggleMinimalMode}
+          className="stage-mode-exit"
           style={{
             padding: '0.75rem',
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            color: '#ffffff',
-            border: 'none',
+            backgroundColor: 'rgba(255, 0, 0, 0.2)',
+            color: 'white',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
             borderRadius: '50%',
             cursor: 'pointer',
-            fontSize: '1.25rem'
+            fontSize: '1.25rem',
+            transition: 'all 0.2s'
           }}
-          aria-label="Exit minimal mode"
+          aria-label="Exit stage mode"
+          title="Exit stage mode (ESC)"
         >
           ✕
         </button>
+        
+        {/* Minimal transpose controls */}
+        {(transposition || onTranspose) && (
+          transposition ? (
+            <TransposeControls
+              currentKey={transposition.currentKey}
+              originalKey={transposition.originalKey}
+              semitones={transposition.semitones}
+              onTranspose={transposition.transpose}
+              onReset={transposition.reset}
+              canTransposeUp={transposition.canTransposeUp}
+              canTransposeDown={transposition.canTransposeDown}
+              variant="stage"
+            />
+          ) : (
+            <>
+              <button
+                onClick={() => onTranspose?.(-1)}
+                style={{
+                  padding: '0.5rem 0.75rem',
+                  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                  color: 'white',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '0.25rem',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  fontWeight: 'bold'
+                }}
+                aria-label="Transpose down"
+                title="Transpose down"
+              >
+                −
+              </button>
+              <span style={{
+                padding: '0.5rem 0.75rem',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                color: 'var(--stage-chord-color, #00ff00)',
+                borderRadius: '0.25rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                minWidth: '2.5rem',
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                {displayKey}
+              </span>
+              <button
+                onClick={() => onTranspose?.(1)}
+                style={{
+                  padding: '0.5rem 0.75rem',
+                  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                  color: 'white',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '0.25rem',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  fontWeight: 'bold'
+                }}
+                aria-label="Transpose up"
+                title="Transpose up"
+              >
+                +
+              </button>
+            </>
+          )
+        )}
       </div>
     )
   }
@@ -59,8 +143,8 @@ export function ViewerControls({
       bottom: 0,
       left: 0,
       right: 0,
-      backgroundColor: '#ffffff',
-      borderTop: '1px solid #e2e8f0',
+      backgroundColor: 'var(--color-background)',
+      borderTop: '1px solid var(--color-border)',
       padding: '1rem',
       zIndex: 100
     }}>
@@ -72,51 +156,64 @@ export function ViewerControls({
         margin: '0 auto'
       }}>
         {/* Transpose Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.875rem', color: '#64748b' }}>Transpose:</span>
-          <button
-            onClick={handleTransposeDown}
-            style={{
+        {transposition ? (
+          <TransposeControls
+            currentKey={transposition.currentKey}
+            originalKey={transposition.originalKey}
+            semitones={transposition.semitones}
+            onTranspose={transposition.transpose}
+            onReset={transposition.reset}
+            canTransposeUp={transposition.canTransposeUp}
+            canTransposeDown={transposition.canTransposeDown}
+            variant="controls"
+          />
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Transpose:</span>
+            <button
+              onClick={handleTransposeDown}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: 'var(--color-accent)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '0.375rem',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: 'bold'
+              }}
+              aria-label="Transpose down"
+            >
+              −
+            </button>
+            <span style={{
               padding: '0.5rem 1rem',
-              backgroundColor: '#f1f5f9',
-              border: '1px solid #e2e8f0',
+              backgroundColor: 'var(--color-accent)',
+              color: 'var(--color-primary)',
               borderRadius: '0.375rem',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              fontWeight: 'bold'
-            }}
-            aria-label="Transpose down"
-          >
-            −
-          </button>
-          <span style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#eff6ff',
-            color: '#1e40af',
-            borderRadius: '0.375rem',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            minWidth: '3rem',
-            textAlign: 'center'
-          }}>
-            {currentKey}
-          </span>
-          <button
-            onClick={handleTransposeUp}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#f1f5f9',
-              border: '1px solid #e2e8f0',
-              borderRadius: '0.375rem',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              fontWeight: 'bold'
-            }}
-            aria-label="Transpose up"
-          >
-            +
-          </button>
-        </div>
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              minWidth: '3rem',
+              textAlign: 'center'
+            }}>
+              {displayKey}
+            </span>
+            <button
+              onClick={handleTransposeUp}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: 'var(--color-accent)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '0.375rem',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: 'bold'
+              }}
+              aria-label="Transpose up"
+            >
+              +
+            </button>
+          </div>
+        )}
         
         {/* Auto-scroll Control */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -124,8 +221,8 @@ export function ViewerControls({
             onClick={onToggleScroll}
             style={{
               padding: '0.5rem 1rem',
-              backgroundColor: isScrolling ? '#dc2626' : '#10b981',
-              color: '#ffffff',
+              backgroundColor: isScrolling ? 'var(--status-error)' : 'var(--status-success)',
+              color: 'var(--color-background)',
               border: 'none',
               borderRadius: '0.375rem',
               cursor: 'pointer',
@@ -147,7 +244,7 @@ export function ViewerControls({
               onChange={(e) => onScrollSpeedChange(Number(e.target.value))}
               style={{
                 width: '100px',
-                accentColor: '#10b981'
+                accentColor: 'var(--status-success)'
               }}
               aria-label="Scroll speed"
             />
@@ -160,8 +257,8 @@ export function ViewerControls({
             onClick={() => setShowSettings(!showSettings)}
             style={{
               padding: '0.5rem',
-              backgroundColor: '#f1f5f9',
-              border: '1px solid #e2e8f0',
+              backgroundColor: 'var(--color-accent)',
+              border: '1px solid var(--color-border)',
               borderRadius: '0.375rem',
               cursor: 'pointer',
               fontSize: '1.25rem'
@@ -177,8 +274,8 @@ export function ViewerControls({
               bottom: '100%',
               right: 0,
               marginBottom: '0.5rem',
-              backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
+              backgroundColor: 'var(--color-background)',
+              border: '1px solid var(--color-border)',
               borderRadius: '0.5rem',
               padding: '1rem',
               boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
@@ -188,14 +285,14 @@ export function ViewerControls({
                 margin: '0 0 1rem 0',
                 fontSize: '1rem',
                 fontWeight: '600',
-                color: '#1e293b'
+                color: 'var(--text-primary)'
               }}>Display Settings</h3>
               
               <div style={{ marginBottom: '1rem' }}>
                 <label style={{
                   display: 'block',
                   fontSize: '0.875rem',
-                  color: '#64748b',
+                  color: 'var(--text-secondary)',
                   marginBottom: '0.25rem'
                 }}>
                   Font Size: {fontSize}px
@@ -208,7 +305,7 @@ export function ViewerControls({
                   onChange={(e) => onFontSizeChange(Number(e.target.value))}
                   style={{
                     width: '100%',
-                    accentColor: '#3b82f6'
+                    accentColor: 'var(--color-primary)'
                   }}
                 />
               </div>
@@ -218,8 +315,8 @@ export function ViewerControls({
                 style={{
                   width: '100%',
                   padding: '0.5rem',
-                  backgroundColor: '#1e293b',
-                  color: '#ffffff',
+                  backgroundColor: 'var(--color-foreground)',
+                  color: 'var(--text-primary)',
                   border: 'none',
                   borderRadius: '0.375rem',
                   cursor: 'pointer',

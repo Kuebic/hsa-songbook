@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FormField } from './FormField'
-import { getFormStyles } from './utils/style-converter'
+import { designTokens, getFieldBorderColor, getFieldBackgroundColor } from '../../styles/tokens'
 import type { FormFieldProps } from './types'
 
 export interface FormInputProps extends Omit<FormFieldProps, 'children'> {
@@ -76,7 +76,6 @@ export function FormInput({
         onBlur={(e) => {
           setFocused(false)
           // FormField will handle onBlur for validation
-          e.target.onBlur?.(e)
         }}
       />
     </FormField>
@@ -142,12 +141,34 @@ function InputElement({
   ...ariaProps
 }: InputElementProps) {
   
+  // Determine field states for styling
+  const borderState = disabled ? 'disabled' : 
+    hasError ? 'error' : 
+    focused ? 'focused' : 'default'
+  
+  const backgroundState = disabled ? 'disabled' : 
+    hasError ? 'error' : 'default'
+  
   // Get styles based on current state
-  const inputStyles = getFormStyles('input', {
-    focused,
-    hasError,
-    disabled,
-  })
+  const inputStyles: React.CSSProperties = {
+    width: '100%',
+    padding: '12px 16px',
+    fontSize: designTokens.typography.fontSize.base,
+    fontWeight: designTokens.typography.fontWeight.normal,
+    lineHeight: designTokens.typography.lineHeight.normal,
+    minHeight: '44px',
+    border: `1px solid ${getFieldBorderColor(borderState)}`,
+    borderRadius: designTokens.radius.md,
+    backgroundColor: getFieldBackgroundColor(backgroundState),
+    color: disabled ? designTokens.colors.text.disabled : designTokens.colors.text.primary,
+    transition: `border-color ${designTokens.transitions.fast}, background-color ${designTokens.transitions.fast}, box-shadow ${designTokens.transitions.fast}`,
+    outline: 'none',
+    cursor: disabled ? 'not-allowed' : 'text',
+    opacity: disabled ? 0.6 : 1,
+    ...(focused && {
+      boxShadow: designTokens.shadows.focus
+    })
+  }
   
   return (
     <input
@@ -171,7 +192,7 @@ function InputElement({
       min={min}
       max={max}
       size={size}
-      inputMode={inputMode}
+      inputMode={inputMode as React.HTMLAttributes<HTMLInputElement>['inputMode']}
       style={inputStyles}
     />
   )

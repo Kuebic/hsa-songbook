@@ -1,16 +1,26 @@
+import { useEffect, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { useArrangementViewer } from '../hooks/useArrangementViewer'
-import { useMinimalMode } from '../hooks/useMinimalMode'
 import { useTransposition } from '../hooks/useTransposition'
+import { useTransposeKeyboard } from '../hooks/useTransposeKeyboard'
 import { useChordSheetSettings } from '../hooks/useChordSheetSettings'
+import { usePrint } from '../hooks/usePrint'
+import { useStageMode } from '../hooks/useStageMode'
+import { extractKeyFromChordPro } from '../utils/chordProUtils'
+import { ViewerLayout } from '../components/ViewerLayout'
 import { ViewerHeader } from '../components/ViewerHeader'
+import { ViewerToolbar } from '../components/ViewerToolbar'
 import { ViewerControls } from '../components/ViewerControls'
 import { ChordSheetViewer } from '../components/ChordSheetViewer'
+import '../styles/viewer-layout.css'
+import '../styles/stage-mode.css'
+import '../styles/transpose.css'
 
 export function ArrangementViewerPage() {
   const { slug } = useParams<{ slug: string }>()
   const { arrangement, loading, error } = useArrangementViewer(slug!)
-  const { isMinimal: isMinimalMode, toggleMinimal } = useMinimalMode()
+  const { isStageMode, toggleStageMode } = useStageMode()
+  const { handlePrint, printRef } = usePrint()
   const { 
     fontSize, 
     scrollSpeed, 
@@ -20,8 +30,44 @@ export function ArrangementViewerPage() {
     toggleScroll
   } = useChordSheetSettings()
   
-  // Use transposition hook only when arrangement is loaded
-  const { currentKey } = useTransposition()
+  // Extract the original key from the ChordPro content
+  const originalKey = useMemo(() => {
+    if (arrangement?.chordProText) {
+      // First try to get key from ChordPro directive
+      const keyFromContent = extractKeyFromChordPro(arrangement.chordProText)
+      if (keyFromContent) return keyFromContent
+    }
+    // Fallback to arrangement's key field
+    return arrangement?.key
+  }, [arrangement?.chordProText, arrangement?.key])
+  
+  // Use transposition hook with the extracted key
+  const transpositionState = useTransposition(originalKey, {
+    persist: true,
+    persistKey: arrangement?.id || 'default'
+  })
+  
+  // Enable keyboard shortcuts for transposition
+  useTransposeKeyboard(
+    transpositionState.transpose,
+    transpositionState.reset,
+    !isStageMode // Disable in stage mode as it has its own controls
+  )
+  
+  // Keyboard shortcuts for print - MUST be before any conditional returns
+  useEffect(() => {
+    const handleKeyboardPrint = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault()
+        handlePrint()
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyboardPrint)
+    return () => {
+      window.removeEventListener('keydown', handleKeyboardPrint)
+    }
+  }, [handlePrint])
   
   if (loading) {
     return (
@@ -106,44 +152,57 @@ export function ArrangementViewerPage() {
     )
   }
   
-  const handleTranspose = (semitones: number) => {
-    // This would need to be implemented to handle transposition
-    console.log('Transpose by', semitones)
+  const handleAddToSetlist = () => {
+    // Future feature - placeholder for now
+    console.log('Add to setlist:', arrangement.id)
   }
   
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: isMinimalMode ? 'var(--text-primary)' : 'var(--color-muted)',
-      color: isMinimalMode ? 'var(--color-background)' : 'var(--text-primary)'
-    }}>
-      {!isMinimalMode && (
-        <ViewerHeader arrangement={arrangement} />
-      )}
-      
-      <main style={{
-        padding: isMinimalMode ? '1rem' : '2rem',
-        maxWidth: isMinimalMode ? '100%' : '1200px',
-        margin: '0 auto'
-      }}>
-        <ChordSheetViewer
-          chordProText={arrangement.chordProText}
-          className={isMinimalMode ? 'dark-mode' : ''}
-        />
-      </main>
-      
-      <ViewerControls
-        currentKey={currentKey || arrangement.key || 'C'}
-        onTranspose={handleTranspose}
-        fontSize={fontSize}
-        onFontSizeChange={setFontSize}
-        scrollSpeed={scrollSpeed}
-        onScrollSpeedChange={setScrollSpeed}
-        isScrolling={isScrolling}
-        onToggleScroll={toggleScroll}
-        isMinimalMode={isMinimalMode}
-        onToggleMinimalMode={toggleMinimal}
-      />
-    </div>
+    <ViewerLayout
+      header={!isStageMode && <ViewerHeader arrangement={arrangement} />}
+      toolbar={
+        !isStageMode && (
+          <ViewerToolbar
+            onPrint={handlePrint}
+            onToggleStageMode={toggleStageMode}
+            onAddToSetlist={handleAddToSetlist}
+            isStageMode={isStageMode}
+            transposition={transpositionState}
+            fontSize={fontSize}
+            onFontSizeChange={setFontSize}
+            scrollSpeed={scrollSpeed}
+            onScrollSpeedChange={setScrollSpeed}
+            isScrolling={isScrolling}
+            onToggleScroll={toggleScroll}
+          />
+        )
+      }
+      content={
+        <div ref={printRef} style={{ height: '100%' }}>
+          <ChordSheetViewer 
+            chordProText={arrangement.chordProText}
+            isStageMode={isStageMode}
+            transposition={transpositionState.semitones}
+            isScrolling={isScrolling}
+            scrollSpeed={scrollSpeed}
+          />
+        </div>
+      }
+      controls={
+        isStageMode ? (
+          <ViewerControls
+            transposition={transpositionState}
+            fontSize={fontSize}
+            onFontSizeChange={setFontSize}
+            scrollSpeed={scrollSpeed}
+            onScrollSpeedChange={setScrollSpeed}
+            isScrolling={isScrolling}
+            onToggleScroll={toggleScroll}
+            isMinimalMode={true}
+            onToggleMinimalMode={toggleStageMode}
+          />
+        ) : null
+      }
+    />
   )
 }

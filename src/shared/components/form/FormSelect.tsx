@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { FormField } from './FormField'
-import { getFormStyles } from './utils/style-converter'
+import { designTokens, getFieldBorderColor, getFieldBackgroundColor } from '../../styles/tokens'
 import { 
   getSelectAriaAttributes, 
   getListboxAriaAttributes, 
@@ -130,11 +130,11 @@ interface SelectElementProps {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
   focusedIndex: number
-  setFocusedIndex: (index: number) => void
+  setFocusedIndex: React.Dispatch<React.SetStateAction<number>>
   searchValue: string
   setSearchValue: (value: string) => void
-  listboxRef: React.RefObject<HTMLDivElement>
-  searchInputRef: React.RefObject<HTMLInputElement>
+  listboxRef: React.RefObject<HTMLDivElement | null>
+  searchInputRef: React.RefObject<HTMLInputElement | null>
   // Props injected by FormField
   id?: string
   name?: string
@@ -181,8 +181,30 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
   const selectedOption = options.find(option => option.value === value)
   const displayValue = selectedOption?.label || placeholder
   
-  // Get styles
-  const selectStyles = getFormStyles('select', { hasError, disabled })
+  // Determine field states for styling
+  const borderState = disabled ? 'disabled' : 
+    hasError ? 'error' : 'default'
+  
+  const backgroundState = disabled ? 'disabled' : 
+    hasError ? 'error' : 'default'
+  
+  // Get styles based on current state
+  const selectStyles: React.CSSProperties = {
+    width: '100%',
+    padding: '12px 16px',
+    fontSize: designTokens.typography.fontSize.base,
+    fontWeight: designTokens.typography.fontWeight.normal,
+    lineHeight: designTokens.typography.lineHeight.normal,
+    minHeight: '44px',
+    border: `1px solid ${getFieldBorderColor(borderState)}`,
+    borderRadius: designTokens.radius.md,
+    backgroundColor: getFieldBackgroundColor(backgroundState),
+    color: disabled ? designTokens.colors.text.disabled : designTokens.colors.text.primary,
+    transition: `border-color ${designTokens.transitions.fast}, background-color ${designTokens.transitions.fast}, box-shadow ${designTokens.transitions.fast}`,
+    outline: 'none',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.6 : 1
+  }
   
   // Handle option selection
   const selectOption = (option: SelectOption) => {
@@ -300,7 +322,10 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          cursor: disabled ? 'not-allowed' : 'pointer',
+          ...(isOpen && !disabled && {
+            borderColor: designTokens.colors.border.focused,
+            boxShadow: designTokens.shadows.focus
+          })
         }}
         onKeyDown={handleKeyDown}
         onClick={() => {
@@ -316,7 +341,7 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
         <span style={{ 
           overflow: 'hidden', 
           textOverflow: 'ellipsis',
-          color: selectedOption ? 'inherit' : 'var(--text-tertiary)'
+          color: selectedOption ? 'inherit' : designTokens.colors.text.tertiary
         }}>
           {displayValue}
         </span>
@@ -333,13 +358,13 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
               onChange?.(syntheticEvent)
             }}
             style={{
-              marginLeft: '0.5rem',
-              padding: '0.25rem',
+              marginLeft: designTokens.spacing.sm,
+              padding: designTokens.spacing.xs,
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              fontSize: '1rem',
-              color: 'var(--text-secondary)',
+              fontSize: designTokens.typography.fontSize.base,
+              color: designTokens.colors.text.secondary,
             }}
             aria-label="Clear selection"
           >
@@ -349,11 +374,11 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
         
         {/* Dropdown Arrow */}
         <span style={{
-          marginLeft: '0.5rem',
+          marginLeft: designTokens.spacing.sm,
           transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.2s',
-          fontSize: '0.75rem',
-          color: 'var(--text-secondary)',
+          transition: `transform ${designTokens.transitions.fast}`,
+          fontSize: designTokens.typography.fontSize.xs,
+          color: designTokens.colors.text.secondary,
         }}>
           ▼
         </span>
@@ -369,19 +394,19 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
             top: '100%',
             left: 0,
             right: 0,
-            zIndex: 50,
-            backgroundColor: 'var(--color-popover)',
-            border: '1px solid var(--color-border)',
-            borderRadius: '0.375rem',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            zIndex: designTokens.zIndex.dropdown,
+            backgroundColor: designTokens.colors.background.primary,
+            border: `1px solid ${designTokens.colors.border.default}`,
+            borderRadius: designTokens.radius.md,
+            boxShadow: designTokens.shadows.lg,
             maxHeight,
             overflowY: 'auto',
-            marginTop: '0.25rem',
+            marginTop: designTokens.spacing.xs,
           }}
         >
           {/* Search Input */}
           {searchable && (
-            <div style={{ padding: '0.5rem' }}>
+            <div style={{ padding: designTokens.spacing.sm }}>
               <input
                 ref={searchInputRef}
                 type="text"
@@ -393,10 +418,12 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
                 }}
                 style={{
                   width: '100%',
-                  padding: '0.375rem',
-                  border: '1px solid var(--color-input)',
-                  borderRadius: '0.25rem',
-                  fontSize: '0.875rem',
+                  padding: '6px 12px',
+                  border: `1px solid ${designTokens.colors.border.default}`,
+                  borderRadius: designTokens.radius.sm,
+                  fontSize: designTokens.typography.fontSize.sm,
+                  outline: 'none',
+                  transition: `border-color ${designTokens.transitions.fast}`
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'ArrowDown') {
@@ -412,10 +439,10 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
           {/* Loading State */}
           {loading && (
             <div style={{
-              padding: '0.75rem',
+              padding: '12px',
               textAlign: 'center',
-              color: 'var(--text-secondary)',
-              fontSize: '0.875rem',
+              color: designTokens.colors.text.secondary,
+              fontSize: designTokens.typography.fontSize.sm,
             }}>
               {loadingText}
             </div>
@@ -424,10 +451,10 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
           {/* No Options */}
           {!loading && options.length === 0 && (
             <div style={{
-              padding: '0.75rem',
+              padding: '12px',
               textAlign: 'center',
-              color: 'var(--text-secondary)',
-              fontSize: '0.875rem',
+              color: designTokens.colors.text.secondary,
+              fontSize: designTokens.typography.fontSize.sm,
             }}>
               {noOptionsText}
             </div>
@@ -448,14 +475,15 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
               disabled={option.disabled}
               style={{
                 width: '100%',
-                padding: '0.5rem 0.75rem',
+                padding: `${designTokens.spacing.sm} 12px`,
                 textAlign: 'left',
                 border: 'none',
                 cursor: option.disabled ? 'not-allowed' : 'pointer',
-                backgroundColor: index === focusedIndex ? 'var(--color-secondary)' : 
-                  option.value === value ? 'rgba(var(--status-info), 0.1)' : 'transparent',
-                color: option.disabled ? 'var(--text-tertiary)' : 'inherit',
-                fontSize: '0.875rem',
+                backgroundColor: index === focusedIndex ? designTokens.colors.background.hover : 
+                  option.value === value ? designTokens.colors.background.secondary : 'transparent',
+                color: option.disabled ? designTokens.colors.text.tertiary : designTokens.colors.text.primary,
+                fontSize: designTokens.typography.fontSize.sm,
+                transition: `background-color ${designTokens.transitions.fast}`,
               }}
               onMouseEnter={() => setFocusedIndex(index)}
             >
@@ -463,8 +491,8 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
               {option.value === value && (
                 <span style={{ 
                   float: 'right', 
-                  color: 'var(--status-info)',
-                  fontWeight: 'bold' 
+                  color: designTokens.colors.border.focused,
+                  fontWeight: designTokens.typography.fontWeight.bold 
                 }}>
                   ✓
                 </span>

@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react'
 import { FormContext } from './context/FormContextInstance'
 import { getButtonAriaAttributes } from './utils/aria-helpers'
 import { formStyles, mergeFormStyles } from './utils/style-converter'
+import { designTokens } from '../../styles/tokens'
 
 export interface FormButtonProps {
   children: React.ReactNode
@@ -69,29 +70,39 @@ export function FormButton({
   const finalStyles = mergeFormStyles(buttonStyles, style)
   
   return (
-    <button
-      {...getButtonAriaAttributes(id || `button-${Math.random()}`, type, isDisabled)}
-      className={className}
-      style={finalStyles}
-      onClick={handleClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      disabled={isDisabled}
-      autoFocus={autoFocus}
-    >
-      {loading && (
-        <span 
-          style={{ 
-            marginRight: '0.5rem',
-            display: 'inline-block',
-            animation: 'spin 1s linear infinite',
-          }}
-        >
-          ⟳
-        </span>
-      )}
-      {displayText}
-    </button>
+    <>
+      <style>{`
+        @keyframes buttonSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+      <button
+        {...getButtonAriaAttributes(id || `button-${Math.random()}`, type, isDisabled)}
+        className={className}
+        style={finalStyles}
+        onClick={handleClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        disabled={isDisabled}
+        autoFocus={autoFocus}
+      >
+        {loading && (
+          <span 
+            style={{ 
+              marginRight: designTokens.spacing.sm,
+              display: 'inline-block',
+              animation: 'buttonSpin 1s linear infinite',
+              width: '1em',
+              height: '1em',
+            }}
+          >
+            ⟳
+          </span>
+        )}
+        {displayText}
+      </button>
+    </>
   )
 }
 
@@ -103,42 +114,72 @@ function getButtonStyles(
   size: 'sm' | 'md' | 'lg',
   state: { disabled: boolean; hovered: boolean; loading: boolean }
 ): React.CSSProperties {
-  const baseStyles = formStyles.button.base
+  const baseStyles: React.CSSProperties = {
+    ...formStyles.button.base,
+    borderRadius: designTokens.radius.md,
+    fontWeight: designTokens.typography.fontWeight.medium,
+    transition: designTokens.transitions.fast,
+    cursor: 'pointer',
+    border: 'none',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '44px', // Touch-friendly minimum
+  }
   
-  // Size styles
+  // Size styles with design tokens
   const sizeStyles = {
     sm: { 
-      padding: '0.375rem 0.75rem', 
-      fontSize: '0.875rem' 
+      padding: `${designTokens.spacing.sm} ${designTokens.spacing.md}`,
+      fontSize: designTokens.typography.fontSize.sm,
+      minHeight: '36px',
     },
     md: { 
-      padding: '0.5rem 1rem', 
-      fontSize: '1rem' 
+      padding: `12px ${designTokens.spacing.lg}`,
+      fontSize: designTokens.typography.fontSize.base,
+      minHeight: '44px',
     },
     lg: { 
-      padding: '0.75rem 1.5rem', 
-      fontSize: '1.125rem' 
+      padding: `${designTokens.spacing.md} ${designTokens.spacing.xl}`,
+      fontSize: designTokens.typography.fontSize.lg,
+      minHeight: '52px',
     },
   }
   
-  // Variant styles
+  // Enhanced variant styles with design tokens
   const variantStyles = {
     primary: {
-      base: formStyles.button.primary,
-      hover: formStyles.button.primaryHover,
+      base: {
+        backgroundColor: 'var(--color-primary)',
+        color: 'var(--color-primary-foreground)',
+        boxShadow: designTokens.shadows.sm,
+      },
+      hover: {
+        backgroundColor: 'var(--color-primary)',
+        opacity: 0.9,
+        boxShadow: designTokens.shadows.md,
+        transform: 'translateY(-1px)',
+      },
     },
     secondary: {
-      base: formStyles.button.secondary,
-      hover: formStyles.button.secondaryHover,
+      base: {
+        backgroundColor: 'var(--color-secondary)',
+        color: 'var(--color-secondary-foreground)',
+        border: `1px solid var(--color-border)`,
+      },
+      hover: {
+        backgroundColor: 'var(--color-muted)',
+        borderColor: 'var(--color-border)',
+      },
     },
     outline: {
       base: {
         backgroundColor: 'transparent',
-        color: formStyles.button.primary.backgroundColor,
-        border: `1px solid ${formStyles.button.primary.backgroundColor}`,
+        color: 'var(--color-primary)',
+        border: `1px solid var(--color-primary)`,
       },
       hover: {
-        backgroundColor: formStyles.button.primary.backgroundColor,
+        backgroundColor: 'var(--color-primary)',
         color: 'var(--color-primary-foreground)',
       },
     },
@@ -149,7 +190,7 @@ function getButtonStyles(
         border: 'none',
       },
       hover: {
-        backgroundColor: 'var(--color-secondary)',
+        backgroundColor: 'var(--color-card-hover)',
       },
     },
   }
@@ -172,13 +213,19 @@ function getButtonStyles(
   if (state.disabled) {
     styles = {
       ...styles,
-      ...formStyles.button.disabled,
+      opacity: 0.6,
+      cursor: 'not-allowed',
+      transform: 'none',
+      boxShadow: 'none',
+      backgroundColor: 'var(--color-muted)',
+      color: 'var(--text-tertiary)',
     }
   }
   
   // Loading cursor
   if (state.loading) {
     styles.cursor = 'wait'
+    styles.opacity = 0.8
   }
   
   return styles

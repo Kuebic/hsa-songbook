@@ -1,0 +1,86 @@
+{title: Long Song for Scroll Testing}
+{artist: Test Artist}
+{key: G}
+{tempo: 120}
+
+[G][D/G][G][D/G]
+
+{start_of_verse}
+[G]Verse 1 line 1 with some [C]chords
+[Am]Verse 1 line 2 with more [F]content
+[G]Verse 1 line 3 testing [D]scroll
+This is just plain text without chords
+{end_of_verse}
+
+{start_of_chorus}
+[C]This is the [G]chorus section
+With [Am]multiple lines of [F]content
+[G]To test the scrolling [D]feature
+{end_of_chorus}
+
+{start_of_verse}
+[G]Verse 2 line 1 with some [C]chords
+[Am]Verse 2 line 2 with more [F]content
+[G]Verse 2 line 3 testing [D]scroll
+More plain text to add content
+{end_of_verse}
+
+{start_of_bridge}
+[Em]Bridge section with [C]different chords
+[D]Testing vertical [G]scrolling
+[Am]Making sure the [F]preview pane
+[C]Can handle long [G]content
+{end_of_bridge}
+
+{start_of_verse}
+[G]Verse 3 line 1 with some [C]chords
+[Am]Verse 3 line 2 with more [F]content
+[G]Verse 3 line 3 testing [D]scroll
+Even more text to ensure scrolling
+{end_of_verse}
+
+{start_of_chorus}
+[C]Repeat chorus [G]section
+With [Am]multiple lines of [F]content
+[G]To test the scrolling [D]feature
+{end_of_chorus}
+
+{start_of_verse}
+[G]Verse 4 line 1 with some [C]chords
+[Am]Verse 4 line 2 with more [F]content
+[G]Verse 4 line 3 testing [D]scroll
+{end_of_verse}
+
+{start_of_outro}
+[G][C/G][G][D][Em][C][G][D/G]
+[G]Final notes and [C]ending
+[D]Making sure scroll [G]works
+{end_of_outro}
+
+Additional verses to ensure enough content for scrolling:
+
+{start_of_verse}
+[G]Verse 5 line 1 with some [C]chords
+[Am]Verse 5 line 2 with more [F]content
+[G]Verse 5 line 3 testing [D]scroll
+{end_of_verse}
+
+{start_of_verse}
+[G]Verse 6 line 1 with some [C]chords
+[Am]Verse 6 line 2 with more [F]content
+[G]Verse 6 line 3 testing [D]scroll
+{end_of_verse}
+
+{start_of_verse}
+[G]Verse 7 line 1 with some [C]chords
+[Am]Verse 7 line 2 with more [F]content
+[G]Verse 7 line 3 testing [D]scroll
+{end_of_verse}
+
+{start_of_verse}
+[G]Verse 8 line 1 with some [C]chords
+[Am]Verse 8 line 2 with more [F]content
+[G]Verse 8 line 3 testing [D]scroll
+{end_of_verse}
+
+{comment: End of long test song}

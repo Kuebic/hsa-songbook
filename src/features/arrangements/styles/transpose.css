@@ -1,0 +1,511 @@
+/* Transpose Controls Styles */
+.transpose-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Button styles for different variants */
+.transpose-button {
+  padding: 0.375rem 0.75rem;
+  background-color: var(--color-accent);
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 1.125rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.transpose-button:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+  transform: scale(1.05);
+}
+
+.transpose-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.transpose-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Key display */
+.key-display {
+  min-width: 3rem;
+  padding: 0.375rem 0.75rem;
+  text-align: center;
+  font-weight: 600;
+  background-color: var(--color-accent);
+  border-radius: 0.375rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.key-value {
+  font-size: 1rem;
+  color: var(--color-primary);
+}
+
+.key-value.transposed {
+  color: var(--status-warning);
+  font-weight: bold;
+}
+
+.semitone-display {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Reset button */
+.reset-button {
+  padding: 0.375rem 0.5rem;
+  background-color: var(--status-warning);
+  color: var(--color-background);
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.reset-button:hover {
+  background-color: var(--status-error);
+  transform: scale(1.05);
+}
+
+/* Toolbar variant */
+.toolbar-button.transpose-button {
+  padding: 0.25rem 0.5rem;
+  font-size: 1rem;
+}
+
+/* Stage variant */
+.stage-transpose-button {
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.stage-transpose-button:hover:not(:disabled) {
+  background-color: rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.stage-key-display {
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: var(--stage-chord-color, #00ff00);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.stage-reset-button {
+  padding: 0.5rem;
+  background-color: rgba(255, 100, 0, 0.3);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+/* Editor variant */
+.editor-transpose-button {
+  padding: 0.25rem 0.625rem;
+  background-color: var(--color-foreground);
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.editor-transpose-button:hover:not(:disabled) {
+  background-color: var(--color-accent);
+  transform: scale(1.05);
+}
+
+.editor-key-display {
+  min-width: 2.5rem;
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background-color: var(--color-foreground);
+  border-radius: 0.25rem;
+}
+
+.editor-reset-button {
+  padding: 0.25rem 0.5rem;
+  background-color: var(--status-warning);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+/* Transpose Bar (Editor) */
+.transpose-bar {
+  padding: 0.5rem 1rem;
+  background-color: var(--color-background-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.transpose-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 100%;
+}
+
+.transpose-controls-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.transpose-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: 1rem;
+}
+
+.transpose-action-button {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  transition: all 0.2s ease;
+}
+
+.transpose-action-button.apply {
+  background-color: var(--status-success);
+  color: white;
+  border-color: var(--status-success);
+}
+
+.transpose-action-button.apply:hover {
+  background-color: var(--status-success-hover);
+  transform: scale(1.05);
+}
+
+.transpose-action-button.cancel {
+  background-color: var(--color-foreground);
+  color: var(--text-primary);
+}
+
+.transpose-action-button.cancel:hover {
+  background-color: var(--status-error);
+  color: white;
+  border-color: var(--status-error);
+}
+
+.transpose-action-button.reset {
+  background-color: var(--status-warning);
+  color: white;
+  border-color: var(--status-warning);
+}
+
+.transpose-action-button.reset:hover {
+  background-color: var(--status-warning-hover);
+}
+
+/* Status indicator */
+.transpose-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.status-badge {
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.status-badge.preview {
+  background-color: var(--status-info);
+  color: white;
+}
+
+.status-text {
+  color: var(--text-secondary);
+}
+
+/* Key Selector */
+.key-selector-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.key-selector-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.key-selector {
+  padding: 0.375rem 0.75rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.key-selector:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.key-selector:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-alpha);
+}
+
+.key-selector:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Enharmonic Toggle Switch */
+.enharmonic-switch {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+.switch-button {
+  position: relative;
+  width: 60px;
+  height: 28px;
+  background-color: var(--color-accent);
+  border: 2px solid var(--color-border);
+  border-radius: 14px;
+  padding: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.switch-slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.switch-button.active-sharp .switch-slider {
+  transform: translateX(0);
+}
+
+.switch-button.active-flat .switch-slider {
+  transform: translateX(32px);
+}
+
+.sharp-symbol, .flat-symbol {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--text-secondary);
+}
+
+.sharp-symbol {
+  left: 8px;
+}
+
+.flat-symbol {
+  right: 8px;
+}
+
+/* Enharmonic Toggle Button */
+.enharmonic-toggle-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  background-color: var(--color-accent);
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.enharmonic-toggle-button:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-primary);
+}
+
+/* Capo Selector */
+.capo-selector {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+.capo-label {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Capo Calculator */
+.capo-calculator {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--color-background-secondary);
+  border-radius: 0.5rem;
+}
+
+.capo-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.capo-option {
+  padding: 0.5rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.capo-option:hover {
+  background-color: var(--color-accent);
+  transform: scale(1.05);
+}
+
+.capo-position {
+  font-weight: bold;
+  font-size: 0.875rem;
+}
+
+.play-key {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.chord-shape {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--text-tertiary);
+}
+
+/* Enhanced Controls Container */
+.transpose-controls-enhanced {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--color-background-secondary);
+  border-radius: 0.5rem;
+}
+
+.transpose-basic-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .transpose-bar-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .transpose-controls-wrapper {
+    justify-content: center;
+  }
+  
+  .transpose-status {
+    justify-content: center;
+  }
+  
+  .transpose-actions {
+    justify-content: center;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .transpose-controls {
+    gap: 0.25rem;
+  }
+  
+  .transpose-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .key-display {
+    min-width: 2.5rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .transpose-action-button span {
+    display: none; /* Hide text on mobile, show only icons */
+  }
+  
+  .enharmonic-switch {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+  
+  .capo-selector {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+  
+  .transpose-controls-enhanced {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .capo-options-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

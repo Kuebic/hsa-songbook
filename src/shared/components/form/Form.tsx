@@ -2,8 +2,10 @@ import { useCallback } from 'react'
 import { FormProvider } from './context/FormContext'
 import { useFormContext } from './hooks/useFormContext'
 import { formStyles, mergeFormStyles } from './utils/style-converter'
+import { designTokens } from '@shared/styles/tokens'
 import type { FormProviderProps } from './context/FormContext'
 import './styles/tailwind.css'
+import '@shared/styles/animations.css'
 
 export interface FormProps<T = unknown> extends Omit<FormProviderProps<T>, 'children'> {
   children: React.ReactNode
@@ -32,14 +34,36 @@ function FormInner<T = unknown>({
     handleSubmit?.(event)
   }, [handleSubmit])
   
-  const formStyle = mergeFormStyles(formStyles.form.container, style)
+  const enhancedFormStyle = mergeFormStyles(
+    {
+      ...formStyles.form.container,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: designTokens.spacing.xl, // Increased from 24px to 32px
+      maxWidth: '100%',
+      animation: 'formFadeIn 300ms ease-out'
+    },
+    style
+  )
   
   return (
     <div className="form-root">
+      <style>{`
+        @keyframes formFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
       <form
         id={id}
         className={className}
-        style={formStyle}
+        style={enhancedFormStyle}
         onSubmit={onSubmit}
         noValidate={noValidate}
         autoComplete={autoComplete}
@@ -110,7 +134,12 @@ export function FormSection({
 }: FormSectionProps) {
   const sectionStyle = mergeFormStyles(
     {
-      marginBottom: '2rem',
+      padding: designTokens.spacing.lg,
+      backgroundColor: designTokens.colors.background.secondary,
+      borderRadius: designTokens.radius.md,
+      border: `1px solid ${designTokens.colors.border.default}`,
+      marginBottom: designTokens.spacing.xl,
+      transition: designTokens.transitions.normal,
     },
     style
   )
@@ -122,20 +151,23 @@ export function FormSection({
     >
       {title && (
         <legend style={{
-          fontSize: '1.125rem',
-          fontWeight: 600,
-          marginBottom: '1rem',
-          color: '#374151',
+          fontSize: designTokens.typography.fontSize.lg,
+          fontWeight: designTokens.typography.fontWeight.semibold,
+          color: designTokens.colors.text.primary,
+          marginBottom: designTokens.spacing.md,
+          paddingBottom: designTokens.spacing.sm,
+          borderBottom: `1px solid ${designTokens.colors.border.default}`,
+          width: '100%'
         }}>
           {title}
         </legend>
       )}
       {description && (
         <p style={{
-          color: '#64748b',
-          fontSize: '0.875rem',
-          marginBottom: '1rem',
-          margin: '0 0 1rem 0',
+          color: designTokens.colors.text.secondary,
+          fontSize: designTokens.typography.fontSize.sm,
+          marginBottom: designTokens.spacing.md,
+          margin: `0 0 ${designTokens.spacing.md} 0`,
         }}>
           {description}
         </p>
@@ -198,7 +230,7 @@ export interface FormRowProps {
 
 export function FormRow({ 
   children, 
-  gap = '1rem',
+  gap = designTokens.spacing.md,
   className,
   style 
 }: FormRowProps) {
@@ -207,6 +239,9 @@ export function FormRow({
       display: 'flex',
       gap,
       alignItems: 'flex-start',
+      '@media (max-width: 640px)': {
+        flexDirection: 'column'
+      }
     },
     style
   )
@@ -236,7 +271,10 @@ export function FormGroup({
   style 
 }: FormGroupProps) {
   const groupStyle = mergeFormStyles(
-    formStyles.field.container,
+    {
+      ...formStyles.field.container,
+      marginBottom: designTokens.spacing.lg
+    },
     style
   )
   

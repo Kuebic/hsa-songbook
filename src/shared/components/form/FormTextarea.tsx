@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { FormField } from './FormField'
-import { getFormStyles } from './utils/style-converter'
+import { designTokens, getFieldBorderColor, getFieldBackgroundColor } from '../../styles/tokens'
 import type { FormFieldProps } from './types'
 
 export interface FormTextareaProps extends Omit<FormFieldProps, 'children'> {
@@ -70,7 +70,6 @@ export function FormTextarea({
         onBlur={(e) => {
           setFocused(false)
           // FormField will handle onBlur for validation
-          e.target.onBlur?.(e)
         }}
       />
     </FormField>
@@ -144,16 +143,39 @@ function TextareaElement({
     }
   }, [value, autoResize])
   
+  // Determine field states for styling
+  const borderState = disabled ? 'disabled' : 
+    hasError ? 'error' : 
+    focused ? 'focused' : 'default'
+  
+  const backgroundState = disabled ? 'disabled' : 
+    hasError ? 'error' : 'default'
+  
   // Get styles based on current state
-  const textareaStyles = getFormStyles('textarea', {
-    focused,
-    hasError,
-    disabled,
-  })
+  const textareaStyles: React.CSSProperties = {
+    width: '100%',
+    padding: '12px 16px',
+    fontSize: designTokens.typography.fontSize.base,
+    fontWeight: designTokens.typography.fontWeight.normal,
+    lineHeight: designTokens.typography.lineHeight.normal,
+    minHeight: '80px',
+    border: `1px solid ${getFieldBorderColor(borderState)}`,
+    borderRadius: designTokens.radius.md,
+    backgroundColor: getFieldBackgroundColor(backgroundState),
+    color: disabled ? designTokens.colors.text.disabled : designTokens.colors.text.primary,
+    transition: `border-color ${designTokens.transitions.fast}, background-color ${designTokens.transitions.fast}, box-shadow ${designTokens.transitions.fast}`,
+    outline: 'none',
+    cursor: disabled ? 'not-allowed' : 'text',
+    opacity: disabled ? 0.6 : 1,
+    resize: 'vertical' as const,
+    ...(focused && {
+      boxShadow: designTokens.shadows.focus
+    })
+  }
   
   // Override resize style if auto-resize is enabled
   const finalStyles = autoResize 
-    ? { ...textareaStyles, resize: 'none', overflow: 'hidden' }
+    ? { ...textareaStyles, resize: 'none' as const, overflow: 'hidden' as const }
     : textareaStyles
   
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

@@ -111,11 +111,21 @@ export function SongDetailPage() {
         ← Back to Songs
       </button>
       
+      <SongViewer 
+        song={song} 
+        arrangements={arrangements}
+        selectedArrangementId={selectedArrangement?.id}
+        onArrangementSelect={(id) => {
+          const arr = arrangements.find(a => a.id === id)
+          if (arr) selectArrangement(arr)
+        }}
+      />
+      
       {/* Arrangement Management Section */}
       <div style={{ 
         padding: '1rem 2rem', 
-        borderBottom: '1px solid var(--color-border)',
-        marginBottom: '1rem' 
+        borderTop: '1px solid var(--color-border)',
+        marginTop: '2rem' 
       }}>
         <div style={{ 
           display: 'flex', 
@@ -156,16 +166,6 @@ export function SongDetailPage() {
           </p>
         )}
       </div>
-      
-      <SongViewer 
-        song={song} 
-        arrangements={arrangements}
-        selectedArrangementId={selectedArrangement?.id}
-        onArrangementSelect={(id) => {
-          const arr = arrangements.find(a => a.id === id)
-          if (arr) selectArrangement(arr)
-        }}
-      />
       
       {/* Edit Arrangement Sheet */}
       {showArrangementSheet && (

@@ -19,9 +19,9 @@ const mockCreateSong = vi.fn()
 vi.mock('../../forms/SongFormModal', () => ({
   SongFormModal: ({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClose: () => void; onSubmit: (data: Record<string, unknown>) => void }) => (
     isOpen ? (
-      <div role="dialog">
+      <div role="dialog" data-testid="song-form-modal">
         <h2>Add New Song</h2>
-        <button onClick={onClose}>Close</button>
+        <button onClick={onClose} aria-label="Close dialog">Close</button>
         <button onClick={() => onSubmit({ title: 'Test Song', themes: ['test'] })}>
           Create Song
         </button>
@@ -111,6 +111,90 @@ describe('AddSongButton', () => {
     expect(screen.getByRole('button', { name: /add new song/i })).toBeInTheDocument()
     expect(screen.getByText('Add Song')).toBeInTheDocument()
     expect(screen.getByText('➕')).toBeInTheDocument()
+  })
+
+  it('should not show modal initially', () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: 'test-user' } as any,
+      userId: 'test-user',
+      sessionId: 'session-123',
+      isLoaded: true,
+      isSignedIn: true,
+      isAdmin: false,
+      getToken: vi.fn(),
+      getUserEmail: vi.fn(),
+      getUserName: vi.fn(),
+      getUserAvatar: vi.fn()
+    })
+
+    render(
+      <TestWrapper>
+        <AddSongButton />
+      </TestWrapper>
+    )
+    
+    expect(screen.queryByTestId('song-form-modal')).not.toBeInTheDocument()
+  })
+
+  it('should show modal when button clicked', async () => {
+    const user = userEvent.setup()
+    mockUseAuth.mockReturnValue({
+      user: { id: 'test-user' } as any,
+      userId: 'test-user',
+      sessionId: 'session-123',
+      isLoaded: true,
+      isSignedIn: true,
+      isAdmin: false,
+      getToken: vi.fn(),
+      getUserEmail: vi.fn(),
+      getUserName: vi.fn(),
+      getUserAvatar: vi.fn()
+    })
+
+    render(
+      <TestWrapper>
+        <AddSongButton />
+      </TestWrapper>
+    )
+    
+    const button = screen.getByTestId('add-song-button')
+    await user.click(button)
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('song-form-modal')).toBeInTheDocument()
+    })
+  })
+
+  it('should hide modal when close button clicked', async () => {
+    const user = userEvent.setup()
+    mockUseAuth.mockReturnValue({
+      user: { id: 'test-user' } as any,
+      userId: 'test-user',
+      sessionId: 'session-123',
+      isLoaded: true,
+      isSignedIn: true,
+      isAdmin: false,
+      getToken: vi.fn(),
+      getUserEmail: vi.fn(),
+      getUserName: vi.fn(),
+      getUserAvatar: vi.fn()
+    })
+
+    render(
+      <TestWrapper>
+        <AddSongButton />
+      </TestWrapper>
+    )
+    
+    const button = screen.getByTestId('add-song-button')
+    await user.click(button)
+    
+    const closeButton = await screen.findByLabelText('Close dialog')
+    await user.click(closeButton)
+    
+    await waitFor(() => {
+      expect(screen.queryByTestId('song-form-modal')).not.toBeInTheDocument()
+    })
   })
 
   it('opens modal when clicked', async () => {

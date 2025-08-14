@@ -7,6 +7,7 @@ import { ThemeSelector } from './components/ThemeSelector';
 import { EditorSplitter } from './components/EditorSplitter';
 import { AutoCompleteDropdown } from './components/AutoCompleteDropdown';
 import { AlignmentDebugger } from './components/AlignmentDebugger';
+import { TransposeBar } from './TransposeBar';
 import { FontPreferences } from '../FontPreferences';
 import { useEditorState } from './hooks/useEditorState';
 import { useEditorTheme } from './hooks/useEditorTheme';
@@ -14,6 +15,7 @@ import { useResponsiveLayout } from './hooks/useResponsiveLayout';
 import { useVirtualKeyboard } from './hooks/useVirtualKeyboard';
 import { useMobileAutocomplete } from './hooks/useMobileAutocomplete';
 import { useBracketCompletion } from './hooks/useBracketCompletion';
+import { useEditorTransposition } from './hooks/useEditorTransposition';
 import { getBrowserSpecificStyles } from './utils/browserDetection';
 import './styles/themes.css';
 import './styles/editor.css';
@@ -22,6 +24,7 @@ import './styles/animations.css';
 import './styles/preview.css';
 import './styles/alignment.css';
 import './styles/autocomplete.css';
+import '../../styles/transpose.css';
 
 export interface ChordProEditorProps {
   initialContent?: string;
@@ -33,6 +36,7 @@ export interface ChordProEditorProps {
   defaultPreviewVisible?: boolean;
   autoFocus?: boolean;
   enableChordCompletion?: boolean;
+  enableTransposition?: boolean;
   className?: string;
 }
 
@@ -44,6 +48,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   showPreview = true,
   defaultPreviewVisible = true,
   autoFocus = false,
+  enableTransposition = true,
   className = '',
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -99,6 +104,14 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     initialContent,
     onChange
   });
+
+  // Use transposition hook for editor
+  const transposition = useEditorTransposition(content, onChange);
+  
+  // Update transposition when content changes externally
+  useEffect(() => {
+    transposition.updateOriginalContent(content);
+  }, [content]);
 
   // Use mobile autocomplete hook
   const autocomplete = useMobileAutocomplete(
@@ -264,6 +277,14 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         </div>
       </div>
       
+      {/* Transposition bar */}
+      {enableTransposition && (
+        <TransposeBar 
+          transposition={transposition}
+          className="editor-transpose-bar"
+        />
+      )}
+      
       <div 
         className="chord-pro-editor-container flex-1 flex chord-editor-main"
         style={{ 
@@ -349,7 +370,11 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
           <div className={`chord-editor-pane preview-pane ${layout.isMobile ? 'mobile-preview' : 'desktop-preview'}`}>
             <div className="chord-preview-container">
               <div className="chord-preview-content">
-                <PreviewPane content={content} theme={currentTheme} />
+                <PreviewPane 
+                  content={content} 
+                  theme={currentTheme}
+                  transpose={transposition.previewSemitones}
+                />
               </div>
             </div>
           </div>

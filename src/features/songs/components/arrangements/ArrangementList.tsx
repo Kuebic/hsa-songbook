@@ -58,9 +58,9 @@ export function ArrangementList({
   
   const formatDifficulty = (difficulty: string) => {
     const colors = {
-      beginner: '#22c55e',
-      intermediate: '#f59e0b', 
-      advanced: '#ef4444'
+      beginner: 'var(--status-success)',
+      intermediate: 'var(--status-warning)', 
+      advanced: 'var(--status-error)'
     }
     
     return (
@@ -89,8 +89,8 @@ export function ArrangementList({
             key={index}
             style={{
               padding: '2px 6px',
-              backgroundColor: '#f1f5f9',
-              color: '#64748b',
+              backgroundColor: 'var(--color-accent)',
+              color: 'var(--text-secondary)',
               borderRadius: '4px',
               fontSize: '10px',
               fontWeight: 500
@@ -102,7 +102,7 @@ export function ArrangementList({
         {tags.length > 3 && (
           <span style={{
             fontSize: '10px',
-            color: '#9ca3af',
+            color: 'var(--text-tertiary)',
             fontStyle: 'italic'
           }}>
             +{tags.length - 3} more
@@ -120,8 +120,8 @@ export function ArrangementList({
   
   const itemStyles = (arrangement: Arrangement): React.CSSProperties => ({
     padding: '16px',
-    backgroundColor: selectedId === arrangement.id ? '#eff6ff' : '#ffffff',
-    border: selectedId === arrangement.id ? '2px solid #3b82f6' : '1px solid #e2e8f0',
+    backgroundColor: selectedId === arrangement.id ? 'var(--color-accent)' : 'var(--color-card)',
+    border: selectedId === arrangement.id ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
     borderRadius: '8px',
     cursor: onSelect ? 'pointer' : 'default',
     transition: 'all 0.2s ease',
@@ -138,7 +138,7 @@ export function ArrangementList({
   const titleStyles: React.CSSProperties = {
     fontSize: '16px',
     fontWeight: 600,
-    color: '#1e293b',
+    color: 'var(--text-primary)',
     marginBottom: '4px'
   }
   
@@ -147,7 +147,7 @@ export function ArrangementList({
     alignItems: 'center',
     gap: '12px',
     fontSize: '12px',
-    color: '#64748b'
+    color: 'var(--text-secondary)'
   }
   
   const actionsStyles: React.CSSProperties = {
@@ -160,8 +160,8 @@ export function ArrangementList({
     padding: '4px 8px',
     fontSize: '11px',
     borderRadius: '4px',
-    border: '1px solid #d1d5db',
-    backgroundColor: 'white',
+    border: '1px solid var(--color-border)',
+    backgroundColor: 'var(--color-background)',
     cursor: 'pointer',
     transition: 'all 0.2s ease'
   }
@@ -171,10 +171,10 @@ export function ArrangementList({
       <div className={className} style={{
         textAlign: 'center',
         padding: '32px 16px',
-        color: '#64748b',
-        backgroundColor: '#f8fafc',
+        color: 'var(--text-secondary)',
+        backgroundColor: 'var(--color-foreground)',
         borderRadius: '8px',
-        border: '1px dashed #d1d5db'
+        border: '1px dashed var(--color-border)'
       }}>
         <div style={{ fontSize: '14px', marginBottom: '4px' }}>No arrangements available</div>
         <div style={{ fontSize: '12px' }}>Create an arrangement to get started</div>
@@ -204,7 +204,7 @@ export function ArrangementList({
               borderRadius: '8px',
               zIndex: 10
             }}>
-              <span style={{ color: '#ef4444' }}>⟳ Deleting...</span>
+              <span style={{ color: 'var(--status-error)' }}>⟳ Deleting...</span>
             </div>
           )}
           
@@ -231,8 +231,8 @@ export function ArrangementList({
                   style={{
                     ...actionButtonStyles,
                     textDecoration: 'none',
-                    color: '#10b981',
-                    borderColor: '#10b981',
+                    color: 'var(--status-success)',
+                    borderColor: 'var(--status-success)',
                     display: 'inline-block'
                   }}
                 >
@@ -247,8 +247,8 @@ export function ArrangementList({
                     }}
                     style={{
                       ...actionButtonStyles,
-                      color: '#3b82f6',
-                      borderColor: '#3b82f6'
+                      color: 'var(--color-primary)',
+                      borderColor: 'var(--color-primary)'
                     }}
                   >
                     Edit
@@ -262,8 +262,8 @@ export function ArrangementList({
                     style={{
                       ...actionButtonStyles,
                       textDecoration: 'none',
-                      color: '#8b5cf6',
-                      borderColor: '#8b5cf6',
+                      color: 'var(--color-primary)',
+                      borderColor: 'var(--color-primary)',
                       display: 'inline-block'
                     }}
                     title="Open in full-screen chord editor"
@@ -281,8 +281,8 @@ export function ArrangementList({
                     disabled={deletingId === arrangement.id}
                     style={{
                       ...actionButtonStyles,
-                      color: '#ef4444',
-                      borderColor: '#ef4444',
+                      color: 'var(--status-error)',
+                      borderColor: 'var(--status-error)',
                       opacity: deletingId === arrangement.id ? 0.5 : 1
                     }}
                   >
@@ -297,7 +297,7 @@ export function ArrangementList({
             <div style={{
               marginTop: '8px',
               fontSize: '12px',
-              color: '#6b7280',
+              color: 'var(--text-secondary)',
               fontStyle: 'italic',
               lineHeight: '1.4'
             }}>
@@ -311,7 +311,7 @@ export function ArrangementList({
               bottom: '8px',
               right: '12px',
               fontSize: '10px',
-              color: '#9ca3af'
+              color: 'var(--text-tertiary)'
             }}>
               ~{Math.round(arrangement.duration / 60)}min
             </div>
@@ -322,8 +322,8 @@ export function ArrangementList({
               position: 'absolute',
               top: '8px',
               left: '8px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
+              backgroundColor: 'var(--color-primary)',
+              color: 'var(--color-primary-foreground)',
               padding: '2px 6px',
               borderRadius: '10px',
               fontSize: '10px',

@@ -85,13 +85,15 @@ export function AddArrangementButton({
         </span>
       </button>
       
-      <ArrangementSheet
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        songId={songId}
-        songTitle={songTitle}
-        onSuccess={handleSuccess}
-      />
+      {showModal && (
+        <ArrangementSheet
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          songId={songId}
+          songTitle={songTitle}
+          onSuccess={handleSuccess}
+        />
+      )}
     </>
   )
 }

@@ -18,8 +18,8 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '1rem',
-        borderBottom: '1px solid #e2e8f0',
-        backgroundColor: '#ffffff'
+        borderBottom: '1px solid var(--color-border)',
+        backgroundColor: 'var(--color-background)'
       }}>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button
@@ -30,14 +30,14 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
               gap: '0.5rem',
               padding: '0.5rem 1rem',
               backgroundColor: 'transparent',
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--color-border)',
               borderRadius: '0.375rem',
               cursor: 'pointer',
               fontSize: '0.875rem',
               transition: 'background-color 0.2s'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f9fafb'
+              e.currentTarget.style.backgroundColor = 'var(--color-muted)'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent'
@@ -55,8 +55,8 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.5rem 1rem',
-                backgroundColor: '#8b5cf6',
-                color: '#ffffff',
+                backgroundColor: 'var(--color-primary)',
+                color: 'var(--color-primary-foreground)',
                 border: 'none',
                 borderRadius: '0.375rem',
                 cursor: 'pointer',
@@ -65,10 +65,10 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
                 transition: 'background-color 0.2s'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#7c3aed'
+                e.currentTarget.style.opacity = '0.9'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#8b5cf6'
+                e.currentTarget.style.opacity = '1'
               }}
             >
               <span>✏️</span>
@@ -88,7 +88,7 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
           {arrangement.songTitle && (
             <p style={{ 
               fontSize: '0.875rem', 
-              color: '#6b7280',
+              color: 'var(--text-secondary)',
               margin: '0.25rem 0 0 0'
             }}>
               {arrangement.songTitle}
@@ -105,8 +105,8 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
           {arrangement.key && (
             <span style={{
               padding: '0.25rem 0.75rem',
-              backgroundColor: '#eff6ff',
-              color: '#1e40af',
+              backgroundColor: 'var(--color-accent)',
+              color: 'var(--color-primary)',
               borderRadius: '0.375rem',
               fontSize: '0.875rem',
               fontWeight: '500'
@@ -117,8 +117,8 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
           {arrangement.tempo && (
             <span style={{
               padding: '0.25rem 0.75rem',
-              backgroundColor: '#f0fdf4',
-              color: '#166534',
+              backgroundColor: 'var(--color-accent)',
+              color: 'var(--status-success)',
               borderRadius: '0.375rem',
               fontSize: '0.875rem',
               fontWeight: '500'
@@ -129,12 +129,10 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
           {arrangement.difficulty && (
             <span style={{
               padding: '0.25rem 0.75rem',
-              backgroundColor: arrangement.difficulty === 'beginner' ? '#f0f9ff' :
-                             arrangement.difficulty === 'intermediate' ? '#fef3c7' :
-                             '#fee2e2',
-              color: arrangement.difficulty === 'beginner' ? '#0369a1' :
-                     arrangement.difficulty === 'intermediate' ? '#92400e' :
-                     '#991b1b',
+              backgroundColor: 'var(--color-accent)',
+              color: arrangement.difficulty === 'beginner' ? 'var(--status-success)' :
+                     arrangement.difficulty === 'intermediate' ? 'var(--status-warning)' :
+                     'var(--status-error)',
               borderRadius: '0.375rem',
               fontSize: '0.875rem',
               fontWeight: '500',

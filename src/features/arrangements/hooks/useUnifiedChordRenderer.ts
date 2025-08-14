@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import * as ChordSheetJS from 'chordsheetjs';
+const { Chord } = ChordSheetJS;
 import { chordPreferencesService } from '../services/chordPreferencesService';
 import type { ChordDisplayPreferences, RenderOptions } from '../types/preferences.types';
 
@@ -242,7 +243,32 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
 
       // Apply transposition if specified
       if (options?.transpose !== undefined && options.transpose !== 0) {
-        song.transpose(options.transpose);
+        // Manually transpose all chords in the song
+        // Note: song.transpose() method doesn't work in ChordSheetJS v12.3.1
+        // We need to manually parse and transpose each chord
+        song.lines.forEach((line: any) => {
+          if (line.items) {
+            line.items.forEach((item: any) => {
+              // Check if item has chords property
+              if (item.chords && typeof item.chords === 'string' && options.transpose) {
+                // Skip section markers like 'Verse', 'Chorus' etc.
+                const sectionMarkers = ['Verse', 'Chorus', 'Bridge', 'Intro', 'Outro', 'Pre-Chorus', 'Tag', 'Coda'];
+                if (!sectionMarkers.includes(item.chords)) {
+                  try {
+                    const chord = Chord.parse(item.chords);
+                    if (chord) {
+                      const transposedChord = chord.transpose(options.transpose);
+                      item.chords = transposedChord.toString();
+                    }
+                  } catch (e) {
+                    // Silently skip chords that can't be parsed
+                    console.warn('Could not transpose chord:', item.chords);
+                  }
+                }
+              }
+            });
+          }
+        });
       }
 
       // Use HtmlDivFormatter for responsive layout (works better for both preview and viewer)

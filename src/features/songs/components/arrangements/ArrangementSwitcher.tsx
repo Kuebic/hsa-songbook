@@ -13,6 +13,7 @@ export function ArrangementSwitcher({
   onSelect,
   loading = false
 }: ArrangementSwitcherProps) {
+  
   // Use tabs for ≤4 arrangements, dropdown for >4
   const useTabView = arrangements.length <= 4
   
@@ -20,7 +21,7 @@ export function ArrangementSwitcher({
     return (
       <div style={{ 
         padding: '0.75rem',
-        color: '#6b7280',
+        color: 'var(--text-secondary)',
         fontSize: '0.875rem'
       }}>
         Loading arrangements...
@@ -69,9 +70,9 @@ export function ArrangementSwitcher({
             aria-controls={`arrangement-panel-${arr.id}`}
             style={{
               padding: '0.5rem 1rem',
-              backgroundColor: selectedId === arr.id ? '#3b82f6' : '#f3f4f6',
-              color: selectedId === arr.id ? 'white' : '#374151',
-              border: selectedId === arr.id ? '1px solid #3b82f6' : '1px solid #d1d5db',
+              backgroundColor: selectedId === arr.id ? 'var(--color-primary)' : 'var(--color-secondary)',
+              color: selectedId === arr.id ? 'var(--color-primary-foreground)' : 'var(--text-primary)',
+              border: selectedId === arr.id ? '1px solid var(--color-primary)' : '1px solid var(--color-border)',
               borderRadius: '0.375rem',
               cursor: 'pointer',
               fontSize: '0.875rem',
@@ -81,16 +82,16 @@ export function ArrangementSwitcher({
             }}
             onMouseEnter={(e) => {
               if (selectedId !== arr.id) {
-                e.currentTarget.style.backgroundColor = '#e5e7eb'
+                e.currentTarget.style.backgroundColor = 'var(--color-muted)'
               }
             }}
             onMouseLeave={(e) => {
               if (selectedId !== arr.id) {
-                e.currentTarget.style.backgroundColor = '#f3f4f6'
+                e.currentTarget.style.backgroundColor = 'var(--color-secondary)'
               }
             }}
             onFocus={(e) => {
-              e.currentTarget.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.5)'
+              e.currentTarget.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.2)'
             }}
             onBlur={(e) => {
               e.currentTarget.style.boxShadow = 'none'
@@ -113,7 +114,7 @@ export function ArrangementSwitcher({
           marginBottom: '0.25rem',
           fontSize: '0.875rem',
           fontWeight: 500,
-          color: '#374151'
+          color: 'var(--text-primary)'
         }}
       >
         Select Arrangement
@@ -127,10 +128,10 @@ export function ArrangementSwitcher({
           maxWidth: '300px',
           padding: '0.5rem 2rem 0.5rem 0.75rem',
           borderRadius: '0.375rem',
-          border: '1px solid #d1d5db',
-          backgroundColor: 'white',
+          border: '1px solid var(--color-border)',
+          backgroundColor: 'var(--color-background)',
           fontSize: '0.875rem',
-          color: '#374151',
+          color: 'var(--text-primary)',
           cursor: 'pointer',
           outline: 'none',
           appearance: 'none',
@@ -140,11 +141,11 @@ export function ArrangementSwitcher({
           backgroundSize: '20px'
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = '#3b82f6'
+          e.currentTarget.style.borderColor = 'var(--color-primary)'
           e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)'
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = '#d1d5db'
+          e.currentTarget.style.borderColor = 'var(--color-border)'
           e.currentTarget.style.boxShadow = 'none'
         }}
         aria-label="Select arrangement"

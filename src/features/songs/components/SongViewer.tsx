@@ -78,58 +78,14 @@ export function SongViewer({
       )}
 
       {selectedArrangement && (
-        <div style={{ marginBottom: '2rem' }}>
-          <div style={{ 
-            display: 'flex', 
-            gap: '1rem', 
-            marginBottom: '1rem',
-            flexWrap: 'wrap' 
-          }}>
-            <span style={{ 
-              padding: '0.25rem 0.75rem', 
-              backgroundColor: 'var(--color-accent)',
-              borderRadius: '4px' 
-            }}>
-              Key: {selectedArrangement.key}
-            </span>
-            {selectedArrangement.tempo && (
-              <span style={{ 
-                padding: '0.25rem 0.75rem', 
-                backgroundColor: 'var(--color-accent)',
-                borderRadius: '4px' 
-              }}>
-                Tempo: {selectedArrangement.tempo} BPM
-              </span>
-            )}
-            {selectedArrangement.timeSignature && (
-              <span style={{ 
-                padding: '0.25rem 0.75rem', 
-                backgroundColor: 'var(--color-accent)',
-                borderRadius: '4px' 
-              }}>
-                Time: {selectedArrangement.timeSignature}
-              </span>
-            )}
-            <span style={{ 
-              padding: '0.25rem 0.75rem', 
-              backgroundColor: 'var(--color-accent)',
-              borderRadius: '4px' 
-            }}>
-              Difficulty: {selectedArrangement.difficulty}
-            </span>
-          </div>
-
-          <div style={{ 
-            backgroundColor: 'var(--color-foreground)',
-            padding: '1.5rem',
-            borderRadius: '8px',
-            fontFamily: 'monospace',
-            fontSize: '1rem',
-            lineHeight: '1.8',
-            whiteSpace: 'pre-wrap'
-          }}>
-            {selectedArrangement.chordData}
-          </div>
+        <div style={{ 
+          marginBottom: '2rem',
+          fontFamily: 'monospace',
+          fontSize: '1rem',
+          lineHeight: '1.8',
+          whiteSpace: 'pre-wrap'
+        }}>
+          {selectedArrangement.chordData}
         </div>
       )}
 

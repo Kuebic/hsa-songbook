@@ -1,6 +1,7 @@
 import { useRef, useEffect, useId, useCallback } from 'react'
 import { useModalFocus } from './hooks/useModalFocus'
 import { useModal } from './hooks/useModal'
+import { designTokens } from '@shared/styles/tokens'
 import type { ModalProps } from './types/modal.types'
 
 export function Modal({
@@ -37,29 +38,55 @@ export function Modal({
     if (!dialog) return
     
     if (isOpen) {
-      dialog.showModal()
+      // Only show modal if it's not already open
+      if (!dialog.open) {
+        dialog.showModal()
+      }
       registerModal(modalId)
+      
+      // Handle backdrop clicks
+      const handleClick = (e: MouseEvent) => {
+        if (closeOnOverlayClick && e.target === dialog) {
+          // Click was on the dialog backdrop (outside the content)
+          const rect = dialog.getBoundingClientRect()
+          const clickedInDialog = (
+            e.clientX >= rect.left &&
+            e.clientX <= rect.right &&
+            e.clientY >= rect.top &&
+            e.clientY <= rect.bottom
+          )
+          
+          // If click was outside the dialog bounds, it was on the backdrop
+          if (!clickedInDialog) {
+            onClose()
+          }
+        }
+      }
+      
+      dialog.addEventListener('click', handleClick)
+      
+      return () => {
+        dialog.removeEventListener('click', handleClick)
+      }
     } else {
-      // Animate out before closing
-      dialog.style.animation = `modalFadeOut ${animationDuration}ms ease-out`
-      setTimeout(() => {
-        dialog.close()
-        dialog.style.animation = ''
-      }, animationDuration)
+      // Only close if dialog is actually open
+      if (dialog.open) {
+        // Animate out before closing
+        dialog.style.animation = `modalFadeOut ${animationDuration}ms ease-out`
+        setTimeout(() => {
+          if (dialog.open) {
+            dialog.close()
+          }
+          dialog.style.animation = ''
+        }, animationDuration)
+      }
       unregisterModal(modalId)
     }
     
     return () => {
       unregisterModal(modalId)
     }
-  }, [isOpen, modalId, animationDuration, registerModal, unregisterModal])
-  
-  // Handle backdrop click
-  const handleBackdropClick = useCallback((e: React.MouseEvent<HTMLDialogElement>) => {
-    if (closeOnOverlayClick && e.target === e.currentTarget) {
-      onClose()
-    }
-  }, [closeOnOverlayClick, onClose])
+  }, [isOpen, modalId, animationDuration, registerModal, unregisterModal, closeOnOverlayClick, onClose])
   
   // Handle ESC key
   const handleCancel = useCallback((e: React.SyntheticEvent<HTMLDialogElement>) => {
@@ -78,10 +105,10 @@ export function Modal({
   
   const styles: React.CSSProperties = {
     ...sizeStyles[size],
-    padding: '24px',
-    borderRadius: '8px',
+    padding: '0', // Remove padding from dialog
+    borderRadius: designTokens.radius.lg, // 12px for modern look
     border: 'none',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+    boxShadow: designTokens.shadows.xl,
     animation: isOpen ? `modalFadeIn ${animationDuration}ms ease-out` : undefined,
     backgroundColor: 'var(--color-card)',
     color: 'var(--text-primary)',
@@ -89,8 +116,10 @@ export function Modal({
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    maxHeight: '90vh',
-    overflow: 'auto'
+    maxHeight: 'calc(100vh - 80px)', // Increased spacing from viewport edges
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden'
   }
   
   return (
@@ -133,7 +162,6 @@ export function Modal({
         ref={dialogRef}
         style={styles}
         className={className}
-        onClick={handleBackdropClick}
         onCancel={handleCancel}
         aria-labelledby={title ? `${testId}-title` : undefined}
         aria-describedby={description ? `${testId}-description` : undefined}
@@ -141,57 +169,94 @@ export function Modal({
         aria-modal="true"
         data-testid={testId}
       >
-        <div onClick={e => e.stopPropagation()}>
-          {showCloseButton && (
-            <button
-              onClick={onClose}
-              style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                background: 'transparent',
-                border: 'none',
-                fontSize: '24px',
-                cursor: 'pointer',
-                padding: '4px',
-                lineHeight: 1,
-                color: 'var(--text-secondary)'
-              }}
-              aria-label="Close dialog"
-              data-testid={`${testId}-close`}
-            >
-              ×
-            </button>
-          )}
+        <div 
+          onClick={(e) => {
+            // Prevent clicks inside the modal content from closing it
+            e.stopPropagation()
+          }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Fixed header */}
+          <div style={{
+            padding: designTokens.spacing.lg,
+            paddingBottom: (title || description) ? '0' : designTokens.spacing.lg,
+            flexShrink: 0,
+            position: 'relative'
+          }}>
+            {showCloseButton && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  onClose()
+                }}
+                style={{
+                  position: 'absolute',
+                  top: designTokens.spacing.md,
+                  right: designTokens.spacing.md,
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  padding: designTokens.spacing.xs,
+                  lineHeight: 1,
+                  color: 'var(--text-secondary)',
+                  borderRadius: designTokens.radius.sm,
+                  transition: designTokens.transitions.fast
+                }}
+                aria-label="Close dialog"
+                data-testid={`${testId}-close`}
+              >
+                ×
+              </button>
+            )}
+            
+            {title && (
+              <h2 
+                id={`${testId}-title`}
+                style={{
+                  margin: `0 0 ${designTokens.spacing.sm} 0`,
+                  fontSize: designTokens.typography.fontSize.xl,
+                  fontWeight: designTokens.typography.fontWeight.semibold,
+                  color: 'var(--text-primary)',
+                  paddingRight: showCloseButton ? designTokens.spacing.xl : '0'
+                }}
+              >
+                {title}
+              </h2>
+            )}
+            
+            {description && (
+              <p 
+                id={`${testId}-description`}
+                style={{
+                  margin: `0 0 ${designTokens.spacing.lg} 0`,
+                  fontSize: designTokens.typography.fontSize.sm,
+                  color: 'var(--text-secondary)',
+                  paddingRight: showCloseButton ? designTokens.spacing.xl : '0'
+                }}
+              >
+                {description}
+              </p>
+            )}
+          </div>
           
-          {title && (
-            <h2 
-              id={`${testId}-title`}
-              style={{
-                margin: '0 0 16px 0',
-                fontSize: '20px',
-                fontWeight: 600,
-                color: 'var(--text-primary)'
-              }}
-            >
-              {title}
-            </h2>
-          )}
-          
-          {description && (
-            <p 
-              id={`${testId}-description`}
-              style={{
-                margin: '0 0 24px 0',
-                fontSize: '14px',
-                color: 'var(--text-secondary)'
-              }}
-            >
-              {description}
-            </p>
-          )}
-          
-          {children}
+          {/* Scrollable content */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            padding: designTokens.spacing.lg,
+            paddingTop: (title || description) ? designTokens.spacing.lg : '0',
+            overscrollBehavior: 'contain'
+          }}>
+            {children}
+          </div>
         </div>
       </dialog>
     </>

@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class', // Enable class-based dark mode
   content: [
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
@@ -7,8 +8,34 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Form-specific colors
-        border: '#e2e8f0',
+        // Map CSS variables to Tailwind utilities
+        background: 'var(--color-background)',
+        foreground: 'var(--color-foreground)',
+        primary: {
+          DEFAULT: 'var(--color-primary)',
+          foreground: 'var(--color-primary-foreground)',
+        },
+        secondary: {
+          DEFAULT: 'var(--color-secondary)',
+          foreground: 'var(--color-secondary-foreground)',
+        },
+        muted: {
+          DEFAULT: 'var(--color-muted)',
+          foreground: 'var(--color-muted-foreground)',
+        },
+        accent: {
+          DEFAULT: 'var(--color-accent)',
+          foreground: 'var(--color-accent-foreground)',
+        },
+        destructive: {
+          DEFAULT: 'var(--color-destructive)',
+          foreground: 'var(--color-destructive-foreground)',
+        },
+        border: 'var(--color-border)',
+        input: 'var(--color-input)',
+        ring: 'var(--color-ring)',
+        
+        // Form-specific colors (keeping for backward compatibility)
         'border-error': '#ef4444',
         'border-focus': '#3b82f6',
         error: '#ef4444',
