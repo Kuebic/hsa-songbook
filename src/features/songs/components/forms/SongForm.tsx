@@ -62,7 +62,7 @@ export function SongForm({
   )
   
   // Handle field changes
-  const handleChange = useCallback((field: keyof SongFormData, value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const handleChange = useCallback((field: keyof SongFormData, value: SongFormData[keyof SongFormData]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     setTouched(prev => new Set(prev).add(field))
     

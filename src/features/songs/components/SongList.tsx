@@ -1,3 +1,4 @@
+import React from 'react'
 import { SongCard } from './SongCard'
 import type { Song } from '../types/song.types'
 
@@ -10,7 +11,14 @@ interface SongListProps {
   error?: string | null
 }
 
-export function SongList({ songs, onSongClick, onSongUpdate, onSongDelete, loading, error }: SongListProps) {
+const SongListComponent: React.FC<SongListProps> = ({ 
+  songs, 
+  onSongClick, 
+  onSongUpdate, 
+  onSongDelete, 
+  loading, 
+  error 
+}) => {
   if (loading) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -56,3 +64,5 @@ export function SongList({ songs, onSongClick, onSongUpdate, onSongDelete, loadi
     </div>
   )
 }
+
+export const SongList = React.memo(SongListComponent)

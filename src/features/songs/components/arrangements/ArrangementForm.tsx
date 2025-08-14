@@ -20,7 +20,7 @@ import type { ArrangementFormData } from '@features/songs/validation/schemas/arr
 
 interface ArrangementFormProps {
   data: Partial<ArrangementFormData>
-  onChange: (field: keyof ArrangementFormData, value: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+  onChange: (field: keyof ArrangementFormData, value: ArrangementFormData[keyof ArrangementFormData]) => void
   errors?: Record<string, string>
   showInSongForm?: boolean
   isRequired?: boolean

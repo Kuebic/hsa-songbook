@@ -436,7 +436,6 @@ describe('Song Form Integration', () => {
   
   describe('Batch Operations', () => {
     it('handles bulk song creation', async () => {
-      const user = userEvent.setup()
       const mockOnSuccess = vi.fn()
       const songs = [
         { title: 'Song 1', themes: ['worship'] },
@@ -446,13 +445,13 @@ describe('Song Form Integration', () => {
       
       server.use(
         http.post('/api/v1/songs/batch', async ({ request }) => {
-          const data = await request.json()
+          const data = await request.json() as { songs?: Array<{ title: string; themes: string[] }> }
           
           return HttpResponse.json({
             success: true,
             data: {
-              created: data.songs.length,
-              songs: data.songs.map((song: any) => ({
+              created: data.songs?.length || 0,
+              songs: data.songs?.map((song) => ({
                 ...songFactory.build(),
                 ...song
               }))

@@ -23,7 +23,7 @@ export function useMinimalMode(): MinimalModeState {
     if (newState && 'orientation' in screen) {
       const orientation = screen.orientation as ScreenOrientation | undefined
       if (orientation && 'lock' in orientation) {
-        (orientation as any).lock('landscape').catch(() => {
+        (orientation as ScreenOrientation & { lock?: (orientation: string) => Promise<void> }).lock?.('landscape').catch(() => {
           // Orientation lock may fail, that's okay
         })
       }

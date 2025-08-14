@@ -34,7 +34,7 @@ class PerformanceService {
     
     // Send to analytics service
     if (typeof window !== 'undefined' && 'gtag' in window) {
-      const gtag = (window as any).gtag;
+      const gtag = (window as typeof window & { gtag?: (command: string, targetId: string, config?: Record<string, unknown>) => void }).gtag;
       if (gtag && typeof gtag === 'function') {
         metrics.forEach(metric => {
           gtag('event', metric.name, {

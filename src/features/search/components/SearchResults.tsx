@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { SongList } from '@features/songs'
 import type { Song } from '@features/songs'
 
@@ -10,13 +10,13 @@ interface SearchResultsProps {
   onSongClick?: (song: Song) => void
 }
 
-export function SearchResults({ 
+const SearchResultsComponent: React.FC<SearchResultsProps> = ({ 
   results, 
   loading, 
   error, 
   query,
   onSongClick 
-}: SearchResultsProps) {
+}) => {
   // Memoize the result count label to avoid recalculating on every render
   const resultCountLabel = useMemo(() => {
     return results.length === 1 ? 'song' : 'songs'
@@ -38,16 +38,17 @@ export function SearchResults({
     <div>
       <div style={{ 
         padding: '1rem', 
-        borderBottom: '1px solid var(--color-border)' 
+        borderBottom: '1px solid var(--color-border)',
+        backgroundColor: 'var(--color-surface)'
       }}>
-        {loading ? (
-          <p>Searching...</p>
-        ) : (
-          <p>
-            Found <strong>{results.length}</strong> {resultCountLabel} 
-            {query && ` for "${query}"`}
-          </p>
-        )}
+        <p style={{ 
+          margin: 0, 
+          color: 'var(--text-secondary)' 
+        }}>
+          {loading ? 'Searching...' : (
+            <>Found {results.length} {resultCountLabel} for "{query}"</>
+          )}
+        </p>
       </div>
       
       <SongList 
@@ -59,3 +60,5 @@ export function SearchResults({
     </div>
   )
 }
+
+export const SearchResults = React.memo(SearchResultsComponent)

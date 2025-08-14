@@ -166,7 +166,7 @@ export function themeStats(themes: string[]): ThemeStats {
     frequency[normalizedTheme] = (frequency[normalizedTheme] || 0) + 1
     
     // Check if it's in our normalized vocabulary
-    if (NORMALIZED_THEMES.includes(normalizedTheme as any)) {
+    if (NORMALIZED_THEMES.includes(normalizedTheme as (typeof NORMALIZED_THEMES)[number])) {
       // Only count as "normalized" if it was actually transformed
       if (original !== normalizedTheme) {
         normalized++

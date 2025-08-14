@@ -6,7 +6,7 @@ import type { SongFormData } from '../../../validation/schemas/songFormSchema'
 interface CategorizationSectionProps {
   data: Partial<SongFormData>
   errors: Record<string, string>
-  onChange: (field: keyof SongFormData, value: any) => void
+  onChange: (field: keyof SongFormData, value: SongFormData[keyof SongFormData]) => void
   disabled?: boolean
 }
 

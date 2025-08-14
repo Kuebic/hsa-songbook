@@ -5,23 +5,22 @@
 /**
  * Throttle function calls to improve performance
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle = false;
   let lastArgs: Parameters<T> | null = null;
   
-  return function throttled(this: any, ...args: Parameters<T>) {
-    const context = this;
+  return function throttled(this: ThisParameterType<T>, ...args: Parameters<T>) {
     if (!inThrottle) {
-      func.apply(context, args);
+      func.apply(this, args);
       inThrottle = true;
       
       setTimeout(() => {
         inThrottle = false;
         if (lastArgs) {
-          throttled.apply(context, lastArgs);
+          throttled.apply(this, lastArgs);
           lastArgs = null;
         }
       }, limit);
@@ -34,20 +33,19 @@ export function throttle<T extends (...args: any[]) => any>(
 /**
  * RequestAnimationFrame-based throttle for 60fps
  */
-export function rafThrottle<T extends (...args: any[]) => any>(
+export function rafThrottle<T extends (...args: unknown[]) => unknown>(
   func: T
 ): (...args: Parameters<T>) => void {
   let rafId: number | null = null;
   let lastArgs: Parameters<T> | null = null;
   
-  return function rafThrottled(this: any, ...args: Parameters<T>) {
-    const context = this;
+  return function rafThrottled(this: ThisParameterType<T>, ...args: Parameters<T>) {
     lastArgs = args;
     
     if (rafId === null) {
       rafId = requestAnimationFrame(() => {
         if (lastArgs) {
-          func.apply(context, lastArgs);
+          func.apply(this, lastArgs);
         }
         rafId = null;
         lastArgs = null;
@@ -178,7 +176,7 @@ export class DOMUpdateBatcher {
 /**
  * Memoize expensive computations
  */
-export function memoize<T extends (...args: any[]) => any>(
+export function memoize<T extends (...args: unknown[]) => unknown>(
   func: T,
   resolver?: (...args: Parameters<T>) => string
 ): T {
@@ -191,7 +189,7 @@ export function memoize<T extends (...args: any[]) => any>(
       return cache.get(key)!;
     }
     
-    const result = func(...args);
+    const result = func(...args) as ReturnType<T>;
     cache.set(key, result);
     
     // Limit cache size to prevent memory leaks
@@ -227,7 +225,7 @@ export function lazyLoad<T>(
  */
 export function isLowEndDevice(): boolean {
   // Check for low memory
-  const memory = (navigator as any).deviceMemory;
+  const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
   if (memory && memory < 4) return true;
   
   // Check for low core count
@@ -235,7 +233,7 @@ export function isLowEndDevice(): boolean {
   if (cores && cores < 4) return true;
   
   // Check for slow connection
-  const connection = (navigator as any).connection;
+  const connection = (navigator as Navigator & { connection?: { effectiveType?: string } }).connection;
   if (connection) {
     const effectiveType = connection.effectiveType;
     if (effectiveType === 'slow-2g' || effectiveType === '2g') {

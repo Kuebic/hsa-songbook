@@ -90,7 +90,7 @@ export const FontPreferences: React.FC<FontPreferencesProps> = ({
       <div className="font-preferences-compact">
         <button 
           className="font-size-decrease"
-          onClick={() => handleFontSizeChange({ target: { value: Math.max(10, localPrefs.fontSize - 2).toString() } } as any)}
+          onClick={() => handleFontSizeChange({ target: { value: Math.max(10, localPrefs.fontSize - 2).toString() } } as React.ChangeEvent<HTMLInputElement>)}
           aria-label="Decrease font size"
         >
           A-
@@ -98,7 +98,7 @@ export const FontPreferences: React.FC<FontPreferencesProps> = ({
         <span className="font-size-display">{localPrefs.fontSize}px</span>
         <button 
           className="font-size-increase"
-          onClick={() => handleFontSizeChange({ target: { value: Math.min(32, localPrefs.fontSize + 2).toString() } } as any)}
+          onClick={() => handleFontSizeChange({ target: { value: Math.min(32, localPrefs.fontSize + 2).toString() } } as React.ChangeEvent<HTMLInputElement>)}
           aria-label="Increase font size"
         >
           A+

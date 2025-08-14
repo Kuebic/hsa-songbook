@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, renderAsAdmin } from '../../test-utils/render'
+import { renderAsAdmin } from '../../test-utils/render'
 import { SongForm } from '../../components/forms/SongForm'
 import { songFactory } from '../../test-utils/factories'
 import { songFormSchema } from '../../validation/schemas/songFormSchema'

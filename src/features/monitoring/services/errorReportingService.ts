@@ -24,7 +24,7 @@ class ErrorReportingService {
   private sendToMonitoring(error: Error, context: ErrorContext) {
     // Example: Sentry integration
     if (typeof window !== 'undefined' && 'Sentry' in window) {
-      const sentry = (window as any).Sentry;
+      const sentry = (window as typeof window & { Sentry?: { captureException: (error: Error, context?: Record<string, unknown>) => void } }).Sentry;
       if (sentry && typeof sentry.captureException === 'function') {
         sentry.captureException(error, {
           extra: context,

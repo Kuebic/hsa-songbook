@@ -21,7 +21,7 @@ export const useVirtualKeyboard = (): VirtualKeyboardState => {
 
   useEffect(() => {
     // Check if Visual Viewport API is available
-    const visualViewport = (window as any).visualViewport;
+    const visualViewport = (window as typeof window & { visualViewport?: VisualViewport }).visualViewport;
     
     if (!visualViewport) {
       // Fallback for browsers without Visual Viewport API

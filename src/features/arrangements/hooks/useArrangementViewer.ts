@@ -58,7 +58,7 @@ Unending [Am]love, [G]amazing [C]grace`
             tempo: data.tempo,
             timeSignature: data.timeSignature,
             difficulty: data.difficulty,
-            chordProText: (data as any).chordProText || sampleChordPro, // Use sample if no data
+            chordProText: (data as unknown as Record<string, unknown>).chordProText as string || sampleChordPro, // Use sample if no data
             tags: data.tags,
             createdBy: data.createdBy || ''
           })

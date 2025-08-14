@@ -41,14 +41,14 @@ export interface ChordSyntaxHighlightRef {
  */
 export const ChordSyntaxHighlight = forwardRef<ChordSyntaxHighlightRef, ChordSyntaxHighlightProps>(
   ({ value, onChange, placeholder, validation, className, disabled = false, autoFocus = false }, ref) => {
-    const aceEditorRef = useRef<any>(null)
+    const aceEditorRef = useRef<ReactAce | null>(null)
     const [isEditorReady, setIsEditorReady] = useState(false)
     
     // Configure ACE Editor when it loads
     useEffect(() => {
       if (aceEditorRef.current && !isEditorReady) {
         const editor = aceEditorRef.current.editor
-        const aceInstance = aceEditorRef.current.editor.ace || (window as any).ace || ace
+        const aceInstance = ((aceEditorRef.current as unknown as { editor: { ace?: typeof import('ace-builds') } }).editor.ace) || (window as typeof window & { ace?: typeof import('ace-builds') }).ace || ace
         
         if (aceInstance && editor) {
           configureAceForChordPro(aceInstance, editor)

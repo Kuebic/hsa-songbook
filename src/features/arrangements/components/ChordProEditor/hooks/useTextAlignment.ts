@@ -108,7 +108,7 @@ export const useTextAlignment = (
         property.replace(/([A-Z])/g, '-$1').toLowerCase()
       );
       if (value) {
-        (highlight.style as any)[property] = value;
+        (highlight.style as CSSStyleDeclaration & Record<string, string>)[property] = value;
       }
     });
   }, [textareaRef, highlightRef]);

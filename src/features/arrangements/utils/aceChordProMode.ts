@@ -2,13 +2,13 @@
  * Custom ACE Editor mode for ChordPro syntax highlighting
  */
 
-export function defineChordProMode(ace: any) {
-  ace.define('ace/mode/chordpro_highlight_rules', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/mode/text_highlight_rules'], 
-    function(require: any, exports: any) {
-      const oop = require('ace/lib/oop');
-      const TextHighlightRules = require('ace/mode/text_highlight_rules').TextHighlightRules;
+export function defineChordProMode(ace: unknown) {
+  (ace as { define: (name: string, deps: string[], factory: (require: (module: string) => unknown, exports: Record<string, unknown>) => void) => void }).define('ace/mode/chordpro_highlight_rules', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/mode/text_highlight_rules'], 
+    function(require: (module: string) => unknown, exports: Record<string, unknown>) {
+      const oop = require('ace/lib/oop') as { inherits: (child: unknown, parent: unknown) => void };
+      const TextHighlightRules = (require('ace/mode/text_highlight_rules') as { TextHighlightRules: unknown }).TextHighlightRules;
 
-      const ChordProHighlightRules = function(this: any) {
+      const ChordProHighlightRules = function(this: Record<string, unknown>) {
         this.$rules = {
           start: [
             // Comments - lines starting with #
@@ -54,20 +54,20 @@ export function defineChordProMode(ace: any) {
     }
   );
 
-  ace.define('ace/mode/chordpro', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/mode/text', 'ace/mode/chordpro_highlight_rules'], 
-    function(require: any, exports: any) {
-      const oop = require('ace/lib/oop');
-      const TextMode = require('ace/mode/text').Mode;
-      const ChordProHighlightRules = require('ace/mode/chordpro_highlight_rules').ChordProHighlightRules;
+  (ace as { define: (name: string, deps: string[], factory: (require: (module: string) => unknown, exports: Record<string, unknown>) => void) => void }).define('ace/mode/chordpro', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/mode/text', 'ace/mode/chordpro_highlight_rules'], 
+    function(require: (module: string) => unknown, exports: Record<string, unknown>) {
+      const oop = require('ace/lib/oop') as { inherits: (child: unknown, parent: unknown) => void };
+      const TextMode = (require('ace/mode/text') as { Mode: unknown }).Mode;
+      const ChordProHighlightRules = (require('ace/mode/chordpro_highlight_rules') as { ChordProHighlightRules: unknown }).ChordProHighlightRules;
 
-      const Mode = function(this: any) {
+      const Mode = function(this: Record<string, unknown>) {
         this.HighlightRules = ChordProHighlightRules;
         this.$behaviour = this.$defaultBehaviour;
       };
 
       oop.inherits(Mode, TextMode);
 
-      (function(this: any) {
+      (function(this: Record<string, unknown>) {
         this.lineCommentStart = '#';
         this.$id = 'ace/mode/chordpro';
       }).call(Mode.prototype);
@@ -195,7 +195,7 @@ export const chordProTheme = `
 /**
  * Helper to configure ACE Editor for ChordPro
  */
-export function configureAceForChordPro(ace: any, editor: any) {
+export function configureAceForChordPro(ace: unknown, editor: unknown) {
   // Define the custom mode
   defineChordProMode(ace);
   

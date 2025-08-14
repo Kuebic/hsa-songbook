@@ -238,13 +238,13 @@ export const songValidationHelpers = {
    * Check if source is valid
    */
   isValidSource: (source: string): boolean => {
-    return SONG_SOURCES.includes(source as any)
+    return SONG_SOURCES.includes(source as (typeof SONG_SOURCES)[number])
   },
   
   /**
    * Sanitize form data before validation
    */
-  sanitizeFormData: (data: any): any => {
+  sanitizeFormData: (data: Partial<SongFormData>): Partial<SongFormData> => {
     const sanitized = { ...data }
     
     // Trim string fields

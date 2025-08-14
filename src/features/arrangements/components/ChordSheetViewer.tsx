@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect } from 'react'
+import React, { useMemo, useRef, useEffect } from 'react'
 import { clsx } from 'clsx'
 import { useUnifiedChordRenderer } from '../hooks/useUnifiedChordRenderer'
 import { useChordSheetSettings } from '../hooks/useChordSheetSettings'
@@ -13,7 +13,7 @@ interface EnhancedChordSheetViewerProps extends ChordSheetViewerProps {
   scrollSpeed?: number
 }
 
-export function ChordSheetViewer({ 
+const ChordSheetViewerComponent: React.FC<EnhancedChordSheetViewerProps> = ({ 
   chordProText, 
   onCenterTap,
   className,
@@ -21,7 +21,7 @@ export function ChordSheetViewer({
   transposition = 0,
   isScrolling: externalIsScrolling,
   scrollSpeed: externalScrollSpeed
-}: EnhancedChordSheetViewerProps) {
+}) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const { renderChordSheet, preferences } = useUnifiedChordRenderer()
@@ -124,3 +124,5 @@ export function ChordSheetViewer({
     </div>
   )
 }
+
+export const ChordSheetViewer = React.memo(ChordSheetViewerComponent)

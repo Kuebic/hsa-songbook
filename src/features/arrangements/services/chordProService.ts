@@ -13,6 +13,7 @@ import {
   Song,
   Chord,
 } from 'chordsheetjs';
+import type { ChordLyricsPair, Comment, Tag, Ternary, Literal } from 'chordsheetjs';
 import type {
   ChordProMetadata,
   ValidationError,
@@ -188,7 +189,7 @@ export class ChordProService {
       
       song.lines.forEach(line => {
         if (line.items) {
-          line.items.forEach((item: any) => {
+          line.items.forEach((item: ChordLyricsPair | Comment | Tag | Ternary | Literal) => {
             if ('chords' in item && item.chords) {
               if (typeof item.chords === 'string') {
                 const chord = Chord.parse(item.chords);
@@ -225,7 +226,7 @@ export class ChordProService {
    */
   detectSongKey(content: string): { key: string; confidence: number } {
     const { song } = this.parse(content);
-    const songData = song as any;
+    const songData = song as Song & { key?: string; [key: string]: unknown };
     
     // Check for explicit key directive
     if (songData.key) {
@@ -262,7 +263,7 @@ export class ChordProService {
     
     song.lines.forEach(line => {
       if (line.items) {
-        line.items.forEach((item: any) => {
+        line.items.forEach((item: Item) => {
           if ('chords' in item && item.chords) {
             if (typeof item.chords === 'string') {
               item.chords = enharmonicService.convertChord(item.chords, modifier);
@@ -287,7 +288,7 @@ export class ChordProService {
     // Extract chords from all lines
     song.lines.forEach((line) => {
       if (line.items) {
-        line.items.forEach((item: any) => {
+        line.items.forEach((item: Item) => {
           // Check if item has chords property (ChordLyricsPair)
           if ('chords' in item && item.chords) {
             if (typeof item.chords === 'string') {
@@ -349,7 +350,22 @@ export class ChordProService {
    */
   private extractMetadata(song: Song): ChordProMetadata {
     const metadata: ChordProMetadata = {};
-    const songData = song as any;
+    const songData = song as Song & {
+      title?: string;
+      subtitle?: string;
+      artist?: string;
+      composer?: string;
+      lyricist?: string;
+      copyright?: string;
+      album?: string;
+      year?: string | number;
+      key?: string;
+      time?: string;
+      tempo?: string | number;
+      duration?: string | number;
+      capo?: string | number;
+      metadata?: Record<string, string | string[] | number>;
+    };
     
     // Standard metadata fields
     if (songData.title) metadata.title = songData.title;
@@ -359,12 +375,12 @@ export class ChordProService {
     if (songData.lyricist) metadata.lyricist = songData.lyricist;
     if (songData.copyright) metadata.copyright = songData.copyright;
     if (songData.album) metadata.album = songData.album;
-    if (songData.year) metadata.year = songData.year;
+    if (songData.year) metadata.year = typeof songData.year === 'string' ? songData.year : songData.year.toString();
     if (songData.key) metadata.key = songData.key;
     if (songData.time) metadata.time = songData.time;
-    if (songData.tempo) metadata.tempo = songData.tempo;
-    if (songData.duration) metadata.duration = songData.duration;
-    if (songData.capo) metadata.capo = songData.capo;
+    if (songData.tempo) metadata.tempo = typeof songData.tempo === 'string' ? songData.tempo : songData.tempo.toString();
+    if (songData.duration) metadata.duration = typeof songData.duration === 'string' ? songData.duration : songData.duration.toString();
+    if (songData.capo) metadata.capo = typeof songData.capo === 'string' ? songData.capo : songData.capo.toString();
     
     // Custom metadata
     if (songData.metadata) {
@@ -436,7 +452,7 @@ export class ChordProService {
   /**
    * Handle parse errors
    */
-  private handleParseError(error: any, content: string): ValidationError[] {
+  private handleParseError(error: Error | unknown, content: string): ValidationError[] {
     const errors: ValidationError[] = [];
     const lines = content.split('\n');
     
@@ -445,7 +461,7 @@ export class ChordProService {
       id: 'error-0',
       line: 1,
       column: 1,
-      message: error.message || 'Invalid ChordPro syntax',
+      message: (error as Error)?.message || 'Invalid ChordPro syntax',
       severity: 'error',
     });
     

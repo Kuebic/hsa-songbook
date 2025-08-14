@@ -5,7 +5,7 @@ import ChordSheetJS from 'chordsheetjs';
  * Improves performance by caching parse results
  */
 class ChordProCache {
-  private cache: Map<string, any>;
+  private cache: Map<string, import('chordsheetjs').Song | null>;
   private maxSize: number;
 
   constructor(maxSize = 10) {
@@ -16,7 +16,7 @@ class ChordProCache {
   /**
    * Get cached parse result
    */
-  get(content: string): any | undefined {
+  get(content: string): import('chordsheetjs').Song | null | undefined {
     const cached = this.cache.get(content);
     if (cached) {
       // Move to end (most recently used)
@@ -30,7 +30,7 @@ class ChordProCache {
   /**
    * Set cache entry
    */
-  set(content: string, parsed: any): void {
+  set(content: string, parsed: import('chordsheetjs').Song | null): void {
     // Remove oldest if at capacity
     if (this.cache.size >= this.maxSize) {
       const firstKey = this.cache.keys().next().value;
@@ -64,7 +64,7 @@ const chordProCache = new ChordProCache(10);
  * @param content - ChordPro formatted text
  * @returns Parsed song object
  */
-export const parseSongWithCache = (content: string): any => {
+export const parseSongWithCache = (content: string): import('chordsheetjs').Song | null => {
   // Check cache first
   const cached = chordProCache.get(content);
   if (cached) {
@@ -91,7 +91,7 @@ export const parseSongWithCache = (content: string): any => {
  */
 export const formatSongWithCache = (
   content: string,
-  formatter: any = new ChordSheetJS.HtmlTableFormatter()
+  formatter: import('chordsheetjs').HtmlTableFormatter = new ChordSheetJS.HtmlTableFormatter()
 ): string => {
   const song = parseSongWithCache(content);
   if (!song) return '';
@@ -110,7 +110,7 @@ export const formatSongWithCache = (
  * @param wait - Debounce delay in milliseconds
  * @returns Debounced function
  */
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
@@ -134,7 +134,7 @@ export const debounce = <T extends (...args: any[]) => any>(
  * @param limit - Throttle limit in milliseconds
  * @returns Throttled function
  */
-export const throttle = <T extends (...args: any[]) => any>(
+export const throttle = <T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): ((...args: Parameters<T>) => void) => {

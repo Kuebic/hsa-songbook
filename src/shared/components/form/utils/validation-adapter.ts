@@ -99,8 +99,7 @@ export function validateSingleField<T>(
 ): string | null {
   try {
     // Create a partial schema for just this field
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fieldSchema = (schema as any).shape?.[fieldName]
+    const fieldSchema = (schema as import('zod').ZodObject<Record<string, import('zod').ZodTypeAny>>).shape?.[fieldName]
     
     if (!fieldSchema) {
       // If field schema not found, return null (no error)

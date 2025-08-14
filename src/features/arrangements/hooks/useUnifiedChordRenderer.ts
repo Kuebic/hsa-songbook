@@ -246,21 +246,21 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
         // Manually transpose all chords in the song
         // Note: song.transpose() method doesn't work in ChordSheetJS v12.3.1
         // We need to manually parse and transpose each chord
-        song.lines.forEach((line: any) => {
+        song.lines.forEach((line: ChordSheetJS.Line) => {
           if (line.items) {
-            line.items.forEach((item: any) => {
-              // Check if item has chords property
-              if (item.chords && typeof item.chords === 'string' && options.transpose) {
+            line.items.forEach((item) => {
+              // Check if item has chords property (ChordLyricsPair)
+              if ('chords' in item && item.chords && typeof item.chords === 'string' && options.transpose) {
                 // Skip section markers like 'Verse', 'Chorus' etc.
                 const sectionMarkers = ['Verse', 'Chorus', 'Bridge', 'Intro', 'Outro', 'Pre-Chorus', 'Tag', 'Coda'];
                 if (!sectionMarkers.includes(item.chords)) {
                   try {
                     const chord = Chord.parse(item.chords);
-                    if (chord) {
+                    if (chord && 'chords' in item) {
                       const transposedChord = chord.transpose(options.transpose);
-                      item.chords = transposedChord.toString();
+                      (item as ChordSheetJS.ChordLyricsPair).chords = transposedChord.toString();
                     }
-                  } catch (e) {
+                  } catch (_e) {
                     // Silently skip chords that can't be parsed
                     console.warn('Could not transpose chord:', item.chords);
                   }
