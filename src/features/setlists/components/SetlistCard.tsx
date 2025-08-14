@@ -13,11 +13,11 @@ export function SetlistCard({ setlist, onClick, onDelete }: SetlistCardProps) {
     <div 
       style={{
         padding: '1rem',
-        border: '1px solid #e2e8f0',
+        border: '1px solid var(--color-border)',
         borderRadius: '8px',
         cursor: onClick ? 'pointer' : 'default',
         transition: 'all 0.2s',
-        backgroundColor: 'var(--card-bg, white)'
+        backgroundColor: 'var(--color-card)'
       }}
       onClick={() => onClick?.(setlist)}
       onMouseEnter={(e) => {
@@ -43,7 +43,7 @@ export function SetlistCard({ setlist, onClick, onDelete }: SetlistCardProps) {
             {setlist.name}
           </h3>
           {setlist.description && (
-            <p style={{ margin: '0 0 0.5rem 0', color: '#64748b' }}>
+            <p style={{ margin: '0 0 0.5rem 0', color: 'var(--text-secondary)' }}>
               {setlist.description}
             </p>
           )}
@@ -51,7 +51,7 @@ export function SetlistCard({ setlist, onClick, onDelete }: SetlistCardProps) {
             display: 'flex', 
             gap: '1rem', 
             fontSize: '0.875rem', 
-            color: '#94a3b8' 
+            color: 'var(--text-tertiary)' 
           }}>
             <span>📝 {setlist.songs.length} songs</span>
             <span>📅 {formattedDate}</span>
@@ -67,8 +67,8 @@ export function SetlistCard({ setlist, onClick, onDelete }: SetlistCardProps) {
             }}
             style={{
               padding: '0.25rem 0.5rem',
-              backgroundColor: '#ef4444',
-              color: 'white',
+              backgroundColor: 'var(--status-error)',
+              color: 'var(--color-destructive-foreground)',
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',

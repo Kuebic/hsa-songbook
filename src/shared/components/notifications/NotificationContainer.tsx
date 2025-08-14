@@ -53,20 +53,20 @@ function NotificationItem({
     
     const typeStyles: Record<NotificationType, React.CSSProperties> = {
       success: {
-        backgroundColor: '#10b981',
-        color: 'white'
+        backgroundColor: 'var(--status-success)',
+        color: 'var(--color-primary-foreground)'
       },
       error: {
-        backgroundColor: '#ef4444',
-        color: 'white'
+        backgroundColor: 'var(--status-error)',
+        color: 'var(--color-primary-foreground)'
       },
       warning: {
-        backgroundColor: '#f59e0b',
-        color: 'white'
+        backgroundColor: 'var(--status-warning)',
+        color: 'var(--color-primary-foreground)'
       },
       info: {
-        backgroundColor: '#3b82f6',
-        color: 'white'
+        backgroundColor: 'var(--status-info)',
+        color: 'var(--color-primary-foreground)'
       }
     }
     
@@ -123,7 +123,7 @@ function NotificationItem({
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
                 border: '1px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '4px',
-                color: 'white',
+                color: 'var(--color-primary-foreground)',
                 cursor: 'pointer',
                 fontSize: '12px'
               }}
@@ -139,7 +139,7 @@ function NotificationItem({
             style={{
               background: 'transparent',
               border: 'none',
-              color: 'white',
+              color: 'var(--color-primary-foreground)',
               cursor: 'pointer',
               fontSize: '20px',
               padding: '0',

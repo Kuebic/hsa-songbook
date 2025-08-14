@@ -316,7 +316,7 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
         <span style={{ 
           overflow: 'hidden', 
           textOverflow: 'ellipsis',
-          color: selectedOption ? 'inherit' : '#9ca3af'
+          color: selectedOption ? 'inherit' : 'var(--text-tertiary)'
         }}>
           {displayValue}
         </span>
@@ -339,7 +339,7 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
               border: 'none',
               cursor: 'pointer',
               fontSize: '1rem',
-              color: '#6b7280',
+              color: 'var(--text-secondary)',
             }}
             aria-label="Clear selection"
           >
@@ -353,7 +353,7 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
           transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.2s',
           fontSize: '0.75rem',
-          color: '#6b7280',
+          color: 'var(--text-secondary)',
         }}>
           ▼
         </span>
@@ -370,8 +370,8 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
             left: 0,
             right: 0,
             zIndex: 50,
-            backgroundColor: 'white',
-            border: '1px solid #e5e7eb',
+            backgroundColor: 'var(--color-popover)',
+            border: '1px solid var(--color-border)',
             borderRadius: '0.375rem',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             maxHeight,
@@ -394,7 +394,7 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
                 style={{
                   width: '100%',
                   padding: '0.375rem',
-                  border: '1px solid #d1d5db',
+                  border: '1px solid var(--color-input)',
                   borderRadius: '0.25rem',
                   fontSize: '0.875rem',
                 }}
@@ -414,7 +414,7 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
             <div style={{
               padding: '0.75rem',
               textAlign: 'center',
-              color: '#6b7280',
+              color: 'var(--text-secondary)',
               fontSize: '0.875rem',
             }}>
               {loadingText}
@@ -426,7 +426,7 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
             <div style={{
               padding: '0.75rem',
               textAlign: 'center',
-              color: '#6b7280',
+              color: 'var(--text-secondary)',
               fontSize: '0.875rem',
             }}>
               {noOptionsText}
@@ -452,9 +452,9 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
                 textAlign: 'left',
                 border: 'none',
                 cursor: option.disabled ? 'not-allowed' : 'pointer',
-                backgroundColor: index === focusedIndex ? '#f3f4f6' : 
-                  option.value === value ? '#eff6ff' : 'transparent',
-                color: option.disabled ? '#9ca3af' : 'inherit',
+                backgroundColor: index === focusedIndex ? 'var(--color-secondary)' : 
+                  option.value === value ? 'rgba(var(--status-info), 0.1)' : 'transparent',
+                color: option.disabled ? 'var(--text-tertiary)' : 'inherit',
                 fontSize: '0.875rem',
               }}
               onMouseEnter={() => setFocusedIndex(index)}
@@ -463,7 +463,7 @@ const SelectElement = React.forwardRef<HTMLDivElement, SelectElementProps>(({
               {option.value === value && (
                 <span style={{ 
                   float: 'right', 
-                  color: '#3b82f6',
+                  color: 'var(--status-info)',
                   fontWeight: 'bold' 
                 }}>
                   ✓

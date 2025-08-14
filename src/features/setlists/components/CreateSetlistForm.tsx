@@ -43,7 +43,7 @@ export function CreateSetlistForm({ onCreate, onCancel }: CreateSetlistFormProps
   return (
     <div style={{
       padding: '1.5rem',
-      backgroundColor: '#f8fafc',
+      backgroundColor: 'var(--color-foreground)',
       borderRadius: '8px',
       marginBottom: '2rem'
     }}>
@@ -59,12 +59,12 @@ export function CreateSetlistForm({ onCreate, onCancel }: CreateSetlistFormProps
             width: '100%',
             padding: '0.5rem',
             marginBottom: '0.25rem',
-            border: `1px solid ${errors.name ? '#ef4444' : '#e2e8f0'}`,
+            border: `1px solid ${errors.name ? 'var(--status-error)' : 'var(--color-border)'}`,
             borderRadius: '4px'
           }}
         />
         {errors.name && (
-          <p style={{ color: '#ef4444', fontSize: '0.875rem', margin: '0' }}>
+          <p style={{ color: 'var(--status-error)', fontSize: '0.875rem', margin: '0' }}>
             {errors.name}
           </p>
         )}
@@ -79,14 +79,14 @@ export function CreateSetlistForm({ onCreate, onCancel }: CreateSetlistFormProps
             width: '100%',
             padding: '0.5rem',
             marginBottom: '0.25rem',
-            border: `1px solid ${errors.description ? '#ef4444' : '#e2e8f0'}`,
+            border: `1px solid ${errors.description ? 'var(--status-error)' : 'var(--color-border)'}`,
             borderRadius: '4px',
             minHeight: '80px',
             resize: 'vertical'
           }}
         />
         {errors.description && (
-          <p style={{ color: '#ef4444', fontSize: '0.875rem', margin: '0' }}>
+          <p style={{ color: 'var(--status-error)', fontSize: '0.875rem', margin: '0' }}>
             {errors.description}
           </p>
         )}
@@ -96,8 +96,8 @@ export function CreateSetlistForm({ onCreate, onCancel }: CreateSetlistFormProps
           onClick={handleCreate}
           style={{
             padding: '0.5rem 1rem',
-            backgroundColor: '#10b981',
-            color: 'white',
+            backgroundColor: 'var(--status-success)',
+            color: 'var(--color-primary-foreground)',
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer'
@@ -109,8 +109,8 @@ export function CreateSetlistForm({ onCreate, onCancel }: CreateSetlistFormProps
           onClick={handleCancel}
           style={{
             padding: '0.5rem 1rem',
-            backgroundColor: '#94a3b8',
-            color: 'white',
+            backgroundColor: 'var(--color-secondary)',
+            color: 'var(--color-primary-foreground)',
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer'

@@ -31,7 +31,7 @@ export function ArrangementViewerPage() {
         alignItems: 'center',
         height: '100vh',
         fontSize: '1.125rem',
-        color: '#64748b'
+        color: 'var(--text-secondary)'
       }}>
         Loading arrangement...
       </div>
@@ -49,15 +49,15 @@ export function ArrangementViewerPage() {
         padding: '2rem'
       }}>
         <div style={{
-          backgroundColor: '#fee2e2',
-          border: '1px solid #fecaca',
+          backgroundColor: 'var(--color-muted)',
+          border: '1px solid var(--color-border)',
           borderRadius: '0.5rem',
           padding: '1.5rem',
           maxWidth: '500px',
           width: '100%'
         }}>
           <h2 style={{
-            color: '#991b1b',
+            color: 'var(--status-error)',
             fontSize: '1.125rem',
             fontWeight: '600',
             marginBottom: '0.5rem'
@@ -65,7 +65,7 @@ export function ArrangementViewerPage() {
             Error loading arrangement
           </h2>
           <p style={{
-            color: '#dc2626',
+            color: 'var(--status-error)',
             fontSize: '0.875rem',
             marginBottom: '1rem'
           }}>
@@ -75,8 +75,8 @@ export function ArrangementViewerPage() {
             onClick={() => window.location.reload()}
             style={{
               padding: '0.5rem 1rem',
-              backgroundColor: '#dc2626',
-              color: '#ffffff',
+              backgroundColor: 'var(--status-error)',
+              color: 'var(--color-background)',
               border: 'none',
               borderRadius: '0.375rem',
               cursor: 'pointer',
@@ -99,7 +99,7 @@ export function ArrangementViewerPage() {
         alignItems: 'center',
         height: '100vh',
         fontSize: '1.125rem',
-        color: '#64748b'
+        color: 'var(--text-secondary)'
       }}>
         Arrangement not found
       </div>
@@ -114,8 +114,8 @@ export function ArrangementViewerPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: isMinimalMode ? '#000000' : '#f9fafb',
-      color: isMinimalMode ? '#ffffff' : '#1e293b'
+      backgroundColor: isMinimalMode ? 'var(--text-primary)' : 'var(--color-muted)',
+      color: isMinimalMode ? 'var(--color-background)' : 'var(--text-primary)'
     }}>
       {!isMinimalMode && (
         <ViewerHeader arrangement={arrangement} />

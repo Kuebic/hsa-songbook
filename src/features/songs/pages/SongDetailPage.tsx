@@ -75,15 +75,15 @@ export function SongDetailPage() {
   if (error || !song) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <p style={{ color: '#ef4444', marginBottom: '1rem' }}>
+        <p style={{ color: 'var(--status-error)', marginBottom: '1rem' }}>
           {error || 'Song not found'}
         </p>
         <button 
           onClick={() => navigate('/songs')}
           style={{
             padding: '0.5rem 1rem',
-            backgroundColor: '#3b82f6',
-            color: 'white',
+            backgroundColor: 'var(--status-info)',
+            color: 'var(--color-background)',
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer'
@@ -102,7 +102,7 @@ export function SongDetailPage() {
         style={{
           margin: '1rem',
           padding: '0.5rem 1rem',
-          backgroundColor: '#f1f5f9',
+          backgroundColor: 'var(--color-accent)',
           border: 'none',
           borderRadius: '4px',
           cursor: 'pointer'
@@ -114,7 +114,7 @@ export function SongDetailPage() {
       {/* Arrangement Management Section */}
       <div style={{ 
         padding: '1rem 2rem', 
-        borderBottom: '1px solid #e5e7eb',
+        borderBottom: '1px solid var(--color-border)',
         marginBottom: '1rem' 
       }}>
         <div style={{ 
@@ -126,7 +126,7 @@ export function SongDetailPage() {
           <h2 style={{ 
             fontSize: '1.25rem', 
             fontWeight: 600,
-            color: '#1f2937'
+            color: 'var(--text-primary)'
           }}>
             Arrangements
           </h2>
@@ -148,7 +148,7 @@ export function SongDetailPage() {
           />
         ) : (
           <p style={{ 
-            color: '#6b7280', 
+            color: 'var(--text-secondary)', 
             fontStyle: 'italic',
             fontSize: '0.875rem'
           }}>

@@ -27,7 +27,7 @@ export function SearchResults({
       <div style={{ 
         padding: '2rem', 
         textAlign: 'center', 
-        color: '#94a3b8' 
+        color: 'var(--text-tertiary)' 
       }}>
         Enter a search term to find songs
       </div>
@@ -38,7 +38,7 @@ export function SearchResults({
     <div>
       <div style={{ 
         padding: '1rem', 
-        borderBottom: '1px solid #e2e8f0' 
+        borderBottom: '1px solid var(--color-border)' 
       }}>
         {loading ? (
           <p>Searching...</p>

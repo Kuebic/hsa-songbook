@@ -13,7 +13,7 @@ export function UpdatePrompt() {
         position: 'fixed',
         bottom: '20px',
         right: '20px',
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--color-card)',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         borderRadius: '8px',
         padding: '16px',
@@ -37,14 +37,14 @@ export function UpdatePrompt() {
             >
               <path
                 d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-1 15l-5-5 1.41-1.41L9 12.17l7.59-7.59L18 6l-9 9z"
-                fill="#10b981"
+                fill="var(--status-success)"
               />
             </svg>
             <div>
-              <p style={{ margin: 0, fontWeight: 600, color: '#1f2937' }}>
+              <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>
                 Ready for offline use
               </p>
-              <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280' }}>
+              <p style={{ margin: '4px 0 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
                 Content has been cached for offline access
               </p>
             </div>
@@ -53,8 +53,8 @@ export function UpdatePrompt() {
             onClick={close}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#f3f4f6',
-              color: '#374151',
+              backgroundColor: 'var(--color-secondary)',
+              color: 'var(--text-primary)',
               border: 'none',
               borderRadius: '6px',
               fontSize: '14px',
@@ -87,18 +87,18 @@ export function UpdatePrompt() {
             >
               <path
                 d="M10 2v6l4-4-4-4zm0 16v-6l-4 4 4 4zm0-8a2 2 0 100-4 2 2 0 000 4z"
-                fill="#3b82f6"
+                fill="var(--status-info)"
               />
               <path
                 d="M17.65 6.35A8 8 0 116.35 17.65 8 8 0 0117.65 6.35zM16 10a6 6 0 11-12 0 6 6 0 0112 0z"
-                fill="#3b82f6"
+                fill="var(--status-info)"
               />
             </svg>
             <div>
-              <p style={{ margin: 0, fontWeight: 600, color: '#1f2937' }}>
+              <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>
                 New version available!
               </p>
-              <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280' }}>
+              <p style={{ margin: '4px 0 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
                 Click update to get the latest features
               </p>
             </div>
@@ -109,8 +109,8 @@ export function UpdatePrompt() {
               style={{
                 flex: 1,
                 padding: '8px 16px',
-                backgroundColor: '#3b82f6',
-                color: 'white',
+                backgroundColor: 'var(--status-info)',
+                color: 'var(--color-primary-foreground)',
                 border: 'none',
                 borderRadius: '6px',
                 fontSize: '14px',
@@ -132,8 +132,8 @@ export function UpdatePrompt() {
               style={{
                 flex: 1,
                 padding: '8px 16px',
-                backgroundColor: '#f3f4f6',
-                color: '#374151',
+                backgroundColor: 'var(--color-secondary)',
+                color: 'var(--text-primary)',
                 border: 'none',
                 borderRadius: '6px',
                 fontSize: '14px',

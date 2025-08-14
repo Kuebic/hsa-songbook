@@ -59,11 +59,11 @@ export function SongViewer({
             onUpdate={setSong}
           />
         </h1>
-        <p style={{ color: '#64748b', fontSize: '1.125rem' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem' }}>
           {song.artist} {song.compositionYear && `(${song.compositionYear})`}
         </p>
         {song.ccli && (
-          <p style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-tertiary)' }}>
             CCLI: {song.ccli}
           </p>
         )}
@@ -87,7 +87,7 @@ export function SongViewer({
           }}>
             <span style={{ 
               padding: '0.25rem 0.75rem', 
-              backgroundColor: '#f1f5f9',
+              backgroundColor: 'var(--color-accent)',
               borderRadius: '4px' 
             }}>
               Key: {selectedArrangement.key}
@@ -95,7 +95,7 @@ export function SongViewer({
             {selectedArrangement.tempo && (
               <span style={{ 
                 padding: '0.25rem 0.75rem', 
-                backgroundColor: '#f1f5f9',
+                backgroundColor: 'var(--color-accent)',
                 borderRadius: '4px' 
               }}>
                 Tempo: {selectedArrangement.tempo} BPM
@@ -104,7 +104,7 @@ export function SongViewer({
             {selectedArrangement.timeSignature && (
               <span style={{ 
                 padding: '0.25rem 0.75rem', 
-                backgroundColor: '#f1f5f9',
+                backgroundColor: 'var(--color-accent)',
                 borderRadius: '4px' 
               }}>
                 Time: {selectedArrangement.timeSignature}
@@ -112,7 +112,7 @@ export function SongViewer({
             )}
             <span style={{ 
               padding: '0.25rem 0.75rem', 
-              backgroundColor: '#f1f5f9',
+              backgroundColor: 'var(--color-accent)',
               borderRadius: '4px' 
             }}>
               Difficulty: {selectedArrangement.difficulty}
@@ -120,7 +120,7 @@ export function SongViewer({
           </div>
 
           <div style={{ 
-            backgroundColor: '#f8fafc',
+            backgroundColor: 'var(--color-foreground)',
             padding: '1.5rem',
             borderRadius: '8px',
             fontFamily: 'monospace',
@@ -137,9 +137,9 @@ export function SongViewer({
         <div style={{ 
           marginTop: '2rem',
           padding: '1rem',
-          backgroundColor: '#fef3c7',
+          backgroundColor: 'rgba(var(--status-warning), 0.1)',
           borderRadius: '8px',
-          borderLeft: '4px solid #f59e0b'
+          borderLeft: '4px solid var(--status-warning)'
         }}>
           <strong>Notes:</strong> {song.notes}
         </div>
@@ -153,19 +153,19 @@ export function SongViewer({
               key={theme}
               style={{
                 padding: '0.25rem 0.75rem',
-                backgroundColor: '#e0f2fe',
+                backgroundColor: 'rgba(var(--status-info), 0.1)',
                 borderRadius: '4px',
-                color: '#0369a1'
+                color: 'var(--status-info)'
               }}
             >
               {theme}
             </span>
-          )) || <span style={{ color: '#64748b', fontStyle: 'italic' }}>No themes available</span>}
+          )) || <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No themes available</span>}
         </div>
       </div>
 
       {song.source && (
-        <p style={{ marginTop: '1rem', color: '#64748b', fontSize: '0.875rem' }}>
+        <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
           Source: {song.source}
         </p>
       )}

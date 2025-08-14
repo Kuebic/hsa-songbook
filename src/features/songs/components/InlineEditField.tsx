@@ -84,17 +84,17 @@ export function InlineEditField({
             fontSize: 'inherit',
             fontWeight: 'inherit',
             padding: '0.25rem 0.5rem',
-            border: error ? '2px solid #ef4444' : '2px solid #3b82f6',
+            border: error ? '2px solid var(--status-error)' : '2px solid var(--status-info)',
             borderRadius: '4px',
             outline: 'none',
-            background: isPending ? '#f3f4f6' : 'white'
+            background: isPending ? 'var(--color-secondary)' : 'var(--color-background)'
           }}
         />
         <span id="edit-hint" className="visually-hidden">
           Press Enter to save, Escape to cancel
         </span>
         {error && (
-          <span id="edit-error" role="alert" style={{ color: '#ef4444', fontSize: '0.875rem' }}>
+          <span id="edit-error" role="alert" style={{ color: 'var(--status-error)', fontSize: '0.875rem' }}>
             {error}
           </span>
         )}
@@ -130,7 +130,7 @@ export function InlineEditField({
           opacity: 0,
           transition: 'opacity 0.2s',
           fontSize: '0.875em',
-          color: '#3b82f6'
+          color: 'var(--status-info)'
         }}
       >
         ✏️

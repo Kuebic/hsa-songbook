@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { ErrorBoundary } from '@shared/components/ErrorBoundary'
 import '@shared/styles/globals.css'
+import '@shared/styles/theme-variables.css'
 import App from './App.tsx'
 
 // Get the Clerk publishable key from environment variables

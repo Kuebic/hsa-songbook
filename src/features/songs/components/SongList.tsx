@@ -21,7 +21,7 @@ export function SongList({ songs, onSongClick, onSongUpdate, onSongDelete, loadi
 
   if (error) {
     return (
-      <div style={{ padding: '2rem', color: '#ef4444', textAlign: 'center' }}>
+      <div style={{ padding: '2rem', color: 'var(--status-error)', textAlign: 'center' }}>
         Error: {error}
       </div>
     )
@@ -29,7 +29,7 @@ export function SongList({ songs, onSongClick, onSongUpdate, onSongDelete, loadi
 
   if (!songs || songs.length === 0) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+      <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
         No songs found
       </div>
     )

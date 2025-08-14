@@ -83,8 +83,8 @@ export function Modal({
     border: 'none',
     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
     animation: isOpen ? `modalFadeIn ${animationDuration}ms ease-out` : undefined,
-    backgroundColor: '#ffffff',
-    color: '#1e293b',
+    backgroundColor: 'var(--color-card)',
+    color: 'var(--text-primary)',
     position: 'fixed',
     top: '50%',
     left: '50%',
@@ -155,7 +155,7 @@ export function Modal({
                 cursor: 'pointer',
                 padding: '4px',
                 lineHeight: 1,
-                color: '#64748b'
+                color: 'var(--text-secondary)'
               }}
               aria-label="Close dialog"
               data-testid={`${testId}-close`}
@@ -171,7 +171,7 @@ export function Modal({
                 margin: '0 0 16px 0',
                 fontSize: '20px',
                 fontWeight: 600,
-                color: '#1e293b'
+                color: 'var(--text-primary)'
               }}
             >
               {title}
@@ -184,7 +184,7 @@ export function Modal({
               style={{
                 margin: '0 0 24px 0',
                 fontSize: '14px',
-                color: '#64748b'
+                color: 'var(--text-secondary)'
               }}
             >
               {description}

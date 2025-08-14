@@ -38,7 +38,7 @@ export const SongCard = memo(function SongCard({ song, onClick, onUpdate, onDele
           >
             {theme}
           </span>
-        )) || <span style={{ color: '#64748b', fontSize: '0.8em', fontStyle: 'italic' }}>No themes</span>}
+        )) || <span style={{ color: 'var(--text-secondary)', fontSize: '0.8em', fontStyle: 'italic' }}>No themes</span>}
       </div>
       {song.metadata.ratings && (
         <div className={styles.ratings}>

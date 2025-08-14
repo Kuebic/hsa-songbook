@@ -44,9 +44,9 @@ export function SetlistPage() {
 
   return (
     <div>
-      <header style={{ padding: '2rem', borderBottom: '1px solid #e2e8f0' }}>
+      <header style={{ padding: '2rem', borderBottom: '1px solid var(--color-border)' }}>
         <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>My Setlists</h1>
-        <p style={{ color: '#64748b' }}>
+        <p style={{ color: 'var(--text-secondary)' }}>
           Create and manage your worship setlists
         </p>
       </header>
@@ -58,8 +58,8 @@ export function SetlistPage() {
               onClick={() => setShowCreateForm(true)}
               style={{
                 padding: '0.75rem 1.5rem',
-                backgroundColor: '#3b82f6',
-                color: 'white',
+                backgroundColor: 'var(--status-info)',
+                color: 'var(--color-background)',
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
@@ -80,7 +80,7 @@ export function SetlistPage() {
         )}
 
         {userSetlists.length === 0 && publicSetlists.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#94a3b8' }}>
+          <p style={{ textAlign: 'center', color: 'var(--text-tertiary)' }}>
             {isSignedIn 
               ? "No setlists yet. Create your first setlist to get started!"
               : "No public setlists available. Sign in to create your own!"}

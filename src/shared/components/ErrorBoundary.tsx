@@ -41,23 +41,23 @@ export class ErrorBoundary extends Component<Props, State> {
         <div style={{
           padding: '2rem',
           textAlign: 'center',
-          backgroundColor: '#fee2e2',
+          backgroundColor: 'rgba(var(--status-error), 0.1)',
           borderRadius: '8px',
           margin: '2rem',
-          border: '1px solid #fca5a5'
+          border: '1px solid var(--status-error)'
         }}>
-          <h2 style={{ color: '#dc2626', marginBottom: '1rem' }}>
+          <h2 style={{ color: 'var(--status-error)', marginBottom: '1rem' }}>
             Something went wrong
           </h2>
-          <p style={{ color: '#7f1d1d', marginBottom: '1rem' }}>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
             {this.state.error?.message || 'An unexpected error occurred'}
           </p>
           <button
             onClick={() => window.location.reload()}
             style={{
               padding: '0.5rem 1rem',
-              backgroundColor: '#dc2626',
-              color: 'white',
+              backgroundColor: 'var(--status-error)',
+              color: 'var(--color-destructive-foreground)',
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',
@@ -102,15 +102,15 @@ export class FeatureErrorBoundary extends Component<
       return (
         <div style={{
           padding: '1rem',
-          backgroundColor: '#fef3c7',
-          border: '1px solid #fcd34d',
+          backgroundColor: 'rgba(var(--status-warning), 0.1)',
+          border: '1px solid var(--status-warning)',
           borderRadius: '4px',
           margin: '1rem 0'
         }}>
-          <h3 style={{ color: '#92400e', marginBottom: '0.5rem' }}>
+          <h3 style={{ color: 'var(--status-warning)', marginBottom: '0.5rem' }}>
             Error in {this.props.featureName}
           </h3>
-          <p style={{ color: '#78350f', fontSize: '0.9rem' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
             This feature encountered an error. Please try refreshing the page or contact support if the problem persists.
           </p>
         </div>

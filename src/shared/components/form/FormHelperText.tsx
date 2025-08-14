@@ -33,10 +33,10 @@ export function FormHelperText({
   }
   
   const variantStyles = {
-    default: { color: '#64748b' },
-    muted: { color: '#9ca3af' },
-    warning: { color: '#f59e0b' },
-    info: { color: '#3b82f6' },
+    default: { color: 'var(--text-secondary)' },
+    muted: { color: 'var(--text-tertiary)' },
+    warning: { color: 'var(--status-warning)' },
+    info: { color: 'var(--status-info)' },
   }
   
   const helperStyles = mergeFormStyles(
@@ -128,7 +128,7 @@ export function FormDescription({
   
   const descriptionStyles = mergeFormStyles(
     {
-      color: '#6b7280',
+      color: 'var(--text-secondary)',
       fontSize: '0.875rem',
       lineHeight: 1.5,
       marginBottom: '1rem',
@@ -215,8 +215,8 @@ export function FormTooltip({
           style={{
             position: 'absolute',
             zIndex: 50,
-            backgroundColor: '#1f2937',
-            color: 'white',
+            backgroundColor: 'var(--color-popover)',
+            color: 'var(--color-primary-foreground)',
             padding: '0.5rem',
             borderRadius: '0.375rem',
             fontSize: '0.75rem',

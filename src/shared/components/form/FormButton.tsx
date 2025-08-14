@@ -139,17 +139,17 @@ function getButtonStyles(
       },
       hover: {
         backgroundColor: formStyles.button.primary.backgroundColor,
-        color: 'white',
+        color: 'var(--color-primary-foreground)',
       },
     },
     ghost: {
       base: {
         backgroundColor: 'transparent',
-        color: '#374151',
+        color: 'var(--text-primary)',
         border: 'none',
       },
       hover: {
-        backgroundColor: '#f3f4f6',
+        backgroundColor: 'var(--color-secondary)',
       },
     },
   }
@@ -205,8 +205,8 @@ export function DeleteButton(props: Omit<FormButtonProps, 'variant'>) {
       {...props} 
       variant="outline" 
       style={{
-        color: '#ef4444',
-        borderColor: '#ef4444',
+        color: 'var(--status-error)',
+        borderColor: 'var(--status-error)',
         ...props.style,
       }}
     />

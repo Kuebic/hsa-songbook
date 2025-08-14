@@ -57,15 +57,15 @@ export function SetlistDetailPage() {
   if (!setlist) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <p style={{ color: '#ef4444', marginBottom: '1rem' }}>
+        <p style={{ color: 'var(--status-error)', marginBottom: '1rem' }}>
           Setlist not found
         </p>
         <button 
           onClick={() => navigate('/setlists')}
           style={{
             padding: '0.5rem 1rem',
-            backgroundColor: '#3b82f6',
-            color: 'white',
+            backgroundColor: 'var(--status-info)',
+            color: 'var(--color-background)',
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer'
@@ -84,7 +84,7 @@ export function SetlistDetailPage() {
         style={{
           margin: '1rem',
           padding: '0.5rem 1rem',
-          backgroundColor: '#f1f5f9',
+          backgroundColor: 'var(--color-accent)',
           border: 'none',
           borderRadius: '4px',
           cursor: 'pointer'

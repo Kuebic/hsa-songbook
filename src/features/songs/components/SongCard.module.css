@@ -1,10 +1,10 @@
 .songCard {
   padding: 1rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   cursor: default;
   transition: all 0.2s;
-  background-color: var(--card-bg, white);
+  background-color: var(--color-card);
 }
 
 .songCard.clickable {
@@ -24,7 +24,7 @@
 
 .artist {
   margin: 0 0 0.5rem 0;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .themesContainer {
@@ -35,14 +35,14 @@
 
 .themeTag {
   padding: 0.25rem 0.5rem;
-  background-color: #f1f5f9;
+  background-color: var(--color-accent);
   border-radius: 4px;
   font-size: 0.875rem;
-  color: #475569;
+  color: var(--text-primary);
 }
 
 .ratings {
   margin-top: 0.5rem;
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }

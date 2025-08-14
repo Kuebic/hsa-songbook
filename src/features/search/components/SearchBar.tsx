@@ -51,11 +51,11 @@ export function SearchBar({
             width: '100%',
             padding: '0.75rem 2.5rem 0.75rem 2.5rem',
             fontSize: '1rem',
-            border: `2px solid ${error ? '#ef4444' : isFocused ? '#3b82f6' : '#e2e8f0'}`,
+            border: `2px solid ${error ? 'var(--status-error)' : isFocused ? 'var(--status-info)' : 'var(--color-border)'}`,
             borderRadius: '8px',
             outline: 'none',
             transition: 'border-color 0.2s',
-            backgroundColor: 'var(--input-bg, white)'
+            backgroundColor: 'var(--color-input)'
           }}
         />
       
@@ -65,7 +65,7 @@ export function SearchBar({
           left: '0.75rem',
           top: '50%',
           transform: 'translateY(-50%)',
-          color: '#94a3b8',
+          color: 'var(--text-tertiary)',
           pointerEvents: 'none'
         }}
       >
@@ -82,7 +82,7 @@ export function SearchBar({
             transform: 'translateY(-50%)',
             background: 'none',
             border: 'none',
-            color: '#94a3b8',
+            color: 'var(--text-tertiary)',
             cursor: 'pointer',
             padding: '0.25rem',
             fontSize: '1.25rem',
@@ -96,7 +96,7 @@ export function SearchBar({
       </div>
       {error && (
         <p style={{ 
-          color: '#ef4444', 
+          color: 'var(--status-error)', 
           fontSize: '0.875rem', 
           marginTop: '0.25rem',
           maxWidth: '600px'

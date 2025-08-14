@@ -5,6 +5,7 @@ import { LazySignedIn, LazySignedOut, ClerkComponentLoader } from '@features/aut
 import { AuthButtons, UserMenu } from '@features/auth'
 import { ErrorBoundary } from '@features/monitoring'
 import { AddSongButton } from '@features/songs/components/ui/AddSongButton'
+import { ThemeToggle } from './ThemeToggle'
 
 interface LayoutProps {
   children: ReactNode
@@ -44,8 +45,8 @@ export function Layout({ children }: LayoutProps) {
     }}>
       <ErrorBoundary level="section" isolate>
         <nav style={{ 
-          backgroundColor: '#1e293b',
-          color: 'white',
+          backgroundColor: 'var(--nav-background)',
+          color: 'var(--nav-text)',
           width: '100%'
         }}>
           <div style={{ 
@@ -65,7 +66,7 @@ export function Layout({ children }: LayoutProps) {
             <NavLink 
               to="/"
               style={({ isActive }) => ({
-                color: isActive ? '#60a5fa' : 'white',
+                color: isActive ? 'var(--nav-active)' : 'var(--nav-text)',
                 textDecoration: 'none',
                 fontWeight: isActive ? 'bold' : 'normal'
               })}
@@ -75,7 +76,7 @@ export function Layout({ children }: LayoutProps) {
             <NavLink 
               to="/songs"
               style={({ isActive }) => ({
-                color: isActive ? '#60a5fa' : 'white',
+                color: isActive ? 'var(--nav-active)' : 'var(--nav-text)',
                 textDecoration: 'none',
                 fontWeight: isActive ? 'bold' : 'normal'
               })}
@@ -85,7 +86,7 @@ export function Layout({ children }: LayoutProps) {
             <NavLink 
               to="/search"
               style={({ isActive }) => ({
-                color: isActive ? '#60a5fa' : 'white',
+                color: isActive ? 'var(--nav-active)' : 'var(--nav-text)',
                 textDecoration: 'none',
                 fontWeight: isActive ? 'bold' : 'normal'
               })}
@@ -95,7 +96,7 @@ export function Layout({ children }: LayoutProps) {
             <NavLink 
               to="/setlists"
               style={({ isActive }) => ({
-                color: isActive ? '#60a5fa' : 'white',
+                color: isActive ? 'var(--nav-active)' : 'var(--nav-text)',
                 textDecoration: 'none',
                 fontWeight: isActive ? 'bold' : 'normal'
               })}
@@ -106,6 +107,7 @@ export function Layout({ children }: LayoutProps) {
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <ThemeToggle />
             <AddSongButton />
             <Suspense fallback={<ClerkComponentLoader />}>
               <LazySignedOut>
@@ -124,7 +126,7 @@ export function Layout({ children }: LayoutProps) {
       
       <main style={{ 
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: 'var(--color-foreground)',
         width: '100%'
       }}>
         {isEditorPage ? (
@@ -154,8 +156,8 @@ export function Layout({ children }: LayoutProps) {
       
       <ErrorBoundary level="section" isolate>
         <footer style={{ 
-          backgroundColor: '#1e293b',
-          color: '#94a3b8',
+          backgroundColor: 'var(--nav-background)',
+          color: 'var(--text-tertiary)',
           width: '100%'
         }}>
           <div style={{
