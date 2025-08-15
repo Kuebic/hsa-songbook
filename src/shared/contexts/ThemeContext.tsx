@@ -3,6 +3,10 @@ import type { ReactNode } from 'react';
 import type { Theme } from './theme-types';
 import { ThemeContext } from './theme-context';
 
+// Re-export for backward compatibility
+export { useTheme } from './useTheme';
+export type { Theme, ThemeContextType } from './theme-types';
+
 const getInitialTheme = (): Theme => {
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem('app-theme');
