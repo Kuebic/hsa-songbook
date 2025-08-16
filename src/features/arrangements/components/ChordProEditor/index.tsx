@@ -111,7 +111,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   // Update transposition when content changes externally
   useEffect(() => {
     transposition.updateOriginalContent(content);
-  }, [content, transposition]);
+  }, [content, transposition.updateOriginalContent]);
 
   // Use mobile autocomplete hook
   const autocomplete = useMobileAutocomplete(
@@ -302,7 +302,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
           }}
         >
           {/* Editor layers container - ensures proper stacking */}
-          <div className="editor-layers" style={{ flex: 1 }}>
+          <div className="editor-layers">
             {/* Syntax highlighting layer - behind textarea */}
             <div 
               ref={syntaxRef}
@@ -368,15 +368,11 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         {/* Preview Pane */}
         {showPreview && previewVisible && (
           <div className={`chord-editor-pane preview-pane ${layout.isMobile ? 'mobile-preview' : 'desktop-preview'}`}>
-            <div className="chord-preview-container">
-              <div className="chord-preview-content">
-                <PreviewPane 
-                  content={content} 
-                  theme={currentTheme}
-                  transpose={transposition.previewSemitones}
-                />
-              </div>
-            </div>
+            <PreviewPane 
+              content={content} 
+              theme={currentTheme}
+              transpose={transposition.previewSemitones}
+            />
           </div>
         )}
       </div>

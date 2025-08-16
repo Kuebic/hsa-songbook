@@ -6,12 +6,14 @@
 
 /* Main container wrapper - adds max-width on desktop */
 .chord-pro-editor-wrapper {
-  height: 100%;
+  height: calc(100vh - 60px); /* Account for footer */
+  max-height: calc(100vh - 60px);
   display: flex;
   flex-direction: column;
   width: 100%;
   margin: 0 auto;
   background: var(--editor-bg);
+  overflow: hidden; /* Prevent scrollbar on wrapper */
 }
 
 /* Desktop max-width constraint */
@@ -38,26 +40,26 @@
   }
 }
 
-/* Preview container - ensures proper scrolling */
-.chord-preview-container {
-  height: 100%;
+/* Preview pane container - simplified structure */
+.chord-editor-pane.preview-pane {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: hidden; /* Container doesn't scroll, PreviewPane component handles it */
 }
 
-.chord-preview-content {
+/* Main container - chord-editor-main class from component */
+.chord-editor-main {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  min-height: 0; /* Important for flexbox overflow */
+  display: flex;
+  overflow: hidden; /* Critical: prevent scrollbar at this level */
+  min-height: 0; /* Important for flexbox children */
 }
 
-/* Main container */
 .chord-editor-enhanced {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 60px); /* Account for footer/statusbar */
+  max-height: calc(100vh - 60px);
   background: var(--editor-bg);
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -70,10 +72,12 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  max-height: 100%;
   background: var(--editor-bg);
   color: var(--text-primary);
   text-align: left !important;
   width: 100%;
+  overflow: hidden;
 }
 
 .chord-pro-editor-container * {
@@ -168,21 +172,27 @@
   overflow: hidden;
 }
 
-/* Preview pane specific */
-.chord-editor-pane.preview-pane {
+/* Mobile preview specific adjustments */
+.chord-editor-pane.mobile-preview {
+  height: 50%;
+}
+
+/* Desktop preview specific adjustments */
+.chord-editor-pane.desktop-preview {
   height: 100%;
-  overflow: hidden; /* Container handles scrolling */
 }
 
 /* Editor layers - Critical for proper stacking */
 .editor-layers {
   flex: 1;
   display: grid;
-  overflow: auto;
+  overflow: hidden; /* No scrolling at this level */
   /* Use standardized font from alignment.css */
   font-family: var(--editor-font-family, 'Courier New', Courier, monospace);
   font-size: var(--editor-font-size, 16px);
   line-height: var(--editor-line-height, 1.5);
+  position: relative;
+  min-height: 0; /* Important for flex children */
 }
 
 /* Background layer for editor */
@@ -201,10 +211,10 @@
   grid-area: 1 / 1; /* Same grid cell as textarea */
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  height: 100%; /* Match container height */
   pointer-events: none;
   z-index: 1;
-  overflow: hidden !important; /* No individual scrolling */
+  overflow: hidden; /* Hide overflow, transforms handle scrolling */
   box-sizing: border-box;
   padding: 16px; /* Same padding as textarea */
 }
@@ -215,8 +225,10 @@
   grid-area: 1 / 1; /* Same grid cell as syntax layer */
   position: relative;
   width: 100%;
-  min-height: 100vh; /* Ensure it fills viewport minimum */
+  height: 100%; /* Fill container exactly */
   z-index: 2;
+  overflow-y: auto; /* Textarea handles scrolling */
+  overflow-x: hidden; /* Prevent horizontal scroll */
   
   /* Spacing */
   padding: 16px;
@@ -239,8 +251,9 @@
   word-break: break-word;
   text-align: left;
   
-  /* No individual scrolling */
-  overflow: hidden !important;
+  /* Scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-tertiary) transparent;
   
   /* Disable browser defaults */
   resize: none;
@@ -362,14 +375,23 @@
   letter-spacing: inherit !important;
 }
 
-/* Syntax container for scroll synchronization */
-.syntax-container {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+/* Textarea scrollbar styling for webkit browsers */
+.chord-editor-textarea::-webkit-scrollbar {
+  width: 8px;
 }
 
-.syntax-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+.chord-editor-textarea::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.chord-editor-textarea::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: 4px;
+}
+
+.chord-editor-textarea::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
 }
 
 .syntax-chord {
@@ -422,29 +444,26 @@
   border-radius: 0.25rem;
 }
 
-/* Scrollbar styling */
-.editor-layers::-webkit-scrollbar,
+/* Scrollbar styling - only for preview pane */
 .chord-preview-pane::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.editor-layers::-webkit-scrollbar-track,
 .chord-preview-pane::-webkit-scrollbar-track {
   background: var(--hover-bg);
   border-radius: 4px;
 }
 
-.editor-layers::-webkit-scrollbar-thumb,
 .chord-preview-pane::-webkit-scrollbar-thumb {
   background: var(--text-tertiary);
   border-radius: 4px;
 }
 
-.editor-layers::-webkit-scrollbar-thumb:hover,
 .chord-preview-pane::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
 }
+
 
 /* Ensure monospace font is applied */
 .chord-pro-editor-container .font-mono,
