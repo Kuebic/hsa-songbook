@@ -1,87 +1,139 @@
 import { useState } from 'react'
-import type { Setlist, SetlistSong } from '../types/setlist.types'
-import type { Song } from '@features/songs'
+import { useNavigate } from 'react-router-dom'
+import { DndContext } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import type { Setlist, SetlistArrangement } from '../types/setlist.types'
+import type { Arrangement } from '@features/songs'
 import { SetlistHeader } from './SetlistHeader'
 import { SongSelector } from './SongSelector'
-import { SetlistSongItem } from './SetlistSongItem'
-import { useDragAndDrop } from '../hooks/useDragAndDrop'
+import { DraggableArrangementItem } from './builder/DraggableArrangementItem'
+import { useDragAndDropEnhanced } from '../hooks/useDragAndDropEnhanced'
 
 interface SetlistBuilderProps {
   setlist: Setlist
-  availableSongs?: Song[]
-  onAddSong: (song: Song, notes?: string) => void
-  onRemoveSong: (index: number) => void
-  onReorder: (songs: SetlistSong[]) => void
+  availableArrangements?: Arrangement[]
+  onAddArrangement: (arrangement: Arrangement, notes?: string) => void
+  onRemoveArrangement: (index: number) => void
+  onReorder: (arrangements: SetlistArrangement[]) => void
   onUpdateName?: (name: string) => void
 }
 
 export function SetlistBuilder({
   setlist,
-  availableSongs = [],
-  onAddSong,
-  onRemoveSong,
+  availableArrangements = [],
+  onAddArrangement,
+  onRemoveArrangement,
   onReorder,
   onUpdateName
 }: SetlistBuilderProps) {
+  const navigate = useNavigate()
   const [isAddingMode, setIsAddingMode] = useState(false)
-  const { handleDragStart, handleDragOver, handleDrop } = useDragAndDrop(setlist.songs, onReorder)
+  
+  const {
+    sensors,
+    modifiers,
+    collisionDetection,
+    handleDragStart,
+    handleDragEnd,
+    handleDragCancel,
+    items,
+  } = useDragAndDropEnhanced({
+    items: setlist.arrangements,
+    onReorder,
+    disabled: false
+  })
 
-  const handleSongSelect = (song: Song) => {
-    onAddSong(song)
+  const handleArrangementSelect = (arrangement: Arrangement) => {
+    onAddArrangement(arrangement)
     setIsAddingMode(false)
+  }
+  
+  const handlePlayAll = () => {
+    navigate(`/setlists/${setlist.id}/play`)
   }
 
   return (
     <div style={{ padding: '1rem' }}>
       <SetlistHeader setlist={setlist} onUpdateName={onUpdateName} />
 
-      <div style={{ marginBottom: '1rem' }}>
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
+        <button
+          onClick={handlePlayAll}
+          style={{
+            padding: '0.75rem 1.5rem',
+            backgroundColor: 'var(--status-success)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+          disabled={setlist.arrangements.length === 0}
+        >
+          ▶ Play All
+        </button>
+        
         <button
           onClick={() => setIsAddingMode(!isAddingMode)}
           style={{
             padding: '0.75rem 1.5rem',
-            backgroundColor: '#3b82f6',
-            color: 'white',
+            backgroundColor: 'var(--color-primary)',
+            color: 'var(--color-primary-foreground)',
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer',
             fontSize: '1rem'
           }}
         >
-          {isAddingMode ? 'Cancel' : '+ Add Song'}
+          {isAddingMode ? 'Cancel' : '+ Add Arrangement'}
         </button>
       </div>
 
       {isAddingMode && (
         <SongSelector 
-          availableSongs={availableSongs} 
-          onSelectSong={handleSongSelect}
+          availableArrangements={availableArrangements} 
+          onSelectArrangement={handleArrangementSelect}
         />
       )}
 
       <div>
         <h3 style={{ marginBottom: '1rem' }}>
-          Songs ({setlist.songs.length})
+          Arrangements ({setlist.arrangements.length})
         </h3>
         
-        {setlist.songs.length === 0 ? (
-          <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>
-            No songs in this setlist yet. Click "Add Song" to get started.
+        {setlist.arrangements.length === 0 ? (
+          <p style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+            No arrangements in this setlist yet. Click "Add Arrangement" to get started.
           </p>
         ) : (
-          <div>
-            {setlist.songs.map((item, index) => (
-              <SetlistSongItem
-                key={`${item.song.id}-${index}`}
-                item={item}
-                index={index}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                onRemove={() => onRemoveSong(index)}
-              />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={collisionDetection}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+            modifiers={modifiers}
+          >
+            <SortableContext
+              items={items.map(item => item.arrangementId)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div>
+                {items.map((item, index) => (
+                  <DraggableArrangementItem
+                    key={item.arrangementId}
+                    item={item}
+                    setlistId={setlist.id}
+                    onRemove={() => onRemoveArrangement(index)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </div>
     </div>
