@@ -32,6 +32,8 @@
   overflow: hidden;
   position: relative;
   background: var(--color-muted, var(--color-background));
+  display: flex;
+  flex-direction: column;
 }
 
 .viewer-controls-wrapper {

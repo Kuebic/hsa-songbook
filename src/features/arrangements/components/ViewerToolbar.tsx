@@ -1,13 +1,15 @@
-import { Printer, Eye, EyeOff, ListPlus, Maximize } from 'lucide-react'
+import { Printer, Eye, EyeOff, Maximize } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { TransposeControls } from './TransposeControls'
+import { AddToSetlistDropdown } from '@features/setlists/components/selectors/AddToSetlistDropdown'
 import type { EnhancedTranspositionState } from '../hooks/useTransposition'
+import type { Arrangement } from '../../songs/types/song.types'
 
 interface ViewerToolbarProps {
   onPrint: () => void
   onToggleStageMode: () => void
-  onAddToSetlist?: () => void
   isStageMode: boolean
+  arrangement?: Arrangement
   // Enhanced transposition props
   transposition?: EnhancedTranspositionState & {
     transpose: (steps: number) => void
@@ -25,8 +27,8 @@ interface ViewerToolbarProps {
 export function ViewerToolbar({ 
   onPrint, 
   onToggleStageMode, 
-  onAddToSetlist,
   isStageMode,
+  arrangement,
   transposition,
   fontSize,
   onFontSizeChange,
@@ -78,17 +80,13 @@ export function ViewerToolbar({
           <span className="label">Fullscreen</span>
         </button>
         
-        {/* Add to Setlist (Future Feature) */}
-        {onAddToSetlist && (
-          <button
-            onClick={onAddToSetlist}
+        {/* Add to Setlist Dropdown */}
+        {arrangement && (
+          <AddToSetlistDropdown
+            arrangement={arrangement}
+            variant="button"
             className="toolbar-button"
-            title="Add to setlist"
-            aria-label="Add to setlist"
-          >
-            <ListPlus className="icon" />
-            <span className="label">Setlist</span>
-          </button>
+          />
         )}
       </div>
       

@@ -100,27 +100,24 @@ const ChordSheetViewerComponent: React.FC<EnhancedChordSheetViewerProps> = ({
       style={{ 
         height: '100%',
         overflow: 'hidden',
-        position: 'relative'
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column'
       }}
     >
       <div 
         ref={scrollContainerRef}
         className="chord-sheet-scroll-container"
         style={{ 
-          height: '100%',
-          overflow: 'auto',
-          position: 'relative'
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          position: 'relative',
+          maxHeight: '100%',
+          padding: isStageMode ? '2rem' : '0.5rem 1rem'
         }}
-      >
-        <div 
-          className="chord-sheet-content"
-          dangerouslySetInnerHTML={{ __html: formattedHtml }}
-          style={{ 
-            minHeight: '100%',
-            padding: isStageMode ? '2rem' : '1rem'
-          }}
-        />
-      </div>
+        dangerouslySetInnerHTML={{ __html: formattedHtml }}
+      />
     </div>
   )
 }

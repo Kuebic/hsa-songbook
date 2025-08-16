@@ -204,7 +204,7 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
         .chord-sheet-content .chord-verse,
         .chord-sheet-content .chord-chorus,
         .chord-sheet-content .chord-bridge {
-          margin-bottom: 1.5em;
+          margin-bottom: 0.75em;
         }
 
         /* Comment and directive styling */
@@ -220,12 +220,7 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
       </style>
     `;
 
-    return `
-      ${inlineCSS}
-      <div class="chord-sheet-rendered chord-sheet-content" data-theme="${preferences.theme}" style="font-size: ${fontSize}px; font-family: ${fontFamily}; line-height: ${preferences.lineHeight};">
-        ${processedHtml}
-      </div>
-    `;
+    return `${inlineCSS}<div class="chord-sheet-rendered chord-sheet-content" data-theme="${preferences.theme}" style="font-size: ${fontSize}px; font-family: ${fontFamily}; line-height: ${preferences.lineHeight};">${processedHtml}</div>`;
   }, [preferences, processChordSheetHTML]);
 
   /**

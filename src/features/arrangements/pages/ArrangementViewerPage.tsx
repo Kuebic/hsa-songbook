@@ -152,10 +152,6 @@ export function ArrangementViewerPage() {
     )
   }
   
-  const handleAddToSetlist = () => {
-    // Future feature - placeholder for now
-    console.log('Add to setlist:', arrangement.id)
-  }
   
   return (
     <ViewerLayout
@@ -165,8 +161,8 @@ export function ArrangementViewerPage() {
           <ViewerToolbar
             onPrint={handlePrint}
             onToggleStageMode={toggleStageMode}
-            onAddToSetlist={handleAddToSetlist}
             isStageMode={isStageMode}
+            arrangement={arrangement}
             transposition={transpositionState}
             fontSize={fontSize}
             onFontSizeChange={setFontSize}

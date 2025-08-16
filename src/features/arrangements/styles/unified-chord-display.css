@@ -6,13 +6,10 @@
 /* Base container styles */
 .chord-sheet-rendered {
   width: 100%;
-  height: 100%;
   padding: 20px;
   box-sizing: border-box;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 /* ChordSheetJS HTML Div Formatter styles */
@@ -54,7 +51,7 @@
 
 /* Paragraph and section styles */
 .chord-sheet-rendered .paragraph {
-  margin-bottom: 1.5em;
+  margin-bottom: 0.75em;
 }
 
 .chord-sheet-rendered .paragraph-label {

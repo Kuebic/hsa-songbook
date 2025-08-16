@@ -44,10 +44,17 @@ export function ViewerLayout({ header, toolbar, content, controls }: ViewerLayou
     }
   }, [header, toolbar, controls])
   
-  const contentHeight = `calc(100vh - ${headerHeight + toolbarHeight + controlsHeight}px)`
+  // Account for footer/statusbar (typically 60px) and dynamic component heights
+  const contentHeight = `calc(100vh - ${headerHeight + toolbarHeight + controlsHeight + 60}px)`
   
   return (
-    <div className="viewer-layout">
+    <div className="viewer-layout" style={{ 
+      maxHeight: 'calc(100vh - 60px)',
+      height: 'calc(100vh - 60px)',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    }}>
       {header && (
         <div ref={headerRef} className="viewer-header-wrapper">
           {header}
@@ -62,7 +69,7 @@ export function ViewerLayout({ header, toolbar, content, controls }: ViewerLayou
         className="viewer-content"
         style={{ 
           height: contentHeight,
-          overflow: 'auto',
+          overflow: 'hidden',
           position: 'relative'
         }}
       >
