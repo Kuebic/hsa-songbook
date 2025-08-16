@@ -53,7 +53,7 @@ export function SetlistCard({ setlist, onClick, onDelete }: SetlistCardProps) {
             fontSize: '0.875rem', 
             color: 'var(--text-tertiary)' 
           }}>
-            <span>📝 {setlist.songs.length} songs</span>
+            <span>📝 {setlist.arrangements.length} arrangements</span>
             <span>📅 {formattedDate}</span>
             {setlist.isPublic && <span>🌐 Public</span>}
           </div>

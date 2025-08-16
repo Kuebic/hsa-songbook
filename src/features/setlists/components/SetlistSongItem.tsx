@@ -1,7 +1,7 @@
-import type { SetlistSong } from '../types/setlist.types'
+import type { SetlistArrangement } from '../types/setlist.types'
 
-interface SetlistSongItemProps {
-  item: SetlistSong
+interface SetlistArrangementItemProps {
+  item: SetlistArrangement
   index: number
   onDragStart: (e: React.DragEvent, index: number) => void
   onDragOver: (e: React.DragEvent) => void
@@ -9,14 +9,14 @@ interface SetlistSongItemProps {
   onRemove: () => void
 }
 
-export function SetlistSongItem({
+export function SetlistArrangementItem({
   item,
   index,
   onDragStart,
   onDragOver,
   onDrop,
   onRemove
-}: SetlistSongItemProps) {
+}: SetlistArrangementItemProps) {
   return (
     <div
       draggable
@@ -26,8 +26,8 @@ export function SetlistSongItem({
       style={{
         padding: '1rem',
         marginBottom: '0.5rem',
-        backgroundColor: 'white',
-        border: '1px solid #e2e8f0',
+        backgroundColor: 'var(--color-card)',
+        border: '1px solid var(--color-border)',
         borderRadius: '8px',
         cursor: 'move',
         display: 'flex',
@@ -36,18 +36,18 @@ export function SetlistSongItem({
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <span style={{ color: '#94a3b8', fontSize: '1.25rem' }}>
+        <span style={{ color: 'var(--text-tertiary)', fontSize: '1.25rem' }}>
           ☰
         </span>
         <div>
-          <strong>{index + 1}. {item.song.title}</strong>
-          <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
-            {item.song.artist}
+          <strong>{index + 1}. {item.arrangement?.name || 'Loading...'}</strong>
+          <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+            Key: {item.arrangement?.key || ''} | Difficulty: {item.arrangement?.difficulty || ''}
           </div>
           {item.notes && (
             <div style={{ 
               fontSize: '0.875rem', 
-              color: '#059669', 
+              color: 'var(--status-success)', 
               marginTop: '0.25rem' 
             }}>
               Note: {item.notes}
@@ -60,8 +60,8 @@ export function SetlistSongItem({
         onClick={onRemove}
         style={{
           padding: '0.25rem 0.5rem',
-          backgroundColor: '#ef4444',
-          color: 'white',
+          backgroundColor: 'var(--color-destructive)',
+          color: 'var(--color-destructive-foreground)',
           border: 'none',
           borderRadius: '4px',
           cursor: 'pointer'

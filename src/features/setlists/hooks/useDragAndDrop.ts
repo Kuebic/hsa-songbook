@@ -1,9 +1,9 @@
-import type { SetlistSong } from '../types/setlist.types'
+import type { SetlistArrangement } from '../types/setlist.types'
 
-export function useDragAndDrop(songs: SetlistSong[], onReorder: (songs: SetlistSong[]) => void) {
+export function useDragAndDrop(arrangements: SetlistArrangement[], onReorder: (arrangements: SetlistArrangement[]) => void) {
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('songIndex', index.toString())
+    e.dataTransfer.setData('arrangementIndex', index.toString())
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -13,15 +13,15 @@ export function useDragAndDrop(songs: SetlistSong[], onReorder: (songs: SetlistS
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
-    const dragIndex = parseInt(e.dataTransfer.getData('songIndex'))
+    const dragIndex = parseInt(e.dataTransfer.getData('arrangementIndex'))
     
     if (dragIndex === dropIndex) return
     
-    const newSongs = [...songs]
-    const [draggedSong] = newSongs.splice(dragIndex, 1)
-    newSongs.splice(dropIndex, 0, draggedSong)
+    const newArrangements = [...arrangements]
+    const [draggedArrangement] = newArrangements.splice(dragIndex, 1)
+    newArrangements.splice(dropIndex, 0, draggedArrangement)
     
-    onReorder(newSongs)
+    onReorder(newArrangements)
   }
 
   return {

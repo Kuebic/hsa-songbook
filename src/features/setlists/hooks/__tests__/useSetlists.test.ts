@@ -25,7 +25,10 @@ describe('useSetlists', () => {
         {
           id: '1',
           name: 'Public Setlist',
-          songs: [],
+          arrangements: [],
+          likes: 0,
+          likedBy: [],
+          allowDuplication: true,
           isPublic: true,
           createdBy: 'user_other',
           createdAt: new Date(),
@@ -34,7 +37,10 @@ describe('useSetlists', () => {
         {
           id: '2',
           name: 'Private Setlist',
-          songs: [],
+          arrangements: [],
+          likes: 0,
+          likedBy: [],
+          allowDuplication: true,
           isPublic: false,
           createdBy: 'user_other',
           createdAt: new Date(),
@@ -81,7 +87,10 @@ describe('useSetlists', () => {
         {
           id: '1',
           name: 'My Setlist',
-          songs: [],
+          arrangements: [],
+          likes: 0,
+          likedBy: [],
+          allowDuplication: true,
           isPublic: false,
           createdBy: userId,
           createdAt: new Date(),
@@ -90,7 +99,10 @@ describe('useSetlists', () => {
         {
           id: '2',
           name: 'Public Setlist',
-          songs: [],
+          arrangements: [],
+          likes: 0,
+          likedBy: [],
+          allowDuplication: true,
           isPublic: true,
           createdBy: 'user_other',
           createdAt: new Date(),
@@ -99,7 +111,10 @@ describe('useSetlists', () => {
         {
           id: '3',
           name: 'Other Private',
-          songs: [],
+          arrangements: [],
+          likes: 0,
+          likedBy: [],
+          allowDuplication: true,
           isPublic: false,
           createdBy: 'user_other',
           createdAt: new Date(),
@@ -131,7 +146,7 @@ describe('useSetlists', () => {
         expect(newSetlist.description).toBe('Description')
         expect(newSetlist.createdBy).toBe(userId)
         expect(newSetlist.isPublic).toBe(false)
-        expect(newSetlist.songs).toEqual([])
+        expect(newSetlist.arrangements).toEqual([])
       })
 
       expect(localStorage.setItem).toHaveBeenCalled()
@@ -253,20 +268,19 @@ describe('useSetlists', () => {
         expect(result.current.loading).toBe(false)
       })
 
-      const mockSong = {
-        id: 'song_1',
-        title: 'Amazing Grace',
-        artist: 'John Newton',
-        slug: 'amazing-grace',
-        themes: ['grace'],
-        metadata: {
-          isPublic: true,
-          views: 100,
-        },
+      const mockArrangement = {
+        id: 'arr_1',
+        name: 'Amazing Grace Arrangement',
+        slug: 'amazing-grace-arr',
+        songIds: ['song_1'],
+        key: 'G',
+        difficulty: 'beginner' as const,
+        tags: [],
+        createdBy: userId,
       }
 
       act(() => {
-        result.current.addSongToSetlist('1', mockSong, 'Key of G')
+        result.current.addArrangementToSetlist('1', mockArrangement, 'Key of G')
       })
 
       expect(localStorage.setItem).toHaveBeenCalled()
