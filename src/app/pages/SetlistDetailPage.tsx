@@ -1,44 +1,55 @@
 import { useMemo, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { SetlistBuilder } from '@features/setlists'
-import type { SetlistSong } from '@features/setlists'
-import { useSetlist, useSetlists } from '@features/setlists'
-import { useSongs } from '@features/songs'
-import type { Song } from '@features/songs'
+import type { SetlistArrangement } from '@features/setlists'
+import { useSetlists } from '@features/setlists'
+import { useArrangements } from '@features/songs'
+import type { Arrangement } from '@features/songs'
 
 export function SetlistDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { setlist, loading } = useSetlist(id || '')
-  const { songs: availableSongs } = useSongs()
-  const { addSongToSetlist, removeSongFromSetlist, reorderSongs, updateSetlist } = useSetlists()
+  const { arrangements: availableArrangements } = useArrangements()
+  const { 
+    setlists, 
+    loading, 
+    addArrangementToSetlist, 
+    removeArrangementFromSetlist, 
+    reorderArrangements, 
+    updateSetlist 
+  } = useSetlists()
+  
+  // Get the specific setlist from the setlists array
+  const setlist = useMemo(() => {
+    return setlists.find(sl => sl.id === id) || null
+  }, [setlists, id])
 
-  // Memoize available songs that aren't already in the setlist
-  const filteredAvailableSongs = useMemo(() => {
-    if (!setlist || !availableSongs) return availableSongs
+  // Memoize available arrangements that aren't already in the setlist
+  const filteredAvailableArrangements = useMemo(() => {
+    if (!setlist || !availableArrangements) return availableArrangements
     
-    const songIdsInSetlist = new Set(setlist.songs.map(s => s.song.id))
-    return availableSongs.filter(song => !songIdsInSetlist.has(song.id))
-  }, [availableSongs, setlist])
+    const arrangementIdsInSetlist = new Set(setlist.arrangements.map(a => a.arrangementId))
+    return availableArrangements.filter(arrangement => !arrangementIdsInSetlist.has(arrangement.id))
+  }, [availableArrangements, setlist])
 
   // Memoize callback functions to prevent unnecessary re-renders
-  const handleAddSong = useCallback((song: Song, notes?: string) => {
+  const handleAddArrangement = useCallback((arrangement: Arrangement, notes?: string) => {
     if (setlist) {
-      addSongToSetlist(setlist.id, song, notes)
+      addArrangementToSetlist(setlist.id, arrangement, notes)
     }
-  }, [setlist, addSongToSetlist])
+  }, [setlist, addArrangementToSetlist])
 
-  const handleRemoveSong = useCallback((index: number) => {
+  const handleRemoveArrangement = useCallback((index: number) => {
     if (setlist) {
-      removeSongFromSetlist(setlist.id, index)
+      removeArrangementFromSetlist(setlist.id, index)
     }
-  }, [setlist, removeSongFromSetlist])
+  }, [setlist, removeArrangementFromSetlist])
 
-  const handleReorderSongs = useCallback((songs: SetlistSong[]) => {
+  const handleReorderArrangements = useCallback((arrangements: SetlistArrangement[]) => {
     if (setlist) {
-      reorderSongs(setlist.id, songs)
+      reorderArrangements(setlist.id, arrangements)
     }
-  }, [setlist, reorderSongs])
+  }, [setlist, reorderArrangements])
 
   const handleUpdateName = useCallback((name: string) => {
     if (setlist) {
@@ -95,10 +106,10 @@ export function SetlistDetailPage() {
 
       <SetlistBuilder
         setlist={setlist}
-        availableSongs={filteredAvailableSongs}
-        onAddSong={handleAddSong}
-        onRemoveSong={handleRemoveSong}
-        onReorder={handleReorderSongs}
+        availableArrangements={filteredAvailableArrangements}
+        onAddArrangement={handleAddArrangement}
+        onRemoveArrangement={handleRemoveArrangement}
+        onReorder={handleReorderArrangements}
         onUpdateName={handleUpdateName}
       />
     </div>
