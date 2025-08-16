@@ -5,6 +5,7 @@
 
 import React, { useRef, useEffect, useCallback } from 'react';
 import { cn } from '../../../../lib/utils';
+import type { Theme } from '@shared/contexts/ThemeContext';
 
 interface ChordProTextAreaProps {
   value: string;
@@ -18,7 +19,7 @@ interface ChordProTextAreaProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement | null>;
   justCompletedDirective?: { position: number; timestamp: number } | null;
   onDirectiveCompleted?: () => void;
-  theme?: 'light' | 'dark' | 'stage';
+  theme?: Theme;
   placeholder?: string;
   className?: string;
   readOnly?: boolean;

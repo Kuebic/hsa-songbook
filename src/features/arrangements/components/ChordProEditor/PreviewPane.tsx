@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
 import { useUnifiedChordRenderer } from '../../hooks/useUnifiedChordRenderer';
+import type { Theme } from '@shared/contexts/ThemeContext';
 import '../../styles/unified-chord-display.css';
 import './styles/preview.css';
 import './styles/chordAlignment.css';
 
 interface PreviewPaneProps {
   content: string;
-  theme?: 'light' | 'dark' | 'stage';
+  theme?: Theme;
   className?: string;
   transpose?: number;
 }

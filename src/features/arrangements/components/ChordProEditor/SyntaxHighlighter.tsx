@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react'
-import { highlightChordPro, type EditorTheme } from './utils/syntaxHighlighting'
+import { highlightChordPro } from './utils/syntaxHighlighting'
+import type { Theme } from '@shared/contexts/ThemeContext'
 
 interface SyntaxHighlighterProps {
   content: string
-  theme?: EditorTheme
+  theme?: Theme
   className?: string
 }
 

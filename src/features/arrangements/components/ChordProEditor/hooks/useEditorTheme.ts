@@ -1,140 +1,50 @@
-import { useState, useEffect, useCallback } from 'react'
-import type { EditorTheme } from '../components/ThemeSelector'
+import { useEffect } from 'react'
+import { useTheme } from '@shared/contexts/ThemeContext'
+import type { Theme } from '@shared/contexts/ThemeContext'
 
-const THEME_STORAGE_KEY = 'chordpro-editor-theme'
-
-interface UseEditorThemeReturn {
-  currentTheme: EditorTheme
-  setTheme: (theme: EditorTheme) => void
-  toggleTheme: () => void
-  systemTheme: EditorTheme
-}
+// Re-export type for backward compatibility
+export type EditorTheme = Theme
 
 /**
- * Hook to manage editor theme state and persistence
- * Supports system preference detection and localStorage persistence
+ * Hook to use the global theme in the editor context
+ * This is now a wrapper around the global theme that adds editor-specific utilities
  */
-export function useEditorTheme(initialTheme?: EditorTheme): UseEditorThemeReturn {
-  // Detect system preference
-  const getSystemTheme = (): EditorTheme => {
-    if (typeof window === 'undefined') return 'light'
-    
-    // Check for system dark mode preference
-    if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
-      return 'dark'
-    }
-    
-    return 'light'
-  }
+export function useEditorTheme() {
+  const { theme: currentTheme, setTheme, toggleTheme } = useTheme()
   
-  const [systemTheme, setSystemTheme] = useState<EditorTheme>(getSystemTheme())
-  
-  // Initialize theme from localStorage or initial prop
-  const getInitialTheme = (): EditorTheme => {
-    if (typeof window === 'undefined') return initialTheme || 'light'
-    
-    try {
-      const stored = localStorage.getItem(THEME_STORAGE_KEY)
-      if (stored && ['light', 'dark', 'stage'].includes(stored)) {
-        return stored as EditorTheme
-      }
-    } catch (error) {
-      console.warn('Failed to load theme from localStorage:', error)
-    }
-    
-    return initialTheme || systemTheme
-  }
-  
-  const [currentTheme, setCurrentTheme] = useState<EditorTheme>(getInitialTheme())
-  
-  // Set theme and persist to localStorage
-  const setTheme = useCallback((theme: EditorTheme) => {
-    setCurrentTheme(theme)
-    
-    // Persist to localStorage
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, theme)
-    } catch (error) {
-      console.warn('Failed to save theme to localStorage:', error)
-    }
-    
-    // Apply theme to document root for CSS variables
+  // Apply theme to document root for CSS variables when used in editor
+  useEffect(() => {
     if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', theme)
-      
-      // Also set a class for additional styling hooks
-      document.documentElement.classList.remove('theme-light', 'theme-dark', 'theme-stage')
-      document.documentElement.classList.add(`theme-${theme}`)
+      // The global theme already sets data-theme, but we can add editor-specific classes if needed
+      const editorElements = document.querySelectorAll('.chord-pro-editor-wrapper')
+      editorElements.forEach(element => {
+        element.setAttribute('data-theme', currentTheme)
+      })
     }
-  }, [])
-  
-  // Toggle between themes
-  const toggleTheme = useCallback(() => {
-    const themes: EditorTheme[] = ['light', 'dark', 'stage']
-    const currentIndex = themes.indexOf(currentTheme)
-    const nextIndex = (currentIndex + 1) % themes.length
-    setTheme(themes[nextIndex])
-  }, [currentTheme, setTheme])
-  
-  // Listen for system theme changes
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      const newSystemTheme = e.matches ? 'dark' : 'light'
-      setSystemTheme(newSystemTheme)
-      
-      // If no theme is explicitly set, follow system preference
-      const stored = localStorage.getItem(THEME_STORAGE_KEY)
-      if (!stored) {
-        setTheme(newSystemTheme)
-      }
-    }
-    
-    // Add event listener
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleChange)
-    } else {
-      // Fallback for older browsers
-      mediaQuery.addListener(handleChange as unknown as EventListener)
-    }
-    
-    return () => {
-      if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener('change', handleChange)
-      } else {
-        mediaQuery.removeListener(handleChange as unknown as EventListener)
-      }
-    }
-  }, [setTheme])
-  
-  // Apply theme on mount
-  useEffect(() => {
-    setTheme(currentTheme)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Only run on mount, not when currentTheme changes to avoid infinite loop
+  }, [currentTheme])
   
   return {
     currentTheme,
     setTheme,
     toggleTheme,
-    systemTheme
+    systemTheme: currentTheme // For backward compatibility
   }
 }
 
 /**
  * Helper hook to get theme-specific colors
+ * These colors work with the global theme values
  */
-export function useThemeColors(theme: EditorTheme) {
-  const isDark = theme === 'dark' || theme === 'stage'
+export function useThemeColors(theme?: Theme) {
+  const { theme: globalTheme } = useTheme()
+  const activeTheme = theme || globalTheme
+  const isDark = activeTheme === 'dark' || activeTheme === 'stage'
   
   return {
     background: {
       primary: isDark ? '#1f2937' : '#ffffff',
       secondary: isDark ? '#111827' : '#f9fafb',
-      preview: theme === 'stage' ? '#000000' : (isDark ? '#0f172a' : '#ffffff')
+      preview: activeTheme === 'stage' ? '#000000' : (isDark ? '#0f172a' : '#ffffff')
     },
     text: {
       primary: isDark ? '#f9fafb' : '#111827',
@@ -142,11 +52,11 @@ export function useThemeColors(theme: EditorTheme) {
       tertiary: isDark ? '#9ca3af' : '#9ca3af'
     },
     syntax: {
-      chord: theme === 'stage' ? '#ffeb3b' : (isDark ? '#60a5fa' : '#2563eb'),
-      directive: theme === 'stage' ? '#ff9800' : (isDark ? '#a78bfa' : '#7c3aed'),
-      section: theme === 'stage' ? '#4caf50' : (isDark ? '#34d399' : '#059669'),
-      comment: theme === 'stage' ? '#757575' : (isDark ? '#9ca3af' : '#6b7280'),
-      error: theme === 'stage' ? '#f44336' : (isDark ? '#f87171' : '#dc2626')
+      chord: activeTheme === 'stage' ? '#ffeb3b' : (isDark ? '#60a5fa' : '#2563eb'),
+      directive: activeTheme === 'stage' ? '#ff9800' : (isDark ? '#a78bfa' : '#7c3aed'),
+      section: activeTheme === 'stage' ? '#4caf50' : (isDark ? '#34d399' : '#059669'),
+      comment: activeTheme === 'stage' ? '#757575' : (isDark ? '#9ca3af' : '#6b7280'),
+      error: activeTheme === 'stage' ? '#f44336' : (isDark ? '#f87171' : '#dc2626')
     }
   }
 }

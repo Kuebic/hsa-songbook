@@ -3,12 +3,15 @@
  * @description Utility functions for ChordPro syntax highlighting
  */
 
-export type EditorTheme = 'light' | 'dark' | 'stage'
+import type { Theme } from '@shared/contexts/ThemeContext'
+
+// Re-export for backward compatibility
+export type EditorTheme = Theme
 
 /**
  * Highlight ChordPro syntax with proper HTML escaping and pattern recognition
  */
-export function highlightChordPro(text: string, _theme: EditorTheme): string {
+export function highlightChordPro(text: string, _theme: Theme): string {
   if (!text) return ''
   
   // First, escape HTML to prevent XSS
@@ -67,7 +70,7 @@ export function highlightChordPro(text: string, _theme: EditorTheme): string {
 /**
  * Apply theme-specific highlighting
  */
-export function applyThemeHighlighting(theme: EditorTheme): string {
+export function applyThemeHighlighting(theme: Theme): string {
   const themes = {
     light: {
       chord: '#0066cc',

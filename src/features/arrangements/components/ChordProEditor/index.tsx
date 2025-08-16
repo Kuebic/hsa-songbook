@@ -3,14 +3,13 @@ import { SyntaxHighlighter } from './SyntaxHighlighter';
 import { PreviewPane } from './PreviewPane';
 import { ChordProTextArea } from './ChordProTextArea';
 import { MobileToggle } from './components/MobileToggle';
-import { ThemeSelector } from './components/ThemeSelector';
 import { EditorSplitter } from './components/EditorSplitter';
 import { AutoCompleteDropdown } from './components/AutoCompleteDropdown';
 import { AlignmentDebugger } from './components/AlignmentDebugger';
 import { TransposeBar } from './TransposeBar';
 import { FontPreferences } from '../FontPreferences';
 import { useEditorState } from './hooks/useEditorState';
-import { useEditorTheme } from './hooks/useEditorTheme';
+import { useTheme } from '@shared/contexts/ThemeContext';
 import { useResponsiveLayout } from './hooks/useResponsiveLayout';
 import { useVirtualKeyboard } from './hooks/useVirtualKeyboard';
 import { useMobileAutocomplete } from './hooks/useMobileAutocomplete';
@@ -60,8 +59,8 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   const [debugMode] = useState(false); // Set to true for debugging text alignment
   const [showAlignmentDebugger] = useState(false); // Set to true for alignment grid
   
-  // Use enhanced hooks for theme and responsive layout
-  const { currentTheme, setTheme } = useEditorTheme('light');
+  // Use global theme context and responsive layout
+  const { theme: currentTheme } = useTheme();
   const layout = useResponsiveLayout();
   
   // Use text alignment hook for perfect sync
@@ -254,13 +253,15 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       data-theme={currentTheme}
       data-device={layout.deviceType}
     >
-      {/* Enhanced toolbar with theme selector and mobile toggle */}
+      {/* Enhanced toolbar with transpose controls and mobile toggle */}
       <div className="chord-editor-toolbar">
         <div className="toolbar-left">
-          <ThemeSelector 
-            currentTheme={currentTheme}
-            onThemeChange={setTheme}
-          />
+          {enableTransposition && (
+            <TransposeBar 
+              transposition={transposition}
+              className="inline-transpose-bar"
+            />
+          )}
         </div>
         
         <div className="toolbar-center">
@@ -276,14 +277,6 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
           <FontPreferences showCompact={true} />
         </div>
       </div>
-      
-      {/* Transposition bar */}
-      {enableTransposition && (
-        <TransposeBar 
-          transposition={transposition}
-          className="editor-transpose-bar"
-        />
-      )}
       
       <div 
         className="chord-pro-editor-container flex-1 flex chord-editor-main"
