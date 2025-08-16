@@ -29,17 +29,18 @@ Was [G]blind but [D]now I [G]see
       <div className="flex-1 min-h-0 bg-gray-900">
         <div className="h-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           <ChordProEditor
-        initialContent={content}
-        onChange={setContent}
-        onSave={(text) => {
-          console.log('Saved:', text)
-          alert('Saved!')
-        }}
-        height="100%"
-        showPreview={true}
-        defaultPreviewVisible={true}
-        autoFocus={true}
-        enableChordCompletion={true}
+            arrangementId="test-editor-page"
+            initialContent={content}
+            onChange={setContent}
+            onSave={(text) => {
+              console.log('Saved:', text)
+              alert('Saved!')
+            }}
+            height="100%"
+            showPreview={true}
+            defaultPreviewVisible={true}
+            autoFocus={true}
+            enableChordCompletion={true}
           />
         </div>
       </div>

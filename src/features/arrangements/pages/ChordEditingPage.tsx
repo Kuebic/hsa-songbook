@@ -115,6 +115,7 @@ export function ChordEditingPage() {
   return (
     <ErrorBoundary>
       <ChordProEditor
+        arrangementId={arrangementId || 'new-arrangement'} // Use actual ID or fallback for new arrangements
         initialContent={initialChordData}
         onChange={() => {}} // onChange is handled internally
         onSave={handleSave}
