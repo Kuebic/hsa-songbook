@@ -29,8 +29,7 @@ export function PlaybackControls({
       alignItems: 'center',
       justifyContent: 'center',
       gap: '1rem',
-      padding: '1rem',
-      borderTop: '1px solid var(--color-border)',
+      padding: '0.75rem',
       backgroundColor: 'var(--color-card)'
     }}>
       <button

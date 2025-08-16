@@ -1,6 +1,9 @@
 import type { Setlist } from '../types/setlist.types'
 import type { PopulatedArrangement } from '../types/playback.types'
 
+// Use localStorage for fetching setlists (same as useSetlists hook)
+const STORAGE_KEY = 'hsa-songbook-setlists'
+
 class PlaybackService {
   /**
    * Fetch setlist with fully populated arrangements for playback
@@ -9,35 +12,48 @@ class PlaybackService {
     setlistId: string, 
     _token?: string
   ): Promise<Setlist & { arrangements: PopulatedArrangement[] }> {
-    // For now, return mock data - will be replaced with actual API calls
-    const setlist: Setlist & { arrangements: PopulatedArrangement[] } = {
-      id: setlistId,
-      name: 'Mock Setlist',
-      arrangements: [],
-      description: '',
-      userId: '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
-    
-    // Ensure all arrangements are populated
-    const populated = await Promise.all(
-      setlist.arrangements.map(async (item) => {
+    // Fetch the setlist from localStorage
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      const allSetlists = stored ? JSON.parse(stored) : []
+      const setlist = allSetlists.find((sl: Setlist) => sl.id === setlistId)
+      
+      if (!setlist) {
+        throw new Error(`Setlist ${setlistId} not found`)
+      }
+      
+      // Ensure all arrangements are populated with their full data
+      const populated = setlist.arrangements.map((item: any) => {
+        // The arrangement data should already be included from when it was added
+        // If not, we ensure it has at least the required fields
         if (!item.arrangement) {
-          // Mock arrangement fetch
-          const arr = {
-            id: item.arrangementId,
-            name: 'Mock Arrangement',
-            key: 'C',
-            content: ''
+          console.error('Missing arrangement data for:', item.arrangementId)
+          return {
+            ...item,
+            arrangement: {
+              id: item.arrangementId,
+              name: 'Unknown Arrangement',
+              key: 'C',
+              chordProText: '',
+              chordData: '',
+              difficulty: 'medium'
+            }
           }
-          return { ...item, arrangement: arr }
         }
         return item as PopulatedArrangement
       })
-    )
-    
-    return { ...setlist, arrangements: populated }
+      
+      return { 
+        ...setlist, 
+        arrangements: populated,
+        // Ensure dates are strings
+        createdAt: setlist.createdAt instanceof Date ? setlist.createdAt.toISOString() : setlist.createdAt,
+        updatedAt: setlist.updatedAt instanceof Date ? setlist.updatedAt.toISOString() : setlist.updatedAt
+      }
+    } catch (error) {
+      console.error('Error loading setlist:', error)
+      throw error
+    }
   }
   
   /**

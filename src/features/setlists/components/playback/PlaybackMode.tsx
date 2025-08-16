@@ -110,32 +110,48 @@ export function PlaybackMode({ setlistId, initialIndex = 0 }: PlaybackModeProps)
         />
       }
       toolbar={
-        <div className="flex items-center gap-4 px-4 py-2">
-          <PlaybackKeySelector
-            currentKey={transpositionState.currentKey || currentArrangement.playbackKey}
-            originalKey={currentArrangement.arrangement.key}
-            onKeyChange={handleKeyChange}
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          borderBottom: '1px solid var(--color-border)'
+        }}>
+          {/* Navigation controls at the top */}
+          <PlaybackControls
+            canGoNext={canGoNext}
+            canGoPrevious={canGoPrevious}
+            onNext={navigateNext}
+            onPrevious={navigatePrevious}
+            onJumpTo={jumpTo}
+            arrangements={setlist?.arrangements || []}
+            currentIndex={currentIndex}
           />
-          <div className="text-sm text-muted">
-            {currentArrangement.arrangement.name}
+          {/* Key selector and song info below */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            padding: '0.5rem 1rem',
+            borderTop: '1px solid var(--color-border)',
+            backgroundColor: 'var(--color-background)'
+          }}>
+            <PlaybackKeySelector
+              currentKey={transpositionState.currentKey || currentArrangement.playbackKey}
+              originalKey={currentArrangement.arrangement.key}
+              onKeyChange={handleKeyChange}
+            />
+            <div style={{
+              fontSize: '0.875rem',
+              color: 'var(--text-secondary)'
+            }}>
+              {currentArrangement.arrangement.name}
+            </div>
           </div>
         </div>
       }
       content={
         <ChordSheetViewer
-          chordProText={currentArrangement.arrangement.content || ''}
+          chordProText={currentArrangement.arrangement.chordProText || currentArrangement.arrangement.chordData || ''}
           transposition={transpositionState.semitones}
-        />
-      }
-      controls={
-        <PlaybackControls
-          canGoNext={canGoNext}
-          canGoPrevious={canGoPrevious}
-          onNext={navigateNext}
-          onPrevious={navigatePrevious}
-          onJumpTo={jumpTo}
-          arrangements={setlist?.arrangements || []}
-          currentIndex={currentIndex}
         />
       }
     />
