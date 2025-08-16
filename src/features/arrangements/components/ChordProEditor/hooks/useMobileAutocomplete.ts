@@ -118,6 +118,22 @@ export const useMobileAutocomplete = (
   }, [enabled, textareaRef, getSuggestions, maxSuggestions]);
 
   /**
+   * Close autocomplete
+   */
+  const closeAutocomplete = useCallback(() => {
+    setState({
+      isOpen: false,
+      items: [],
+      selectedIndex: 0,
+      trigger: null,
+      triggerPosition: -1,
+      searchTerm: '',
+      anchorEl: null,
+      isSearching: false,
+    });
+  }, []);
+
+  /**
    * Update search term and filter suggestions
    */
   const updateSearchTerm = useCallback((
@@ -176,6 +192,61 @@ export const useMobileAutocomplete = (
       checkForTrigger(cursorPosition);
     }
   }, [textareaRef, state.isOpen, debouncedUpdateSearchTerm, checkForTrigger]);
+
+  /**
+   * Insert selected suggestion
+   */
+  const insertSuggestion = useCallback((
+    item: AutocompleteItem
+  ) => {
+    if (!textareaRef.current || state.triggerPosition === -1) return;
+
+    const textarea = textareaRef.current;
+    const text = textarea.value;
+    const startPos = state.triggerPosition;
+    const endPos = textarea.selectionStart || 0;
+    
+    let insertText = '';
+    let cursorOffset = 0;
+    
+    if (state.trigger === '{') {
+      // Insert directive with closing brace
+      insertText = `{${item.value}}`;
+      cursorOffset = item.value.endsWith(':') 
+        ? insertText.length - 1 // Position before closing brace
+        : insertText.length; // Position after closing brace
+    } else if (state.trigger === '[') {
+      // Insert chord with closing bracket
+      insertText = `[${item.value}]`;
+      cursorOffset = insertText.length; // Position after closing bracket
+    }
+    
+    // Update textarea value through React
+    const newText = text.substring(0, startPos) + insertText + text.substring(endPos);
+    const newCursorPos = startPos + cursorOffset;
+    
+    // Call onChange to update React state
+    if (onChange) {
+      onChange(newText, newCursorPos);
+    } else {
+      // Fallback: directly update textarea and dispatch event
+      textarea.value = newText;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+      
+      // Trigger input event for React
+      const inputEvent = new Event('input', { bubbles: true });
+      textarea.dispatchEvent(inputEvent);
+    }
+    
+    // Focus textarea
+    textarea.focus();
+    
+    // Call onSelect callback
+    onSelect?.(item, state.trigger!, state.triggerPosition);
+    
+    // Close autocomplete
+    closeAutocomplete();
+  }, [textareaRef, state.triggerPosition, state.trigger, onSelect, onChange, closeAutocomplete]);
 
   /**
    * Force open autocomplete with current context
@@ -308,77 +379,6 @@ export const useMobileAutocomplete = (
 
     return false;
   }, [state.isOpen, state.items, state.selectedIndex, state.trigger, forceOpenAutocomplete, insertSuggestion, closeAutocomplete]);
-
-  /**
-   * Insert selected suggestion
-   */
-  const insertSuggestion = useCallback((
-    item: AutocompleteItem
-  ) => {
-    if (!textareaRef.current || state.triggerPosition === -1) return;
-
-    const textarea = textareaRef.current;
-    const text = textarea.value;
-    const startPos = state.triggerPosition;
-    const endPos = textarea.selectionStart || 0;
-    
-    let insertText = '';
-    let cursorOffset = 0;
-    
-    if (state.trigger === '{') {
-      // Insert directive with closing brace
-      insertText = `{${item.value}}`;
-      cursorOffset = item.value.endsWith(':') 
-        ? insertText.length - 1 // Position before closing brace
-        : insertText.length; // Position after closing brace
-    } else if (state.trigger === '[') {
-      // Insert chord with closing bracket
-      insertText = `[${item.value}]`;
-      cursorOffset = insertText.length; // Position after closing bracket
-    }
-    
-    // Update textarea value through React
-    const newText = text.substring(0, startPos) + insertText + text.substring(endPos);
-    const newCursorPos = startPos + cursorOffset;
-    
-    // Call onChange to update React state
-    if (onChange) {
-      onChange(newText, newCursorPos);
-    } else {
-      // Fallback: directly update textarea and dispatch event
-      textarea.value = newText;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-      
-      // Trigger input event for React
-      const inputEvent = new Event('input', { bubbles: true });
-      textarea.dispatchEvent(inputEvent);
-    }
-    
-    // Focus textarea
-    textarea.focus();
-    
-    // Call onSelect callback
-    onSelect?.(item, state.trigger!, state.triggerPosition);
-    
-    // Close autocomplete
-    closeAutocomplete();
-  }, [textareaRef, state.triggerPosition, state.trigger, onSelect, onChange, closeAutocomplete]);
-
-  /**
-   * Close autocomplete
-   */
-  const closeAutocomplete = useCallback(() => {
-    setState({
-      isOpen: false,
-      items: [],
-      selectedIndex: 0,
-      trigger: null,
-      triggerPosition: -1,
-      searchTerm: '',
-      anchorEl: null,
-      isSearching: false,
-    });
-  }, []);
 
   /**
    * Handle composition events (IME input)

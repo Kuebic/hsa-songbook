@@ -64,11 +64,12 @@
   grid-area: 1 / 1;
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  min-height: 100%;
+  height: auto; /* Allow expansion to content height */
   z-index: 2;
   
-  /* Allow scrolling for sync */
-  overflow: auto !important;
+  /* Prevent individual scrolling - container handles it */
+  overflow: visible !important;
   scroll-behavior: auto;
 }
 
@@ -77,10 +78,11 @@
   grid-area: 1 / 1; /* Same grid cell as textarea */
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  min-height: 100%;
+  height: auto; /* Allow expansion to content height */
   pointer-events: none;
   z-index: 1;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 /* Syntax highlighter specific styles */
