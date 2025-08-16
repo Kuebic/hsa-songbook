@@ -31,31 +31,25 @@ export function AddArrangementButton({
   const buttonStyles = {
     primary: {
       padding: '0.5rem 1rem',
-      backgroundColor: '#3b82f6',
-      color: 'white',
+      backgroundColor: 'var(--color-primary)',
+      color: 'var(--color-primary-foreground)',
       border: 'none',
       borderRadius: '0.375rem',
       cursor: 'pointer',
       fontSize: '0.875rem',
       fontWeight: 500,
-      transition: 'background-color 0.2s',
-      ':hover': {
-        backgroundColor: '#2563eb'
-      }
+      transition: 'background-color 0.2s'
     },
     secondary: {
       padding: '0.5rem 1rem',
       backgroundColor: 'transparent',
-      color: '#3b82f6',
-      border: '1px solid #3b82f6',
+      color: 'var(--color-primary)',
+      border: '1px solid var(--color-primary)',
       borderRadius: '0.375rem',
       cursor: 'pointer',
       fontSize: '0.875rem',
       fontWeight: 500,
-      transition: 'all 0.2s',
-      ':hover': {
-        backgroundColor: '#eff6ff'
-      }
+      transition: 'all 0.2s'
     }
   }
   

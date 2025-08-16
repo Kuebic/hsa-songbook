@@ -8,8 +8,8 @@ interface DuplicateWarningProps {
 export function DuplicateWarning({ similarSongs, onContinue }: DuplicateWarningProps) {
   const warningStyles: React.CSSProperties = {
     padding: '16px',
-    backgroundColor: '#fef3c7',
-    border: '1px solid #f59e0b',
+    backgroundColor: 'var(--color-accent)',
+    border: '1px solid var(--status-warning)',
     borderRadius: '8px',
     marginBottom: '16px'
   }
@@ -17,7 +17,7 @@ export function DuplicateWarning({ similarSongs, onContinue }: DuplicateWarningP
   const titleStyles: React.CSSProperties = {
     fontSize: '16px',
     fontWeight: 600,
-    color: '#92400e',
+    color: 'var(--status-warning)',
     marginBottom: '8px',
     display: 'flex',
     alignItems: 'center',
@@ -30,7 +30,7 @@ export function DuplicateWarning({ similarSongs, onContinue }: DuplicateWarningP
   }
   
   const listItemStyles: React.CSSProperties = {
-    color: '#92400e',
+    color: 'var(--status-warning)',
     fontSize: '14px',
     marginBottom: '4px'
   }
@@ -38,8 +38,8 @@ export function DuplicateWarning({ similarSongs, onContinue }: DuplicateWarningP
   const buttonStyles: React.CSSProperties = {
     marginTop: '12px',
     padding: '6px 12px',
-    backgroundColor: '#f59e0b',
-    color: 'white',
+    backgroundColor: 'var(--status-warning)',
+    color: 'var(--color-background)',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
@@ -48,7 +48,7 @@ export function DuplicateWarning({ similarSongs, onContinue }: DuplicateWarningP
   }
   
   const buttonHoverStyles: React.CSSProperties = {
-    backgroundColor: '#d97706'
+    backgroundColor: 'var(--status-warning)'
   }
   
   const getSimilarityLabel = (similarity: string) => {
@@ -70,7 +70,7 @@ export function DuplicateWarning({ similarSongs, onContinue }: DuplicateWarningP
         <span role="img" aria-label="Warning">⚠️</span>
         Similar songs found in the database
       </div>
-      <p style={{ color: '#92400e', fontSize: '14px', margin: '8px 0' }}>
+      <p style={{ color: 'var(--status-warning)', fontSize: '14px', margin: '8px 0' }}>
         The following songs may be duplicates:
       </p>
       <ul style={listStyles}>
@@ -98,7 +98,7 @@ export function DuplicateWarning({ similarSongs, onContinue }: DuplicateWarningP
           Object.assign(e.currentTarget.style, buttonHoverStyles)
         }}
         onMouseLeave={(e) => {
-          Object.assign(e.currentTarget.style, { backgroundColor: '#f59e0b' })
+          Object.assign(e.currentTarget.style, { backgroundColor: 'var(--status-warning)' })
         }}
       >
         Continue Anyway

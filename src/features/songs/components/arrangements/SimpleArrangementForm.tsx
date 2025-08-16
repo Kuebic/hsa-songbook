@@ -109,27 +109,28 @@ export function SimpleArrangementForm({
           marginBottom: '4px', 
           fontSize: '14px', 
           fontWeight: '500', 
-          color: '#374151' 
+          color: 'var(--text-primary)' 
         }}>
-          Difficulty Level <span style={{ color: '#ef4444' }}>*</span>
+          Difficulty Level <span style={{ color: 'var(--color-destructive)' }}>*</span>
         </label>
         <select
           name="arrangement-difficulty"
-          value={data.difficulty || ''}
+          value={data.difficulty || 'intermediate'}
           onChange={(e) => handleChange('difficulty', e.target.value)}
           disabled={disabled}
           style={{
             width: '100%',
             padding: '8px 12px',
             fontSize: '14px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid var(--color-border)',
             borderRadius: '6px',
-            backgroundColor: disabled ? '#f9fafb' : '#ffffff',
-            outline: 'none'
+            backgroundColor: disabled ? 'var(--color-muted)' : 'var(--color-card)',
+            color: 'var(--text-primary)',
+            outline: 'none',
+            cursor: disabled ? 'not-allowed' : 'pointer'
           }}
           required
         >
-          <option value="">Select difficulty...</option>
           {DIFFICULTY_LEVELS.map(level => (
             <option key={level} value={level}>
               {level.charAt(0).toUpperCase() + level.slice(1)}

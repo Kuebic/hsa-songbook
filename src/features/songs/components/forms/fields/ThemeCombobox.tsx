@@ -87,7 +87,7 @@ export function ThemeCombobox({
     marginBottom: '4px',
     fontSize: '14px',
     fontWeight: '500',
-    color: '#374151'
+    color: 'var(--text-primary)'
   }
 
   const tagsContainerStyles: React.CSSProperties = {
@@ -101,17 +101,17 @@ export function ThemeCombobox({
     display: 'inline-flex',
     alignItems: 'center',
     padding: '4px 8px',
-    backgroundColor: '#e0e7ff',
+    backgroundColor: 'var(--color-accent)',
     borderRadius: '4px',
     fontSize: '14px',
-    color: '#3730a3'
+    color: 'var(--color-accent-foreground)'
   }
   
   const removeButtonStyles: React.CSSProperties = {
     marginLeft: '4px',
     background: 'none',
     border: 'none',
-    color: '#6366f1',
+    color: 'var(--color-primary)',
     cursor: 'pointer',
     fontSize: '18px',
     lineHeight: '1',
@@ -128,7 +128,8 @@ export function ThemeCombobox({
     fontSize: '14px',
     border: '1px solid',
     borderRadius: '6px',
-    backgroundColor: disabled ? '#f9fafb' : '#ffffff',
+    backgroundColor: disabled ? 'var(--color-muted)' : 'var(--color-card)',
+    color: 'var(--text-primary)',
     transition: 'border-color 0.15s ease-in-out',
     outline: 'none'
   }
@@ -139,8 +140,8 @@ export function ThemeCombobox({
     left: 0,
     right: 0,
     marginTop: '4px',
-    backgroundColor: 'white',
-    border: '1px solid #e2e8f0',
+    backgroundColor: 'var(--color-popover)',
+    border: '1px solid var(--color-border)',
     borderRadius: '6px',
     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
     maxHeight: '200px',
@@ -151,27 +152,27 @@ export function ThemeCombobox({
   const suggestionStyles = (isHighlighted: boolean): React.CSSProperties => ({
     padding: '8px 12px',
     cursor: 'pointer',
-    backgroundColor: isHighlighted ? '#f1f5f9' : 'transparent',
+    backgroundColor: isHighlighted ? 'var(--color-accent)' : 'transparent',
     fontSize: '14px'
   })
 
   const helperStyles: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-secondary)'
   }
 
   const errorStyles: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
-    color: '#ef4444'
+    color: 'var(--color-destructive)'
   }
   
   return (
     <div style={fieldStyles}>
       <label htmlFor="themes" style={labelStyles}>
         Themes
-        {required && <span style={{ color: '#ef4444' }}> *</span>}
+        {required && <span style={{ color: 'var(--color-destructive)' }}> *</span>}
       </label>
       
       {value.length > 0 && (
@@ -214,7 +215,7 @@ export function ThemeCombobox({
           placeholder={value.length === 0 ? 'Type to search themes...' : 'Add more themes...'}
           style={{
             ...inputStyles,
-            borderColor: error ? '#ef4444' : '#e2e8f0'
+            borderColor: error ? 'var(--color-destructive)' : 'var(--color-border)'
           }}
           aria-label="Theme search"
           aria-autocomplete="list"

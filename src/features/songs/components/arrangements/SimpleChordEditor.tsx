@@ -25,7 +25,7 @@ export function SimpleChordEditor({
     marginBottom: '4px',
     fontSize: '14px',
     fontWeight: '500',
-    color: '#374151'
+    color: 'var(--text-primary)'
   }
 
   const textareaStyles: React.CSSProperties = {
@@ -35,9 +35,10 @@ export function SimpleChordEditor({
     fontSize: '13px',
     fontFamily: 'Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
     border: '2px solid',
-    borderColor: isDragOver ? '#3b82f6' : '#e2e8f0',
+    borderColor: isDragOver ? 'var(--color-primary)' : 'var(--color-border)',
     borderRadius: '8px',
-    backgroundColor: disabled ? '#f9fafb' : '#ffffff',
+    backgroundColor: disabled ? 'var(--color-muted)' : 'var(--color-card)',
+    color: 'var(--text-primary)',
     transition: 'border-color 0.15s ease-in-out',
     outline: 'none',
     resize: 'vertical',
@@ -47,7 +48,7 @@ export function SimpleChordEditor({
   const helperStyles: React.CSSProperties = {
     marginTop: '8px',
     fontSize: '12px',
-    color: '#6b7280',
+    color: 'var(--text-secondary)',
     lineHeight: '1.4'
   }
 
@@ -56,7 +57,7 @@ export function SimpleChordEditor({
     gap: '8px',
     marginBottom: '8px',
     padding: '8px',
-    backgroundColor: '#f8fafc',
+    backgroundColor: 'var(--color-secondary)',
     borderRadius: '6px',
     fontSize: '12px'
   }
@@ -64,11 +65,11 @@ export function SimpleChordEditor({
   const buttonStyles: React.CSSProperties = {
     padding: '4px 8px',
     fontSize: '11px',
-    backgroundColor: '#ffffff',
-    border: '1px solid #d1d5db',
+    backgroundColor: 'var(--color-card)',
+    border: '1px solid var(--color-border)',
     borderRadius: '4px',
     cursor: 'pointer',
-    color: '#374151'
+    color: 'var(--text-primary)'
   }
 
   const insertText = (textToInsert: string) => {
@@ -121,12 +122,12 @@ export function SimpleChordEditor({
   return (
     <div style={fieldStyles}>
       <label htmlFor="chord-editor" style={labelStyles}>
-        Chord & Lyrics (ChordPro Format) <span style={{ color: '#ef4444' }}>*</span>
+        Chord & Lyrics (ChordPro Format) <span style={{ color: 'var(--color-destructive)' }}>*</span>
       </label>
       
       {!disabled && (
         <div style={toolbarStyles}>
-          <span style={{ fontSize: '11px', color: '#6b7280', marginRight: '8px' }}>Quick insert:</span>
+          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginRight: '8px' }}>Quick insert:</span>
           {quickInserts.map((item, index) => (
             <button
               key={index}

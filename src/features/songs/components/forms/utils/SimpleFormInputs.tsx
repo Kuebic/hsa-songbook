@@ -43,9 +43,10 @@ export function SimpleInput({
     padding: '8px 12px',
     fontSize: '14px',
     border: '1px solid',
-    borderColor: error ? '#ef4444' : '#e2e8f0',
+    borderColor: error ? 'var(--color-destructive)' : 'var(--color-border)',
     borderRadius: '6px',
-    backgroundColor: disabled ? '#f9fafb' : '#ffffff',
+    backgroundColor: disabled ? 'var(--color-muted)' : 'var(--color-card)',
+    color: 'var(--text-primary)',
     transition: 'border-color 0.15s ease-in-out',
     outline: 'none'
   }
@@ -55,19 +56,19 @@ export function SimpleInput({
     marginBottom: '4px',
     fontSize: '14px',
     fontWeight: '500',
-    color: '#374151'
+    color: 'var(--text-primary)'
   }
 
   const errorStyles: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
-    color: '#ef4444'
+    color: 'var(--color-destructive)'
   }
 
   const helperStyles: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-secondary)'
   }
 
   const fieldStyles: React.CSSProperties = {
@@ -77,7 +78,7 @@ export function SimpleInput({
   const characterCountStyles: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
-    color: '#6b7280',
+    color: 'var(--text-secondary)',
     textAlign: 'right'
   }
 
@@ -159,9 +160,10 @@ export function SimpleTextarea({
     padding: '8px 12px',
     fontSize: '14px',
     border: '1px solid',
-    borderColor: error ? '#ef4444' : '#e2e8f0',
+    borderColor: error ? 'var(--color-destructive)' : 'var(--color-border)',
     borderRadius: '6px',
-    backgroundColor: disabled ? '#f9fafb' : '#ffffff',
+    backgroundColor: disabled ? 'var(--color-muted)' : 'var(--color-card)',
+    color: 'var(--text-primary)',
     transition: 'border-color 0.15s ease-in-out',
     outline: 'none',
     resize: autoResize ? 'vertical' : 'none',
@@ -173,19 +175,19 @@ export function SimpleTextarea({
     marginBottom: '4px',
     fontSize: '14px',
     fontWeight: '500',
-    color: '#374151'
+    color: 'var(--text-primary)'
   }
 
   const errorStyles: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
-    color: '#ef4444'
+    color: 'var(--color-destructive)'
   }
 
   const helperStyles: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-secondary)'
   }
 
   const fieldStyles: React.CSSProperties = {
@@ -195,7 +197,7 @@ export function SimpleTextarea({
   const characterCountStyles: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
-    color: '#6b7280',
+    color: 'var(--text-secondary)',
     textAlign: 'right'
   }
 
@@ -264,7 +266,7 @@ export function SimpleCheckbox({
     display: 'flex',
     alignItems: 'center',
     fontSize: '14px',
-    color: '#374151',
+    color: 'var(--text-primary)',
     cursor: disabled ? 'not-allowed' : 'pointer'
   }
 
@@ -276,14 +278,14 @@ export function SimpleCheckbox({
   const errorStyles: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
-    color: '#ef4444'
+    color: 'var(--color-destructive)'
   }
 
   const helperStyles: React.CSSProperties = {
     marginTop: '4px',
     marginLeft: '24px',
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-secondary)'
   }
 
   return (
@@ -344,10 +346,10 @@ export function SimpleSection({ title, children }: SimpleSectionProps) {
   const titleStyles: React.CSSProperties = {
     fontSize: '18px',
     fontWeight: '600',
-    color: '#111827',
+    color: 'var(--text-primary)',
     marginBottom: '16px',
     paddingBottom: '8px',
-    borderBottom: '1px solid #e5e7eb'
+    borderBottom: '1px solid var(--color-border)'
   }
 
   return (

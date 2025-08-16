@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { Modal } from '@shared/components/modal'
 import { SongForm } from './SongForm'
 import type { Song } from '../../types/song.types'
@@ -21,14 +21,6 @@ export function SongFormModal({
   existingSongs = [],
   isSubmitting = false
 }: SongFormModalProps) {
-  // Ensure modal closes on unmount
-  useEffect(() => {
-    return () => {
-      if (isOpen) {
-        onClose()
-      }
-    }
-  }, [isOpen, onClose])
   
   const handleSubmit = async (data: SongFormData) => {
     try {

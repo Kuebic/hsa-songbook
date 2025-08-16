@@ -82,8 +82,8 @@ export function AddSongButton() {
         onMouseLeave={e => {
           e.currentTarget.style.opacity = '1'
         }}
-        aria-label="Add new song"
-        title="Add new song"
+        aria-label="Add Song"
+        title="Add Song"
         data-testid="add-song-button"
       >
         <span style={iconStyles}>➕</span>

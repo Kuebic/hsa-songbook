@@ -24,7 +24,7 @@ export function SourceSelect({
     marginBottom: '4px',
     fontSize: '14px',
     fontWeight: '500',
-    color: '#374151'
+    color: 'var(--text-primary)'
   }
 
   const selectStyles: React.CSSProperties = {
@@ -32,28 +32,29 @@ export function SourceSelect({
     padding: '8px 12px',
     fontSize: '14px',
     border: '1px solid',
-    borderColor: error ? '#ef4444' : '#e2e8f0',
+    borderColor: error ? 'var(--color-destructive)' : 'var(--color-border)',
     borderRadius: '6px',
-    backgroundColor: disabled ? '#f9fafb' : '#ffffff',
+    backgroundColor: disabled ? 'var(--color-muted)' : 'var(--color-card)',
+    color: 'var(--text-primary)',
     cursor: disabled ? 'not-allowed' : 'pointer',
     transition: 'border-color 0.15s ease-in-out'
   }
   
   const optionGroupStyles: React.CSSProperties = {
     fontWeight: '600',
-    color: '#374151'
+    color: 'var(--text-primary)'
   }
 
   const helperStyles: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-secondary)'
   }
 
   const errorStyles: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
-    color: '#ef4444'
+    color: 'var(--color-destructive)'
   }
   
   // Group sources by category
@@ -70,7 +71,7 @@ export function SourceSelect({
     <div style={fieldStyles}>
       <label htmlFor="source" style={labelStyles}>
         Source
-        {required && <span style={{ color: '#ef4444' }}> *</span>}
+        {required && <span style={{ color: 'var(--color-destructive)' }}> *</span>}
       </label>
       
       <select
