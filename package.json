@@ -15,7 +15,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest --watch",
-    "test:ci": "vitest run --coverage --reporter=json --reporter=default",
+    "test:ci": "vitest run --coverage",
     "analyze": "npm run build && open dist/stats.html",
     "analyze:ci": "npm run build && npx vite-bundle-visualizer --format json > bundle-stats.json",
     "install:all": "npm install && cd server && npm install"
