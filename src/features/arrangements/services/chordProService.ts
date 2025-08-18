@@ -13,13 +13,18 @@ import {
   Song,
   Chord,
 } from 'chordsheetjs';
-import type { ChordLyricsPair, Comment, Tag, Ternary, Literal } from 'chordsheetjs';
 import type {
   ChordProMetadata,
   ValidationError,
   ValidationWarning,
 } from '../types/editor.types';
 import { enharmonicService } from './enharmonicService';
+
+// Type for chord items in chordsheetjs
+interface ChordItem {
+  chords?: string | string[];
+  [key: string]: unknown;
+}
 
 /**
  * Supported export formats
@@ -189,7 +194,7 @@ export class ChordProService {
       
       song.lines.forEach(line => {
         if (line.items) {
-          line.items.forEach((item: ChordLyricsPair | Comment | Tag | Ternary | Literal) => {
+          line.items.forEach((item: ChordItem) => {
             if ('chords' in item && item.chords) {
               if (typeof item.chords === 'string') {
                 const chord = Chord.parse(item.chords);
@@ -263,7 +268,7 @@ export class ChordProService {
     
     song.lines.forEach(line => {
       if (line.items) {
-        line.items.forEach((item: Item) => {
+        line.items.forEach((item: ChordItem) => {
           if ('chords' in item && item.chords) {
             if (typeof item.chords === 'string') {
               item.chords = enharmonicService.convertChord(item.chords, modifier);
@@ -288,7 +293,7 @@ export class ChordProService {
     // Extract chords from all lines
     song.lines.forEach((line) => {
       if (line.items) {
-        line.items.forEach((item: Item) => {
+        line.items.forEach((item: ChordItem) => {
           // Check if item has chords property (ChordLyricsPair)
           if ('chords' in item && item.chords) {
             if (typeof item.chords === 'string') {
@@ -375,12 +380,16 @@ export class ChordProService {
     if (songData.lyricist) metadata.lyricist = songData.lyricist;
     if (songData.copyright) metadata.copyright = songData.copyright;
     if (songData.album) metadata.album = songData.album;
-    if (songData.year) metadata.year = typeof songData.year === 'string' ? songData.year : songData.year.toString();
+    if (songData.year) metadata.year = typeof songData.year === 'string' ? songData.year : String(songData.year);
     if (songData.key) metadata.key = songData.key;
     if (songData.time) metadata.time = songData.time;
-    if (songData.tempo) metadata.tempo = typeof songData.tempo === 'string' ? songData.tempo : songData.tempo.toString();
-    if (songData.duration) metadata.duration = typeof songData.duration === 'string' ? songData.duration : songData.duration.toString();
-    if (songData.capo) metadata.capo = typeof songData.capo === 'string' ? songData.capo : songData.capo.toString();
+    if (songData.tempo) {
+      metadata.tempo = typeof songData.tempo === 'string' ? parseInt(songData.tempo, 10) : songData.tempo;
+    }
+    if (songData.duration) metadata.duration = typeof songData.duration === 'string' ? songData.duration : String(songData.duration);
+    if (songData.capo) {
+      metadata.capo = typeof songData.capo === 'string' ? parseInt(songData.capo, 10) : songData.capo;
+    }
     
     // Custom metadata
     if (songData.metadata) {

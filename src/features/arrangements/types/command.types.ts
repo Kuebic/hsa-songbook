@@ -1,15 +1,17 @@
 import type { RefObject } from 'react';
 
-// Command types enum
-export enum CommandType {
-  INSERT_TEXT = 'INSERT_TEXT',
-  DELETE_TEXT = 'DELETE_TEXT',
-  REPLACE_TEXT = 'REPLACE_TEXT',
-  INSERT_DIRECTIVE = 'INSERT_DIRECTIVE',
-  UPDATE_DIRECTIVE = 'UPDATE_DIRECTIVE',
-  TRANSPOSE = 'TRANSPOSE',
-  FORMAT = 'FORMAT'
-}
+// Command types as const assertion pattern (compatible with erasableSyntaxOnly)
+export const CommandType = {
+  INSERT_TEXT: 'INSERT_TEXT',
+  DELETE_TEXT: 'DELETE_TEXT',
+  REPLACE_TEXT: 'REPLACE_TEXT',
+  INSERT_DIRECTIVE: 'INSERT_DIRECTIVE',
+  UPDATE_DIRECTIVE: 'UPDATE_DIRECTIVE',
+  TRANSPOSE: 'TRANSPOSE',
+  FORMAT: 'FORMAT'
+} as const;
+
+export type CommandType = typeof CommandType[keyof typeof CommandType];
 
 // Editor context passed to commands
 export interface EditorContext {

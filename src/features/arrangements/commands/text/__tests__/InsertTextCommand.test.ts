@@ -124,7 +124,7 @@ describe('InsertTextCommand', () => {
       const throwingTextarea = {
         _value: 'Hello world',
         get value() { return this._value; },
-        set value(val: string) { throw new Error('Textarea error'); },
+        set value(_val: string) { throw new Error('Textarea error'); },
         selectionStart: 0,
         selectionEnd: 0,
         setSelectionRange: vi.fn(),
@@ -197,7 +197,7 @@ describe('InsertTextCommand', () => {
       // Mock textarea that throws on value assignment
       const throwingTextarea = {
         ...mockTextarea,
-        set value(val: string) {
+        set value(_val: string) {
           throw new Error('Undo error');
         }
       };
@@ -273,7 +273,7 @@ describe('InsertTextCommand', () => {
       const merged = command1.merge(command2);
       
       expect(merged).toBe(command1); // Returns this
-      expect(merged.serialize()).toContain('"text":"ab"');
+      expect(merged.serialize?.()).toContain('"text":"ab"');
       expect(merged.timestamp).toBe(command2.timestamp);
     });
     

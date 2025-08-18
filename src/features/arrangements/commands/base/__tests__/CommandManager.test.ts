@@ -28,10 +28,16 @@ class MockCommand implements EditorCommand {
   executeResult: CommandResult = { success: true };
   undoResult: CommandResult = { success: true };
   
+  shouldFail: boolean;
+  canMergeWith: EditorCommand | null;
+  
   constructor(
-    public shouldFail = false,
-    public canMergeWith: EditorCommand | null = null
-  ) {}
+    shouldFail = false,
+    canMergeWith: EditorCommand | null = null
+  ) {
+    this.shouldFail = shouldFail;
+    this.canMergeWith = canMergeWith;
+  }
   
   async execute(): Promise<CommandResult> {
     if (this.shouldFail) {
@@ -147,15 +153,22 @@ describe('CommandManager', () => {
     });
     
     it('should not merge commands outside merge window', async () => {
+      vi.useFakeTimers();
+      const startTime = Date.now();
+      vi.setSystemTime(startTime);
+      
       const command1 = new MockCommand();
-      const command2 = new MockCommand();
-      command1.canMergeWith = command2;
+      command1.timestamp = startTime;
       
       await manager.execute(command1, context);
       
       // Simulate time passing beyond merge window
-      vi.useFakeTimers();
       vi.advanceTimersByTime(1000); // Advance beyond 500ms merge window
+      vi.setSystemTime(startTime + 1000);
+      
+      const command2 = new MockCommand();
+      command2.timestamp = startTime + 1000;
+      command1.canMergeWith = command2;
       
       await manager.execute(command2, context);
       
@@ -277,7 +290,16 @@ describe('CommandManager', () => {
     
     it('should keep command in redo stack if redo fails', async () => {
       const command = new MockCommand();
-      command.executeResult = { success: false, error: new Error('Redo failed') };
+      let executeCallCount = 0;
+      
+      // Override execute to succeed first time, fail second time
+      command.execute = async (): Promise<CommandResult> => {
+        executeCallCount++;
+        if (executeCallCount === 1) {
+          return { success: true };
+        }
+        return { success: false, error: new Error('Redo failed') };
+      };
       
       await manager.execute(command, context);
       await manager.undo(context);
@@ -485,7 +507,7 @@ describe('CommandManager', () => {
     it('should handle undo/redo cycle with real commands', async () => {
       mockTextarea.value = 'Hello world';
       const insertCommand = new InsertTextCommand(5, ' beautiful');
-      const deleteCommand = new DeleteTextCommand(5, 11);
+      const deleteCommand = new DeleteTextCommand(5, 10); // Delete " beautiful" (10 chars)
       
       // Execute insert
       await manager.execute(insertCommand, context);
@@ -493,7 +515,7 @@ describe('CommandManager', () => {
       
       // Execute delete
       await manager.execute(deleteCommand, context);
-      expect(mockTextarea.value).toBe('Hello');
+      expect(mockTextarea.value).toBe('Hello world');
       
       // Undo delete
       await manager.undo(context);
@@ -509,7 +531,7 @@ describe('CommandManager', () => {
       
       // Redo delete
       await manager.redo(context);
-      expect(mockTextarea.value).toBe('Hello');
+      expect(mockTextarea.value).toBe('Hello world');
     });
   });
   

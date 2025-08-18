@@ -75,7 +75,7 @@ export function useAddToSetlistDropdown(arrangement: Arrangement): UseAddToSetli
     
     try {
       // Add arrangement using localStorage implementation
-      addArrangementToSetlist(setlistId, arrangement as any)
+      addArrangementToSetlist(setlistId, arrangement)
       
       addNotification({
         type: 'success',
@@ -100,7 +100,7 @@ export function useAddToSetlistDropdown(arrangement: Arrangement): UseAddToSetli
       
       // If requested, add the arrangement to the new setlist
       if (data.addArrangement) {
-        addArrangementToSetlist(newSetlist.id, arrangement as any)
+        addArrangementToSetlist(newSetlist.id, arrangement)
         
         addNotification({
           type: 'success',

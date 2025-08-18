@@ -26,6 +26,8 @@ Review relevant files in that directory based on the technologies and patterns u
 - **Package Manager**: npm
 - **Linting**: ESLint 9 with React plugins
 - **Module System**: ES Modules
+- **Storage**: IndexedDB (idb 8.0.3) for persistent storage
+- **Compression**: LZ-String 1.5.0 for data compression
 
 ## Project Structure
 
@@ -105,6 +107,26 @@ npm run dev
 npm run build && npm run preview
 # Test production build locally
 ```
+
+## Key Utilities and Patterns
+
+### Command Pattern (Undo/Redo)
+The application uses a robust Command Pattern implementation for undo/redo functionality:
+
+- **CommandManager**: Configurable undo/redo with command merging
+  - `maxHistorySize`: Configurable history limit (default: 100)
+  - `mergeWindow`: Time window for merging commands (default: 500ms)
+- **Command Types**: INSERT_TEXT, DELETE_TEXT, REPLACE_TEXT, INSERT_DIRECTIVE, UPDATE_DIRECTIVE
+- **Location**: `src/features/arrangements/commands/`
+
+### Auto-Save Architecture
+Three-tier storage system with compression:
+
+1. **Memory State**: Immediate command history
+2. **Session Storage**: Tab-specific recovery
+3. **IndexedDB**: Persistent storage with LZ-String compression
+
+See `src/features/arrangements/docs/AUTO_SAVE_ARCHITECTURE.md` for details.
 
 ## Anti-Patterns to Avoid
 

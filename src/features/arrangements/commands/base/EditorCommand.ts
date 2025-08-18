@@ -1,4 +1,5 @@
-import type { EditorCommand as IEditorCommand, CommandType, EditorContext, CommandResult } from '../../types/command.types';
+import type { EditorCommand as IEditorCommand, EditorContext, CommandResult } from '../../types/command.types';
+import type { CommandType as CommandTypeType } from '../../types/command.types';
 
 /**
  * Abstract base class for all editor commands
@@ -6,9 +7,9 @@ import type { EditorCommand as IEditorCommand, CommandType, EditorContext, Comma
 export abstract class BaseEditorCommand implements IEditorCommand {
   id: string;
   timestamp: number;
-  type: CommandType;
+  type: CommandTypeType;
   
-  constructor(type: CommandType) {
+  constructor(type: CommandTypeType) {
     this.id = crypto.randomUUID();
     this.timestamp = Date.now();
     this.type = type;

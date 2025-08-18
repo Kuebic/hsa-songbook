@@ -121,7 +121,7 @@ describe('DeleteTextCommand', () => {
       
       // Check that deleted text is stored (via serialization)
       const serialized = command.serialize();
-      const parsed = JSON.parse(serialized);
+      const parsed = JSON.parse(serialized!);
       expect(parsed.deletedText).toBe(' world');
     });
     
@@ -158,7 +158,7 @@ describe('DeleteTextCommand', () => {
       const throwingTextarea = {
         _value: 'Hello world',
         get value() { return this._value; },
-        set value(val: string) { throw new Error('Textarea error'); },
+        set value(_val: string) { throw new Error('Textarea error'); },
         selectionStart: 0,
         selectionEnd: 0,
         setSelectionRange: vi.fn(),
@@ -246,7 +246,7 @@ describe('DeleteTextCommand', () => {
       // Mock textarea that throws on value assignment
       const throwingTextarea = {
         ...mockTextarea,
-        set value(val: string) {
+        set value(_val: string) {
           throw new Error('Undo error');
         }
       };
@@ -329,8 +329,8 @@ describe('DeleteTextCommand', () => {
       expect(merged.timestamp).toBe(command2.timestamp);
       
       // Check internal state via serialization
-      const serialized = merged.serialize();
-      const parsed = JSON.parse(serialized);
+      const serialized = merged.serialize?.();
+      const parsed = JSON.parse(serialized!);
       expect(parsed.length).toBe(2); // Combined length
       expect(parsed.deletedText).toBe('ab'); // Combined deleted text
     });
@@ -350,8 +350,8 @@ describe('DeleteTextCommand', () => {
       expect(merged.timestamp).toBe(command2.timestamp);
       
       // Check internal state via serialization
-      const serialized = merged.serialize();
-      const parsed = JSON.parse(serialized);
+      const serialized = merged.serialize?.();
+      const parsed = JSON.parse(serialized!);
       expect(parsed.position).toBe(4); // Updated position
       expect(parsed.length).toBe(2); // Combined length
       expect(parsed.deletedText).toBe('ab'); // Combined deleted text (order matters)
@@ -375,7 +375,7 @@ describe('DeleteTextCommand', () => {
       const command = new DeleteTextCommand(5, 6);
       
       const serialized = command.serialize();
-      const parsed = JSON.parse(serialized);
+      const parsed = JSON.parse(serialized!);
       
       expect(parsed.position).toBe(5);
       expect(parsed.length).toBe(6);
@@ -390,7 +390,7 @@ describe('DeleteTextCommand', () => {
       await command.execute(context);
       
       const serialized = command.serialize();
-      const parsed = JSON.parse(serialized);
+      const parsed = JSON.parse(serialized!);
       
       expect(parsed.deletedText).toBe(' world');
       expect(parsed.previousContent).toBe('Hello world');
@@ -403,7 +403,7 @@ describe('DeleteTextCommand', () => {
       await command.execute(context);
       
       const serialized = command.serialize();
-      const parsed = JSON.parse(serialized);
+      const parsed = JSON.parse(serialized!);
       
       expect(parsed.deletedText).toBe('"quotes" and \\backslashes\\ and \nnewlines');
     });
@@ -421,7 +421,7 @@ describe('DeleteTextCommand', () => {
       
       // Serialize after execute
       const serialized = command.serialize();
-      const parsed = JSON.parse(serialized);
+      const parsed = JSON.parse(serialized!);
       expect(parsed.deletedText).toBe(' beautiful');
       expect(parsed.previousContent).toBe('Hello beautiful world');
       
@@ -473,7 +473,7 @@ describe('DeleteTextCommand', () => {
       command1.merge(command3);
       
       const serialized = command1.serialize();
-      const parsed = JSON.parse(serialized);
+      const parsed = JSON.parse(serialized!);
       expect(parsed.position).toBe(3);
       expect(parsed.length).toBe(3);
       expect(parsed.deletedText).toBe('abc');

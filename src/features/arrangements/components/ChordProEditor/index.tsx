@@ -182,7 +182,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   // Update transposition when content changes externally
   useEffect(() => {
     transposition.updateOriginalContent(content);
-  }, [content, transposition.updateOriginalContent]);
+  }, [content, transposition]);
 
   // Use mobile autocomplete hook
   const autocomplete = useMobileAutocomplete(

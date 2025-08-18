@@ -119,11 +119,22 @@ describe('AddToSetlistDropdown', () => {
   describe('Authentication', () => {
     it('redirects to sign-in when not authenticated', async () => {
       const { useAuth } = await import('@features/auth')
-      vi.mocked(useAuth).mockReturnValue({ isSignedIn: false } as any)
+      vi.mocked(useAuth).mockReturnValue({ 
+        isSignedIn: false,
+        user: null,
+        userId: null,
+        sessionId: null,
+        isLoaded: true,
+        isAdmin: false,
+        getToken: vi.fn(),
+        getUserEmail: () => undefined,
+        getUserName: () => 'User',
+        getUserAvatar: () => undefined
+      })
       
       const originalLocation = window.location.href
-      delete (window as any).location
-      window.location = { href: originalLocation } as any
+      delete (window as Record<string, unknown>).location
+      window.location = { href: originalLocation } as Location
       
       const user = userEvent.setup()
       render(<AddToSetlistDropdown arrangement={mockArrangement} />)

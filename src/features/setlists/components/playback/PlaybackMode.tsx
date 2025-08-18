@@ -61,7 +61,7 @@ export function PlaybackMode({ setlistId, initialIndex = 0 }: PlaybackModeProps)
       )
       transpositionState.setTransposition(semitones)
     }
-  }, [currentArrangement?.arrangementId, currentArrangement?.playbackKey])
+  }, [currentArrangement?.arrangementId, currentArrangement?.playbackKey, currentArrangement?.arrangement.key, transpositionState])
   
   // Handle key changes
   const handleKeyChange = (newKey: string) => {

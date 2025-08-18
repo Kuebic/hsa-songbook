@@ -1,5 +1,6 @@
 import { BaseEditorCommand } from '../base/EditorCommand';
-import { CommandType, EditorContext, CommandResult } from '../../types/command.types';
+import { CommandType } from '../../types/command.types';
+import type { EditorContext, CommandResult } from '../../types/command.types';
 
 /**
  * Command to replace text at a specific position

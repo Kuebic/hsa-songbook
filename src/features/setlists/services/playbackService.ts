@@ -1,4 +1,4 @@
-import type { Setlist } from '../types/setlist.types'
+import type { Setlist, SetlistArrangement } from '../types/setlist.types'
 import type { PopulatedArrangement } from '../types/playback.types'
 
 // Use localStorage for fetching setlists (same as useSetlists hook)
@@ -23,7 +23,7 @@ class PlaybackService {
       }
       
       // Ensure all arrangements are populated with their full data
-      const populated = setlist.arrangements.map((item: any) => {
+      const populated = setlist.arrangements.map((item: SetlistArrangement) => {
         // The arrangement data should already be included from when it was added
         // If not, we ensure it has at least the required fields
         if (!item.arrangement) {

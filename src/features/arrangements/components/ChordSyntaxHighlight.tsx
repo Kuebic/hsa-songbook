@@ -1,5 +1,6 @@
 import { useRef, useImperativeHandle, forwardRef, useEffect, useState } from 'react'
 import AceEditor from 'react-ace'
+import type ReactAce from 'react-ace'
 import { cn } from '../../../lib/utils'
 import type { ValidationResult } from '../hooks/useChordProValidation'
 import { configureAceForChordPro, chordProTheme } from '../utils/aceChordProMode'

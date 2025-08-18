@@ -1,10 +1,29 @@
 import type { EditorCommand, EditorContext, CommandResult } from '../../types/command.types';
 
+export interface CommandManagerOptions {
+  /**
+   * Maximum number of commands to keep in history
+   * @default 100
+   */
+  maxHistorySize?: number;
+  
+  /**
+   * Time window in milliseconds for merging consecutive commands
+   * @default 500
+   */
+  mergeWindow?: number;
+}
+
 export class CommandManager {
   private undoStack: EditorCommand[] = [];
   private redoStack: EditorCommand[] = [];
-  private maxHistorySize = 100;
-  private mergeWindow = 500; // Merge commands within 500ms
+  private maxHistorySize: number;
+  private mergeWindow: number;
+  
+  constructor(options: CommandManagerOptions = {}) {
+    this.maxHistorySize = options.maxHistorySize ?? 100;
+    this.mergeWindow = options.mergeWindow ?? 500;
+  }
   
   /**
    * Execute a command and add it to history
@@ -128,6 +147,29 @@ export class CommandManager {
       undoCount: this.undoStack.length,
       redoCount: this.redoStack.length,
       maxSize: this.maxHistorySize
+    };
+  }
+  
+  /**
+   * Update configuration options
+   */
+  updateOptions(options: Partial<CommandManagerOptions>): void {
+    if (options.maxHistorySize !== undefined) {
+      this.maxHistorySize = options.maxHistorySize;
+      this.enforceHistoryLimit();
+    }
+    if (options.mergeWindow !== undefined) {
+      this.mergeWindow = options.mergeWindow;
+    }
+  }
+  
+  /**
+   * Get current configuration
+   */
+  getOptions(): Required<CommandManagerOptions> {
+    return {
+      maxHistorySize: this.maxHistorySize,
+      mergeWindow: this.mergeWindow
     };
   }
   

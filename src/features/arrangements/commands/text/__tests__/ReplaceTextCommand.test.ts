@@ -180,7 +180,7 @@ describe('ReplaceTextCommand', () => {
       const throwingTextarea = {
         _value: 'Hello world',
         get value() { return this._value; },
-        set value(val: string) { throw new Error('Textarea error'); },
+        set value(_val: string) { throw new Error('Textarea error'); },
         selectionStart: 0,
         selectionEnd: 0,
         setSelectionRange: vi.fn(),
@@ -282,7 +282,7 @@ describe('ReplaceTextCommand', () => {
       // Mock textarea that throws on value assignment
       const throwingTextarea = {
         ...mockTextarea,
-        set value(val: string) {
+        set value(_val: string) {
           throw new Error('Undo error');
         }
       };
@@ -411,7 +411,7 @@ describe('ReplaceTextCommand', () => {
         },
         { 
           initial: 'test', 
-          position: 2, 
+          position: 4, 
           length: 0, 
           newText: 'ing', 
           expected: 'testing' 
@@ -464,7 +464,7 @@ describe('ReplaceTextCommand', () => {
       
       expect(result.success).toBe(true);
       expect(result.content).toBe('Hello there, how are you doing today?');
-      expect(result.cursorPosition).toBe(38);
+      expect(result.cursorPosition).toBe(37);
       
       // Undo should restore
       const undoResult = await command.undo(context);
