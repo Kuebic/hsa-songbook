@@ -11,8 +11,6 @@ import { FontPreferences } from '../FontPreferences';
 import { useEnhancedEditorState } from '../../hooks/useEnhancedEditorState';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import { useExitSave } from '../../hooks/useExitSave';
-import { useSessionRecovery } from '../../hooks/useSessionRecovery';
-import { RecoveryDialog } from './RecoveryDialog';
 import { ReplaceTextCommand } from '../../commands/text/ReplaceTextCommand';
 import { useAuth } from '@features/auth';
 import { useTheme } from '@shared/contexts/ThemeContext';
@@ -161,20 +159,6 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     }
   });
   
-  // Session recovery
-  const {
-    isChecking: isCheckingRecovery,
-    hasDraft,
-    draftData,
-    recoverDraft,
-    discardDraft,
-    getDraftAge,
-    getDraftPreview
-  } = useSessionRecovery({
-    arrangementId,
-    userId: userId || undefined,
-    enabled: true
-  });
   
   // Use transposition hook for editor
   const transposition = useEditorTransposition(content, onChange);
@@ -182,7 +166,9 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   // Update transposition when content changes externally
   useEffect(() => {
     transposition.updateOriginalContent(content);
-  }, [content, transposition]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content, transposition.updateOriginalContent]);
+
 
   // Use mobile autocomplete hook
   const autocomplete = useMobileAutocomplete(
@@ -235,23 +221,6 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     }
   );
 
-  // Handle recovery dialog
-  const handleRecoverDraft = useCallback(() => {
-    const draft = recoverDraft();
-    if (draft) {
-      updateContent(draft.content);
-      // Could also restore command history here if needed
-      // restoreHistory(draft.history);
-    }
-  }, [recoverDraft, updateContent]);
-  
-  const handleDiscardDraft = useCallback(async () => {
-    try {
-      await discardDraft();
-    } catch (error) {
-      console.error('Failed to discard draft:', error);
-    }
-  }, [discardDraft]);
   
   // Handle content changes from ChordProTextArea using command system
   const handleContentChange = useCallback(async (newContent: string) => {
@@ -564,16 +533,6 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         isMobile={layout.isMobile}
         isSearching={autocomplete.isSearching}
         onClose={autocomplete.closeAutocomplete}
-      />
-      
-      {/* Recovery dialog for unsaved drafts */}
-      <RecoveryDialog
-        isOpen={hasDraft && !isCheckingRecovery}
-        onRecover={handleRecoverDraft}
-        onDiscard={handleDiscardDraft}
-        draftTimestamp={draftData?.timestamp}
-        draftPreview={getDraftPreview()}
-        draftAge={getDraftAge()}
       />
     </div>
   );
