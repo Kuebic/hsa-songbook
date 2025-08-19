@@ -154,6 +154,7 @@ export function SongDetailPage() {
             onSelect={(arr) => selectArrangement(arr)}
             onEdit={user ? handleEditArrangement : undefined}
             onDelete={user?.role === 'admin' ? handleDeleteArrangement : undefined}
+            songTitle={song.title}
             compact
           />
         ) : (

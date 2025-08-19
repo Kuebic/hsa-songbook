@@ -1,6 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useNavigate } from 'react-router-dom'
+import { getArrangementDisplayName } from '@features/songs/utils/arrangementNaming'
 import type { SetlistArrangement } from '../../types/setlist.types'
 
 interface DraggableArrangementItemProps {
@@ -111,7 +112,7 @@ export function DraggableArrangementItem({
                 e.currentTarget.style.textDecorationColor = 'transparent'
               }}
             >
-              {item.order + 1}. {item.arrangement?.name || 'Loading...'}
+              {item.order + 1}. {item.arrangement ? getArrangementDisplayName(item.arrangement, 'setlist') : 'Loading...'}
               <span style={{ 
                 marginLeft: '0.5rem', 
                 fontWeight: 'bold',

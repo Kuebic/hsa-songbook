@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@features/auth'
 import { useNotification } from '@shared/components/notifications'
+import { getArrangementDisplayName } from '../../utils/arrangementNaming'
 import type { Arrangement } from '@features/songs/types/song.types'
 
 interface ArrangementListProps {
@@ -12,6 +13,7 @@ interface ArrangementListProps {
   selectedId?: string
   showActions?: boolean
   className?: string
+  songTitle?: string // For context-aware display
 }
 
 export function ArrangementList({
@@ -21,7 +23,8 @@ export function ArrangementList({
   onDelete,
   selectedId,
   showActions = true,
-  className = ''
+  className = '',
+  songTitle
 }: ArrangementListProps) {
   const { isSignedIn, isAdmin } = useAuth()
   const { addNotification } = useNotification()
@@ -222,7 +225,7 @@ export function ArrangementList({
                 }}
                 title="View arrangement"
               >
-                {arrangement.name}
+                {getArrangementDisplayName(arrangement, 'song', songTitle)}
               </Link>
               
               <div style={metaStyles}>

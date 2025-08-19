@@ -16,6 +16,7 @@ import {
   getTempoLabel
 } from '@features/songs/validation/constants/musicalKeys'
 import { chordProValidation } from '@features/songs/validation/schemas/arrangementSchema'
+import { splitArrangementName, combineArrangementName } from '../../utils/arrangementNaming'
 import type { ArrangementFormData } from '@features/songs/validation/schemas/arrangementSchema'
 
 interface ArrangementFormProps {
@@ -38,9 +39,19 @@ export function ArrangementForm({
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [autoDetectedKey, setAutoDetectedKey] = useState<string | null>(null)
   
+  // Split the arrangement name for editing
+  const { arrangementSuffix } = splitArrangementName(data.name || '', songTitle)
+  const [editingSuffix, setEditingSuffix] = useState(arrangementSuffix || '')
+  
   const sectionTitle = showInSongForm 
     ? 'Add Arrangement (Optional)' 
     : 'Arrangement Details'
+  
+  const handleArrangementSuffixChange = (suffix: string) => {
+    setEditingSuffix(suffix)
+    const fullName = combineArrangementName(songTitle || '', suffix)
+    onChange('name', fullName)
+  }
   
   const handleChordDataChange = (value: string) => {
     onChange('chordData', value)
@@ -101,23 +112,85 @@ That [Em]saved a [C]wretch like [G]me`
   
   return (
     <FormSection title={sectionTitle}>
-      <FormInput
-        label="Arrangement Name"
-        value={data.name || ''}
-        onChange={e => onChange('name', e.target.value)}
-        error={errors.name}
-        required={isRequired}
-        placeholder={
-          showInSongForm 
-            ? `e.g., Key of G, Acoustic Version, Simple Chords...`
-            : "e.g., Acoustic Version, Key of G..."
-        }
-        helperText={
-          showInSongForm 
-            ? "Give this arrangement a descriptive name"
-            : "A descriptive name for this arrangement"
-        }
-      />
+      {songTitle ? (
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '0.5rem',
+            fontSize: '14px',
+            fontWeight: '500',
+            color: 'var(--text-primary)'
+          }}>
+            Arrangement Name {isRequired && <span style={{ color: 'var(--color-destructive)' }}>*</span>}
+          </label>
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: '0' }}>
+            <div style={{
+              padding: '0.5rem 0.75rem',
+              backgroundColor: 'var(--color-muted)',
+              border: '1px solid var(--color-border)',
+              borderRight: 'none',
+              borderRadius: '0.375rem 0 0 0.375rem',
+              fontSize: '14px',
+              color: 'var(--text-secondary)',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              {songTitle} -
+            </div>
+            <input
+              type="text"
+              value={editingSuffix}
+              onChange={(e) => handleArrangementSuffixChange(e.target.value)}
+              placeholder="e.g., Standard, Acoustic, Simplified"
+              required={isRequired}
+              style={{
+                flex: 1,
+                padding: '0.5rem 0.75rem',
+                fontSize: '14px',
+                border: '1px solid var(--color-border)',
+                borderRadius: '0 0.375rem 0.375rem 0',
+                backgroundColor: 'var(--color-card)',
+                color: 'var(--text-primary)',
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = 'var(--color-primary)'
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = 'var(--color-border)'
+              }}
+            />
+          </div>
+          {errors.name && (
+            <div style={{ marginTop: '0.25rem', fontSize: '12px', color: 'var(--color-destructive)' }}>
+              {errors.name}
+            </div>
+          )}
+          <div style={{ marginTop: '0.25rem', fontSize: '12px', color: 'var(--text-secondary)' }}>
+            Enter a descriptive name for this arrangement variant
+          </div>
+        </div>
+      ) : (
+        <FormInput
+          label="Arrangement Name"
+          value={data.name || ''}
+          onChange={e => onChange('name', e.target.value)}
+          error={errors.name}
+          required={isRequired}
+          placeholder={
+            showInSongForm 
+              ? `e.g., Key of G, Acoustic Version, Simple Chords...`
+              : "e.g., Acoustic Version, Key of G..."
+          }
+          helperText={
+            showInSongForm 
+              ? "Give this arrangement a descriptive name"
+              : "A descriptive name for this arrangement"
+          }
+        />
+      )}
       
       <FormTextarea
         label={`Chord Data (ChordPro Format)${formatValidationIcon()}`}

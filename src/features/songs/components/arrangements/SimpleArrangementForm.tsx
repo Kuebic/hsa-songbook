@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { SimpleSection, SimpleInput, SimpleTextarea } from '../forms/utils/SimpleFormInputs'
 import { SimpleChordEditor } from './SimpleChordEditor'
 import { DIFFICULTY_LEVELS } from '../../validation/constants/musicalKeys'
+import { splitArrangementName, combineArrangementName } from '../../utils/arrangementNaming'
 import type { ArrangementFormData } from '../../validation/schemas/arrangementSchema'
 
 interface SimpleArrangementFormProps {
@@ -19,6 +20,13 @@ export function SimpleArrangementForm({
   compact = false,
   songTitle
 }: SimpleArrangementFormProps) {
+  // Split the initial name if provided
+  const initialSplit = initialData?.name 
+    ? splitArrangementName(initialData.name, songTitle)
+    : { songTitle: songTitle || '', arrangementSuffix: 'Standard' }
+  
+  const [arrangementSuffix, setArrangementSuffix] = useState(initialSplit.arrangementSuffix)
+  
   const [data, setData] = useState<Partial<ArrangementFormData>>(() => {
     // Generate default ChordPro template if no initial data
     const existingChordData = initialData?.chordProText || (initialData as Record<string, unknown>)?.chordData as string
@@ -36,7 +44,7 @@ export function SimpleArrangementForm({
 [C]With the main [G]melody [C]flows` : '')
 
     return {
-      name: initialData?.name || (songTitle ? `${songTitle} - Standard` : ''),
+      name: initialData?.name || combineArrangementName(songTitle || '', initialSplit.arrangementSuffix),
       key: initialData?.key || 'C', // Default to C major
       tempo: initialData?.tempo || 120,
       capo: initialData?.capo,
@@ -51,6 +59,12 @@ export function SimpleArrangementForm({
     const newData = { ...data, [field]: value }
     setData(newData)
     onChange(newData)
+  }
+  
+  const handleArrangementSuffixChange = (suffix: string) => {
+    setArrangementSuffix(suffix)
+    const fullName = combineArrangementName(songTitle || '', suffix)
+    handleChange('name', fullName)
   }
   
   const hasInitialized = useRef(false)
@@ -91,16 +105,70 @@ export function SimpleArrangementForm({
 
   return (
     <SimpleSection title="Arrangement Details">
-      <SimpleInput
-        name="arrangement-name"
-        label="Arrangement Name"
-        value={data.name || ''}
-        onChange={(value) => handleChange('name', value)}
-        placeholder="e.g., Standard, Acoustic, Piano, Simplified"
-        disabled={disabled}
-        required
-        helperText="This will be the display name for this arrangement (auto-filled with song title)"
-      />
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{
+          display: 'block',
+          marginBottom: '4px',
+          fontSize: '14px',
+          fontWeight: '500',
+          color: 'var(--text-primary)'
+        }}>
+          Arrangement Name <span style={{ color: 'var(--color-destructive)' }}>*</span>
+        </label>
+        {songTitle ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{
+              padding: '8px 12px',
+              backgroundColor: 'var(--color-muted)',
+              border: '1px solid var(--color-border)',
+              borderRadius: '6px 0 0 6px',
+              fontSize: '14px',
+              color: 'var(--text-secondary)',
+              whiteSpace: 'nowrap'
+            }}>
+              {songTitle} -
+            </div>
+            <input
+              type="text"
+              value={arrangementSuffix}
+              onChange={(e) => handleArrangementSuffixChange(e.target.value)}
+              placeholder="e.g., Standard, Acoustic, Simplified"
+              disabled={disabled}
+              required
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                fontSize: '14px',
+                border: '1px solid var(--color-border)',
+                borderLeft: 'none',
+                borderRadius: '0 6px 6px 0',
+                backgroundColor: disabled ? 'var(--color-muted)' : 'var(--color-card)',
+                color: 'var(--text-primary)',
+                outline: 'none'
+              }}
+            />
+          </div>
+        ) : (
+          <SimpleInput
+            name="arrangement-name"
+            label=""
+            value={data.name || ''}
+            onChange={(value) => handleChange('name', value)}
+            placeholder="e.g., Standard, Acoustic, Piano, Simplified"
+            disabled={disabled}
+            required
+          />
+        )}
+        <div style={{
+          marginTop: '4px',
+          fontSize: '12px',
+          color: 'var(--text-secondary)'
+        }}>
+          {songTitle 
+            ? "Enter a descriptive name for this arrangement variant"
+            : "Enter the full arrangement name"}
+        </div>
+      </div>
 
 
       <div style={{ marginBottom: '16px' }}>

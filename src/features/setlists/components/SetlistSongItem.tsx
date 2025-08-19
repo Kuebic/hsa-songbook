@@ -1,3 +1,4 @@
+import { getArrangementDisplayName } from '@features/songs/utils/arrangementNaming'
 import type { SetlistArrangement } from '../types/setlist.types'
 
 interface SetlistArrangementItemProps {
@@ -40,7 +41,7 @@ export function SetlistArrangementItem({
           ☰
         </span>
         <div>
-          <strong>{index + 1}. {item.arrangement?.name || 'Loading...'}</strong>
+          <strong>{index + 1}. {item.arrangement ? getArrangementDisplayName(item.arrangement, 'setlist') : 'Loading...'}</strong>
           <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
             Key: {item.arrangement?.key || ''} | Difficulty: {item.arrangement?.difficulty || ''}
           </div>
