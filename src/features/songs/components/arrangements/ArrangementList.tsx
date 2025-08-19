@@ -210,7 +210,20 @@ export function ArrangementList({
           
           <div style={headerStyles}>
             <div style={{ flex: 1 }}>
-              <div style={titleStyles}>{arrangement.name}</div>
+              <Link
+                to={`/arrangements/${arrangement.slug}`}
+                onClick={(e) => e.stopPropagation()}
+                className="arrangement-title-link"
+                style={{
+                  ...titleStyles,
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                  transition: 'color 0.2s ease'
+                }}
+                title="View arrangement"
+              >
+                {arrangement.name}
+              </Link>
               
               <div style={metaStyles}>
                 {arrangement.key && <span>Key: {arrangement.key}</span>}
@@ -226,7 +239,7 @@ export function ArrangementList({
             {showActions && (
               <div style={actionsStyles}>
                 <Link
-                  to={`/arrangements/${arrangement.slug}`}
+                  to={`/arrangements/${arrangement.slug}/edit`}
                   onClick={(e) => e.stopPropagation()}
                   style={{
                     ...actionButtonStyles,
@@ -235,8 +248,9 @@ export function ArrangementList({
                     borderColor: 'var(--status-success)',
                     display: 'inline-block'
                   }}
+                  title="Open in chord editor"
                 >
-                  View
+                  Chord Editor
                 </Link>
                 
                 {(isSignedIn || isAdmin) && onEdit && (
@@ -251,25 +265,8 @@ export function ArrangementList({
                       borderColor: 'var(--color-primary)'
                     }}
                   >
-                    Edit
+                    Edit Details
                   </button>
-                )}
-                
-                {(isSignedIn || isAdmin) && arrangement.slug && (
-                  <Link
-                    to={`/arrangements/${arrangement.slug}/edit`}
-                    onClick={(e) => e.stopPropagation()}
-                    style={{
-                      ...actionButtonStyles,
-                      textDecoration: 'none',
-                      color: 'var(--color-primary)',
-                      borderColor: 'var(--color-primary)',
-                      display: 'inline-block'
-                    }}
-                    title="Open in full-screen chord editor"
-                  >
-                    Chord Editor
-                  </Link>
                 )}
                 
                 {onDelete && isAdmin && (

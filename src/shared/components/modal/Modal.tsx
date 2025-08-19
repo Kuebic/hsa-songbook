@@ -47,19 +47,8 @@ export function Modal({
       // Handle backdrop clicks
       const handleClick = (e: MouseEvent) => {
         if (closeOnOverlayClick && e.target === dialog) {
-          // Click was on the dialog backdrop (outside the content)
-          const rect = dialog.getBoundingClientRect()
-          const clickedInDialog = (
-            e.clientX >= rect.left &&
-            e.clientX <= rect.right &&
-            e.clientY >= rect.top &&
-            e.clientY <= rect.bottom
-          )
-          
-          // If click was outside the dialog bounds, it was on the backdrop
-          if (!clickedInDialog) {
-            onClose()
-          }
+          // Click was directly on the dialog element (backdrop)
+          onClose()
         }
       }
       
@@ -119,7 +108,8 @@ export function Modal({
     maxHeight: 'calc(100vh - 80px)', // Increased spacing from viewport edges
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    zIndex: 99999 // Ensure modal appears above all other content including editor overlays
   }
   
   return (
@@ -155,6 +145,7 @@ export function Modal({
         dialog::backdrop {
           background-color: rgba(0, 0, 0, 0.5);
           animation: backdropFadeIn ${animationDuration}ms ease-out;
+          z-index: 99998;
         }
       `}</style>
       
@@ -170,10 +161,6 @@ export function Modal({
         data-testid={testId}
       >
         <div 
-          onClick={(e) => {
-            // Prevent clicks inside the modal content from closing it
-            e.stopPropagation()
-          }}
           style={{
             display: 'flex',
             flexDirection: 'column',

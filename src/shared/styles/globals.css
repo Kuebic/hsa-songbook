@@ -14,6 +14,15 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Ensure dialog elements appear above other content */
+dialog {
+  z-index: 99999;
+}
+
+dialog::backdrop {
+  z-index: 99998;
+}
+
 a {
   font-weight: 500;
   color: var(--color-primary);
@@ -22,6 +31,11 @@ a {
 a:hover {
   color: var(--color-primary);
   opacity: 0.8;
+}
+
+/* Arrangement title link hover effect */
+.arrangement-title-link:hover {
+  color: var(--color-primary) !important;
 }
 
 body {
@@ -53,25 +67,8 @@ h1 {
   line-height: 1.1;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: var(--color-secondary);
-  color: var(--color-secondary-foreground);
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: var(--color-primary);
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+/* Removed global button styles that were conflicting with component-specific styles */
+/* Button styles should be handled by individual button components */
 
 @media (prefers-color-scheme: light) {
   :root {
@@ -81,9 +78,6 @@ button:focus-visible {
   a:hover {
     color: var(--color-primary);
     opacity: 0.8;
-  }
-  button {
-    background-color: var(--color-secondary);
   }
 }
 
