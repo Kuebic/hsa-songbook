@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Modal } from '@shared/components/modal'
 import { SimpleArrangementForm } from './SimpleArrangementForm'
 import { useArrangementMutations } from '../../hooks/useArrangementMutations'
 import { useNotification } from '@shared/components/notifications'
 import { arrangementSchema } from '../../validation/schemas/arrangementSchema'
 import { generateUniqueSlug } from '../../validation/utils/slugGeneration'
+import { generateInitialChordPro } from '../../utils/chordProGenerator'
 import type { Arrangement } from '../../types/song.types'
 import type { ArrangementFormData } from '../../validation/schemas/arrangementSchema'
 
@@ -41,6 +43,7 @@ export function ArrangementSheet({
   
   const { createArrangement, updateArrangement } = useArrangementMutations()
   const { addNotification } = useNotification()
+  const navigate = useNavigate()
   
   const handleFormChange = (data: Partial<ArrangementFormData>) => {
     setFormData(data)
@@ -125,23 +128,35 @@ export function ArrangementSheet({
       console.log('📝 songIds array:', dataToSubmit.songIds)
       
       if (arrangement) {
+        // Update existing arrangement - stay on current page
         await updateArrangement(arrangement.id, dataToSubmit)
         addNotification({
           type: 'success',
           title: 'Arrangement Updated',
           message: 'Your changes have been saved successfully'
         })
+        onSuccess?.()
+        onClose()
       } else {
+        // Create new arrangement and navigate to chord editor
         await createArrangement(dataToSubmit)
+        
+        // Generate initial ChordPro content with form data
+        const initialChordPro = generateInitialChordPro(validationResult.data, songTitle)
+        
+        // Store initial ChordPro content for the editor
+        sessionStorage.setItem(`initial-chordpro-${slug}`, initialChordPro)
+        
         addNotification({
           type: 'success',
           title: 'Arrangement Created',
-          message: 'New arrangement has been added successfully'
+          message: 'Opening chord editor with starter template...'
         })
+        onClose()
+        onSuccess?.()
+        // Navigate to chord editor for the new arrangement
+        navigate(`/arrangements/${slug}/edit`)
       }
-      
-      onSuccess?.()
-      onClose()
     } catch (error) {
       addNotification({
         type: 'error',
@@ -165,7 +180,11 @@ export function ArrangementSheet({
       isOpen={isOpen} 
       onClose={handleCancel}
       title={arrangement ? `Edit Arrangement: ${arrangement.name}` : 'Add New Arrangement'}
-      description={songTitle ? `Creating arrangement for "${songTitle}"` : undefined}
+      description={
+        arrangement
+          ? `Editing arrangement details for "${songTitle}"`
+          : `Create arrangement for "${songTitle}" - you'll add the chord chart in the next step`
+      }
       closeOnEsc={!isSubmitting}
       closeOnOverlayClick={!isSubmitting}
       showCloseButton={!isSubmitting}
@@ -217,7 +236,10 @@ export function ArrangementSheet({
               opacity: isSubmitting ? 0.7 : 1
             }}
           >
-            {isSubmitting ? 'Saving...' : (arrangement ? 'Update Arrangement' : 'Create Arrangement')}
+            {isSubmitting 
+              ? 'Saving...' 
+              : (arrangement ? 'Update Arrangement' : 'Create & Open Editor')
+            }
           </button>
         </div>
       </div>

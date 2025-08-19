@@ -20,8 +20,21 @@ export function ChordEditingPage() {
     const loadArrangement = async (arrangementSlug: string) => {
       try {
         const arrangement = await arrangementService.getArrangementBySlug(arrangementSlug)
-        if (arrangement && arrangement.chordProText) {
-          setInitialChordData(arrangement.chordProText)
+        if (arrangement) {
+          // Check for initial ChordPro content from arrangement creation
+          const initialContentKey = `initial-chordpro-${arrangementSlug}`
+          const storedInitialContent = sessionStorage.getItem(initialContentKey)
+          
+          if (storedInitialContent && !arrangement.chordProText) {
+            // Use the generated initial content for new arrangements
+            setInitialChordData(storedInitialContent)
+            // Clean up the stored content
+            sessionStorage.removeItem(initialContentKey)
+          } else if (arrangement.chordProText) {
+            // Use existing ChordPro content
+            setInitialChordData(arrangement.chordProText)
+          }
+          
           setArrangementId(arrangement.id)
         }
         setLoading(false)

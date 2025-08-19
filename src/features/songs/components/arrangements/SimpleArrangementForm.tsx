@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { SimpleSection, SimpleInput, SimpleTextarea } from '../forms/utils/SimpleFormInputs'
-import { SimpleChordEditor } from './SimpleChordEditor'
+import { KeySelector } from '../forms/KeySelector'
 import { DIFFICULTY_LEVELS } from '../../validation/constants/musicalKeys'
 import { splitArrangementName, combineArrangementName } from '../../utils/arrangementNaming'
 import type { ArrangementFormData } from '../../validation/schemas/arrangementSchema'
@@ -28,21 +28,6 @@ export function SimpleArrangementForm({
   const [arrangementSuffix, setArrangementSuffix] = useState(initialSplit.arrangementSuffix)
   
   const [data, setData] = useState<Partial<ArrangementFormData>>(() => {
-    // Generate default ChordPro template if no initial data
-    const existingChordData = initialData?.chordProText || (initialData as Record<string, unknown>)?.chordData as string
-    const defaultChordData = existingChordData || (songTitle ? 
-      `{title: ${songTitle}}
-{key: C}
-{tempo: 120}
-
-[Verse]
-[C]Add your lyrics here with [F]chords above
-[G]Each line shows the [C]progression
-
-[Chorus]
-[Am]This is where the [F]chorus goes
-[C]With the main [G]melody [C]flows` : '')
-
     return {
       name: initialData?.name || combineArrangementName(songTitle || '', initialSplit.arrangementSuffix),
       key: initialData?.key || 'C', // Default to C major
@@ -50,7 +35,7 @@ export function SimpleArrangementForm({
       capo: initialData?.capo,
       timeSignature: initialData?.timeSignature || '4/4',
       difficulty: initialData?.difficulty || 'intermediate',
-      chordProText: defaultChordData,
+      chordProText: '', // Start with empty ChordPro - will be added in editor
       notes: initialData?.notes || (initialData as Record<string, unknown>)?.description as string || ''
     }
   })
@@ -77,31 +62,6 @@ export function SimpleArrangementForm({
     }
   }, [onChange, data])
 
-  const handleChordDataChange = (value: string) => {
-    const newData = { ...data, chordProText: value }
-    
-    // Auto-detect key from ChordPro data
-    const keyMatch = value.match(/\{key\s*:\s*([^}]+)\}/i)
-    if (keyMatch && keyMatch[1]) {
-      const extractedKey = keyMatch[1].trim()
-      newData.key = extractedKey
-    }
-    
-    // Auto-detect tempo
-    const tempoMatch = value.match(/\{tempo\s*:\s*(\d+)\}/i)
-    if (tempoMatch && tempoMatch[1]) {
-      newData.tempo = parseInt(tempoMatch[1], 10)
-    }
-    
-    // Auto-detect time signature
-    const timeMatch = value.match(/\{time\s*:\s*([^}]+)\}/i)
-    if (timeMatch && timeMatch[1]) {
-      newData.timeSignature = timeMatch[1].trim()
-    }
-    
-    setData(newData)
-    onChange(newData)
-  }
 
   return (
     <SimpleSection title="Arrangement Details">
@@ -170,6 +130,12 @@ export function SimpleArrangementForm({
         </div>
       </div>
 
+      <KeySelector
+        value={data.key || ''}
+        onChange={(value) => handleChange('key', value)}
+        disabled={disabled}
+        required
+      />
 
       <div style={{ marginBottom: '16px' }}>
         <label style={{ 
@@ -244,12 +210,6 @@ export function SimpleArrangementForm({
         </>
       )}
 
-      <SimpleChordEditor
-        value={data.chordProText || ''}
-        onChange={handleChordDataChange}
-        disabled={disabled}
-        placeholder="Enter ChordPro format content...\n\nExample:\n{title: Amazing Grace}\n{key: G}\n{tempo: 90}\n\n[Verse]\n[G]Amazing [C]grace how [D]sweet the [G]sound\nThat [G]saved a [D]wretch like [G]me\n\n* This field is required for creating arrangements"
-      />
 
       {!compact && (
         <>

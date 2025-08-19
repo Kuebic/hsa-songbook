@@ -7,15 +7,12 @@ import {
   FormRow,
   FormCheckbox
 } from '@shared/components/form'
+import { KeySelector } from '../forms/KeySelector'
 import { 
-  MUSICAL_KEYS, 
   TIME_SIGNATURES, 
   // DIFFICULTY_LEVELS, // Temporarily commented out
-  MAJOR_KEYS,
-  MINOR_KEYS,
   getTempoLabel
 } from '@features/songs/validation/constants/musicalKeys'
-import { chordProValidation } from '@features/songs/validation/schemas/arrangementSchema'
 import { splitArrangementName, combineArrangementName } from '../../utils/arrangementNaming'
 import type { ArrangementFormData } from '@features/songs/validation/schemas/arrangementSchema'
 
@@ -37,7 +34,6 @@ export function ArrangementForm({
   songTitle
 }: ArrangementFormProps) {
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const [autoDetectedKey, setAutoDetectedKey] = useState<string | null>(null)
   
   // Split the arrangement name for editing
   const { arrangementSuffix } = splitArrangementName(data.name || '', songTitle)
@@ -53,62 +49,6 @@ export function ArrangementForm({
     onChange('name', fullName)
   }
   
-  const handleChordDataChange = (value: string) => {
-    onChange('chordData', value)
-    
-    // Auto-detect key from ChordPro data
-    const extractedKey = chordProValidation.extractKey(value)
-    if (extractedKey && MUSICAL_KEYS.includes(extractedKey as string)) {
-      setAutoDetectedKey(extractedKey)
-      if (!data.key) {
-        onChange('key', extractedKey)
-      }
-    }
-    
-    // Auto-detect title if not in song form
-    if (!showInSongForm && !data.name) {
-      const extractedTitle = chordProValidation.extractTitle(value)
-      if (extractedTitle) {
-        onChange('name', extractedTitle)
-      }
-    }
-  }
-  
-  const getChordProExample = () => {
-    const title = songTitle || data.name || 'Song Title'
-    return `{title: ${title}}
-{artist: Artist Name}
-{key: G}
-{tempo: 120}
-
-[Intro]
-[G] [D] [Em] [C]
-
-[Verse 1]
-[G]Amazing [D]grace how [Em]sweet the [C]sound
-That [G]saved a [D]wretch like [G]me
-I [G]once was [D]lost but [Em]now I'm [C]found
-Was [G]blind but [D]now I [G]see
-
-[Chorus]
-[C]How sweet the [G]sound
-That [Em]saved a [C]wretch like [G]me`
-  }
-  
-  const formatValidationIcon = () => {
-    if (!data.chordData) return null
-    
-    const isValid = chordProValidation.isValid(data.chordData)
-    return (
-      <span style={{
-        marginLeft: '8px',
-        fontSize: '16px',
-        color: isValid ? '#22c55e' : '#ef4444'
-      }}>
-        {isValid ? '✓' : '⚠'}
-      </span>
-    )
-  }
   
   return (
     <FormSection title={sectionTitle}>
@@ -191,58 +131,16 @@ That [Em]saved a [C]wretch like [G]me`
           }
         />
       )}
-      
-      <FormTextarea
-        label={`Chord Data (ChordPro Format)${formatValidationIcon()}`}
-        value={data.chordData || ''}
-        onChange={e => handleChordDataChange(e.target.value)}
-        error={errors.chordData}
+
+      <KeySelector
+        value={data.key || ''}
+        onChange={(value) => onChange('key', value)}
+        error={errors.key}
+        disabled={false}
         required={isRequired}
-        rows={12}
-        fontFamily="monospace"
-        placeholder={getChordProExample()}
-        helperText={
-          <div>
-            <div>Enter chords in ChordPro format. Place chords in brackets before the syllable.</div>
-            {autoDetectedKey && (
-              <div style={{ marginTop: '4px', color: '#22c55e', fontSize: '12px' }}>
-                ✓ Auto-detected key: {autoDetectedKey}
-              </div>
-            )}
-            {data.chordData && !chordProValidation.isValid(data.chordData) && (
-              <div style={{ marginTop: '4px', color: '#ef4444', fontSize: '12px' }}>
-                ⚠ ChordPro format not detected. Add chord brackets [C] or directives {'{key: G}'}
-              </div>
-            )}
-          </div>
-        }
-        style={{
-          lineHeight: '1.4',
-          fontSize: '13px'
-        }}
       />
       
       <FormRow>
-        <FormSelect
-          label="Musical Key"
-          value={data.key || ''}
-          onChange={e => onChange('key', e.target.value)}
-          error={errors.key}
-          helperText={autoDetectedKey ? `Auto-detected: ${autoDetectedKey}` : undefined}
-        >
-          <option value="">Select key...</option>
-          <optgroup label="Major Keys">
-            {MAJOR_KEYS.map(key => (
-              <option key={key} value={key}>{key} Major</option>
-            ))}
-          </optgroup>
-          <optgroup label="Minor Keys">
-            {MINOR_KEYS.map(key => (
-              <option key={key} value={key}>{key.replace('m', '')} Minor</option>
-            ))}
-          </optgroup>
-        </FormSelect>
-        
         <FormSelect
           label="Difficulty"
           value={data.difficulty || ''}

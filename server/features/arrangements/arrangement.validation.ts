@@ -15,8 +15,10 @@ export const createArrangementSchema = z.object({
       .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
       .optional(),
     chordProText: z.string()
-      .min(1, 'Chord data is required'),
-    key: z.enum(['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'])
+      .optional()
+      .default(''),
+    key: z.enum(['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B',
+                 'Cm', 'C#m', 'Dbm', 'Dm', 'D#m', 'Ebm', 'Em', 'Fm', 'F#m', 'Gbm', 'Gm', 'G#m', 'Abm', 'Am', 'A#m', 'Bbm', 'Bm'])
       .optional(),
     tempo: z.number()
       .min(40, 'Tempo must be at least 40 BPM')
@@ -54,9 +56,9 @@ export const updateArrangementSchema = z.object({
       .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
       .optional(),
     chordProText: z.string()
-      .min(1, 'Chord data cannot be empty')
       .optional(),
-    key: z.enum(['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'])
+    key: z.enum(['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B',
+                 'Cm', 'C#m', 'Dbm', 'Dm', 'D#m', 'Ebm', 'Em', 'Fm', 'F#m', 'Gbm', 'Gm', 'G#m', 'Abm', 'Am', 'A#m', 'Bbm', 'Bm'])
       .optional(),
     tempo: z.number()
       .min(40, 'Tempo must be at least 40 BPM')
@@ -112,7 +114,8 @@ export const getArrangementsQuerySchema = z.object({
     songId: z.string().regex(mongoIdRegex, 'Invalid song ID').optional(),
     createdBy: z.string().optional(),
     difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
-    key: z.enum(['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B']).optional(),
+    key: z.enum(['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B',
+                 'Cm', 'C#m', 'Dbm', 'Dm', 'D#m', 'Ebm', 'Em', 'Fm', 'F#m', 'Gbm', 'Gm', 'G#m', 'Abm', 'Am', 'A#m', 'Bbm', 'Bm']).optional(),
     tags: z.union([
       z.string(),
       z.array(z.string())

@@ -40,18 +40,11 @@ export const arrangementSchema = z.object({
     .optional()
     .default([]),
   
-  // ChordPro data
+  // ChordPro data - optional during creation, can be added later in chord editor
   chordProText: z.string()
-    .min(1, 'Chord data is required')
     .max(50000, 'Chord data is too large (max 50KB)')
-    .refine(
-      (data) => {
-        // Basic ChordPro validation - check for basic structure
-        // Must have at least some content that looks like ChordPro
-        return data.includes('[') || data.includes('{') || data.trim().length > 10
-      },
-      { message: 'Invalid ChordPro format' }
-    ),
+    .optional()
+    .default(''),
   
   // Mashup support (multiple songs in one arrangement)
   songIds: z.array(z.string())
