@@ -17,7 +17,7 @@ export function generateInitialChordPro(
   formData: Partial<ArrangementFormData>,
   songTitle?: string
 ): string {
-  
+
   const { arrangementSuffix } = splitArrangementName(formData.name || '', songTitle)
 
   const lines: string[] = []
@@ -55,7 +55,7 @@ export function generateInitialChordPro(
   // Add basic template structure using Nashville numbers
   lines.push(
     '[Intro]',
-    '| [I] | [I] |',
+    '[| ][I][] | ][I][] |]',
     '',
     '[Verse 1]',
     '[I]Add your lyrics here with [V]chords above each syllable',
@@ -74,15 +74,15 @@ export function generateInitialChordPro(
     '[I]Leading back to the [V]final chorus',
     '',
     '[Outro]',
-    '| [vi] | [IV] | [I] |'
+    '[| ][vi][] | ][IV][] | ][I][] |]'
   )
 
   // Convert Nashville numbers to actual chords based on key
   let content = lines.join('\n')
-  
+
   if (formData.key) {
     const chords = getNashvilleChords(formData.key)
-    
+
     content = content
       .replace(/\[I\]/g, `[${chords.I}]`)
       .replace(/\[IV\]/g, `[${chords.IV}]`)
@@ -104,35 +104,35 @@ function getNashvilleChords(key: string): {
 } {
   const isMinor = key.endsWith('m')
   const baseKey = key.replace('m', '')
-  
+
   // Chromatic circle for major keys
   const chromaticKeys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-  
+
   // Handle enharmonic equivalents
   const keyMap: { [key: string]: string } = {
     'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#'
   }
-  
+
   const normalizedKey = keyMap[baseKey] || baseKey
   const keyIndex = chromaticKeys.indexOf(normalizedKey)
-  
+
   if (keyIndex === -1) {
     // Fallback for unknown keys
     return { I: key, IV: 'IV', V: 'V', vi: 'vi' }
   }
-  
+
   // Calculate Nashville number positions (0-based indexing)
   const getChordAtInterval = (interval: number): string => {
     const chordIndex = (keyIndex + interval) % 12
     return chromaticKeys[chordIndex]
   }
-  
+
   if (isMinor) {
     // Minor key Nashville numbers
     return {
       I: key,                                    // i (minor tonic)
       IV: getChordAtInterval(5),                // IV (major subdominant)
-      V: getChordAtInterval(7),                 // V (major dominant) 
+      V: getChordAtInterval(7),                 // V (major dominant)
       vi: getChordAtInterval(9)                 // VI (relative major)
     }
   } else {
