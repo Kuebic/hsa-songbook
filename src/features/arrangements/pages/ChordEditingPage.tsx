@@ -69,9 +69,9 @@ export function ChordEditingPage() {
         addNotification({
           type: 'success',
           title: 'Success',
-          message: 'Arrangement updated successfully'
+          message: 'Arrangement saved successfully'
         })
-        navigate(`/arrangements/${slug}`)
+        // Don't navigate away - let user continue editing
       } else {
         // For new arrangements, we'd need to collect metadata first
         // This could redirect to the full arrangement form

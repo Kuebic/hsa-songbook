@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import { throttle, debounce } from 'lodash-es';
 import { EditorStorageService } from '../services/EditorStorageService';
+import { arrangementService } from '@features/songs/services/arrangementService';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import type { EditorCommand } from '../types/command.types';
 
 interface UseAutoSaveOptions {
@@ -31,6 +33,7 @@ export function useAutoSave({
   throttleMs = 30000 // 30 seconds maximum interval
 }: UseAutoSaveOptions) {
   const storageService = useRef<EditorStorageService>(new EditorStorageService());
+  const { getToken } = useAuth();
   const [autoSaveState, setAutoSaveState] = useState<AutoSaveState>({
     isAutoSaving: false,
     lastSaved: null,
@@ -40,6 +43,7 @@ export function useAutoSave({
   const saveInProgress = useRef(false);
   const lastContentRef = useRef(content);
   const lastHistoryRef = useRef(history);
+  const lastBackendSaveRef = useRef<Date | null>(null);
   
   // Initialize storage service
   useEffect(() => {
@@ -51,7 +55,7 @@ export function useAutoSave({
     }
   }, [enabled]);
   
-  // Perform save operation
+  // Perform save operation (both local and backend)
   const performSave = useCallback(async (
     saveContent: string, 
     saveHistory: EditorCommand[], 
@@ -72,12 +76,38 @@ export function useAutoSave({
     }));
     
     try {
+      // Save to session storage first (fast, local backup)
       await storageService.current.saveDraftToSession(
         arrangementId,
         saveContent,
         saveHistory,
         userId
       );
+      
+      // Save to MongoDB backend periodically (every 10 seconds minimum)
+      const now = new Date();
+      const timeSinceLastBackendSave = lastBackendSaveRef.current 
+        ? now.getTime() - lastBackendSaveRef.current.getTime()
+        : Infinity;
+      
+      if (force || timeSinceLastBackendSave > 10000) { // 10 seconds minimum between backend saves
+        try {
+          const token = await getToken();
+          if (token && userId && arrangementId !== 'new-arrangement') {
+            // Only save to backend if we have auth and a real arrangement ID
+            await arrangementService.updateArrangement(
+              arrangementId,
+              { chordProText: saveContent },
+              token,
+              userId
+            );
+            lastBackendSaveRef.current = now;
+          }
+        } catch (backendError) {
+          // Don't fail the whole save if backend fails - local is saved
+          console.warn('Backend auto-save failed (local save succeeded):', backendError);
+        }
+      }
       
       lastContentRef.current = saveContent;
       lastHistoryRef.current = saveHistory;
@@ -98,7 +128,7 @@ export function useAutoSave({
     } finally {
       saveInProgress.current = false;
     }
-  }, [enabled, arrangementId, userId]);
+  }, [enabled, arrangementId, userId, getToken]);
   
   // Debounced save (wait for typing pause)
   const debouncedSave = useMemo(
