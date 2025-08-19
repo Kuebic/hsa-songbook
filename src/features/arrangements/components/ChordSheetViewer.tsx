@@ -1,7 +1,6 @@
-import React, { useMemo, useRef, useEffect } from 'react'
+import React, { useMemo, useRef } from 'react'
 import { clsx } from 'clsx'
 import { useUnifiedChordRenderer } from '../hooks/useUnifiedChordRenderer'
-import { useChordSheetSettings } from '../hooks/useChordSheetSettings'
 import type { ChordSheetViewerProps } from '../types/viewer.types'
 import '../styles/unified-chord-display.css'
 import '../styles/chordsheet.css'
@@ -9,8 +8,6 @@ import '../styles/chordsheet.css'
 interface EnhancedChordSheetViewerProps extends ChordSheetViewerProps {
   isStageMode?: boolean
   transposition?: number
-  isScrolling?: boolean
-  scrollSpeed?: number
 }
 
 const ChordSheetViewerComponent: React.FC<EnhancedChordSheetViewerProps> = ({ 
@@ -18,18 +15,11 @@ const ChordSheetViewerComponent: React.FC<EnhancedChordSheetViewerProps> = ({
   onCenterTap,
   className,
   isStageMode = false,
-  transposition = 0,
-  isScrolling: externalIsScrolling,
-  scrollSpeed: externalScrollSpeed
+  transposition = 0
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const { renderChordSheet, preferences } = useUnifiedChordRenderer()
-  const { isScrolling: localIsScrolling, scrollSpeed: localScrollSpeed } = useChordSheetSettings()
-  
-  // Use external props if provided, otherwise use local settings
-  const isScrolling = externalIsScrolling !== undefined ? externalIsScrolling : localIsScrolling
-  const scrollSpeed = externalScrollSpeed !== undefined ? externalScrollSpeed : localScrollSpeed
   
   const formattedHtml = useMemo(() => {
     if (!chordProText) {
@@ -48,26 +38,6 @@ const ChordSheetViewerComponent: React.FC<EnhancedChordSheetViewerProps> = ({
       return '<div class="error">Unable to parse chord sheet</div>'
     }
   }, [chordProText, transposition, renderChordSheet, preferences])
-  
-  // Handle auto-scroll within the content container
-  useEffect(() => {
-    if (isScrolling && scrollContainerRef.current) {
-      const container = scrollContainerRef.current
-      const pixelsPerFrame = scrollSpeed / 60 // Convert to pixels per frame (60fps)
-      
-      const scrollInterval = setInterval(() => {
-        // Scroll the container, not the window
-        container.scrollTop += pixelsPerFrame
-        
-        // Stop scrolling when we reach the bottom
-        if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
-          clearInterval(scrollInterval)
-        }
-      }, 1000 / 60) // 60fps
-      
-      return () => clearInterval(scrollInterval)
-    }
-  }, [isScrolling, scrollSpeed])
   
   const handleCenterTap = (e: React.MouseEvent) => {
     const rect = containerRef.current?.getBoundingClientRect()

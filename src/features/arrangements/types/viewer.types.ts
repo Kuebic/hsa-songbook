@@ -20,13 +20,9 @@ export interface ViewerControlsProps {
     reset: () => void
   }
   fontSize: number
-  onFontSizeChange: (size: number) => void
-  scrollSpeed: number
-  onScrollSpeedChange: (speed: number) => void
-  isScrolling: boolean
-  onToggleScroll: () => void
+  onFontSizeChange?: (size: number) => void
   isMinimalMode: boolean
-  onToggleMinimalMode: () => void
+  onToggleMinimalMode?: () => void
 }
 
 export interface ArrangementViewerData {
@@ -47,8 +43,6 @@ export interface ArrangementViewerData {
 export interface ChordSheetSettings {
   fontSize: number
   fontFamily: string
-  scrollSpeed: number
-  isScrolling: boolean
 }
 
 export interface TranspositionState {

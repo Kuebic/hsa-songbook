@@ -111,16 +111,19 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
     return processed;
   }, []);
 
+  // Extract specific preference values to avoid object reference issues
+  const { fontSize: prefFontSize, fontFamily: prefFontFamily, theme: prefTheme, lineHeight: prefLineHeight } = preferences;
+
   /**
    * Apply preference styles with inline CSS injection
    */
   const applyPreferenceStyles = useCallback((html: string, options?: RenderOptions): string => {
-    const fontSize = options?.fontSize || preferences.fontSize;
-    const fontFamily = options?.fontFamily || preferences.fontFamily;
+    const fontSize = options?.fontSize || prefFontSize;
+    const fontFamily = options?.fontFamily || prefFontFamily;
 
     // Get theme colors
     const getThemeColors = () => {
-      switch (preferences.theme) {
+      switch (prefTheme) {
         case 'dark':
           return {
             chord: '#60a5fa',
@@ -220,8 +223,8 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
       </style>
     `;
 
-    return `${inlineCSS}<div class="chord-sheet-rendered chord-sheet-content" data-theme="${preferences.theme}" style="font-size: ${fontSize}px; font-family: ${fontFamily}; line-height: ${preferences.lineHeight};">${processedHtml}</div>`;
-  }, [preferences, processChordSheetHTML]);
+    return `${inlineCSS}<div class="chord-sheet-rendered chord-sheet-content" data-theme="${prefTheme}" style="font-size: ${fontSize}px; font-family: ${fontFamily}; line-height: ${prefLineHeight};">${processedHtml}</div>`;
+  }, [prefFontSize, prefFontFamily, prefTheme, prefLineHeight, processChordSheetHTML]);
 
   /**
    * Render ChordPro content to HTML
@@ -275,7 +278,10 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
 
       return html;
     } catch (error) {
-      console.error('Error rendering chord sheet:', error);
+      // Only log non-parsing errors to reduce console noise during typing
+      if (error instanceof Error && !error.message.includes('Expected')) {
+        console.error('Error rendering chord sheet:', error);
+      }
       return `
         <div class="error-state">
           <h3>Error rendering chord sheet</h3>

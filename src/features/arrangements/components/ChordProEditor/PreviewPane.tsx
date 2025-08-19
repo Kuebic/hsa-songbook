@@ -35,7 +35,10 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
     try {
       return renderChordSheet(content, { transpose });
     } catch (error) {
-      console.error('Preview error:', error);
+      // Only log non-parsing errors to reduce console noise during typing
+      if (error instanceof Error && !error.message.includes('Expected')) {
+        console.error('Preview error:', error);
+      }
       return `
         <div class="preview-error">
           <div class="preview-error-title">Error parsing ChordPro</div>
