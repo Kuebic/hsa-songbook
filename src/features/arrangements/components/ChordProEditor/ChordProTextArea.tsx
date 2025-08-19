@@ -122,10 +122,13 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
       const newValue = value.substring(0, start) + spaces + value.substring(end);
       onChange(newValue);
       
-      // Move cursor after inserted spaces
-      setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + spaces.length;
-      }, 0);
+      // Set cursor position immediately after state update
+      requestAnimationFrame(() => {
+        if (textarea) {
+          textarea.selectionStart = textarea.selectionEnd = start + spaces.length;
+          textarea.focus();
+        }
+      });
       return;
     }
 
@@ -148,18 +151,24 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
           const newValue = value.substring(0, start) + '}\n' + value.substring(start);
           onChange(newValue);
           
-          setTimeout(() => {
-            textarea.selectionStart = textarea.selectionEnd = start + 2; // After }\n
-          }, 0);
+          requestAnimationFrame(() => {
+            if (textarea) {
+              textarea.selectionStart = textarea.selectionEnd = start + 2; // After }\n
+              textarea.focus();
+            }
+          });
         } else {
           // Closing bracket exists, just insert newline and leave } in place
           e.preventDefault();
           const newValue = value.substring(0, start) + '\n' + value.substring(start);
           onChange(newValue);
           
-          setTimeout(() => {
-            textarea.selectionStart = textarea.selectionEnd = start + 1; // After \n
-          }, 0);
+          requestAnimationFrame(() => {
+            if (textarea) {
+              textarea.selectionStart = textarea.selectionEnd = start + 1; // After \n
+              textarea.focus();
+            }
+          });
         }
         
         // Clear the directive completion state
@@ -176,9 +185,12 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
         const newValue = value.substring(0, start) + '\n' + indent + value.substring(start);
         onChange(newValue);
         
-        setTimeout(() => {
-          textarea.selectionStart = textarea.selectionEnd = start + 1 + indent.length;
-        }, 0);
+        requestAnimationFrame(() => {
+          if (textarea) {
+            textarea.selectionStart = textarea.selectionEnd = start + 1 + indent.length;
+            textarea.focus();
+          }
+        });
       }
     }
   }, [value, onChange, onKeyDown, justCompletedDirective, onDirectiveCompleted, textareaRef]);
