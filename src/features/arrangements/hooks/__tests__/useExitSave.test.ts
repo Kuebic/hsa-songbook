@@ -21,8 +21,8 @@ describe('useExitSave - Exit Save Functionality', () => {
   const mockToken = 'auth-token-789';
   const mockContent = '{title: Test Song}\n[C]Test content';
   
-  let addEventListenerSpy: any;
-  let removeEventListenerSpy: any;
+  let addEventListenerSpy: ReturnType<typeof vi.spyOn>;
+  let removeEventListenerSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     // Setup auth mock
@@ -292,7 +292,7 @@ describe('useExitSave - Exit Save Functionality', () => {
       await act(async () => {
         try {
           await result.current.saveNow();
-        } catch (e) {
+        } catch (_e) {
           // Expected to throw
         }
       });
@@ -333,7 +333,7 @@ describe('useExitSave - Exit Save Functionality', () => {
       await act(async () => {
         try {
           await result.current.saveNow();
-        } catch (e) {
+        } catch (_e) {
           // Expected to throw
         }
       });
@@ -388,7 +388,7 @@ describe('useExitSave - Exit Save Functionality', () => {
       await act(async () => {
         try {
           await result.current.saveNow();
-        } catch (e) {
+        } catch (_e) {
           // Expected
         }
       });

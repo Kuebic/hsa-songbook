@@ -40,7 +40,7 @@ vi.mock('../../services/EditorStorageService', () => ({
 
 describe('useAutoSave', () => {
   let mockCommands: EditorCommand[];
-  let defaultOptions: any;
+  let defaultOptions: Parameters<typeof useAutoSave>[0];
   
   beforeEach(() => {
     vi.useFakeTimers();

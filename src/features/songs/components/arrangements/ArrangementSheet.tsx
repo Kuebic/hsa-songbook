@@ -44,7 +44,7 @@ export function ArrangementSheet({
   
   const { createArrangement, updateArrangement, deleteArrangement } = useArrangementMutations()
   const { addNotification } = useNotification()
-  const { user, isAdmin } = useAuth()
+  const { isAdmin } = useAuth()
   const navigate = useNavigate()
   
   const handleFormChange = (data: Partial<ArrangementFormData>) => {

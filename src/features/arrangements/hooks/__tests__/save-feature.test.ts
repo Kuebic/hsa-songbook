@@ -286,7 +286,7 @@ describe('ChordPro Editor Save Feature', () => {
       
       let state: SaveState = 'idle';
       let lastSaved: Date | null = null;
-      let error: Error | null = null;
+      const _error: Error | null = null;
 
       // Helper to get display text
       const getSaveIndicator = () => {
@@ -312,7 +312,7 @@ describe('ChordPro Editor Save Feature', () => {
 
       // Save error
       state = 'error';
-      error = new Error('Network error');
+      const _error = new Error('Network error');
       expect(getSaveIndicator()).toBe('Save failed');
     });
 

@@ -14,14 +14,14 @@ import type { EditorCommand } from '../../types/command.types';
 vi.mock('@features/songs/services/arrangementService');
 vi.mock('@features/auth/hooks/useAuth');
 vi.mock('lodash-es', () => ({
-  debounce: (fn: Function) => {
-    const debounced = (...args: any[]) => fn(...args);
+  debounce: (fn: (...args: unknown[]) => void) => {
+    const debounced = (...args: unknown[]) => fn(...args);
     debounced.cancel = vi.fn();
     debounced.flush = vi.fn(() => fn());
     return debounced;
   },
-  throttle: (fn: Function) => {
-    const throttled = (...args: any[]) => fn(...args);
+  throttle: (fn: (...args: unknown[]) => void) => {
+    const throttled = (...args: unknown[]) => fn(...args);
     throttled.cancel = vi.fn();
     throttled.flush = vi.fn(() => fn());
     return throttled;
@@ -133,7 +133,7 @@ describe('ChordPro Editor Save Functionality', () => {
     });
 
     it('should not save to MongoDB for new arrangements', async () => {
-      const { result } = renderHook(() =>
+      const { result: _result } = renderHook(() =>
         useAutoSave({
           arrangementId: 'new-arrangement',
           content: mockContent,
@@ -254,7 +254,7 @@ describe('ChordPro Editor Save Functionality', () => {
 
   describe('Page Visibility Save', () => {
     it('should save when page becomes hidden', async () => {
-      const { result } = renderHook(() =>
+      const { result: _result } = renderHook(() =>
         useAutoSave({
           arrangementId: mockArrangementId,
           content: mockContent,
