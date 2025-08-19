@@ -14,12 +14,10 @@ import type { Arrangement } from '../types/song.types'
 export function SongDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const { song, loading, error } = useSong(slug || '', true)
   const { 
     arrangements, 
-    selectedArrangement,
-    selectArrangement,
     refreshArrangements
   } = useArrangements(song?.id)
   const { deleteArrangement } = useArrangementMutations()
@@ -113,12 +111,6 @@ export function SongDetailPage() {
       
       <SongViewer 
         song={song} 
-        arrangements={arrangements}
-        selectedArrangementId={selectedArrangement?.id}
-        onArrangementSelect={(id) => {
-          const arr = arrangements.find(a => a.id === id)
-          if (arr) selectArrangement(arr)
-        }}
       />
       
       {/* Arrangement Management Section */}
@@ -150,11 +142,10 @@ export function SongDetailPage() {
         {arrangements.length > 0 ? (
           <ArrangementList
             arrangements={arrangements}
-            selectedId={selectedArrangement?.id}
-            onSelect={(arr) => selectArrangement(arr)}
             onEdit={user ? handleEditArrangement : undefined}
-            onDelete={user?.role === 'admin' ? handleDeleteArrangement : undefined}
+            onDelete={isAdmin ? handleDeleteArrangement : undefined}
             songTitle={song.title}
+            songSlug={song.slug}
             compact
           />
         ) : (

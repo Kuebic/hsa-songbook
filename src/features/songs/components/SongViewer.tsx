@@ -1,57 +1,21 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { SongTitleEdit } from './SongTitleEdit'
-import { ArrangementSwitcher } from './arrangements/ArrangementSwitcher'
-import type { Song, Arrangement } from '../types/song.types'
+import type { Song } from '../types/song.types'
 
 interface SongViewerProps {
   song: Song
-  arrangement?: Arrangement // Backward compatibility for single arrangement
-  arrangements?: Arrangement[] // New: support multiple arrangements
-  selectedArrangementId?: string // New: externally controlled selection
-  onArrangementSelect?: (id: string) => void // New: callback for selection
 }
 
 export function SongViewer({ 
-  song: initialSong, 
-  arrangement,
-  arrangements,
-  selectedArrangementId,
-  onArrangementSelect
+  song: initialSong
 }: SongViewerProps) {
   // Local state to handle optimistic updates
   const [song, setSong] = useState(initialSong)
-  const [localSelectedId, setLocalSelectedId] = useState<string | undefined>(selectedArrangementId)
   
   // Update local state when prop changes
   useEffect(() => {
     setSong(initialSong)
   }, [initialSong])
-  
-  // Update selected ID when prop changes
-  useEffect(() => {
-    setLocalSelectedId(selectedArrangementId)
-  }, [selectedArrangementId])
-  
-  // Determine which arrangements to use (backward compatibility)
-  const effectiveArrangements = useMemo(() => 
-    arrangements || (arrangement ? [arrangement] : []),
-    [arrangements, arrangement]
-  )
-  
-  // Auto-select first arrangement if none selected
-  useEffect(() => {
-    if (effectiveArrangements.length > 0 && !localSelectedId) {
-      setLocalSelectedId(effectiveArrangements[0].id)
-    }
-  }, [effectiveArrangements, localSelectedId])
-  
-  // Find the currently selected arrangement
-  const selectedArrangement = effectiveArrangements.find(a => a.id === localSelectedId) || arrangement
-  
-  const handleArrangementSelect = (id: string) => {
-    setLocalSelectedId(id)
-    onArrangementSelect?.(id)
-  }
   
   return (
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
@@ -72,25 +36,7 @@ export function SongViewer({
         )}
       </header>
 
-      {effectiveArrangements.length > 1 && (
-        <ArrangementSwitcher
-          arrangements={effectiveArrangements}
-          selectedId={localSelectedId}
-          onSelect={handleArrangementSelect}
-        />
-      )}
-
-      {selectedArrangement && (
-        <div style={{ 
-          marginBottom: '2rem',
-          fontFamily: 'monospace',
-          fontSize: '1rem',
-          lineHeight: '1.8',
-          whiteSpace: 'pre-wrap'
-        }}>
-          {selectedArrangement.chordData}
-        </div>
-      )}
+{/* ArrangementSwitcher removed - arrangements are now managed via the ArrangementList below */}
 
       {song.notes && (
         <div style={{ 

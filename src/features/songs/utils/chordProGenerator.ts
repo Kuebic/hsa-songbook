@@ -17,132 +17,132 @@ export function generateInitialChordPro(
   formData: Partial<ArrangementFormData>,
   songTitle?: string
 ): string {
+  
   const { arrangementSuffix } = splitArrangementName(formData.name || '', songTitle)
-  
+
   const lines: string[] = []
-  
+
   // Title directive
   if (songTitle) {
     lines.push(`{title: ${songTitle}}`)
   }
-  
+
   // Subtitle directive (arrangement name)
   if (arrangementSuffix) {
     lines.push(`{subtitle: ${arrangementSuffix}}`)
   }
-  
+
   // Key directive
   if (formData.key) {
     lines.push(`{key: ${formData.key}}`)
   }
-  
+
   // Tempo directive
   if (formData.tempo) {
     lines.push(`{tempo: ${formData.tempo}}`)
   }
-  
+
   // Time signature directive
   if (formData.timeSignature) {
     lines.push(`{time: ${formData.timeSignature}}`)
   }
-  
+
   // Add empty line after directives
   if (lines.length > 0) {
     lines.push('')
   }
-  
-  // Add basic template structure
+
+  // Add basic template structure using Nashville numbers
   lines.push(
     '[Intro]',
-    '| [Key] | [Key] |',
+    '| [I] | [I] |',
     '',
     '[Verse 1]',
-    '[Key]Add your lyrics here with [Progression]chords above each syllable',
-    '[Key]Each line shows the chord [Progression]changes throughout',
+    '[I]Add your lyrics here with [V]chords above each syllable',
+    '[vi]Each line shows the chord [IV]changes throughout',
     '',
     '[Chorus]',
-    '[Key]This is where the [Progression]chorus lyrics go',
-    '[Key]With the main [Progression]melody and [Key]hook',
+    '[I]This is where the [V]chorus lyrics go',
+    '[vi]With the main [IV]melody and [I]hook',
     '',
     '[Verse 2]',
-    '[Key]Second verse continues the [Progression]story',
-    '[Key]Building on the first [Progression]verse theme',
+    '[I]Second verse continues the [V]story here',
+    '[vi]Building on the first [IV]verse theme',
     '',
     '[Bridge]',
-    '[Different]This section provides [Musical]contrast',
-    '[Resolution]Leading back to the [Key]final chorus',
+    '[vi]This section provides [IV]contrast',
+    '[I]Leading back to the [V]final chorus',
     '',
     '[Outro]',
-    '| [Key] | [Resolution] |'
+    '| [vi] | [IV] | [I] |'
   )
-  
-  // Replace placeholder [Key] with actual key if available
+
+  // Convert Nashville numbers to actual chords based on key
   let content = lines.join('\n')
-  if (formData.key) {
-    // Simple chord progression suggestions based on key
-    const progressions = getBasicProgressions(formData.key)
-    content = content
-      .replace(/\[Key\]/g, `[${formData.key}]`)
-      .replace(/\[Progression\]/g, `[${progressions.progression}]`)
-      .replace(/\[Different\]/g, `[${progressions.bridge}]`)
-      .replace(/\[Musical\]/g, `[${progressions.dominant}]`)
-      .replace(/\[Resolution\]/g, `[${progressions.resolution}]`)
-  }
   
+  if (formData.key) {
+    const chords = getNashvilleChords(formData.key)
+    
+    content = content
+      .replace(/\[I\]/g, `[${chords.I}]`)
+      .replace(/\[IV\]/g, `[${chords.IV}]`)
+      .replace(/\[V\]/g, `[${chords.V}]`)
+      .replace(/\[vi\]/g, `[${chords.vi}]`)
+  }
+
   return content
 }
 
 /**
- * Gets basic chord progressions for a given key
+ * Converts Nashville numbers to actual chords for a given key
  */
-function getBasicProgressions(key: string): {
-  progression: string
-  bridge: string
-  dominant: string
-  resolution: string
+function getNashvilleChords(key: string): {
+  I: string
+  IV: string
+  V: string
+  vi: string
 } {
-  // Remove 'm' for minor keys to get the base note
-  const baseKey = key.replace('m', '')
   const isMinor = key.endsWith('m')
+  const baseKey = key.replace('m', '')
   
-  // Simple chord mapping - this could be enhanced
-  const majorProgressions = {
-    'C': { progression: 'F', bridge: 'Am', dominant: 'G', resolution: 'F' },
-    'G': { progression: 'C', bridge: 'Em', dominant: 'D', resolution: 'C' },
-    'D': { progression: 'G', bridge: 'Bm', dominant: 'A', resolution: 'G' },
-    'A': { progression: 'D', bridge: 'F#m', dominant: 'E', resolution: 'D' },
-    'E': { progression: 'A', bridge: 'C#m', dominant: 'B', resolution: 'A' },
-    'B': { progression: 'E', bridge: 'G#m', dominant: 'F#', resolution: 'E' },
-    'F#': { progression: 'B', bridge: 'D#m', dominant: 'C#', resolution: 'B' },
-    'F': { progression: 'Bb', bridge: 'Dm', dominant: 'C', resolution: 'Bb' },
-    'Bb': { progression: 'Eb', bridge: 'Gm', dominant: 'F', resolution: 'Eb' },
-    'Eb': { progression: 'Ab', bridge: 'Cm', dominant: 'Bb', resolution: 'Ab' },
-    'Ab': { progression: 'Db', bridge: 'Fm', dominant: 'Eb', resolution: 'Db' },
-    'Db': { progression: 'Gb', bridge: 'Bbm', dominant: 'Ab', resolution: 'Gb' },
+  // Chromatic circle for major keys
+  const chromaticKeys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+  
+  // Handle enharmonic equivalents
+  const keyMap: { [key: string]: string } = {
+    'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#'
   }
   
-  const minorProgressions = {
-    'C': { progression: 'F', bridge: 'G', dominant: 'G', resolution: 'F' },
-    'G': { progression: 'C', bridge: 'D', dominant: 'D', resolution: 'C' },
-    'D': { progression: 'G', bridge: 'A', dominant: 'A', resolution: 'G' },
-    'A': { progression: 'D', bridge: 'E', dominant: 'E', resolution: 'D' },
-    'E': { progression: 'A', bridge: 'B', dominant: 'B', resolution: 'A' },
-    'B': { progression: 'E', bridge: 'F#', dominant: 'F#', resolution: 'E' },
-    'F#': { progression: 'B', bridge: 'C#', dominant: 'C#', resolution: 'B' },
-    'F': { progression: 'Bb', bridge: 'C', dominant: 'C', resolution: 'Bb' },
-    'Bb': { progression: 'Eb', bridge: 'F', dominant: 'F', resolution: 'Eb' },
-    'Eb': { progression: 'Ab', bridge: 'Bb', dominant: 'Bb', resolution: 'Ab' },
-    'Ab': { progression: 'Db', bridge: 'Eb', dominant: 'Eb', resolution: 'Db' },
-    'Db': { progression: 'Gb', bridge: 'Ab', dominant: 'Ab', resolution: 'Gb' },
+  const normalizedKey = keyMap[baseKey] || baseKey
+  const keyIndex = chromaticKeys.indexOf(normalizedKey)
+  
+  if (keyIndex === -1) {
+    // Fallback for unknown keys
+    return { I: key, IV: 'IV', V: 'V', vi: 'vi' }
   }
   
-  const progressionSet = isMinor ? minorProgressions : majorProgressions
+  // Calculate Nashville number positions (0-based indexing)
+  const getChordAtInterval = (interval: number): string => {
+    const chordIndex = (keyIndex + interval) % 12
+    return chromaticKeys[chordIndex]
+  }
   
-  return progressionSet[baseKey as keyof typeof progressionSet] || {
-    progression: 'IV',
-    bridge: 'vi',
-    dominant: 'V',
-    resolution: 'IV'
+  if (isMinor) {
+    // Minor key Nashville numbers
+    return {
+      I: key,                                    // i (minor tonic)
+      IV: getChordAtInterval(5),                // IV (major subdominant)
+      V: getChordAtInterval(7),                 // V (major dominant) 
+      vi: getChordAtInterval(9)                 // VI (relative major)
+    }
+  } else {
+    // Major key Nashville numbers
+    return {
+      I: baseKey,                               // I (major tonic)
+      IV: getChordAtInterval(5),                // IV (major subdominant)
+      V: getChordAtInterval(7),                 // V (major dominant)
+      vi: getChordAtInterval(9) + 'm'           // vi (relative minor)
+    }
   }
 }
 
@@ -154,15 +154,15 @@ export function generateBasicChordProTemplate(
   subtitle?: string
 ): string {
   const lines: string[] = []
-  
+
   if (title) {
     lines.push(`{title: ${title}}`)
   }
-  
+
   if (subtitle) {
     lines.push(`{subtitle: ${subtitle}}`)
   }
-  
+
   lines.push(
     '',
     '[Verse 1]',
@@ -175,7 +175,7 @@ export function generateBasicChordProTemplate(
     'Second verse here...',
     ''
   )
-  
+
   return lines.join('\n')
 }
 
@@ -189,7 +189,7 @@ export function updateChordProMetadata(
 ): string {
   let content = existingContent
   const { arrangementSuffix } = splitArrangementName(formData.name || '', songTitle)
-  
+
   // Update or add title
   if (songTitle) {
     if (content.includes('{title:')) {
@@ -198,7 +198,7 @@ export function updateChordProMetadata(
       content = `{title: ${songTitle}}\n${content}`
     }
   }
-  
+
   // Update or add subtitle
   if (arrangementSuffix) {
     if (content.includes('{subtitle:')) {
@@ -213,7 +213,7 @@ export function updateChordProMetadata(
       }
     }
   }
-  
+
   // Update or add key
   if (formData.key) {
     if (content.includes('{key:')) {
@@ -222,7 +222,7 @@ export function updateChordProMetadata(
       content = addDirectiveAfterTitles(content, `{key: ${formData.key}}`)
     }
   }
-  
+
   // Update or add tempo
   if (formData.tempo) {
     if (content.includes('{tempo:')) {
@@ -231,7 +231,7 @@ export function updateChordProMetadata(
       content = addDirectiveAfterTitles(content, `{tempo: ${formData.tempo}}`)
     }
   }
-  
+
   // Update or add time signature
   if (formData.timeSignature) {
     if (content.includes('{time:')) {
@@ -240,7 +240,7 @@ export function updateChordProMetadata(
       content = addDirectiveAfterTitles(content, `{time: ${formData.timeSignature}}`)
     }
   }
-  
+
   return content
 }
 
@@ -250,7 +250,7 @@ export function updateChordProMetadata(
 function addDirectiveAfterTitles(content: string, directive: string): string {
   const lines = content.split('\n')
   let insertIndex = 0
-  
+
   // Find the last title/subtitle directive
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].match(/^\{(title|subtitle):/)) {
@@ -263,7 +263,7 @@ function addDirectiveAfterTitles(content: string, directive: string): string {
       break
     }
   }
-  
+
   lines.splice(insertIndex, 0, directive)
   return lines.join('\n')
 }

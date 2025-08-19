@@ -1,14 +1,29 @@
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@features/auth'
 import type { ViewerHeaderProps } from '../types/viewer.types'
 
 export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { isSignedIn } = useAuth()
   
   const handleBack = () => {
-    // Navigate back to the previous page
-    navigate(-1)
+    // Strategy 1: If we have the song slug from arrangement data, use it
+    if (arrangement.songSlug) {
+      navigate(`/songs/${arrangement.songSlug}`)
+      return
+    }
+    
+    // Strategy 2: Check if we came from a song details page via location state
+    const state = location.state as { fromSong?: string } | null
+    if (state?.fromSong && typeof state.fromSong === 'string' && state.fromSong.trim() !== '') {
+      navigate(`/songs/${state.fromSong}`)
+      return
+    }
+    
+    // Strategy 3: Navigate to songs list as a safe fallback
+    // This is safer than navigate(-1) which could go to the chord editor
+    navigate('/songs')
   }
   
   return (
@@ -44,7 +59,13 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
             }}
           >
             <span>←</span>
-            <span>Back</span>
+            <span>
+              {arrangement.songSlug 
+                ? 'Back to Song' 
+                : (location.state as { fromSong?: string } | null)?.fromSong 
+                  ? 'Back to Song'  
+                  : 'Back to Songs'}
+            </span>
           </button>
           
           {isSignedIn && arrangement.slug && (

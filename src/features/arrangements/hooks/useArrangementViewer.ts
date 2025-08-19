@@ -30,9 +30,14 @@ export function useArrangementViewer(slug: string) {
         }
 
         if (data) {
+          // Use arrangement name as fallback for song title
+          const songTitle = data.name || 'Unknown Song'
+          const songSlug = '' // Will be provided via navigation state instead
+          const artist = '' // TODO: Implement when API format is clarified
+          
           // Server now provides decompressed chordProText
           // Use sample chord data if none exists (for demo purposes)
-          const sampleChordPro = `{title: ${data.name}}
+          const sampleChordPro = `{title: ${songTitle || data.name}}
 {key: ${data.key || 'C'}}
 {tempo: ${data.tempo || 120}}
 
@@ -52,8 +57,9 @@ Unending [Am]love, [G]amazing [C]grace`
             id: data.id,
             name: data.name,
             slug: data.slug,
-            songTitle: '', // TODO: Will need song data lookup from songIds
-            artist: '',    // TODO: Will need song data lookup from songIds
+            songTitle,
+            songSlug,
+            artist,
             key: data.key,
             tempo: data.tempo,
             timeSignature: data.timeSignature,

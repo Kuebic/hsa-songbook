@@ -4,6 +4,7 @@ import { Modal } from '@shared/components/modal'
 import { SimpleArrangementForm } from './SimpleArrangementForm'
 import { useArrangementMutations } from '../../hooks/useArrangementMutations'
 import { useNotification } from '@shared/components/notifications'
+import { useAuth } from '@features/auth'
 import { arrangementSchema } from '../../validation/schemas/arrangementSchema'
 import { generateUniqueSlug } from '../../validation/utils/slugGeneration'
 import { generateInitialChordPro } from '../../utils/chordProGenerator'
@@ -41,8 +42,9 @@ export function ArrangementSheet({
     duration: arrangement?.duration
   }))
   
-  const { createArrangement, updateArrangement } = useArrangementMutations()
+  const { createArrangement, updateArrangement, deleteArrangement } = useArrangementMutations()
   const { addNotification } = useNotification()
+  const { user, isAdmin } = useAuth()
   const navigate = useNavigate()
   
   const handleFormChange = (data: Partial<ArrangementFormData>) => {
@@ -174,6 +176,34 @@ export function ArrangementSheet({
     }
   }
   
+  const handleDelete = async () => {
+    if (!arrangement) return
+    
+    // Confirm deletion
+    const confirmed = window.confirm(`Are you sure you want to delete "${arrangement.name}"? This action cannot be undone.`)
+    if (!confirmed) return
+    
+    setIsSubmitting(true)
+    try {
+      await deleteArrangement(arrangement.id)
+      addNotification({
+        type: 'success',
+        title: 'Arrangement Deleted',
+        message: `"${arrangement.name}" has been deleted successfully`
+      })
+      onSuccess?.()
+      onClose()
+    } catch (error) {
+      addNotification({
+        type: 'error',
+        title: 'Delete Failed',
+        message: error instanceof Error ? error.message : 'Failed to delete arrangement'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+  
   return (
     <Modal 
       size="large" 
@@ -200,47 +230,74 @@ export function ArrangementSheet({
         
         <div style={{ 
           display: 'flex', 
-          justifyContent: 'flex-end', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
           gap: '0.5rem', 
           marginTop: '1.5rem',
           paddingTop: '1rem',
           borderTop: '1px solid #e5e7eb'
         }}>
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={isSubmitting}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#f3f4f6',
-              color: '#374151',
-              border: '1px solid #d1d5db',
-              borderRadius: '0.375rem',
-              cursor: isSubmitting ? 'not-allowed' : 'pointer',
-              opacity: isSubmitting ? 0.5 : 1
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '0.375rem',
-              cursor: isSubmitting ? 'not-allowed' : 'pointer',
-              opacity: isSubmitting ? 0.7 : 1
-            }}
-          >
-            {isSubmitting 
-              ? 'Saving...' 
-              : (arrangement ? 'Update Arrangement' : 'Create & Open Editor')
-            }
-          </button>
+          {/* Delete button - only show when editing existing arrangement and user is admin */}
+          <div>
+            {arrangement && isAdmin && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isSubmitting}
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#dc2626',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                  opacity: isSubmitting ? 0.5 : 1,
+                  fontSize: '14px'
+                }}
+              >
+                Delete Arrangement
+              </button>
+            )}
+          </div>
+          
+          {/* Cancel and Save buttons */}
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={isSubmitting}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: '#f3f4f6',
+                color: '#374151',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.375rem',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                opacity: isSubmitting ? 0.5 : 1
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.375rem',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                opacity: isSubmitting ? 0.7 : 1
+              }}
+            >
+              {isSubmitting 
+                ? 'Saving...' 
+                : (arrangement ? 'Update Arrangement' : 'Create & Open Editor')
+              }
+            </button>
+          </div>
         </div>
       </div>
     </Modal>

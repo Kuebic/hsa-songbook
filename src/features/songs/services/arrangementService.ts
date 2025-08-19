@@ -235,7 +235,8 @@ export const arrangementService = {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
-        'x-user-id': userId
+        'x-user-id': userId,
+        'x-user-role': 'ADMIN'
       }
     })
   },

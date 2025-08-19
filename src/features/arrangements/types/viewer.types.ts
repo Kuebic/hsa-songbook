@@ -30,6 +30,7 @@ export interface ArrangementViewerData {
   name: string
   slug: string
   songTitle?: string
+  songSlug?: string // Add song slug for navigation
   artist?: string
   key?: string
   tempo?: number

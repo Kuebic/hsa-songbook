@@ -14,6 +14,7 @@ interface ArrangementListProps {
   showActions?: boolean
   className?: string
   songTitle?: string // For context-aware display
+  songSlug?: string // For proper back navigation from arrangement viewer
 }
 
 export function ArrangementList({
@@ -24,7 +25,8 @@ export function ArrangementList({
   selectedId,
   showActions = true,
   className = '',
-  songTitle
+  songTitle,
+  songSlug
 }: ArrangementListProps) {
   const { isSignedIn, isAdmin } = useAuth()
   const { addNotification } = useNotification()
@@ -215,6 +217,7 @@ export function ArrangementList({
             <div style={{ flex: 1 }}>
               <Link
                 to={`/arrangements/${arrangement.slug}`}
+                state={songSlug ? { fromSong: songSlug } : undefined}
                 onClick={(e) => e.stopPropagation()}
                 className="arrangement-title-link"
                 style={{
