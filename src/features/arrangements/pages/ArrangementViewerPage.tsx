@@ -22,12 +22,8 @@ export function ArrangementViewerPage() {
   const { isStageMode, toggleStageMode } = useStageMode()
   const { handlePrint, printRef } = usePrint()
   const { 
-    fontSize, 
-    scrollSpeed, 
-    isScrolling,
-    setFontSize,
-    setScrollSpeed,
-    toggleScroll
+    fontSize,
+    setFontSize
   } = useChordSheetSettings()
   
   // Extract the original key from the ChordPro content
@@ -164,12 +160,6 @@ export function ArrangementViewerPage() {
             isStageMode={isStageMode}
             arrangement={arrangement}
             transposition={transpositionState}
-            fontSize={fontSize}
-            onFontSizeChange={setFontSize}
-            scrollSpeed={scrollSpeed}
-            onScrollSpeedChange={setScrollSpeed}
-            isScrolling={isScrolling}
-            onToggleScroll={toggleScroll}
           />
         )
       }
@@ -179,8 +169,6 @@ export function ArrangementViewerPage() {
             chordProText={arrangement.chordProText}
             isStageMode={isStageMode}
             transposition={transpositionState.semitones}
-            isScrolling={isScrolling}
-            scrollSpeed={scrollSpeed}
           />
         </div>
       }
@@ -190,10 +178,6 @@ export function ArrangementViewerPage() {
             transposition={transpositionState}
             fontSize={fontSize}
             onFontSizeChange={setFontSize}
-            scrollSpeed={scrollSpeed}
-            onScrollSpeedChange={setScrollSpeed}
-            isScrolling={isScrolling}
-            onToggleScroll={toggleScroll}
             isMinimalMode={true}
             onToggleMinimalMode={toggleStageMode}
           />

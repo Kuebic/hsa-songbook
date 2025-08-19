@@ -98,6 +98,33 @@
   z-index: 100;
 }
 
+/* Toolbar buttons */
+.toolbar-button {
+  transition: all 0.2s ease;
+}
+
+.toolbar-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Inline transpose controls in toolbar */
+.inline-transpose-controls {
+  margin-left: 0.5rem;
+  padding: 0 0.5rem;
+  border-left: 1px solid var(--editor-divider);
+}
+
+.inline-transpose-controls .toolbar-button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
 .toolbar-left,
 .toolbar-right {
   display: flex;

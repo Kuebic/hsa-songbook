@@ -73,11 +73,6 @@ export const FontPreferences: React.FC<FontPreferencesProps> = ({
     updatePreferences({ lineHeight: height });
   }, [updatePreferences]);
 
-  const handleScrollSpeedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const speed = parseInt(e.target.value, 10);
-    setLocalPrefs(prev => ({ ...prev, autoScrollSpeed: speed }));
-    updatePreferences({ autoScrollSpeed: speed });
-  }, [updatePreferences]);
 
   const handleReset = useCallback(() => {
     resetPreferences();
@@ -133,16 +128,38 @@ export const FontPreferences: React.FC<FontPreferencesProps> = ({
       <div className="font-preferences-content">
         <div className="preference-group">
           <label htmlFor="font-size">Font Size</label>
-          <div className="font-size-control">
-            <input
-              id="font-size"
-              type="range"
-              min="10"
-              max="32"
-              value={localPrefs.fontSize}
-              onChange={handleFontSizeChange}
-            />
-            <span className="font-size-value">{localPrefs.fontSize}px</span>
+          <div className="font-size-control" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button 
+              className="font-size-decrease"
+              onClick={() => handleFontSizeChange({ target: { value: Math.max(10, localPrefs.fontSize - 2).toString() } } as React.ChangeEvent<HTMLInputElement>)}
+              aria-label="Decrease font size"
+              style={{
+                padding: '0.25rem 0.5rem',
+                borderRadius: '0.25rem',
+                border: '1px solid var(--border)',
+                background: 'var(--background)',
+                cursor: 'pointer',
+                fontSize: '1rem'
+              }}
+            >
+              -
+            </button>
+            <span className="font-size-value" style={{ minWidth: '60px', textAlign: 'center' }}>{localPrefs.fontSize}px</span>
+            <button 
+              className="font-size-increase"
+              onClick={() => handleFontSizeChange({ target: { value: Math.min(32, localPrefs.fontSize + 2).toString() } } as React.ChangeEvent<HTMLInputElement>)}
+              aria-label="Increase font size"
+              style={{
+                padding: '0.25rem 0.5rem',
+                borderRadius: '0.25rem',
+                border: '1px solid var(--border)',
+                background: 'var(--background)',
+                cursor: 'pointer',
+                fontSize: '1rem'
+              }}
+            >
+              +
+            </button>
           </div>
         </div>
 
@@ -228,20 +245,6 @@ export const FontPreferences: React.FC<FontPreferencesProps> = ({
           </div>
         </div>
 
-        <div className="preference-group">
-          <label htmlFor="scroll-speed">Auto-Scroll Speed</label>
-          <div className="scroll-speed-control">
-            <input
-              id="scroll-speed"
-              type="range"
-              min="10"
-              max="100"
-              value={localPrefs.autoScrollSpeed || 30}
-              onChange={handleScrollSpeedChange}
-            />
-            <span className="scroll-speed-value">{localPrefs.autoScrollSpeed || 30}</span>
-          </div>
-        </div>
 
         <div className="preference-actions">
           <button className="reset-button" onClick={handleReset}>

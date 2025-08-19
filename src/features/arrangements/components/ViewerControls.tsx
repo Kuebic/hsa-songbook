@@ -8,10 +8,6 @@ export function ViewerControls({
   transposition,
   fontSize,
   onFontSizeChange,
-  scrollSpeed,
-  onScrollSpeedChange,
-  isScrolling,
-  onToggleScroll,
   isMinimalMode,
   onToggleMinimalMode
 }: ViewerControlsProps) {
@@ -215,40 +211,47 @@ export function ViewerControls({
           </div>
         )}
         
-        {/* Auto-scroll Control */}
+        {/* Font Size Control */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Font Size:</span>
           <button
-            onClick={onToggleScroll}
+            onClick={() => onFontSizeChange?.(Math.max(10, fontSize - 2))}
             style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: isScrolling ? 'var(--status-error)' : 'var(--status-success)',
-              color: 'var(--color-background)',
-              border: 'none',
+              padding: '0.25rem 0.5rem',
+              backgroundColor: 'var(--color-accent)',
+              border: '1px solid var(--color-border)',
               borderRadius: '0.375rem',
               cursor: 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
+              fontSize: '1rem',
+              fontWeight: 'bold'
             }}
+            aria-label="Decrease font size"
           >
-            {isScrolling ? '⏸ Pause' : '▶ Auto-scroll'}
+            −
           </button>
-          {isScrolling && (
-            <input
-              type="range"
-              min="10"
-              max="100"
-              value={scrollSpeed}
-              onChange={(e) => onScrollSpeedChange(Number(e.target.value))}
-              style={{
-                width: '100px',
-                accentColor: 'var(--status-success)'
-              }}
-              aria-label="Scroll speed"
-            />
-          )}
+          <span style={{
+            padding: '0.25rem 0.5rem',
+            minWidth: '60px',
+            textAlign: 'center',
+            fontSize: '0.875rem'
+          }}>
+            {fontSize}px
+          </span>
+          <button
+            onClick={() => onFontSizeChange?.(Math.min(32, fontSize + 2))}
+            style={{
+              padding: '0.25rem 0.5rem',
+              backgroundColor: 'var(--color-accent)',
+              border: '1px solid var(--color-border)',
+              borderRadius: '0.375rem',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: 'bold'
+            }}
+            aria-label="Increase font size"
+          >
+            +
+          </button>
         </div>
         
         {/* Settings Button */}

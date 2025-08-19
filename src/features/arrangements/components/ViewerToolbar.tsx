@@ -1,6 +1,7 @@
 import { Printer, Eye, EyeOff, Maximize } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { TransposeControls } from './TransposeControls'
+import { FontPreferences } from './FontPreferences'
 import { AddToSetlistDropdown } from '@features/setlists/components/selectors/AddToSetlistDropdown'
 import type { EnhancedTranspositionState } from '../hooks/useTransposition'
 import type { Arrangement } from '../../songs/types/song.types'
@@ -15,13 +16,6 @@ interface ViewerToolbarProps {
     transpose: (steps: number) => void
     reset: () => void
   }
-  // Other controls
-  fontSize?: number
-  onFontSizeChange?: (size: number) => void
-  scrollSpeed?: number
-  onScrollSpeedChange?: (speed: number) => void
-  isScrolling?: boolean
-  onToggleScroll?: () => void
 }
 
 export function ViewerToolbar({ 
@@ -29,13 +23,7 @@ export function ViewerToolbar({
   onToggleStageMode, 
   isStageMode,
   arrangement,
-  transposition,
-  fontSize,
-  onFontSizeChange,
-  scrollSpeed,
-  onScrollSpeedChange,
-  isScrolling,
-  onToggleScroll
+  transposition
 }: ViewerToolbarProps) {
   
   return (
@@ -106,48 +94,8 @@ export function ViewerToolbar({
           />
         )}
         
-        {/* Auto-scroll Control */}
-        {onToggleScroll && (
-          <div className="control-group">
-            <button
-              onClick={onToggleScroll}
-              className={cn(
-                'control-button scroll-button',
-                isScrolling && 'active'
-              )}
-            >
-              {isScrolling ? '⏸ Pause' : '▶ Scroll'}
-            </button>
-            {isScrolling && onScrollSpeedChange && (
-              <input
-                type="range"
-                min="10"
-                max="100"
-                value={scrollSpeed}
-                onChange={(e) => onScrollSpeedChange(Number(e.target.value))}
-                className="speed-slider"
-                aria-label="Scroll speed"
-              />
-            )}
-          </div>
-        )}
-        
-        {/* Font Size Control */}
-        {fontSize && onFontSizeChange && (
-          <div className="control-group">
-            <span className="control-label">Size:</span>
-            <input
-              type="range"
-              min="12"
-              max="24"
-              value={fontSize}
-              onChange={(e) => onFontSizeChange(Number(e.target.value))}
-              className="font-slider"
-              aria-label="Font size"
-            />
-            <span className="size-value">{fontSize}px</span>
-          </div>
-        )}
+        {/* Font Preferences - Compact Version */}
+        <FontPreferences showCompact={true} />
       </div>
     </div>
   )

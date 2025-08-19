@@ -6,7 +6,7 @@ import { MobileToggle } from './components/MobileToggle';
 import { EditorSplitter } from './components/EditorSplitter';
 import { AutoCompleteDropdown } from './components/AutoCompleteDropdown';
 import { AlignmentDebugger } from './components/AlignmentDebugger';
-import { TransposeBar } from './TransposeBar';
+import { TransposeControls } from '../TransposeControls';
 import { FontPreferences } from '../FontPreferences';
 import { useEnhancedEditorState } from '../../hooks/useEnhancedEditorState';
 import { useAutoSave } from '../../hooks/useAutoSave';
@@ -17,7 +17,6 @@ import { useResponsiveLayout } from './hooks/useResponsiveLayout';
 import { useVirtualKeyboard } from './hooks/useVirtualKeyboard';
 import { useMobileAutocomplete } from './hooks/useMobileAutocomplete';
 import { useBracketCompletion } from './hooks/useBracketCompletion';
-import { useEditorTransposition } from './hooks/useEditorTransposition';
 import { getBrowserSpecificStyles } from './utils/browserDetection';
 import './styles/themes.css';
 import './styles/editor.css';
@@ -48,6 +47,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   initialContent = '',
   onChange,
   onSave,
+  onCancel,
   height = 600,
   showPreview = true,
   defaultPreviewVisible = true,
@@ -154,14 +154,33 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   });
   
   
-  // Use transposition hook for editor
-  const transposition = useEditorTransposition(content, onChange);
+  // Simple transposition state for immediate application
+  const [transposeSemitones, setTransposeSemitones] = useState(0);
   
-  // Update transposition when content changes externally
-  useEffect(() => {
-    transposition.updateOriginalContent(content);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content, transposition.updateOriginalContent]);
+  // Extract current key from content
+  const getCurrentKey = useCallback(() => {
+    const keyMatch = content.match(/\{key:\s*([^}]+)\}/i);
+    if (keyMatch) return keyMatch[1];
+    // Try to detect from first chord
+    const chordMatch = content.match(/\[([A-G][#b]?)/);
+    return chordMatch ? chordMatch[1] : 'C';
+  }, [content]);
+  
+  const currentKey = getCurrentKey();
+  
+  // Transpose immediately
+  const handleTranspose = useCallback((steps: number) => {
+    const newSemitones = transposeSemitones + steps;
+    if (newSemitones < -12 || newSemitones > 12) return;
+    
+    setTransposeSemitones(newSemitones);
+    // Note: actual transposition is applied to preview, not the editor content
+    // This matches the arrangement viewer behavior
+  }, [transposeSemitones]);
+  
+  const handleReset = useCallback(() => {
+    setTransposeSemitones(0);
+  }, []);
 
 
   // Use mobile autocomplete hook
@@ -317,10 +336,86 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       {/* Enhanced toolbar with transpose controls and mobile toggle */}
       <div className="chord-editor-toolbar">
         <div className="toolbar-left">
+          {/* Back button */}
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              className="toolbar-button"
+              style={{
+                padding: '0.5rem 1rem',
+                marginRight: '0.5rem',
+                borderRadius: '0.375rem',
+                border: '1px solid var(--border)',
+                background: 'var(--background)',
+                color: 'var(--foreground)',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem'
+              }}
+              title="Go back"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+              Back
+            </button>
+          )}
+          
+          {/* Save button */}
+          {onSave && (
+            <button
+              onClick={async () => {
+                try {
+                  if (needsSave) {
+                    await saveToMongoDB();
+                  }
+                  if (onSave) {
+                    onSave(content);
+                  }
+                } catch (error) {
+                  console.error('Save failed:', error);
+                }
+              }}
+              className="toolbar-button"
+              disabled={!needsSave}
+              style={{
+                padding: '0.5rem 1rem',
+                marginRight: '0.5rem',
+                borderRadius: '0.375rem',
+                border: '1px solid var(--border)',
+                background: needsSave ? 'var(--primary)' : 'var(--background)',
+                color: needsSave ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
+                cursor: needsSave ? 'pointer' : 'default',
+                fontSize: '0.875rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                opacity: needsSave ? 1 : 0.5
+              }}
+              title={needsSave ? "Save changes (Ctrl+S)" : "No changes to save"}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Save
+            </button>
+          )}
+          
           {enableTransposition && (
-            <TransposeBar 
-              transposition={transposition}
-              className="inline-transpose-bar"
+            <TransposeControls
+              currentKey={currentKey}
+              originalKey={currentKey}
+              semitones={transposeSemitones}
+              onTranspose={handleTranspose}
+              onReset={handleReset}
+              canTransposeUp={transposeSemitones < 12}
+              canTransposeDown={transposeSemitones > -12}
+              variant="toolbar"
+              className="inline-transpose-controls"
             />
           )}
         </div>
@@ -445,9 +540,9 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         {showPreview && previewVisible && (
           <div className={`chord-editor-pane preview-pane ${layout.isMobile ? 'mobile-preview' : 'desktop-preview'}`}>
             <PreviewPane 
-              content={content} 
+              content={debouncedContent} 
               theme={currentTheme}
-              transpose={transposition.previewSemitones}
+              transpose={transposeSemitones}
             />
           </div>
         )}
