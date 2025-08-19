@@ -55,6 +55,8 @@ export function generateInitialChordPro(
   // Add basic template structure using Nashville numbers
   lines.push(
     '[Intro]',
+    // Display hack: Using [| ][chord][] notation ensures pipe symbols 
+    // stay on the same line as chords in the rendered view
     '[| ][I][] | ][I][] |]',
     '',
     '[Verse 1]',
@@ -74,6 +76,7 @@ export function generateInitialChordPro(
     '[I]Leading back to the [V]final chorus',
     '',
     '[Outro]',
+    // Same display hack as intro for proper chord grid rendering
     '[| ][vi][] | ][IV][] | ][I][] |]'
   )
 
