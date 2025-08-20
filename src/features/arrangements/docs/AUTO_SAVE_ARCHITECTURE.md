@@ -1,16 +1,15 @@
 # Auto-Save Architecture Documentation
 
 ## Overview
-The ChordPro editor implements a robust auto-save system with undo/redo capabilities using local storage and session persistence. This document describes the architecture and package dependencies.
+The ChordPro editor implements a robust auto-save system using local storage and session persistence. This document describes the architecture and package dependencies.
 
 ## Package Dependencies
 
 ### 1. IndexedDB (idb@8.0.3)
-**Purpose**: Provides persistent browser storage for auto-save drafts and command history.
+**Purpose**: Provides persistent browser storage for auto-save drafts.
 
 **Usage**:
 - Stores editor drafts with compression
-- Maintains command history across sessions
 - Provides quota management and cleanup
 - Enables offline editing capabilities
 
@@ -23,12 +22,11 @@ The ChordPro editor implements a robust auto-save system with undo/redo capabili
 **Implementation Location**: `src/features/arrangements/services/EditorStorageService.ts`
 
 ### 2. LZ-String (lz-string@1.5.0)
-**Purpose**: Provides compression for stored editor content and command history.
+**Purpose**: Provides compression for stored editor content.
 
 **Usage**:
 - Compresses ChordPro content before storage (typically 60-70% reduction)
 - Reduces IndexedDB storage usage
-- Enables storing more history within browser quotas
 - Fast compression/decompression for real-time editing
 
 **Key Features**:
@@ -45,9 +43,8 @@ The ChordPro editor implements a robust auto-save system with undo/redo capabili
 
 1. **Memory State** (Immediate)
    - Current editor content
-   - Active command history (undo/redo stacks)
-   - Managed by: `CommandManager`
-   - Capacity: Last 100-500 commands (configurable)
+   - Managed by: React state
+   - Capacity: Current session only
 
 2. **Session Storage** (Tab-specific)
    - Temporary drafts during editing
@@ -67,7 +64,7 @@ The ChordPro editor implements a robust auto-save system with undo/redo capabili
 ```mermaid
 graph TD
     A[User Types] --> B[Command Created]
-    B --> C[CommandManager]
+    B --> C[State Manager]
     C --> D{Merge Window?}
     D -->|Yes| E[Merge Commands]
     D -->|No| F[Add to History]
@@ -79,14 +76,6 @@ graph TD
 ```
 
 ## Configuration
-
-### CommandManager Options
-```typescript
-interface CommandManagerOptions {
-  maxHistorySize?: number;  // Default: 100
-  mergeWindow?: number;      // Default: 500ms
-}
-```
 
 ### Auto-Save Options
 ```typescript
@@ -115,7 +104,6 @@ interface AutoSaveOptions {
 ### 1. Browser Crash
 - On restart: Load from IndexedDB
 - Restore last saved draft
-- Rebuild command history
 
 ### 2. Tab Close
 - On reopen: Check session storage first
@@ -142,8 +130,7 @@ interface AutoSaveOptions {
 ### Optimization Strategies
 1. Debounce saves (default 1000ms)
 2. Compress large content
-3. Batch command history updates
-4. Use Web Workers for heavy operations (future)
+3. Use Web Workers for heavy operations (future)
 
 ## Security Considerations
 
@@ -163,7 +150,7 @@ interface AutoSaveOptions {
 ## Testing
 
 ### Unit Tests
-- `CommandManager.test.ts`: Command history management
+- `EditorStorageService.test.ts`: Storage management
 - `EditorStorageService.test.ts`: Storage operations
 - `useAutoSave.test.ts`: Auto-save hook logic
 

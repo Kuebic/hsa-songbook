@@ -1,6 +1,4 @@
-import * as LZString from 'lz-string';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import type { EditorCommand } from '../types/command.types';
 
 // IndexedDB schema
 interface EditorDBSchema extends DBSchema {
@@ -19,25 +17,11 @@ interface EditorDBSchema extends DBSchema {
       'by-arrangement': string;
     };
   };
-  history: {
-    key: string;
-    value: {
-      arrangementId: string;
-      data: string; // Compressed command history
-      timestamp: number;
-      userId: string;
-    };
-    indexes: { 
-      'by-arrangement': string;
-      'by-timestamp': number;
-    };
-  };
 }
 
 // Draft data structure
 interface DraftData {
   content: string;
-  history: EditorCommand[];
   timestamp: number;
   version: number;
 }
@@ -75,15 +59,6 @@ export class EditorStorageService {
             draftStore.createIndex('by-user', 'userId');
             draftStore.createIndex('by-arrangement', 'arrangementId');
           }
-          
-          // Create history store
-          if (!db.objectStoreNames.contains('history')) {
-            const historyStore = db.createObjectStore('history', {
-              keyPath: 'arrangementId'
-            });
-            historyStore.createIndex('by-arrangement', 'arrangementId');
-            historyStore.createIndex('by-timestamp', 'timestamp');
-          }
         }
       });
       
@@ -101,7 +76,6 @@ export class EditorStorageService {
   async saveDraftToSession(
     arrangementId: string, 
     content: string, 
-    history: EditorCommand[] = [],
     userId?: string
   ): Promise<void> {
     const key = `chord-editor-session-${arrangementId}`;
@@ -109,23 +83,11 @@ export class EditorStorageService {
     try {
       const data: DraftData = {
         content,
-        history: history.slice(-100), // Keep only last 100 commands
         timestamp: Date.now(),
         version: this.DRAFT_VERSION
       };
       
-      // Compress large history arrays
-      let serializedData: string;
-      if (history.length > 10) {
-        const compressedHistory = LZString.compress(JSON.stringify(data.history));
-        serializedData = JSON.stringify({
-          ...data,
-          history: undefined,
-          compressedHistory
-        });
-      } else {
-        serializedData = JSON.stringify(data);
-      }
+      const serializedData = JSON.stringify(data);
       
       // Check size before saving
       if (serializedData.length > this.MAX_SESSION_SIZE) {
@@ -138,12 +100,12 @@ export class EditorStorageService {
       
       // Fallback to IndexedDB for large content
       if (this.db && userId) {
-        await this.saveLargeDraftToIndexedDB(arrangementId, content, history, userId);
+        await this.saveLargeDraftToIndexedDB(arrangementId, content, userId);
       } else {
         // Last resort: clear old session drafts and retry
         this.clearOldSessionDrafts();
         try {
-          // Retry with compressed content only (no history)
+          // Retry with compressed content only
           const minimalData = {
             content,
             timestamp: Date.now(),
@@ -170,20 +132,8 @@ export class EditorStorageService {
       if (sessionData) {
         const parsed = JSON.parse(sessionData);
         
-        // Handle compressed history
-        if (parsed.compressedHistory && !parsed.history) {
-          const decompressed = LZString.decompress(parsed.compressedHistory);
-          if (decompressed) {
-            parsed.history = JSON.parse(decompressed);
-          } else {
-            parsed.history = [];
-          }
-          delete parsed.compressedHistory;
-        }
-        
         return {
           content: parsed.content || '',
-          history: parsed.history || [],
           timestamp: parsed.timestamp || Date.now(),
           version: parsed.version || 1
         };
@@ -286,13 +236,12 @@ export class EditorStorageService {
   private async saveLargeDraftToIndexedDB(
     arrangementId: string,
     content: string,
-    history: EditorCommand[],
     userId: string
   ): Promise<void> {
     if (!this.db) return;
     
     try {
-      const tx = this.db.transaction(['drafts', 'history'], 'readwrite');
+      const tx = this.db.transaction(['drafts'], 'readwrite');
       
       // Save draft content
       await tx.objectStore('drafts').put({
@@ -302,17 +251,6 @@ export class EditorStorageService {
         userId,
         version: this.DRAFT_VERSION
       });
-      
-      // Save compressed history separately
-      if (history.length > 0) {
-        const compressedHistory = LZString.compress(JSON.stringify(history.slice(-100)));
-        await tx.objectStore('history').put({
-          arrangementId,
-          data: compressedHistory,
-          timestamp: Date.now(),
-          userId
-        });
-      }
       
       await tx.done;
     } catch (error) {
@@ -328,30 +266,14 @@ export class EditorStorageService {
     if (!this.db) return null;
     
     try {
-      const [draft, history] = await Promise.all([
-        this.db.get('drafts', arrangementId),
-        this.db.get('history', arrangementId)
-      ]);
+      const draft = await this.db.get('drafts', arrangementId);
       
       if (!draft || draft.userId !== userId) {
         return null;
       }
       
-      let historyData: EditorCommand[] = [];
-      if (history && history.userId === userId) {
-        try {
-          const decompressed = LZString.decompress(history.data);
-          if (decompressed) {
-            historyData = JSON.parse(decompressed);
-          }
-        } catch (error) {
-          console.warn('Failed to decompress history:', error);
-        }
-      }
-      
       return {
         content: draft.content,
-        history: historyData,
         timestamp: draft.timestamp,
         version: draft.version
       };
@@ -404,7 +326,7 @@ export class EditorStorageService {
     // Clean IndexedDB
     if (this.db) {
       try {
-        const tx = this.db.transaction(['drafts', 'history'], 'readwrite');
+        const tx = this.db.transaction(['drafts'], 'readwrite');
         
         // Clean old drafts
         const draftIndex = tx.objectStore('drafts').index('by-timestamp');
@@ -413,15 +335,6 @@ export class EditorStorageService {
         if (draftCursor) {
           await draftCursor.delete();
           await draftCursor.continue();
-        }
-        
-        // Clean old history
-        const historyIndex = tx.objectStore('history').index('by-timestamp');
-        const historyCursor = await historyIndex.openCursor(IDBKeyRange.upperBound(cutoff));
-        
-        if (historyCursor) {
-          await historyCursor.delete();
-          await historyCursor.continue();
         }
         
         await tx.done;

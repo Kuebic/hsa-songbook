@@ -110,19 +110,10 @@ npm run build && npm run preview
 
 ## Key Utilities and Patterns
 
-### Command Pattern (Undo/Redo)
-The application uses a robust Command Pattern implementation for undo/redo functionality:
-
-- **CommandManager**: Configurable undo/redo with command merging
-  - `maxHistorySize`: Configurable history limit (default: 100)
-  - `mergeWindow`: Time window for merging commands (default: 500ms)
-- **Command Types**: INSERT_TEXT, DELETE_TEXT, REPLACE_TEXT, INSERT_DIRECTIVE, UPDATE_DIRECTIVE
-- **Location**: `src/features/arrangements/commands/`
-
 ### Auto-Save Architecture
 Three-tier storage system with compression:
 
-1. **Memory State**: Immediate command history
+1. **Memory State**: Current editor content
 2. **Session Storage**: Tab-specific recovery
 3. **IndexedDB**: Persistent storage with LZ-String compression
 

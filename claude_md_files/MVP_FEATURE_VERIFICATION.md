@@ -249,3 +249,45 @@ This document provides a systematic guide for verifying every feature of the HSA
 - Check accessibility (keyboard navigation, screen readers)
 - Test with different user roles (guest, user, admin)
 - Verify data persistence across sessions
+
+
+---
+
+  Recommended Approach:
+
+  1. Delete broken tests
+
+  Start clean rather than fixing outdated tests
+
+  2. Focus on integration tests first
+
+  - Test user workflows, not implementation
+  - Example: "User can create a song with arrangements"
+  - These survive refactoring better
+
+  3. Add unit tests for critical logic
+
+  - Transposition algorithms
+  - ChordPro parsing
+  - Validation logic
+  - Not for simple components
+
+  4. Use Testing Library best practices
+
+  - Test behavior, not implementation
+  - Query by role/text, not test-ids
+  - Don't test framework code
+
+  5. Start with the most important features
+
+  - Authentication flow
+  - Song creation/editing
+  - Arrangement editing
+  - Setlist building
+
+  Want me to help you:
+  1. Remove the broken tests
+  2. Set up a clean testing foundation
+  3. Write a few example tests showing best practices?
+
+  This would give you a fresh start with maintainable tests that actually provide value.

@@ -8,7 +8,7 @@ import { AutoCompleteDropdown } from './components/AutoCompleteDropdown';
 import { AlignmentDebugger } from './components/AlignmentDebugger';
 import { TransposeControls } from '../TransposeControls';
 import { FontPreferences } from '../FontPreferences';
-import { useEnhancedEditorState } from '../../hooks/useEnhancedEditorState';
+import { useDebounce } from '../../hooks/useDebounce';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import { useExitSave } from '../../hooks/useExitSave';
 import { useAuth } from '@features/auth';
@@ -102,24 +102,26 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   // Get auth info for storage
   const { userId } = useAuth();
   
-  // Enhanced editor state
-  const {
-    content,
-    isDirty,
-    cursorPosition,
-    // selectionRange, // Unused for now
-    debouncedContent,
-    updateContent,
-    handleCursorPositionChange,
-    handleSelectionRangeChange,
-    textareaRef,
-    getHistory,
-    clearHistory
-  } = useEnhancedEditorState({
-    initialContent,
-    arrangementId,
-    onChange
-  });
+  // Simple editor state
+  const [content, setContent] = useState(initialContent);
+  const [isDirty, setIsDirty] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const debouncedContent = useDebounce(content, 300);
+  
+  const updateContent = useCallback((newContent: string) => {
+    setContent(newContent);
+    setIsDirty(newContent !== initialContent);
+    onChange?.(newContent);
+  }, [initialContent, onChange]);
+  
+  const handleCursorPositionChange = useCallback((pos: number) => {
+    setCursorPosition(pos);
+  }, []);
+  
+  const handleSelectionRangeChange = useCallback(() => {
+    // Not used currently
+  }, []);
 
   // Auto-save functionality
   const {
@@ -131,7 +133,6 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   } = useAutoSave({
     arrangementId,
     content: debouncedContent,
-    history: getHistory(),
     isDirty,
     userId: userId || undefined,
     enabled: true
@@ -148,7 +149,6 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     isDirty,
     enabled: true,
     onSaveSuccess: () => {
-      clearHistory();
       clearDrafts();
     }
   });

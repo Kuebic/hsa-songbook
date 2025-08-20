@@ -3,12 +3,10 @@ import { throttle, debounce } from 'lodash-es';
 import { EditorStorageService } from '../services/EditorStorageService';
 import { arrangementService } from '@features/songs/services/arrangementService';
 import { useAuth } from '@features/auth/hooks/useAuth';
-import type { EditorCommand } from '../types/command.types';
 
 interface UseAutoSaveOptions {
   arrangementId: string;
   content: string;
-  history: EditorCommand[];
   isDirty: boolean;
   userId?: string;
   enabled?: boolean;
@@ -25,7 +23,6 @@ interface AutoSaveState {
 export function useAutoSave({
   arrangementId,
   content,
-  history,
   isDirty,
   userId,
   enabled = true,
@@ -42,7 +39,6 @@ export function useAutoSave({
   
   const saveInProgress = useRef(false);
   const lastContentRef = useRef(content);
-  const lastHistoryRef = useRef(history);
   const lastBackendSaveRef = useRef<Date | null>(null);
   
   // Initialize storage service
@@ -58,13 +54,12 @@ export function useAutoSave({
   // Perform save operation (both local and backend)
   const performSave = useCallback(async (
     saveContent: string, 
-    saveHistory: EditorCommand[], 
     force = false
   ): Promise<void> => {
     if (!enabled || saveInProgress.current) return;
     
     // Skip if content hasn't changed (unless forced)
-    if (!force && saveContent === lastContentRef.current && saveHistory === lastHistoryRef.current) {
+    if (!force && saveContent === lastContentRef.current) {
       return;
     }
     
@@ -80,7 +75,6 @@ export function useAutoSave({
       await storageService.current.saveDraftToSession(
         arrangementId,
         saveContent,
-        saveHistory,
         userId
       );
       
@@ -110,7 +104,6 @@ export function useAutoSave({
       }
       
       lastContentRef.current = saveContent;
-      lastHistoryRef.current = saveHistory;
       
       setAutoSaveState(prev => ({
         ...prev,
@@ -133,9 +126,9 @@ export function useAutoSave({
   // Debounced save (wait for typing pause)
   const debouncedSave = useMemo(
     () => debounce(
-      (saveContent: string, saveHistory: EditorCommand[]) => {
+      (saveContent: string) => {
         if (isDirty) {
-          performSave(saveContent, saveHistory).catch(console.error);
+          performSave(saveContent).catch(console.error);
         }
       },
       debounceMs
@@ -146,9 +139,9 @@ export function useAutoSave({
   // Throttled save (regular intervals)
   const throttledSave = useMemo(
     () => throttle(
-      (saveContent: string, saveHistory: EditorCommand[]) => {
+      (saveContent: string) => {
         if (isDirty) {
-          performSave(saveContent, saveHistory).catch(console.error);
+          performSave(saveContent).catch(console.error);
         }
       },
       throttleMs,
@@ -162,22 +155,22 @@ export function useAutoSave({
     if (enabled && isDirty) {
       debouncedSave.cancel();
       throttledSave.cancel();
-      await performSave(content, history, true);
+      await performSave(content, true);
     }
-  }, [enabled, isDirty, content, history, performSave, debouncedSave, throttledSave]);
+  }, [enabled, isDirty, content, performSave, debouncedSave, throttledSave]);
   
-  // Trigger saves on content/history change
+  // Trigger saves on content change
   useEffect(() => {
     if (enabled && isDirty) {
-      debouncedSave(content, history);
-      throttledSave(content, history);
+      debouncedSave(content);
+      throttledSave(content);
     }
     
     return () => {
       debouncedSave.cancel();
       throttledSave.cancel();
     };
-  }, [content, history, isDirty, enabled, debouncedSave, throttledSave]);
+  }, [content, isDirty, enabled, debouncedSave, throttledSave]);
   
   // Cleanup on unmount
   useEffect(() => {
