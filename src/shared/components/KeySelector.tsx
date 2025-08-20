@@ -2,11 +2,14 @@ import { useState } from 'react'
 
 interface KeySelectorProps {
   value?: string
-  onChange: (key: string) => void
+  currentKey?: string  // Support old prop name
+  onChange?: (key: string) => void
+  onKeySelect?: (key: string) => void  // Support old prop name
   error?: string
   disabled?: boolean
   label?: string
   required?: boolean
+  className?: string  // Support className for styling
 }
 
 // Organized as requested: major | minor layout
@@ -22,24 +25,30 @@ const KEY_LAYOUT = [
 
 export function KeySelector({
   value = '',
+  currentKey,  // Support old prop name
   onChange,
+  onKeySelect,  // Support old prop name
   error,
   disabled = false,
   label = 'Musical Key',
-  required = false
+  required = false,
+  className
 }: KeySelectorProps) {
+  // Support both prop names for backward compatibility
+  const actualValue = value || currentKey || ''
+  const handleChange = onChange || onKeySelect || (() => {})
   const [keyType, setKeyType] = useState<'major' | 'minor'>(() => {
-    return value?.endsWith('m') ? 'minor' : 'major'
+    return actualValue?.endsWith('m') ? 'minor' : 'major'
   })
 
   const handleKeyTypeChange = (newType: 'major' | 'minor') => {
     setKeyType(newType)
     
     // If there's a current selection, convert it
-    if (value) {
-      const baseKey = value.replace('m', '')
+    if (actualValue) {
+      const baseKey = actualValue.replace('m', '')
       const newValue = newType === 'minor' ? `${baseKey}m` : baseKey
-      onChange(newValue)
+      handleChange(newValue)
     }
   }
 
@@ -47,13 +56,13 @@ export function KeySelector({
     if (!key || disabled) return
     
     const finalKey = keyType === 'minor' ? `${key}m` : key
-    onChange(finalKey)
+    handleChange(finalKey)
   }
 
   const isKeySelected = (key: string) => {
     if (!key) return false
     const expectedKey = keyType === 'minor' ? `${key}m` : key
-    return value === expectedKey
+    return actualValue === expectedKey
   }
 
   return (

@@ -7,7 +7,7 @@ import {
   FormRow,
   FormCheckbox
 } from '@shared/components/form'
-import { KeySelector } from '../forms/KeySelector'
+import { KeySelector } from '@shared/components/KeySelector'
 import { 
   TIME_SIGNATURES, 
   // DIFFICULTY_LEVELS, // Temporarily commented out

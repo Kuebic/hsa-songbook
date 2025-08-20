@@ -1,7 +1,7 @@
 import { RotateCcw } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { EnharmonicToggle } from './EnharmonicToggle'
-import { KeySelector } from './KeySelector'
+import { KeySelector } from '@shared/components/KeySelector'
 
 interface TransposeControlsProps {
   currentKey?: string

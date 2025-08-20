@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { SimpleSection, SimpleInput, SimpleTextarea } from '../forms/utils/SimpleFormInputs'
-import { KeySelector } from '../forms/KeySelector'
+import { KeySelector } from '@shared/components/KeySelector'
 import { DIFFICULTY_LEVELS } from '../../validation/constants/musicalKeys'
 import { splitArrangementName, combineArrangementName } from '../../utils/arrangementNaming'
 import type { ArrangementFormData } from '../../validation/schemas/arrangementSchema'
