@@ -110,15 +110,6 @@ npm test AuthButtons
 - Testing Library DOM matchers
 - Browser API mocks (matchMedia, IntersectionObserver)
 
-## 📚 Test Utilities
-
-### Clerk Test Utils (`src/test/utils/clerk-test-utils.tsx`)
-- `renderWithClerk()` - Render with Clerk context
-- `createMockUser()` - Generate test users
-- `setAuthState()` - Configure auth state
-- `setUserState()` - Configure user state
-- Mock implementations for all Clerk hooks
-
 ## ✨ Best Practices
 
 1. **Write tests next to code** - Always create tests in `__tests__` folder
