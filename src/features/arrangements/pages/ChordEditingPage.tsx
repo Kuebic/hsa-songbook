@@ -5,6 +5,7 @@ import { useNotification } from '@shared/components/notifications'
 import { ErrorBoundary } from '@features/monitoring/components/ErrorBoundary'
 import { arrangementService } from '@features/songs/services/arrangementService'
 import { useAuth } from '@features/auth'
+import { recoverDraft } from '../utils/recoverDraft'
 
 export function ChordEditingPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -19,24 +20,75 @@ export function ChordEditingPage() {
   useEffect(() => {
     const loadArrangement = async (arrangementSlug: string) => {
       try {
+        // Always try to load the arrangement from the database first
         const arrangement = await arrangementService.getArrangementBySlug(arrangementSlug)
+        
         if (arrangement) {
+          // Arrangement exists in database
+          setArrangementId(arrangement.id)
+          
           // Check for initial ChordPro content from arrangement creation
           const initialContentKey = `initial-chordpro-${arrangementSlug}`
           const storedInitialContent = sessionStorage.getItem(initialContentKey)
           
-          if (storedInitialContent && !arrangement.chordProText) {
+          if (storedInitialContent && !arrangement.chordData) {
             // Use the generated initial content for new arrangements
             setInitialChordData(storedInitialContent)
             // Clean up the stored content
             sessionStorage.removeItem(initialContentKey)
-          } else if (arrangement.chordProText) {
+          } else if (arrangement.chordData) {
             // Use existing ChordPro content
-            setInitialChordData(arrangement.chordProText)
+            setInitialChordData(arrangement.chordData)
+          } else {
+            // Try to recover from draft if no chordData exists
+            const recoveredContent = await recoverDraft(arrangement.id)
+            if (recoveredContent) {
+              console.log('Recovered draft content for arrangement:', arrangement.id)
+              setInitialChordData(recoveredContent)
+              addNotification({
+                type: 'info',
+                title: 'Draft Recovered',
+                message: 'We recovered your unsaved changes from local storage'
+              })
+            }
+          }
+        } else {
+          // Arrangement doesn't exist in database
+          // Check if we have stored initial content
+          const initialContentKey = `initial-chordpro-${arrangementSlug}`
+          const storedInitialContent = sessionStorage.getItem(initialContentKey)
+          
+          if (storedInitialContent) {
+            setInitialChordData(storedInitialContent)
+            // Clean up the stored content
+            sessionStorage.removeItem(initialContentKey)
+          } else {
+            // Try to recover any draft with a matching pattern
+            const possibleIds = [`new-${arrangementSlug}`, arrangementSlug, 'new-unsaved']
+            for (const id of possibleIds) {
+              const recoveredContent = await recoverDraft(id)
+              if (recoveredContent) {
+                console.log('Recovered draft content for:', id)
+                setInitialChordData(recoveredContent)
+                addNotification({
+                  type: 'info',
+                  title: 'Draft Recovered',
+                  message: 'We recovered your unsaved changes from local storage'
+                })
+                break
+              }
+            }
           }
           
-          setArrangementId(arrangement.id)
+          // Don't set an arrangementId since it doesn't exist yet
+          // The arrangement needs to be created first
+          setArrangementId(null)
         }
+        
+        // Clean up any stale arrangement ID from sessionStorage
+        const idKey = `arrangement-id-${arrangementSlug}`
+        sessionStorage.removeItem(idKey)
+        
         setLoading(false)
       } catch (error) {
         console.error('Failed to load arrangement:', error)
@@ -76,7 +128,7 @@ export function ChordEditingPage() {
         }
         
         await arrangementService.updateArrangement(arrangementId, {
-          chordProText
+          chordData: chordProText
         })
         
         addNotification({
@@ -128,7 +180,7 @@ export function ChordEditingPage() {
   return (
     <ErrorBoundary>
       <ChordProEditor
-        arrangementId={arrangementId || 'new-arrangement'} // Use actual ID or fallback for new arrangements
+        arrangementId={arrangementId || `new-${slug || 'unsaved'}`} // Use actual ID or unique fallback for new arrangements
         initialContent={initialChordData}
         onChange={() => {}} // onChange is handled internally
         onSave={handleSave}
