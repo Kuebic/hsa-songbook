@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react'
-import { FormTextarea } from '@shared/components/form'
 import { useNotification } from '@shared/components/notifications'
 import { RatingWidget } from './RatingWidget'
 import type { Song } from '@features/songs/types/song.types'
@@ -132,6 +131,10 @@ export function ReviewForm({
     border: 'none'
   }
   
+  const characterCount = comment.length
+  const maxCharacters = 1000
+  const isNearLimit = characterCount > maxCharacters * 0.8
+  
   const cancelButtonStyles: React.CSSProperties = {
     ...buttonBaseStyles,
     backgroundColor: '#f8fafc',
@@ -141,14 +144,10 @@ export function ReviewForm({
   
   const submitButtonStyles: React.CSSProperties = {
     ...buttonBaseStyles,
-    backgroundColor: rating > 0 && !isLoading ? '#3b82f6' : '#9ca3af',
+    backgroundColor: !isLoading && characterCount <= maxCharacters ? '#3b82f6' : '#9ca3af',
     color: 'white',
-    cursor: rating > 0 && !isLoading ? 'pointer' : 'not-allowed'
+    cursor: !isLoading && characterCount <= maxCharacters ? 'pointer' : 'not-allowed'
   }
-  
-  const characterCount = comment.length
-  const maxCharacters = 1000
-  const isNearLimit = characterCount > maxCharacters * 0.8
   
   return (
     <form onSubmit={handleSubmit} style={containerStyles}>
@@ -173,6 +172,7 @@ export function ReviewForm({
           showAverage={false}
           size="large"
           userRating={rating}
+          readonly={isLoading}
         />
         {error && rating === 0 && (
           <div style={errorStyles}>Please select a rating</div>
@@ -180,20 +180,35 @@ export function ReviewForm({
       </div>
       
       <div style={sectionStyles}>
-        <FormTextarea
-          label="Your Review (optional)"
+        <label htmlFor="comment-field" style={labelStyles}>Your Review (optional)</label>
+        <textarea
+          id="comment-field"
           value={comment}
           onChange={e => setComment(e.target.value)}
           rows={5}
           maxLength={maxCharacters}
           placeholder="Share your experience with this song. What did you like? How did it work for your team or congregation?"
-          showCharacterCount
-          helperText="Help others by sharing your honest thoughts and experiences"
+          disabled={isLoading}
           style={{
+            width: '100%',
             resize: 'vertical',
-            minHeight: '120px'
+            minHeight: '120px',
+            padding: '12px',
+            border: '1px solid #d1d5db',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontFamily: 'inherit',
+            backgroundColor: isLoading ? '#f9fafb' : '#ffffff',
+            opacity: isLoading ? 0.6 : 1
           }}
         />
+        <div style={{
+          fontSize: '12px',
+          color: '#64748b',
+          marginTop: '4px'
+        }}>
+          Help others by sharing your honest thoughts and experiences
+        </div>
         
         {isNearLimit && (
           <div style={{ 
@@ -226,7 +241,7 @@ export function ReviewForm({
         
         <button
           type="submit"
-          disabled={rating === 0 || isLoading || characterCount > maxCharacters}
+          disabled={isLoading || characterCount > maxCharacters}
           style={submitButtonStyles}
         >
           {isLoading ? (

@@ -1,3 +1,4 @@
+import React from 'react'
 import { SONG_SOURCES, SOURCE_METADATA } from '../../../validation/constants/sources'
 
 interface SourceSelectProps {
@@ -82,7 +83,7 @@ export function SourceSelect({
         disabled={disabled}
         style={selectStyles}
         aria-invalid={!!error}
-        aria-describedby={error ? 'source-error' : undefined}
+        aria-describedby={error ? 'source-error' : 'source-helper'}
       >
         <option value="">Select a source...</option>
         
@@ -98,7 +99,7 @@ export function SourceSelect({
       </select>
       
       {!error && (
-        <div style={helperStyles}>
+        <div id="source-helper" style={helperStyles}>
           Select the source or origin of this song
         </div>
       )}

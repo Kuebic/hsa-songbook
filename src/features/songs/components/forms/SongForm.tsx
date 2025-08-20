@@ -172,7 +172,19 @@ export function SongForm({
     !isSubmitting
   
   return (
-    <form onSubmit={handleSubmit} style={formStyles} noValidate>
+    <form onSubmit={handleSubmit} style={formStyles} noValidate role="form" aria-label="Song creation form">
+      {/* Screen reader announcements */}
+      <div aria-live="polite" aria-atomic="true" style={{ 
+        position: 'absolute', 
+        left: '-10000px', 
+        width: '1px', 
+        height: '1px', 
+        overflow: 'hidden' 
+      }}>
+        {isSubmitting && 'Saving song...'}
+        {Object.keys(errors).length > 0 && 'Form has errors. Please check the fields below.'}
+      </div>
+      
       {shouldShowDuplicateWarning && (
         <DuplicateWarning 
           similarSongs={similarSongs}

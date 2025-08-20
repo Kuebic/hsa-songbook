@@ -5,15 +5,18 @@ import { songService } from '../../services/songService'
 import type { Song } from '../../types/song.types'
 import type { SongFormData } from '../../validation/schemas/songFormSchema'
 
-// Mock dependencies
-vi.mock('../../services/songService')
+// Mock dependencies with factory functions
+vi.mock('../../services/songService', () => ({
+  songService: {
+    createSong: vi.fn(),
+    updateSong: vi.fn(),
+    deleteSong: vi.fn(),
+    rateSong: vi.fn()
+  }
+}))
+
 vi.mock('@features/auth', () => ({
-  useAuth: () => ({
-    user: { id: 'test-user-id' },
-    userId: 'test-user-id',
-    isSignedIn: true,
-    getToken: vi.fn(() => Promise.resolve('test-token'))
-  })
+  useAuth: vi.fn()
 }))
 
 vi.mock('../utils/offlineQueue', () => ({
@@ -54,18 +57,53 @@ describe('useSongMutations (Enhanced)', () => {
     isPublic: false
   }
   
-  beforeEach(() => {
-    vi.clearAllMocks()
+  let mockCreateSong: any
+  let mockUpdateSong: any
+  let mockDeleteSong: any
+  let mockRateSong: any
+  let mockGetToken: any
+  let mockOfflineQueueAdd: any
+  
+  beforeEach(async () => {
+    const { useAuth } = await import('@features/auth')
+    const { songService } = await import('../../services/songService')
+    const { offlineQueue } = await import('../utils/offlineQueue')
+    
+    mockCreateSong = vi.fn()
+    mockUpdateSong = vi.fn()
+    mockDeleteSong = vi.fn()
+    mockRateSong = vi.fn()
+    mockGetToken = vi.fn(() => Promise.resolve('test-token'))
+    mockOfflineQueueAdd = vi.fn()
+    
+    // Set up auth mock
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: 'test-user-id' },
+      userId: 'test-user-id',
+      isSignedIn: true,
+      getToken: mockGetToken
+    })
+    
+    // Set up service mocks
+    songService.createSong = mockCreateSong
+    songService.updateSong = mockUpdateSong
+    songService.deleteSong = mockDeleteSong
+    songService.rateSong = mockRateSong
+    
+    // Set up offline queue mock
+    offlineQueue.add = mockOfflineQueueAdd
+    
     Object.defineProperty(navigator, 'onLine', { value: true })
   })
   
   afterEach(() => {
-    vi.restoreAllMocks()
+    // Reset navigator.onLine to default
+    Object.defineProperty(navigator, 'onLine', { value: true })
   })
   
   describe('createSong', () => {
     it('creates song successfully when online', async () => {
-      vi.mocked(songService.createSong).mockResolvedValue(mockSong)
+      mockCreateSong.mockResolvedValue(mockSong)
       
       const { result } = renderHook(() => useSongMutations())
       
@@ -77,12 +115,12 @@ describe('useSongMutations (Enhanced)', () => {
       expect(createdSong!).toEqual(mockSong)
       expect(result.current.isCreating).toBe(false)
       expect(result.current.error).toBeNull()
-      expect(songService.createSong).toHaveBeenCalledWith(mockFormData, 'test-token')
+      expect(mockCreateSong).toHaveBeenCalledWith(mockFormData, 'test-token')
     })
     
     it('handles creation error and reverts optimistic update', async () => {
       const mockError = new Error('Creation failed')
-      vi.mocked(songService.createSong).mockRejectedValue(mockError)
+      mockCreateSong.mockRejectedValue(mockError)
       
       const { result } = renderHook(() => useSongMutations())
       
@@ -97,7 +135,6 @@ describe('useSongMutations (Enhanced)', () => {
     })
     
     it('queues creation when offline', async () => {
-      const { offlineQueue } = await import('../utils/offlineQueue')
       Object.defineProperty(navigator, 'onLine', { value: false })
       
       const { result } = renderHook(() => useSongMutations())
@@ -108,10 +145,10 @@ describe('useSongMutations (Enhanced)', () => {
       })
       
       // Should not call service when offline
-      expect(songService.createSong).not.toHaveBeenCalled()
+      expect(mockCreateSong).not.toHaveBeenCalled()
       
       // Should add to offline queue
-      expect(offlineQueue.add).toHaveBeenCalledWith({
+      expect(mockOfflineQueueAdd).toHaveBeenCalledWith({
         type: 'create',
         data: { formData: mockFormData, token: 'test-token' }
       })
@@ -127,7 +164,7 @@ describe('useSongMutations (Enhanced)', () => {
     
     it('updates song successfully when online', async () => {
       const updatedSong = { ...mockSong, title: 'Updated Song' }
-      vi.mocked(songService.updateSong).mockResolvedValue(updatedSong)
+      mockUpdateSong.mockResolvedValue(updatedSong)
       
       const { result } = renderHook(() => useSongMutations({ initialSongs }))
       
@@ -138,12 +175,12 @@ describe('useSongMutations (Enhanced)', () => {
       
       expect(resultSong!).toEqual(updatedSong)
       expect(result.current.isUpdating).toBe(false)
-      expect(songService.updateSong).toHaveBeenCalledWith('123', { title: 'Updated Song' }, 'test-token', 'test-user-id')
+      expect(mockUpdateSong).toHaveBeenCalledWith('123', { title: 'Updated Song' }, 'test-token', 'test-user-id')
     })
     
     it('handles update error and reverts optimistic update', async () => {
       const mockError = new Error('Update failed')
-      vi.mocked(songService.updateSong).mockRejectedValue(mockError)
+      mockUpdateSong.mockRejectedValue(mockError)
       
       const { result } = renderHook(() => useSongMutations({ initialSongs }))
       
@@ -161,7 +198,7 @@ describe('useSongMutations (Enhanced)', () => {
     const initialSongs = [mockSong]
     
     it('deletes song successfully when online', async () => {
-      vi.mocked(songService.deleteSong).mockResolvedValue(undefined)
+      mockDeleteSong.mockResolvedValue(undefined)
       
       const { result } = renderHook(() => useSongMutations({ initialSongs }))
       
@@ -169,13 +206,13 @@ describe('useSongMutations (Enhanced)', () => {
         await result.current.deleteSong('123')
       })
       
-      expect(songService.deleteSong).toHaveBeenCalledWith('123', 'test-token')
+      expect(mockDeleteSong).toHaveBeenCalledWith('123', 'test-token')
       expect(result.current.isDeleting).toBe(false)
     })
     
     it('handles delete error and reverts optimistic delete', async () => {
       const mockError = new Error('Delete failed')
-      vi.mocked(songService.deleteSong).mockRejectedValue(mockError)
+      mockDeleteSong.mockRejectedValue(mockError)
       
       const { result } = renderHook(() => useSongMutations({ initialSongs }))
       
@@ -193,7 +230,7 @@ describe('useSongMutations (Enhanced)', () => {
     const initialSongs = [mockSong]
     
     it('rates song successfully when online', async () => {
-      vi.mocked(songService.rateSong).mockResolvedValue(mockSong)
+      mockRateSong.mockResolvedValue(mockSong)
       
       const { result } = renderHook(() => useSongMutations({ initialSongs }))
       
@@ -201,7 +238,7 @@ describe('useSongMutations (Enhanced)', () => {
         await result.current.rateSong('123', 5)
       })
       
-      expect(songService.rateSong).toHaveBeenCalledWith('123', 5, 'test-token')
+      expect(mockRateSong).toHaveBeenCalledWith('123', 5, 'test-token')
       expect(result.current.isRating).toBe(false)
     })
     
@@ -234,7 +271,7 @@ describe('useSongMutations (Enhanced)', () => {
       const onSongsUpdate = vi.fn()
       const initialSongs = [mockSong]
       
-      vi.mocked(songService.createSong).mockResolvedValue({
+      mockCreateSong.mockResolvedValue({
         ...mockSong,
         id: 'real-id'
       })
@@ -256,7 +293,7 @@ describe('useSongMutations (Enhanced)', () => {
   describe('error handling', () => {
     it('provides error state and clearError method', async () => {
       const mockError = new Error('Test error')
-      vi.mocked(songService.createSong).mockRejectedValue(mockError)
+      mockCreateSong.mockRejectedValue(mockError)
       
       const { result } = renderHook(() => useSongMutations())
       
@@ -289,7 +326,7 @@ describe('useSongMutations (Enhanced)', () => {
         await result.current.updateSongTitle('123', 'New Title')
       })
       
-      expect(songService.updateSong).toHaveBeenCalledWith('123', { title: 'New Title' }, 'test-token', 'test-user-id')
+      expect(mockUpdateSong).toHaveBeenCalledWith('123', { title: 'New Title' }, 'test-token', 'test-user-id')
     })
     
     it('provides updateSongField method for backward compatibility', async () => {
@@ -302,7 +339,7 @@ describe('useSongMutations (Enhanced)', () => {
         await result.current.updateSongField('123', 'artist', 'New Artist')
       })
       
-      expect(songService.updateSong).toHaveBeenCalledWith('123', { artist: 'New Artist' }, 'test-token', 'test-user-id')
+      expect(mockUpdateSong).toHaveBeenCalledWith('123', { artist: 'New Artist' }, 'test-token', 'test-user-id')
     })
   })
 })

@@ -143,11 +143,16 @@ describe('ErrorBoundary', () => {
     expect(errorContainer).toHaveStyle({
       padding: '2rem',
       textAlign: 'center',
-      backgroundColor: '#fee2e2',
       borderRadius: '8px',
       margin: '2rem',
-      border: '1px solid #fca5a5'
+      border: '1px solid var(--status-error)'
     })
+    
+    // Check that CSS variables are properly set (can't test computed values directly)
+    expect(errorContainer).toHaveAttribute('style')
+    const style = errorContainer?.getAttribute('style') || ''
+    expect(style).toContain('var(--status-error)')
+    expect(style).toContain('rgba(var(--status-error), 0.1)')
   })
 
   it('does not render error UI when component recovers', () => {
@@ -221,11 +226,16 @@ describe('FeatureErrorBoundary', () => {
     const errorContainer = screen.getByText('Error in TestFeature').parentElement
     expect(errorContainer).toHaveStyle({
       padding: '1rem',
-      backgroundColor: '#fef3c7',
-      border: '1px solid #fcd34d',
+      border: '1px solid var(--status-warning)',
       borderRadius: '4px',
       margin: '1rem 0'
     })
+    
+    // Check that CSS variables are properly set (can't test computed values directly)
+    expect(errorContainer).toHaveAttribute('style')
+    const style = errorContainer?.getAttribute('style') || ''
+    expect(style).toContain('var(--status-warning)')
+    expect(style).toContain('rgba(var(--status-warning), 0.1)')
   })
 
   it('displays generic error message for feature errors', () => {

@@ -1,14 +1,31 @@
 import { ReactElement } from 'react'
 import { render as rtlRender, RenderOptions } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ThemeProvider } from '@shared/contexts/ThemeContext'
+import { ModalProvider } from '@shared/components/modal/ModalProvider'
 import { NotificationProvider } from '@shared/components/notifications'
+import { mockUseAuth } from '@shared/test-utils/setup'
 import { vi } from 'vitest'
 
-// Set up auth mock at module level
-const mockUseAuth = vi.fn()
-vi.mock('@features/auth/hooks/useAuth', () => ({
-  useAuth: mockUseAuth
-}))
+// Create a new QueryClient for each test to ensure isolation
+const createTestQueryClient = () => new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false, // Disable retries in tests
+      gcTime: 0, // Disable caching
+      staleTime: 0,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+  logger: {
+    log: () => {},
+    warn: () => {},
+    error: () => {},
+  },
+})
 
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   user?: { 
@@ -72,18 +89,21 @@ export function render(
     })
   }
   
-  // Set initial route if provided
-  if (initialRoute !== '/') {
-    window.history.pushState({}, 'Test page', initialRoute)
-  }
+  const queryClient = createTestQueryClient()
   
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
-      <BrowserRouter>
-        <NotificationProvider>
-          {children}
-        </NotificationProvider>
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={[initialRoute]}>
+          <ThemeProvider>
+            <ModalProvider>
+              <NotificationProvider>
+                {children}
+              </NotificationProvider>
+            </ModalProvider>
+          </ThemeProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
     )
   }
   

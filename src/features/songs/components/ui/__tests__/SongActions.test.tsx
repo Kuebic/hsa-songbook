@@ -1,11 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@shared/test-utils/testWrapper'
 import userEvent from '@testing-library/user-event'
 import { SongActions } from '../SongActions'
-import { NotificationProvider } from '@shared/components/notifications'
 import type { TestUser } from '@shared/types/test'
 
-// Mock dependencies
+// Mock dependencies  
 vi.mock('@features/auth/hooks/useAuth')
 vi.mock('@features/songs/hooks/mutations/useSongMutations')
 
@@ -54,13 +53,6 @@ const mockSong = {
   }
 }
 
-function TestWrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <NotificationProvider>
-      {children}
-    </NotificationProvider>
-  )
-}
 
 describe('SongActions', () => {
   beforeEach(() => {
@@ -103,11 +95,7 @@ describe('SongActions', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <SongActions song={mockSong} />
-      </TestWrapper>
-    )
+    render(<SongActions song={mockSong} />)
     
     expect(screen.queryByRole('button', { name: /edit/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument()
@@ -127,11 +115,7 @@ describe('SongActions', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />
-      </TestWrapper>
-    )
+    render(<SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />)
     
     expect(screen.getByRole('button', { name: /edit test song/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /delete test song/i })).toBeInTheDocument()
@@ -151,11 +135,7 @@ describe('SongActions', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />
-      </TestWrapper>
-    )
+    render(<SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />)
     
     expect(screen.getByRole('button', { name: /edit test song/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /delete test song/i })).toBeInTheDocument()
@@ -175,11 +155,7 @@ describe('SongActions', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <SongActions song={mockSong} />
-      </TestWrapper>
-    )
+    render(<SongActions song={mockSong} />)
     
     expect(screen.queryByRole('button', { name: /edit/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument()
@@ -200,11 +176,7 @@ describe('SongActions', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />
-      </TestWrapper>
-    )
+    render(<SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />)
     
     await user.click(screen.getByRole('button', { name: /edit test song/i }))
     
@@ -229,11 +201,7 @@ describe('SongActions', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />
-      </TestWrapper>
-    )
+    render(<SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />)
     
     await user.click(screen.getByRole('button', { name: /delete test song/i }))
     
@@ -263,11 +231,7 @@ describe('SongActions', () => {
 
     mockUpdateSong.mockResolvedValue(updatedSong)
 
-    render(
-      <TestWrapper>
-        <SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />
-      </TestWrapper>
-    )
+    render(<SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />)
     
     // Open edit modal and submit
     await user.click(screen.getByRole('button', { name: /edit test song/i }))
@@ -297,11 +261,7 @@ describe('SongActions', () => {
 
     mockDeleteSong.mockResolvedValue(undefined)
 
-    render(
-      <TestWrapper>
-        <SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />
-      </TestWrapper>
-    )
+    render(<SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />)
     
     // Open delete confirmation and confirm
     await user.click(screen.getByRole('button', { name: /delete test song/i }))
@@ -331,11 +291,7 @@ describe('SongActions', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />
-      </TestWrapper>
-    )
+    render(<SongActions song={mockSong} onUpdate={mockOnUpdate} onDelete={mockOnDelete} />)
     
     // Open delete confirmation and cancel
     await user.click(screen.getByRole('button', { name: /delete test song/i }))

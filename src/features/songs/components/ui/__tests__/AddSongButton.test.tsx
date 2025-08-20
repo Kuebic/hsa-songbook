@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@shared/test-utils/testWrapper'
 import userEvent from '@testing-library/user-event'
 import { AddSongButton } from '../AddSongButton'
-import { NotificationProvider } from '@shared/components/notifications'
 import type { TestUser } from '@shared/types/test'
 
 // Mock dependencies  
@@ -37,13 +36,6 @@ vi.mock('../../forms/SongFormModal', () => ({
   )
 }))
 
-function TestWrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <NotificationProvider>
-      {children}
-    </NotificationProvider>
-  )
-}
 
 describe('AddSongButton', () => {
   beforeEach(() => {
@@ -86,13 +78,9 @@ describe('AddSongButton', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <AddSongButton />
-      </TestWrapper>
-    )
+    render(<AddSongButton />)
     
-    expect(screen.queryByRole('button', { name: /add new song/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /add song/i })).not.toBeInTheDocument()
   })
 
   it('renders when user is signed in', () => {
@@ -109,13 +97,9 @@ describe('AddSongButton', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <AddSongButton />
-      </TestWrapper>
-    )
+    render(<AddSongButton />)
     
-    expect(screen.getByRole('button', { name: /add new song/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /add song/i })).toBeInTheDocument()
     expect(screen.getByText('Add Song')).toBeInTheDocument()
     expect(screen.getByText('➕')).toBeInTheDocument()
   })
@@ -134,11 +118,7 @@ describe('AddSongButton', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <AddSongButton />
-      </TestWrapper>
-    )
+    render(<AddSongButton />)
     
     expect(screen.queryByTestId('song-form-modal')).not.toBeInTheDocument()
   })
@@ -158,11 +138,7 @@ describe('AddSongButton', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <AddSongButton />
-      </TestWrapper>
-    )
+    render(<AddSongButton />)
     
     const button = screen.getByTestId('add-song-button')
     await user.click(button)
@@ -187,11 +163,7 @@ describe('AddSongButton', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <AddSongButton />
-      </TestWrapper>
-    )
+    render(<AddSongButton />)
     
     const button = screen.getByTestId('add-song-button')
     await user.click(button)
@@ -219,13 +191,9 @@ describe('AddSongButton', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <AddSongButton />
-      </TestWrapper>
-    )
+    render(<AddSongButton />)
     
-    await user.click(screen.getByRole('button', { name: /add new song/i }))
+    await user.click(screen.getByRole('button', { name: /add song/i }))
     
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument()
@@ -248,14 +216,10 @@ describe('AddSongButton', () => {
       getUserAvatar: vi.fn()
     })
 
-    render(
-      <TestWrapper>
-        <AddSongButton />
-      </TestWrapper>
-    )
+    render(<AddSongButton />)
     
     // Open modal
-    await user.click(screen.getByRole('button', { name: /add new song/i }))
+    await user.click(screen.getByRole('button', { name: /add song/i }))
     
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument()
@@ -288,14 +252,10 @@ describe('AddSongButton', () => {
 
     mockCreateSong.mockResolvedValue(mockSong)
 
-    render(
-      <TestWrapper>
-        <AddSongButton />
-      </TestWrapper>
-    )
+    render(<AddSongButton />)
     
     // Open modal and submit
-    await user.click(screen.getByRole('button', { name: /add new song/i }))
+    await user.click(screen.getByRole('button', { name: /add song/i }))
     await user.click(screen.getByText('Create Song'))
     
     await waitFor(() => {
@@ -327,14 +287,10 @@ describe('AddSongButton', () => {
 
     mockCreateSong.mockRejectedValue(mockError)
 
-    render(
-      <TestWrapper>
-        <AddSongButton />
-      </TestWrapper>
-    )
+    render(<AddSongButton />)
     
     // Open modal and submit
-    await user.click(screen.getByRole('button', { name: /add new song/i }))
+    await user.click(screen.getByRole('button', { name: /add song/i }))
     await user.click(screen.getByText('Create Song'))
     
     await waitFor(() => {

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { screen } from '@testing-library/react'
 import { Layout } from '../Layout'
+import { renderWithProviders } from '@shared/test-utils/testWrapper'
 
 // Mock the lazy Clerk components
 vi.mock('@features/auth/components/LazyClerkComponents', () => ({
@@ -14,19 +14,21 @@ vi.mock('@features/auth/components/LazyClerkComponents', () => ({
   ClerkComponentLoader: () => <div data-testid="clerk-loader">Loading...</div>
 }))
 
-// Mock the auth components
+// Mock the auth components and hooks
 vi.mock('@features/auth', () => ({
   AuthButtons: () => <div data-testid="auth-buttons">Auth Buttons</div>,
-  UserMenu: () => <div data-testid="user-menu">User Menu</div>
+  UserMenu: () => <div data-testid="user-menu">User Menu</div>,
+  useAuth: vi.fn(() => ({
+    isAuthenticated: false,
+    user: null,
+    login: vi.fn(),
+    logout: vi.fn()
+  }))
 }))
 
 describe('Layout', () => {
   const renderWithRouter = (component: React.ReactElement, initialEntries = ['/']) => {
-    return render(
-      <MemoryRouter initialEntries={initialEntries}>
-        {component}
-      </MemoryRouter>
-    )
+    return renderWithProviders(component, { initialEntries })
   }
 
   it('renders the application title', () => {
@@ -59,8 +61,8 @@ describe('Layout', () => {
     const songsLink = screen.getByRole('link', { name: 'Songs' })
     const homeLink = screen.getByRole('link', { name: 'Home' })
     
-    expect(songsLink).toHaveStyle({ color: '#60a5fa', fontWeight: 'bold' })
-    expect(homeLink).toHaveStyle({ color: 'rgb(255, 255, 255)', fontWeight: 'normal' })
+    expect(songsLink).toHaveStyle({ color: 'var(--nav-active)', fontWeight: 'bold' })
+    expect(homeLink).toHaveStyle({ color: 'var(--nav-text)', fontWeight: 'normal' })
   })
 
   it('renders children content in main section', () => {
@@ -95,8 +97,8 @@ describe('Layout', () => {
     
     const nav = screen.getByRole('navigation')
     expect(nav).toHaveStyle({
-      backgroundColor: '#1e293b',
-      color: 'rgb(255, 255, 255)',
+      backgroundColor: 'var(--nav-background)',
+      color: 'var(--nav-text)',
       width: '100%'
     })
   })
@@ -107,7 +109,7 @@ describe('Layout', () => {
     const main = screen.getByRole('main')
     expect(main).toHaveStyle({
       flex: '1',
-      backgroundColor: '#f8fafc',
+      backgroundColor: 'var(--color-foreground)',
       width: '100%'
     })
   })
@@ -117,8 +119,8 @@ describe('Layout', () => {
     
     const footer = screen.getByRole('contentinfo')
     expect(footer).toHaveStyle({
-      backgroundColor: '#1e293b',
-      color: '#94a3b8',
+      backgroundColor: 'var(--nav-background)',
+      color: 'var(--text-tertiary)',
       width: '100%'
     })
   })
@@ -187,7 +189,7 @@ describe('Layout', () => {
       const { unmount } = renderWithRouter(<Layout><div>Content</div></Layout>, [path])
       
       const activeLink = screen.getByRole('link', { name: linkName })
-      expect(activeLink).toHaveStyle({ color: '#60a5fa', fontWeight: 'bold' })
+      expect(activeLink).toHaveStyle({ color: 'var(--nav-active)', fontWeight: 'bold' })
       
       unmount()
     })

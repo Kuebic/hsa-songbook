@@ -86,6 +86,8 @@ export function FormButton({
         onMouseLeave={() => setHovered(false)}
         disabled={isDisabled}
         autoFocus={autoFocus}
+        aria-busy={loading}
+        aria-disabled={isDisabled}
       >
         {loading && (
           <span 

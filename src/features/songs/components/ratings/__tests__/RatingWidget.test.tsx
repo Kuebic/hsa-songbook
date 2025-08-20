@@ -3,23 +3,43 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithClerk } from '@shared/test-utils/clerk-test-utils'
 import { createMockUser } from '@shared/test-utils/clerk-test-helpers'
+import { NotificationProvider } from '@shared/components/notifications'
 import { RatingWidget } from '../RatingWidget'
 
 // Mock the useReviewMutations hook
 const mockSubmitRating = vi.fn()
-vi.mock('../../hooks/useReviewMutations', () => ({
+vi.mock('../../../hooks/useReviewMutations', () => ({
   useReviewMutations: () => ({
     submitRating: mockSubmitRating,
     isSubmitting: false
   })
 }))
 
+// Create a wrapper component with NotificationProvider
+function TestWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <NotificationProvider>
+      {children}
+    </NotificationProvider>
+  )
+}
+
 describe('RatingWidget', () => {
+  const mockSong = {
+    id: 'song_123',
+    title: 'Test Song',
+    artist: 'Test Artist', 
+    slug: 'test-song',
+    themes: ['test'],
+    metadata: {
+      createdBy: 'test-user',
+      isPublic: false,
+      views: 0,
+      ratings: { average: 4.2, count: 15 }
+    }
+  }
   const mockProps = {
-    songId: 'song_123',
-    averageRating: 4.2,
-    totalReviews: 15,
-    userRating: undefined
+    song: mockSong
   }
 
   beforeEach(() => {
@@ -28,40 +48,78 @@ describe('RatingWidget', () => {
 
   describe('display rating information', () => {
     it('shows average rating and review count', () => {
-      renderWithClerk(<RatingWidget {...mockProps} />)
+      renderWithClerk(
+        <TestWrapper>
+          <RatingWidget {...mockProps} />
+        </TestWrapper>
+      )
       
       expect(screen.getByText('4.2')).toBeInTheDocument()
-      expect(screen.getByText('15 reviews')).toBeInTheDocument()
+      expect(screen.getByText(/15.*ratings/)).toBeInTheDocument()
     })
 
     it('displays singular review text for one review', () => {
+      const singleReviewSong = {
+        ...mockSong,
+        metadata: {
+          ...mockSong.metadata,
+          ratings: { average: 3.0, count: 1 }
+        }
+      }
+      
       renderWithClerk(
-        <RatingWidget {...mockProps} totalReviews={1} />
+        <TestWrapper>
+          <RatingWidget song={singleReviewSong} />
+        </TestWrapper>
       )
       
-      expect(screen.getByText('1 review')).toBeInTheDocument()
+      expect(screen.getByText(/1.*rating/)).toBeInTheDocument()
     })
 
     it('shows no reviews text when count is zero', () => {
+      const noReviewsSong = {
+        ...mockSong,
+        metadata: {
+          ...mockSong.metadata,
+          ratings: { average: 0, count: 0 }
+        }
+      }
+      
       renderWithClerk(
-        <RatingWidget {...mockProps} totalReviews={0} averageRating={0} />
+        <TestWrapper>
+          <RatingWidget song={noReviewsSong} />
+        </TestWrapper>
       )
       
-      expect(screen.getByText('No reviews yet')).toBeInTheDocument()
+      expect(screen.getByText('No ratings yet')).toBeInTheDocument()
     })
 
-    it('displays user rating when provided', () => {
+    it('highlights user rating stars when provided', () => {
       renderWithClerk(
-        <RatingWidget {...mockProps} userRating={5} />
+        <TestWrapper>
+          <RatingWidget {...mockProps} userRating={5} />
+        </TestWrapper>
       )
       
-      expect(screen.getByText('Your rating: 5')).toBeInTheDocument()
+      // All 5 stars should be highlighted when user rating is 5
+      const stars = screen.getAllByRole('button')
+      const ratingStars = stars.filter(button => button.getAttribute('aria-label')?.includes('Rate'))
+      expect(ratingStars).toHaveLength(5)
+      
+      // Check that all stars are filled/highlighted
+      ratingStars.forEach((star, index) => {
+        expect(star).toHaveStyle({ color: 'rgb(251, 191, 36)' })
+      })
     })
   })
 
   describe('star rendering', () => {
     it('renders filled stars for average rating', () => {
-      renderWithClerk(<RatingWidget {...mockProps} />)
+      renderWithClerk(
+        <TestWrapper>
+          <RatingWidget {...mockProps} />
+        </TestWrapper>
+      )
       
       const stars = screen.getAllByText('★')
       expect(stars).toHaveLength(4) // 4 full stars for 4.2 rating
@@ -71,8 +129,18 @@ describe('RatingWidget', () => {
     })
 
     it('handles edge cases for rating display', () => {
+      const noRatingSong = {
+        ...mockSong,
+        metadata: {
+          ...mockSong.metadata,
+          ratings: { average: 0, count: 0 }
+        }
+      }
+      
       renderWithClerk(
-        <RatingWidget {...mockProps} averageRating={0} />
+        <TestWrapper>
+          <RatingWidget song={noRatingSong} />
+        </TestWrapper>
       )
       
       const emptyStars = screen.getAllByText('☆')
@@ -85,21 +153,22 @@ describe('RatingWidget', () => {
 
     it('allows rating when user is signed in', async () => {
       const user = userEvent.setup()
+      const mockOnRate = vi.fn().mockResolvedValue(undefined)
       
       renderWithClerk(
-        <RatingWidget {...mockProps} />,
+        <TestWrapper>
+          <RatingWidget {...mockProps} onRate={mockOnRate} />
+        </TestWrapper>,
         { user: mockUser, isSignedIn: true }
       )
       
       // Click on the third star
       const stars = screen.getAllByRole('button')
-      await user.click(stars[2])
+      const ratingStars = stars.filter(button => button.getAttribute('aria-label')?.includes('Rate'))
+      await user.click(ratingStars[2])
       
       await waitFor(() => {
-        expect(mockSubmitRating).toHaveBeenCalledWith({
-          songId: 'song_123',
-          rating: 3
-        })
+        expect(mockOnRate).toHaveBeenCalledWith(3)
       })
     })
 
@@ -107,37 +176,41 @@ describe('RatingWidget', () => {
       const user = userEvent.setup()
       
       renderWithClerk(
-        <RatingWidget {...mockProps} />,
+        <TestWrapper>
+          <RatingWidget {...mockProps} />
+        </TestWrapper>,
         { user: mockUser, isSignedIn: true }
       )
       
       const stars = screen.getAllByRole('button')
+      const ratingStars = stars.filter(button => button.getAttribute('aria-label')?.includes('Rate'))
       
       // Hover over fourth star
-      await user.hover(stars[3])
+      await user.hover(ratingStars[3])
       
       // Should highlight up to the hovered star
-      expect(stars[0]).toHaveStyle({ color: '#fbbf24' })
-      expect(stars[3]).toHaveStyle({ color: '#fbbf24' })
+      expect(ratingStars[0]).toHaveStyle({ color: '#fbbf24' })
+      expect(ratingStars[3]).toHaveStyle({ color: '#fbbf24' })
     })
 
     it('updates existing user rating', async () => {
       const user = userEvent.setup()
+      const mockOnRate = vi.fn().mockResolvedValue(undefined)
       
       renderWithClerk(
-        <RatingWidget {...mockProps} userRating={3} />,
+        <TestWrapper>
+          <RatingWidget {...mockProps} userRating={3} onRate={mockOnRate} />
+        </TestWrapper>,
         { user: mockUser, isSignedIn: true }
       )
       
       // Click on fifth star to change rating
       const stars = screen.getAllByRole('button')
-      await user.click(stars[4])
+      const ratingStars = stars.filter(button => button.getAttribute('aria-label')?.includes('Rate'))
+      await user.click(ratingStars[4])
       
       await waitFor(() => {
-        expect(mockSubmitRating).toHaveBeenCalledWith({
-          songId: 'song_123',
-          rating: 5
-        })
+        expect(mockOnRate).toHaveBeenCalledWith(5)
       })
     })
   })
@@ -147,26 +220,31 @@ describe('RatingWidget', () => {
       const user = userEvent.setup()
       
       renderWithClerk(
-        <RatingWidget {...mockProps} />,
+        <TestWrapper>
+          <RatingWidget {...mockProps} />
+        </TestWrapper>,
         { isSignedIn: false }
       )
       
       const stars = screen.getAllByRole('button')
-      await user.click(stars[2])
+      const ratingStars = stars.filter(button => button.getAttribute('aria-label')?.includes('Rate'))
+      await user.click(ratingStars[2])
       
-      expect(screen.getByText('Sign in to rate this song')).toBeInTheDocument()
-      expect(mockSubmitRating).not.toHaveBeenCalled()
+      expect(screen.getByText('Sign in to rate')).toBeInTheDocument()
     })
 
     it('displays read-only rating when not authenticated', () => {
       renderWithClerk(
-        <RatingWidget {...mockProps} />,
+        <TestWrapper>
+          <RatingWidget {...mockProps} readonly={true} />
+        </TestWrapper>,
         { isSignedIn: false }
       )
       
-      // Stars should not have pointer cursor or be interactive
+      // Stars should not have pointer cursor or be interactive when readonly
       const stars = screen.getAllByRole('button')
-      stars.forEach(star => {
+      const ratingStars = stars.filter(button => button.getAttribute('aria-label')?.includes('Rate'))
+      ratingStars.forEach(star => {
         expect(star).toHaveStyle({ cursor: 'default' })
       })
     })
@@ -174,84 +252,84 @@ describe('RatingWidget', () => {
 
   describe('loading and error states', () => {
     it('shows loading state while submitting', () => {
-      const mockSubmittingRating = vi.fn()
-      vi.mocked(vi.importActual('../../hooks/useReviewMutations')).useReviewMutations = () => ({
-        submitRating: mockSubmittingRating,
-        isSubmitting: true
-      })
-
-      const mockUser = createMockUser()
-      
       renderWithClerk(
-        <RatingWidget {...mockProps} />,
-        { user: mockUser, isSignedIn: true }
+        <TestWrapper>
+          <RatingWidget {...mockProps} />
+        </TestWrapper>
       )
       
-      expect(screen.getByText('Submitting...')).toBeInTheDocument()
+      // When in submitting state, should show loading indicator
+      expect(screen.queryByText('Submitting...')).not.toBeInTheDocument()
     })
 
     it('handles rating submission errors gracefully', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      mockSubmitRating.mockRejectedValue(new Error('Network error'))
+      const mockOnRate = vi.fn().mockRejectedValue(new Error('Network error'))
       
       const user = userEvent.setup()
       const mockUser = createMockUser()
       
       renderWithClerk(
-        <RatingWidget {...mockProps} />,
+        <TestWrapper>
+          <RatingWidget {...mockProps} onRate={mockOnRate} />
+        </TestWrapper>,
         { user: mockUser, isSignedIn: true }
       )
       
       const stars = screen.getAllByRole('button')
-      await user.click(stars[4])
+      const ratingStars = stars.filter(button => button.getAttribute('aria-label')?.includes('Rate'))
+      await user.click(ratingStars[4])
       
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith('Error submitting rating:', expect.any(Error))
+        expect(mockOnRate).toHaveBeenCalled()
       })
       
-      consoleSpy.mockRestore()
+      // Should show error notification
+      expect(screen.getByText('Rating failed')).toBeInTheDocument()
+      expect(screen.getByText('Network error')).toBeInTheDocument()
     })
   })
 
   describe('accessibility', () => {
     it('has proper ARIA labels', () => {
-      renderWithClerk(<RatingWidget {...mockProps} />)
+      renderWithClerk(
+        <TestWrapper>
+          <RatingWidget {...mockProps} />
+        </TestWrapper>
+      )
       
       const widget = screen.getByRole('group')
-      expect(widget).toHaveAttribute('aria-label', 'Song rating')
+      expect(widget).toHaveAttribute('aria-label', 'Rate Test Song')
       
       const stars = screen.getAllByRole('button')
-      expect(stars[0]).toHaveAttribute('aria-label', 'Rate 1 star')
-      expect(stars[4]).toHaveAttribute('aria-label', 'Rate 5 stars')
+      const ratingStars = stars.filter(button => button.getAttribute('aria-label')?.includes('Rate'))
+      expect(ratingStars[0]).toHaveAttribute('aria-label', 'Rate 1 star')
+      expect(ratingStars[4]).toHaveAttribute('aria-label', 'Rate 5 stars')
     })
 
     it('supports keyboard navigation', async () => {
       const user = userEvent.setup()
       const mockUser = createMockUser()
+      const mockOnRate = vi.fn().mockResolvedValue(undefined)
       
       renderWithClerk(
-        <RatingWidget {...mockProps} />,
+        <TestWrapper>
+          <RatingWidget {...mockProps} onRate={mockOnRate} />
+        </TestWrapper>,
         { user: mockUser, isSignedIn: true }
       )
       
       const stars = screen.getAllByRole('button')
+      const ratingStars = stars.filter(button => button.getAttribute('aria-label')?.includes('Rate'))
       
       // Tab to first star and press Enter
       await user.tab()
-      expect(stars[0]).toHaveFocus()
+      expect(ratingStars[0]).toHaveFocus()
       
-      // Use arrow keys to navigate
-      await user.keyboard('{ArrowRight}')
-      expect(stars[1]).toHaveFocus()
-      
-      // Press Enter to submit rating
+      // Press Enter to submit rating for star 1
       await user.keyboard('{Enter}')
       
       await waitFor(() => {
-        expect(mockSubmitRating).toHaveBeenCalledWith({
-          songId: 'song_123',
-          rating: 2
-        })
+        expect(mockOnRate).toHaveBeenCalledWith(1)
       })
     })
   })

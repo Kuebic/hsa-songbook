@@ -1,8 +1,10 @@
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { screen } from '@testing-library/react'
 import { DndContext } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { DraggableArrangementItem } from '../DraggableArrangementItem'
 import type { SetlistArrangement } from '../../../types/setlist.types'
+import { renderWithProviders } from '@shared/test-utils/testWrapper'
 
 // Mock arrangement data
 const mockArrangement: SetlistArrangement = {
@@ -31,17 +33,21 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   </DndContext>
 )
 
+const renderWithDnd = (ui: React.ReactElement) => {
+  return renderWithProviders(
+    <TestWrapper>{ui}</TestWrapper>
+  )
+}
+
 describe('DraggableArrangementItem', () => {
   it('renders arrangement information correctly', () => {
-    const mockOnRemove = jest.fn()
+    const mockOnRemove = vi.fn()
     
-    render(
-      <TestWrapper>
-        <DraggableArrangementItem
-          item={mockArrangement}
-          onRemove={mockOnRemove}
-        />
-      </TestWrapper>
+    renderWithDnd(
+      <DraggableArrangementItem
+        item={mockArrangement}
+        onRemove={mockOnRemove}
+      />
     )
 
     // Check that arrangement name is displayed
@@ -50,21 +56,19 @@ describe('DraggableArrangementItem', () => {
     // Check that key information is displayed
     expect(screen.getByText(/Key: G/)).toBeInTheDocument()
     
-    // Check that difficulty is displayed
-    expect(screen.getByText(/Difficulty: beginner/)).toBeInTheDocument()
+    // Check that original key is displayed
+    expect(screen.getByText(/Original: G/)).toBeInTheDocument()
   })
 
   it('shows drag handle when not disabled', () => {
-    const mockOnRemove = jest.fn()
+    const mockOnRemove = vi.fn()
     
-    render(
-      <TestWrapper>
-        <DraggableArrangementItem
-          item={mockArrangement}
-          onRemove={mockOnRemove}
-          disabled={false}
-        />
-      </TestWrapper>
+    renderWithDnd(
+      <DraggableArrangementItem
+        item={mockArrangement}
+        onRemove={mockOnRemove}
+        disabled={false}
+      />
     )
 
     // Check that drag handle exists
@@ -73,16 +77,14 @@ describe('DraggableArrangementItem', () => {
   })
 
   it('hides drag handle when disabled', () => {
-    const mockOnRemove = jest.fn()
+    const mockOnRemove = vi.fn()
     
-    render(
-      <TestWrapper>
-        <DraggableArrangementItem
-          item={mockArrangement}
-          onRemove={mockOnRemove}
-          disabled={true}
-        />
-      </TestWrapper>
+    renderWithDnd(
+      <DraggableArrangementItem
+        item={mockArrangement}
+        onRemove={mockOnRemove}
+        disabled={true}
+      />
     )
 
     // Check that drag handle is not present
@@ -90,39 +92,36 @@ describe('DraggableArrangementItem', () => {
   })
 
   it('shows key override when present', () => {
-    const mockOnRemove = jest.fn()
+    const mockOnRemove = vi.fn()
     const arrangementWithOverride = {
       ...mockArrangement,
       keyOverride: 'A'
     }
     
-    render(
-      <TestWrapper>
-        <DraggableArrangementItem
-          item={arrangementWithOverride}
-          onRemove={mockOnRemove}
-        />
-      </TestWrapper>
+    renderWithDnd(
+      <DraggableArrangementItem
+        item={arrangementWithOverride}
+        onRemove={mockOnRemove}
+      />
     )
 
     // Check that key override is displayed
-    expect(screen.getByText(/Override: A/)).toBeInTheDocument()
+    expect(screen.getByText(/Key: A/)).toBeInTheDocument()
+    expect(screen.getByText(/Transposed for setlist/)).toBeInTheDocument()
   })
 
   it('shows notes when present', () => {
-    const mockOnRemove = jest.fn()
+    const mockOnRemove = vi.fn()
     const arrangementWithNotes = {
       ...mockArrangement,
       notes: 'Play softly during verses'
     }
     
-    render(
-      <TestWrapper>
-        <DraggableArrangementItem
-          item={arrangementWithNotes}
-          onRemove={mockOnRemove}
-        />
-      </TestWrapper>
+    renderWithDnd(
+      <DraggableArrangementItem
+        item={arrangementWithNotes}
+        onRemove={mockOnRemove}
+      />
     )
 
     // Check that notes are displayed
@@ -130,15 +129,13 @@ describe('DraggableArrangementItem', () => {
   })
 
   it('has proper accessibility attributes', () => {
-    const mockOnRemove = jest.fn()
+    const mockOnRemove = vi.fn()
     
-    render(
-      <TestWrapper>
-        <DraggableArrangementItem
-          item={mockArrangement}
-          onRemove={mockOnRemove}
-        />
-      </TestWrapper>
+    renderWithDnd(
+      <DraggableArrangementItem
+        item={mockArrangement}
+        onRemove={mockOnRemove}
+      />
     )
 
     // Check drag handle accessibility

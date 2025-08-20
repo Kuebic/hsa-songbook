@@ -68,11 +68,7 @@ export class OfflineQueue {
     window.addEventListener('offline', this.handleOffline)
     
     // Also listen for visibility change to sync when tab becomes visible
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && this.isOnline) {
-        this.processQueue()
-      }
-    })
+    document.addEventListener('visibilitychange', this.handleVisibilityChange)
   }
   
   private handleOnline = () => {
@@ -188,7 +184,17 @@ export class OfflineQueue {
   destroy() {
     window.removeEventListener('online', this.handleOnline)
     window.removeEventListener('offline', this.handleOffline)
+    
+    // Also remove visibility change listener
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange)
+    
     this.clearQueue()
+  }
+  
+  private handleVisibilityChange = () => {
+    if (!document.hidden && this.isOnline) {
+      this.processQueue()
+    }
   }
 }
 

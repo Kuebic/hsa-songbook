@@ -9,6 +9,9 @@ interface ThemeComboboxProps {
   maxThemes?: number
   required?: boolean
   disabled?: boolean
+  label?: string
+  placeholder?: string
+  availableThemes?: string[]
 }
 
 export function ThemeCombobox({ 
@@ -17,7 +20,10 @@ export function ThemeCombobox({
   error, 
   maxThemes = 10,
   required = false,
-  disabled = false
+  disabled = false,
+  label = 'Themes',
+  placeholder,
+  availableThemes
 }: ThemeComboboxProps) {
   const [inputValue, setInputValue] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -25,8 +31,8 @@ export function ThemeCombobox({
   
   // Get all available themes
   const allThemes = useMemo(() => {
-    return Object.keys(NORMALIZED_THEMES)
-  }, [])
+    return availableThemes || Object.keys(NORMALIZED_THEMES)
+  }, [availableThemes])
   
   // Get suggestions based on input
   const suggestions = useMemo(() => {
@@ -171,7 +177,7 @@ export function ThemeCombobox({
   return (
     <div style={fieldStyles}>
       <label htmlFor="themes" style={labelStyles}>
-        Themes
+        {label}
         {required && <span style={{ color: 'var(--color-destructive)' }}> *</span>}
       </label>
       
@@ -212,19 +218,30 @@ export function ThemeCombobox({
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           onKeyDown={handleKeyDown}
-          placeholder={value.length === 0 ? 'Type to search themes...' : 'Add more themes...'}
+          placeholder={placeholder || (value.length === 0 ? 'Type to search themes...' : 'Add more themes...')}
           style={{
             ...inputStyles,
             borderColor: error ? 'var(--color-destructive)' : 'var(--color-border)'
           }}
+          role="combobox"
           aria-label="Theme search"
           aria-autocomplete="list"
           aria-expanded={showSuggestions}
+          aria-required={required}
+          aria-describedby={
+            error ? 'themes-error' : 'themes-helper'
+          }
+          aria-controls={showSuggestions ? 'themes-listbox' : undefined}
+          data-testid="theme-combobox"
           disabled={disabled || value.length >= maxThemes}
         />
         
         {showSuggestions && suggestions.length > 0 && !disabled && (
-          <div style={suggestionsStyles} role="listbox">
+          <div 
+            id="themes-listbox"
+            style={suggestionsStyles} 
+            role="listbox"
+          >
             {suggestions.map((suggestion, index) => (
               <div
                 key={suggestion}
@@ -242,7 +259,7 @@ export function ThemeCombobox({
       </div>
       
       {!error && (
-        <div style={helperStyles}>
+        <div id="themes-helper" style={helperStyles}>
           {value.length}/{maxThemes} themes selected. Start typing to search or add custom themes.
         </div>
       )}

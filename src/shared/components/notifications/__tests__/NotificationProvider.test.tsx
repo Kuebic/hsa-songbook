@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { NotificationProvider } from '../NotificationProvider'
 import { useNotification } from '../useNotification'
@@ -56,13 +56,14 @@ function TestComponent() {
 }
 
 describe('NotificationProvider', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-  })
-
   afterEach(() => {
+    // Cleanup after each test to prevent test pollution
+    cleanup()
     vi.restoreAllMocks()
+    vi.clearAllTimers()
     vi.useRealTimers()
+    // Clear any remaining DOM elements
+    document.body.innerHTML = ''
   })
 
   it('throws error when useNotification is used outside provider', () => {
@@ -76,8 +77,6 @@ describe('NotificationProvider', () => {
   })
 
   it('adds and displays notifications', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-    
     render(
       <NotificationProvider>
         <TestComponent />
@@ -88,19 +87,24 @@ describe('NotificationProvider', () => {
     expect(screen.getByTestId('notification-count')).toHaveTextContent('0')
     
     // Add success notification
-    await user.click(screen.getByText('Add Success'))
-    
-    await waitFor(() => {
-      expect(screen.getByTestId('notification-count')).toHaveTextContent('1')
-      expect(screen.getByText('Success!')).toBeInTheDocument()
-      expect(screen.getByText('Operation completed')).toBeInTheDocument()
-      expect(screen.getByText('✅')).toBeInTheDocument()
+    const addButton = screen.getByText('Add Success')
+    await act(async () => {
+      await userEvent.click(addButton)
     })
+    
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('notification-count')).toHaveTextContent('1')
+        expect(screen.getByText('Success!')).toBeInTheDocument()
+        expect(screen.getByText('Operation completed')).toBeInTheDocument()
+        expect(screen.getByText('✅')).toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
   })
 
   it('auto-dismisses notifications after duration', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-    
+    // Use real timers with a shorter duration for the test
     render(
       <NotificationProvider>
         <TestComponent />
@@ -108,24 +112,29 @@ describe('NotificationProvider', () => {
     )
     
     // Add notification
-    await user.click(screen.getByText('Add Success'))
-    
-    await waitFor(() => {
-      expect(screen.getByText('Success!')).toBeInTheDocument()
+    const addButton = screen.getByText('Add Success')
+    await act(async () => {
+      await userEvent.click(addButton)
     })
     
-    // Fast-forward time
-    vi.advanceTimersByTime(5000)
+    await waitFor(
+      () => {
+        expect(screen.getByText('Success!')).toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
     
-    await waitFor(() => {
-      expect(screen.queryByText('Success!')).not.toBeInTheDocument()
-      expect(screen.getByTestId('notification-count')).toHaveTextContent('0')
-    })
+    // Wait for auto-dismiss with real timer (5 seconds)
+    await waitFor(
+      () => {
+        expect(screen.queryByText('Success!')).not.toBeInTheDocument()
+        expect(screen.getByTestId('notification-count')).toHaveTextContent('0')
+      },
+      { timeout: 6000 }
+    )
   })
 
   it('does not auto-dismiss notifications with duration 0', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-    
     render(
       <NotificationProvider>
         <TestComponent />
@@ -133,24 +142,26 @@ describe('NotificationProvider', () => {
     )
     
     // Add persistent notification
-    await user.click(screen.getByText('Add Error'))
-    
-    await waitFor(() => {
-      expect(screen.getByText('Error!')).toBeInTheDocument()
+    const addButton = screen.getByText('Add Error')
+    await act(async () => {
+      await userEvent.click(addButton)
     })
     
-    // Fast-forward time - should still be there
-    vi.advanceTimersByTime(10000)
+    await waitFor(
+      () => {
+        expect(screen.getByText('Error!')).toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
     
-    await waitFor(() => {
-      expect(screen.getByText('Error!')).toBeInTheDocument()
-      expect(screen.getByTestId('notification-count')).toHaveTextContent('1')
-    })
+    // Wait a bit and ensure it's still there (no auto-dismiss)
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    expect(screen.getByText('Error!')).toBeInTheDocument()
+    expect(screen.getByTestId('notification-count')).toHaveTextContent('1')
   })
 
   it('manually dismisses notifications', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-    
     render(
       <NotificationProvider>
         <TestComponent />
@@ -158,24 +169,34 @@ describe('NotificationProvider', () => {
     )
     
     // Add notification
-    await user.click(screen.getByText('Add Error'))
-    
-    await waitFor(() => {
-      expect(screen.getByText('Error!')).toBeInTheDocument()
+    const addButton = screen.getByText('Add Error')
+    await act(async () => {
+      await userEvent.click(addButton)
     })
+    
+    await waitFor(
+      () => {
+        expect(screen.getByText('Error!')).toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
     
     // Manually dismiss
-    await user.click(screen.getByLabelText('Dismiss notification'))
-    
-    await waitFor(() => {
-      expect(screen.queryByText('Error!')).not.toBeInTheDocument()
-      expect(screen.getByTestId('notification-count')).toHaveTextContent('0')
+    const dismissButton = screen.getByLabelText('Dismiss notification')
+    await act(async () => {
+      await userEvent.click(dismissButton)
     })
+    
+    await waitFor(
+      () => {
+        expect(screen.queryByText('Error!')).not.toBeInTheDocument()
+        expect(screen.getByTestId('notification-count')).toHaveTextContent('0')
+      },
+      { timeout: 3000 }
+    )
   })
 
   it('clears all notifications', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-    
     render(
       <NotificationProvider>
         <TestComponent />
@@ -183,26 +204,37 @@ describe('NotificationProvider', () => {
     )
     
     // Add multiple notifications
-    await user.click(screen.getByText('Add Success'))
-    await user.click(screen.getByText('Add Error'))
-    
-    await waitFor(() => {
-      expect(screen.getByTestId('notification-count')).toHaveTextContent('2')
+    const successButton = screen.getByText('Add Success')
+    const errorButton = screen.getByText('Add Error')
+    await act(async () => {
+      await userEvent.click(successButton)
+      await userEvent.click(errorButton)
     })
+    
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('notification-count')).toHaveTextContent('2')
+      },
+      { timeout: 3000 }
+    )
     
     // Clear all
-    await user.click(screen.getByText('Clear All'))
-    
-    await waitFor(() => {
-      expect(screen.getByTestId('notification-count')).toHaveTextContent('0')
-      expect(screen.queryByText('Success!')).not.toBeInTheDocument()
-      expect(screen.queryByText('Error!')).not.toBeInTheDocument()
+    const clearButton = screen.getByText('Clear All')
+    await act(async () => {
+      await userEvent.click(clearButton)
     })
+    
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('notification-count')).toHaveTextContent('0')
+        expect(screen.queryByText('Success!')).not.toBeInTheDocument()
+        expect(screen.queryByText('Error!')).not.toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
   })
 
   it('renders notifications with actions', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-    
     render(
       <NotificationProvider>
         <TestComponent />
@@ -210,18 +242,22 @@ describe('NotificationProvider', () => {
     )
     
     // Add notification with action
-    await user.click(screen.getByText('Add Info with Action'))
-    
-    await waitFor(() => {
-      expect(screen.getByText('Info')).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Action' })).toBeInTheDocument()
-      expect(screen.getByText('ℹ️')).toBeInTheDocument()
+    const addButton = screen.getByText('Add Info with Action')
+    await act(async () => {
+      await userEvent.click(addButton)
     })
+    
+    await waitFor(
+      () => {
+        expect(screen.getByText('Info')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Action' })).toBeInTheDocument()
+        expect(screen.getByText('ℹ️')).toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
   })
 
   it('handles multiple notifications correctly', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-    
     render(
       <NotificationProvider>
         <TestComponent />
@@ -229,25 +265,34 @@ describe('NotificationProvider', () => {
     )
     
     // Add multiple different notifications
-    await user.click(screen.getByText('Add Success'))
-    await user.click(screen.getByText('Add Error'))
-    await user.click(screen.getByText('Add Info with Action'))
-    
-    await waitFor(() => {
-      expect(screen.getByTestId('notification-count')).toHaveTextContent('3')
-      expect(screen.getByText('Success!')).toBeInTheDocument()
-      expect(screen.getByText('Error!')).toBeInTheDocument()
-      expect(screen.getByText('Info')).toBeInTheDocument()
+    const successButton = screen.getByText('Add Success')
+    const errorButton = screen.getByText('Add Error')
+    const infoButton = screen.getByText('Add Info with Action')
+    await act(async () => {
+      await userEvent.click(successButton)
+      await userEvent.click(errorButton)
+      await userEvent.click(infoButton)
     })
     
-    // Auto-dismiss should work for success notification
-    vi.advanceTimersByTime(5000)
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('notification-count')).toHaveTextContent('3')
+        expect(screen.getByText('Success!')).toBeInTheDocument()
+        expect(screen.getByText('Error!')).toBeInTheDocument()
+        expect(screen.getByText('Info')).toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
     
-    await waitFor(() => {
-      expect(screen.getByTestId('notification-count')).toHaveTextContent('2')
-      expect(screen.queryByText('Success!')).not.toBeInTheDocument()
-      expect(screen.getByText('Error!')).toBeInTheDocument() // Persistent
-      expect(screen.getByText('Info')).toBeInTheDocument() // Has action
-    })
+    // Wait for success notification auto-dismiss (5 seconds)
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('notification-count')).toHaveTextContent('2')
+        expect(screen.queryByText('Success!')).not.toBeInTheDocument()
+        expect(screen.getByText('Error!')).toBeInTheDocument() // Persistent
+        expect(screen.getByText('Info')).toBeInTheDocument() // Has action
+      },
+      { timeout: 6000 }
+    )
   })
 })

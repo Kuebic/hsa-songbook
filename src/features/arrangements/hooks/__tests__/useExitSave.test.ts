@@ -10,10 +10,18 @@ import { arrangementService } from '@features/songs/services/arrangementService'
 import { useAuth } from '@features/auth/hooks/useAuth';
 import { useNotification } from '@shared/components/notifications/useNotification';
 
-// Mock dependencies
-vi.mock('@features/songs/services/arrangementService');
-vi.mock('@features/auth/hooks/useAuth');
-vi.mock('@shared/components/notifications/useNotification');
+// Mock dependencies with factory functions
+vi.mock('@features/songs/services/arrangementService', () => ({
+  arrangementService: {
+    updateArrangement: vi.fn()
+  }
+}))
+vi.mock('@features/auth/hooks/useAuth', () => ({
+  useAuth: vi.fn()
+}))
+vi.mock('@shared/components/notifications/useNotification', () => ({
+  useNotification: vi.fn()
+}))
 
 describe('useExitSave - Exit Save Functionality', () => {
   const mockArrangementId = 'test-arrangement-123';
@@ -24,10 +32,22 @@ describe('useExitSave - Exit Save Functionality', () => {
   let addEventListenerSpy: ReturnType<typeof vi.spyOn>;
   let removeEventListenerSpy: ReturnType<typeof vi.spyOn>;
 
-  beforeEach(() => {
+  let mockGetToken: any
+  let mockUpdateArrangement: any
+  let mockAddNotification: any
+  
+  beforeEach(async () => {
+    const { useAuth } = await import('@features/auth/hooks/useAuth')
+    const { arrangementService } = await import('@features/songs/services/arrangementService')
+    const { useNotification } = await import('@shared/components/notifications/useNotification')
+    
+    mockGetToken = vi.fn().mockResolvedValue(mockToken)
+    mockUpdateArrangement = vi.fn()
+    mockAddNotification = vi.fn()
+    
     // Setup auth mock
     vi.mocked(useAuth).mockReturnValue({
-      getToken: vi.fn().mockResolvedValue(mockToken),
+      getToken: mockGetToken,
       userId: mockUserId,
       isSignedIn: true,
       signIn: vi.fn(),
@@ -38,13 +58,14 @@ describe('useExitSave - Exit Save Functionality', () => {
 
     // Setup notification mock
     vi.mocked(useNotification).mockReturnValue({
-      addNotification: vi.fn(),
+      addNotification: mockAddNotification,
       removeNotification: vi.fn(),
       notifications: []
     });
 
     // Setup arrangement service mock
-    vi.mocked(arrangementService.updateArrangement).mockResolvedValue({
+    arrangementService.updateArrangement = mockUpdateArrangement
+    mockUpdateArrangement.mockResolvedValue({
       id: mockArrangementId,
       name: 'Test Arrangement',
       slug: 'test-arrangement',
@@ -86,7 +107,7 @@ describe('useExitSave - Exit Save Functionality', () => {
       unmount();
 
       // Should attempt to save
-      expect(arrangementService.updateArrangement).toHaveBeenCalledWith(
+      expect(mockUpdateArrangement).toHaveBeenCalledWith(
         mockArrangementId,
         { chordProText: mockContent },
         mockToken,
@@ -107,7 +128,7 @@ describe('useExitSave - Exit Save Functionality', () => {
       unmount();
 
       // Should not save when not dirty
-      expect(arrangementService.updateArrangement).not.toHaveBeenCalled();
+      expect(mockUpdateArrangement).not.toHaveBeenCalled();
     });
 
     it('should not save on unmount when disabled', () => {
@@ -123,7 +144,7 @@ describe('useExitSave - Exit Save Functionality', () => {
       unmount();
 
       // Should not save when disabled
-      expect(arrangementService.updateArrangement).not.toHaveBeenCalled();
+      expect(mockUpdateArrangement).not.toHaveBeenCalled();
     });
   });
 
@@ -180,7 +201,7 @@ describe('useExitSave - Exit Save Functionality', () => {
         await new Promise(resolve => setTimeout(resolve, 100));
       });
 
-      expect(arrangementService.updateArrangement).toHaveBeenCalled();
+      expect(mockUpdateArrangement).toHaveBeenCalled();
     });
 
     it('should handle pagehide event for mobile browsers', async () => {
@@ -223,7 +244,7 @@ describe('useExitSave - Exit Save Functionality', () => {
         await new Promise(resolve => setTimeout(resolve, 100));
       });
 
-      expect(arrangementService.updateArrangement).toHaveBeenCalled();
+      expect(mockUpdateArrangement).toHaveBeenCalled();
     });
   });
 
@@ -243,7 +264,7 @@ describe('useExitSave - Exit Save Functionality', () => {
         await result.current.saveNow();
       });
 
-      expect(arrangementService.updateArrangement).toHaveBeenCalledWith(
+      expect(mockUpdateArrangement).toHaveBeenCalledWith(
         mockArrangementId,
         { chordProText: mockContent },
         mockToken,
@@ -277,7 +298,7 @@ describe('useExitSave - Exit Save Functionality', () => {
   describe('Error Handling', () => {
     it('should handle save errors and show notification', async () => {
       const mockError = new Error('Network error');
-      vi.mocked(arrangementService.updateArrangement).mockRejectedValue(mockError);
+      mockUpdateArrangement.mockRejectedValue(mockError);
 
       const { result } = renderHook(() =>
         useExitSave({
@@ -339,7 +360,7 @@ describe('useExitSave - Exit Save Functionality', () => {
       });
 
       // Should not call arrangement service
-      expect(arrangementService.updateArrangement).not.toHaveBeenCalled();
+      expect(mockUpdateArrangement).not.toHaveBeenCalled();
     });
   });
 
@@ -369,7 +390,7 @@ describe('useExitSave - Exit Save Functionality', () => {
 
     it('should call onSaveError when save fails', async () => {
       const mockError = new Error('Save failed');
-      vi.mocked(arrangementService.updateArrangement).mockRejectedValue(mockError);
+      mockUpdateArrangement.mockRejectedValue(mockError);
 
       const onSaveSuccess = vi.fn();
       const onSaveError = vi.fn();
@@ -401,7 +422,7 @@ describe('useExitSave - Exit Save Functionality', () => {
   describe('Save State Management', () => {
     it('should track saving state', async () => {
       // Make save take some time
-      vi.mocked(arrangementService.updateArrangement).mockImplementation(
+      mockUpdateArrangement.mockImplementation(
         () => new Promise(resolve => setTimeout(() => resolve({
           id: mockArrangementId,
           name: 'Test',

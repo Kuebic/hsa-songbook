@@ -1,12 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@shared/test-utils/testWrapper'
 import userEvent from '@testing-library/user-event'
 import { AddToSetlistDropdown } from '../AddToSetlistDropdown'
 
 // Mock dependencies
-vi.mock('@features/auth', () => ({
-  useAuth: vi.fn(() => ({ isSignedIn: true }))
-}))
+vi.mock('@features/auth/hooks/useAuth')
+import { useAuth } from '@features/auth/hooks/useAuth'
 
 vi.mock('../../../hooks/mutations/useAddToSetlistDropdown', () => ({
   useAddToSetlistDropdown: vi.fn(() => ({
@@ -52,6 +51,20 @@ describe('AddToSetlistDropdown', () => {
   
   beforeEach(() => {
     vi.clearAllMocks()
+    
+    // Setup default auth mock
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: 'test-user' },
+      userId: 'test-user',
+      sessionId: 'session-123',
+      isLoaded: true,
+      isSignedIn: true,
+      isAdmin: false,
+      getToken: vi.fn(),
+      getUserEmail: vi.fn(),
+      getUserName: vi.fn(),
+      getUserAvatar: vi.fn()
+    })
   })
   
   describe('Rendering', () => {
@@ -118,7 +131,6 @@ describe('AddToSetlistDropdown', () => {
   
   describe('Authentication', () => {
     it('redirects to sign-in when not authenticated', async () => {
-      const { useAuth } = await import('@features/auth')
       vi.mocked(useAuth).mockReturnValue({ 
         isSignedIn: false,
         user: null,

@@ -10,9 +10,15 @@ import { arrangementService } from '@features/songs/services/arrangementService'
 import { useAuth } from '@features/auth/hooks/useAuth';
 import type { EditorCommand } from '../../types/command.types';
 
-// Mock dependencies
-vi.mock('@features/songs/services/arrangementService');
-vi.mock('@features/auth/hooks/useAuth');
+// Mock dependencies with factory functions
+vi.mock('@features/songs/services/arrangementService', () => ({
+  arrangementService: {
+    updateArrangement: vi.fn()
+  }
+}))
+vi.mock('@features/auth/hooks/useAuth', () => ({
+  useAuth: vi.fn()
+}))
 vi.mock('lodash-es', () => ({
   debounce: (fn: (...args: unknown[]) => void) => {
     const debounced = (...args: unknown[]) => fn(...args);
@@ -29,14 +35,46 @@ vi.mock('lodash-es', () => ({
 }));
 
 // Mock EditorStorageService to avoid IndexedDB issues
-vi.mock('../../services/EditorStorageService', () => ({
-  EditorStorageService: vi.fn().mockImplementation(() => ({
+vi.mock('../../services/EditorStorageService', () => {
+  const mockMethods = {
     initialize: vi.fn().mockResolvedValue(undefined),
     saveDraftToSession: vi.fn().mockResolvedValue(undefined),
+    saveLargeDraftToIndexedDB: vi.fn().mockResolvedValue(undefined),
+    loadDraftFromSession: vi.fn().mockResolvedValue(null),
+    loadDraftFromIndexedDB: vi.fn().mockResolvedValue(null),
+    clearDraft: vi.fn().mockResolvedValue(undefined),
+    clearAllDrafts: vi.fn().mockResolvedValue(undefined),
     deleteDraft: vi.fn().mockResolvedValue(undefined),
-    getStorageStats: vi.fn().mockResolvedValue({ used: 0, total: 0 })
-  }))
-}));
+    getStorageStats: vi.fn().mockResolvedValue({
+      sessionStorageUsed: 1000,
+      sessionStorageTotal: 5000000,
+      indexedDBUsed: 0,
+      indexedDBQuota: 100000000
+    })
+  }
+  
+  return {
+    EditorStorageService: vi.fn().mockImplementation(() => mockMethods)
+  }
+});
+
+// Create references to the mock methods for test access
+const mockStorageService = {
+  initialize: vi.fn().mockResolvedValue(undefined),
+  saveDraftToSession: vi.fn().mockResolvedValue(undefined),
+  saveLargeDraftToIndexedDB: vi.fn().mockResolvedValue(undefined),
+  loadDraftFromSession: vi.fn().mockResolvedValue(null),
+  loadDraftFromIndexedDB: vi.fn().mockResolvedValue(null),
+  clearDraft: vi.fn().mockResolvedValue(undefined),
+  clearAllDrafts: vi.fn().mockResolvedValue(undefined),
+  deleteDraft: vi.fn().mockResolvedValue(undefined),
+  getStorageStats: vi.fn().mockResolvedValue({
+    sessionStorageUsed: 1000,
+    sessionStorageTotal: 5000000,
+    indexedDBUsed: 0,
+    indexedDBQuota: 100000000
+  })
+}
 
 describe('ChordPro Editor Save Functionality', () => {
   const mockArrangementId = 'test-arrangement-123';
@@ -45,10 +83,19 @@ describe('ChordPro Editor Save Functionality', () => {
   const mockContent = '{title: Test Song}\n{key: C}\n[C]This is a [G]test song';
   const mockHistory: EditorCommand[] = [];
 
-  beforeEach(() => {
+  let mockGetToken: any
+  let mockUpdateArrangement: any
+  
+  beforeEach(async () => {
+    const { useAuth } = await import('@features/auth/hooks/useAuth')
+    const { arrangementService } = await import('@features/songs/services/arrangementService')
+    
+    mockGetToken = vi.fn().mockResolvedValue(mockToken)
+    mockUpdateArrangement = vi.fn()
+    
     // Setup auth mock
     vi.mocked(useAuth).mockReturnValue({
-      getToken: vi.fn().mockResolvedValue(mockToken),
+      getToken: mockGetToken,
       userId: mockUserId,
       isSignedIn: true,
       signIn: vi.fn(),
@@ -58,7 +105,8 @@ describe('ChordPro Editor Save Functionality', () => {
     });
 
     // Setup arrangement service mock
-    vi.mocked(arrangementService.updateArrangement).mockResolvedValue({
+    arrangementService.updateArrangement = mockUpdateArrangement
+    mockUpdateArrangement.mockResolvedValue({
       id: mockArrangementId,
       name: 'Test Arrangement',
       slug: 'test-arrangement',
@@ -67,6 +115,12 @@ describe('ChordPro Editor Save Functionality', () => {
       createdAt: new Date(),
       updatedAt: new Date()
     });
+    
+    // Clear storage service mocks
+    mockStorageService.initialize.mockClear()
+    mockStorageService.saveDraftToSession.mockClear()
+    mockStorageService.deleteDraft.mockClear()
+    mockStorageService.getStorageStats.mockClear()
 
     // Mock localStorage
     const localStorageMock = {
@@ -119,7 +173,7 @@ describe('ChordPro Editor Save Functionality', () => {
 
       // Verify MongoDB save was attempted
       await waitFor(() => {
-        expect(arrangementService.updateArrangement).toHaveBeenCalledWith(
+        expect(mockUpdateArrangement).toHaveBeenCalledWith(
           mockArrangementId,
           { chordProText: mockContent },
           mockToken,
@@ -150,7 +204,7 @@ describe('ChordPro Editor Save Functionality', () => {
       }, { timeout: 300 });
 
       // MongoDB save should NOT be called for new arrangements
-      expect(arrangementService.updateArrangement).not.toHaveBeenCalled();
+      expect(mockUpdateArrangement).not.toHaveBeenCalled();
     });
 
     it('should handle backend save failures gracefully', async () => {
@@ -207,7 +261,7 @@ describe('ChordPro Editor Save Functionality', () => {
 
       // First save
       await waitFor(() => {
-        expect(arrangementService.updateArrangement).toHaveBeenCalledTimes(1);
+        expect(mockUpdateArrangement).toHaveBeenCalledTimes(1);
       }, { timeout: 200 });
 
       // Clear mock to track new calls
@@ -221,7 +275,7 @@ describe('ChordPro Editor Save Functionality', () => {
         await new Promise(resolve => setTimeout(resolve, 200));
       });
 
-      expect(arrangementService.updateArrangement).not.toHaveBeenCalled();
+      expect(mockUpdateArrangement).not.toHaveBeenCalled();
     });
   });
 
@@ -243,7 +297,7 @@ describe('ChordPro Editor Save Functionality', () => {
         await result.current.forceAutoSave();
       });
 
-      expect(arrangementService.updateArrangement).toHaveBeenCalledWith(
+      expect(mockUpdateArrangement).toHaveBeenCalledWith(
         mockArrangementId,
         { chordProText: mockContent },
         mockToken,
@@ -275,7 +329,7 @@ describe('ChordPro Editor Save Functionality', () => {
       document.dispatchEvent(event);
 
       await waitFor(() => {
-        expect(arrangementService.updateArrangement).toHaveBeenCalled();
+        expect(mockUpdateArrangement).toHaveBeenCalled();
       });
     });
   });
@@ -329,14 +383,14 @@ describe('ChordPro Editor Save Functionality', () => {
       });
 
       // Should not save when not dirty
-      expect(arrangementService.updateArrangement).not.toHaveBeenCalled();
+      expect(mockUpdateArrangement).not.toHaveBeenCalled();
 
       // Mark as dirty
       rerender({ isDirty: true });
 
       // Now should save
       await waitFor(() => {
-        expect(arrangementService.updateArrangement).toHaveBeenCalled();
+        expect(mockUpdateArrangement).toHaveBeenCalled();
       });
     });
   });
@@ -371,7 +425,7 @@ describe('ChordPro Editor Save Functionality', () => {
 
       // Should save locally but not to backend
       expect(sessionStorage.setItem).toHaveBeenCalled();
-      expect(arrangementService.updateArrangement).not.toHaveBeenCalled();
+      expect(mockUpdateArrangement).not.toHaveBeenCalled();
     });
   });
 

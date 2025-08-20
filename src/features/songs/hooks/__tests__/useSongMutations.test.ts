@@ -2,12 +2,12 @@ import { renderHook } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useSongMutations } from '../useSongMutations'
 
-// Mock auth hook
+// Mock auth hook with factory function
 vi.mock('@features/auth', () => ({
   useAuth: vi.fn()
 }))
 
-// Mock song service
+// Mock song service with factory function
 vi.mock('../../services/songService', () => ({
   songService: {
     updateSong: vi.fn()
@@ -15,15 +15,17 @@ vi.mock('../../services/songService', () => ({
 }))
 
 describe('useSongMutations', () => {
-  const mockGetToken = vi.fn()
-  const mockUpdateSong = vi.fn()
+  let mockGetToken: any
+  let mockUpdateSong: any
   
   beforeEach(async () => {
-    vi.clearAllMocks()
-    const { useAuth } = vi.mocked(await import('@features/auth'))
-    const { songService } = vi.mocked(await import('../../services/songService'))
+    const { useAuth } = await import('@features/auth')
+    const { songService } = await import('../../services/songService')
     
-    useAuth.mockReturnValue({
+    mockGetToken = vi.fn()
+    mockUpdateSong = vi.fn()
+    
+    vi.mocked(useAuth).mockReturnValue({
       isSignedIn: true,
       isAdmin: false,
       userId: 'user-123',

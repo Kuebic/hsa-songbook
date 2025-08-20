@@ -104,7 +104,8 @@ export function SimpleInput({
         max={max}
         style={inputStyles}
         aria-invalid={!!error}
-        aria-describedby={error ? `${name}-error` : undefined}
+        aria-required={required}
+        aria-describedby={error ? `${name}-error` : (helperText ? `${name}-helper` : undefined)}
       />
       {showCharacterCount && maxLength && (
         <div style={characterCountStyles}>
@@ -112,7 +113,7 @@ export function SimpleInput({
         </div>
       )}
       {helperText && !error && (
-        <div style={helperStyles}>{helperText}</div>
+        <div id={`${name}-helper`} style={helperStyles}>{helperText}</div>
       )}
       {error && (
         <div id={`${name}-error`} style={errorStyles} role="alert">
@@ -219,7 +220,8 @@ export function SimpleTextarea({
         maxLength={maxLength}
         style={textareaStyles}
         aria-invalid={!!error}
-        aria-describedby={error ? `${name}-error` : undefined}
+        aria-required={required}
+        aria-describedby={error ? `${name}-error` : (helperText ? `${name}-helper` : undefined)}
       />
       {showCharacterCount && maxLength && (
         <div style={characterCountStyles}>
@@ -227,7 +229,7 @@ export function SimpleTextarea({
         </div>
       )}
       {helperText && !error && (
-        <div style={helperStyles}>{helperText}</div>
+        <div id={`${name}-helper`} style={helperStyles}>{helperText}</div>
       )}
       {error && (
         <div id={`${name}-error`} style={errorStyles} role="alert">
@@ -290,7 +292,7 @@ export function SimpleCheckbox({
 
   return (
     <div style={containerStyles}>
-      <label style={labelStyles}>
+      <label htmlFor={name} style={labelStyles}>
         <input
           type="checkbox"
           id={name}
@@ -300,12 +302,12 @@ export function SimpleCheckbox({
           disabled={disabled}
           style={checkboxStyles}
           aria-invalid={!!error}
-          aria-describedby={error ? `${name}-error` : undefined}
+          aria-describedby={error ? `${name}-error` : (helperText ? `${name}-helper` : undefined)}
         />
         {label}
       </label>
       {helperText && !error && (
-        <div style={helperStyles}>{helperText}</div>
+        <div id={`${name}-helper`} style={helperStyles}>{helperText}</div>
       )}
       {error && (
         <div id={`${name}-error`} style={errorStyles} role="alert">
@@ -353,8 +355,8 @@ export function SimpleSection({ title, children }: SimpleSectionProps) {
   }
 
   return (
-    <div style={sectionStyles}>
-      <h3 style={titleStyles}>{title}</h3>
+    <div style={sectionStyles} role="group" aria-labelledby={`section-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+      <h3 id={`section-${title.toLowerCase().replace(/\s+/g, '-')}`} style={titleStyles}>{title}</h3>
       {children}
     </div>
   )

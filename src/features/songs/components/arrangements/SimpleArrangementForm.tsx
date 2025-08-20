@@ -66,7 +66,7 @@ export function SimpleArrangementForm({
   return (
     <SimpleSection title="Arrangement Details">
       <div style={{ marginBottom: '16px' }}>
-        <label style={{
+        <label htmlFor="arrangement-name" style={{
           display: 'block',
           marginBottom: '4px',
           fontSize: '14px',
@@ -89,6 +89,8 @@ export function SimpleArrangementForm({
               {songTitle} -
             </div>
             <input
+              id="arrangement-name"
+              name="arrangement-name"
               type="text"
               value={arrangementSuffix}
               onChange={(e) => handleArrangementSuffixChange(e.target.value)}
@@ -109,14 +111,25 @@ export function SimpleArrangementForm({
             />
           </div>
         ) : (
-          <SimpleInput
+          <input
+            id="arrangement-name"
             name="arrangement-name"
-            label=""
+            type="text"
             value={data.name || ''}
-            onChange={(value) => handleChange('name', value)}
+            onChange={(e) => handleChange('name', e.target.value)}
             placeholder="e.g., Standard, Acoustic, Piano, Simplified"
             disabled={disabled}
             required
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              fontSize: '14px',
+              border: '1px solid var(--color-border)',
+              borderRadius: '6px',
+              backgroundColor: disabled ? 'var(--color-muted)' : 'var(--color-card)',
+              color: 'var(--text-primary)',
+              outline: 'none'
+            }}
           />
         )}
         <div style={{

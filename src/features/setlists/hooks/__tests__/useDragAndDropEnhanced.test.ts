@@ -1,32 +1,33 @@
 import { renderHook, act } from '@testing-library/react'
+import { vi } from 'vitest'
 import { useDragAndDropEnhanced } from '../useDragAndDropEnhanced'
 import type { SetlistArrangement } from '../../types/setlist.types'
 import type { DragStartEvent } from '@dnd-kit/core'
 
 // Mock @dnd-kit modules
-jest.mock('@dnd-kit/core', () => ({
+vi.mock('@dnd-kit/core', () => ({
   DndContext: 'DndContext',
-  closestCenter: 'closestCenter',
-  KeyboardSensor: 'KeyboardSensor',
-  PointerSensor: 'PointerSensor',
-  TouchSensor: 'TouchSensor',
-  useSensor: jest.fn(),
-  useSensors: jest.fn(() => []),
+  closestCenter: vi.fn(),
+  KeyboardSensor: vi.fn(),
+  PointerSensor: vi.fn(),
+  TouchSensor: vi.fn(),
+  useSensor: vi.fn().mockReturnValue({}),
+  useSensors: vi.fn().mockReturnValue([]),
 }))
 
-jest.mock('@dnd-kit/sortable', () => ({
-  arrayMove: jest.fn((items, oldIndex, newIndex) => {
+vi.mock('@dnd-kit/sortable', () => ({
+  arrayMove: vi.fn((items, oldIndex, newIndex) => {
     const result = [...items]
     const [removed] = result.splice(oldIndex, 1)
     result.splice(newIndex, 0, removed)
     return result
   }),
   SortableContext: 'SortableContext',
-  sortableKeyboardCoordinates: 'sortableKeyboardCoordinates',
+  sortableKeyboardCoordinates: vi.fn(),
 }))
 
-jest.mock('@dnd-kit/modifiers', () => ({
-  restrictToVerticalAxis: 'restrictToVerticalAxis',
+vi.mock('@dnd-kit/modifiers', () => ({
+  restrictToVerticalAxis: vi.fn(),
 }))
 
 const mockArrangements: SetlistArrangement[] = [
@@ -68,7 +69,7 @@ const mockArrangements: SetlistArrangement[] = [
 
 describe('useDragAndDropEnhanced', () => {
   it('initializes with provided items', () => {
-    const mockOnReorder = jest.fn()
+    const mockOnReorder = vi.fn()
     
     const { result } = renderHook(() =>
       useDragAndDropEnhanced({
@@ -83,7 +84,7 @@ describe('useDragAndDropEnhanced', () => {
   })
 
   it('updates local items when props change', () => {
-    const mockOnReorder = jest.fn()
+    const mockOnReorder = vi.fn()
     const initialItems = mockArrangements.slice(0, 1)
     
     const { result, rerender } = renderHook(
@@ -105,7 +106,7 @@ describe('useDragAndDropEnhanced', () => {
   })
 
   it('handles drag start event', () => {
-    const mockOnReorder = jest.fn()
+    const mockOnReorder = vi.fn()
     
     const { result } = renderHook(() =>
       useDragAndDropEnhanced({
@@ -127,7 +128,7 @@ describe('useDragAndDropEnhanced', () => {
   })
 
   it('handles drag cancel event', () => {
-    const mockOnReorder = jest.fn()
+    const mockOnReorder = vi.fn()
     
     const { result } = renderHook(() =>
       useDragAndDropEnhanced({
@@ -153,7 +154,7 @@ describe('useDragAndDropEnhanced', () => {
   })
 
   it('provides expected return values', () => {
-    const mockOnReorder = jest.fn()
+    const mockOnReorder = vi.fn()
     
     const { result } = renderHook(() =>
       useDragAndDropEnhanced({
@@ -176,7 +177,7 @@ describe('useDragAndDropEnhanced', () => {
   })
 
   it('respects disabled prop', () => {
-    const mockOnReorder = jest.fn()
+    const mockOnReorder = vi.fn()
     
     const { result } = renderHook(() =>
       useDragAndDropEnhanced({

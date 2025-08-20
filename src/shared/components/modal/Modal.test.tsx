@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
+import { render, renderWithProviders } from '@shared/test-utils/testWrapper'
 import userEvent from '@testing-library/user-event'
 import { Modal } from './Modal'
 import { ModalProvider } from './ModalProvider'
@@ -19,18 +20,24 @@ describe('Modal Component', () => {
   
   beforeEach(() => {
     mockOnClose.mockClear()
-    // Mock HTMLDialogElement methods if not available in test environment
+    // Mock HTMLDialogElement methods and properties if not available in test environment
     if (!HTMLDialogElement.prototype.showModal) {
-      HTMLDialogElement.prototype.showModal = vi.fn()
+      HTMLDialogElement.prototype.showModal = vi.fn(function(this: HTMLDialogElement) {
+        // Set the open property when showModal is called
+        Object.defineProperty(this, 'open', { value: true, writable: true, configurable: true })
+      })
     }
     if (!HTMLDialogElement.prototype.close) {
-      HTMLDialogElement.prototype.close = vi.fn()
+      HTMLDialogElement.prototype.close = vi.fn(function(this: HTMLDialogElement) {
+        // Clear the open property when close is called
+        Object.defineProperty(this, 'open', { value: false, writable: true, configurable: true })
+      })
     }
   })
   
   describe('Rendering', () => {
     it('renders when isOpen is true', () => {
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose}>
           <p>Modal content</p>
         </Modal>
@@ -41,7 +48,7 @@ describe('Modal Component', () => {
     })
     
     it('renders dialog but closed when isOpen is false', () => {
-      render(
+      renderWithProviders(
         <Modal isOpen={false} onClose={mockOnClose}>
           <p>Modal content</p>
         </Modal>
@@ -50,12 +57,12 @@ describe('Modal Component', () => {
       // Dialog element should exist but be closed
       const dialog = screen.getByTestId('modal')
       expect(dialog).toBeInTheDocument()
-      // Check that close animation is applied
-      expect(dialog.style.animation).toContain('modalFadeOut')
+      // When starting closed, no close animation is applied - only when transitioning from open to closed
+      expect(dialog.open).toBe(false)
     })
     
     it('renders title and description when provided', () => {
-      render(
+      renderWithProviders(
         <Modal 
           isOpen={true} 
           onClose={mockOnClose}
@@ -91,7 +98,7 @@ describe('Modal Component', () => {
     })
     
     it('applies custom className', () => {
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose} className="custom-modal">
           <p>Content</p>
         </Modal>
@@ -101,7 +108,7 @@ describe('Modal Component', () => {
     })
     
     it('uses custom testId', () => {
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose} testId="custom-test-id">
           <p>Content</p>
         </Modal>
@@ -115,7 +122,7 @@ describe('Modal Component', () => {
     it('calls onClose when close button is clicked', async () => {
       const user = userEvent.setup()
       
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose} showCloseButton={true}>
           <p>Content</p>
         </Modal>
@@ -126,7 +133,7 @@ describe('Modal Component', () => {
     })
     
     it('does not render close button when showCloseButton is false', () => {
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose} showCloseButton={false}>
           <p>Content</p>
         </Modal>
@@ -138,7 +145,7 @@ describe('Modal Component', () => {
     it('calls onClose when clicking outside the modal', async () => {
       const user = userEvent.setup()
       
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose} closeOnOverlayClick={true}>
           <p>Content</p>
         </Modal>
@@ -152,7 +159,7 @@ describe('Modal Component', () => {
     it('does not close when clicking inside the modal content', async () => {
       const user = userEvent.setup()
       
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose} closeOnOverlayClick={true}>
           <p>Content</p>
         </Modal>
@@ -165,7 +172,7 @@ describe('Modal Component', () => {
     it('does not close on overlay click when closeOnOverlayClick is false', async () => {
       const user = userEvent.setup()
       
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose} closeOnOverlayClick={false}>
           <p>Content</p>
         </Modal>
@@ -177,7 +184,7 @@ describe('Modal Component', () => {
     })
     
     it('handles ESC key press when closeOnEsc is true', () => {
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose} closeOnEsc={true}>
           <p>Content</p>
         </Modal>
@@ -197,7 +204,7 @@ describe('Modal Component', () => {
     })
     
     it('does not close on ESC when closeOnEsc is false', () => {
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose} closeOnEsc={false}>
           <p>Content</p>
         </Modal>
@@ -219,7 +226,7 @@ describe('Modal Component', () => {
   
   describe('Accessibility', () => {
     it('has proper ARIA attributes', () => {
-      render(
+      renderWithProviders(
         <Modal 
           isOpen={true} 
           onClose={mockOnClose}
@@ -238,7 +245,7 @@ describe('Modal Component', () => {
     })
     
     it('has aria-label when no title is provided', () => {
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose}>
           <p>Content</p>
         </Modal>
@@ -295,7 +302,7 @@ describe('Modal Component', () => {
     it('respects initialFocusRef', async () => {
       const buttonRef = { current: null as HTMLElement | null }
       
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose} initialFocusRef={buttonRef as React.RefObject<HTMLElement>}>
           <div>
             <button>First button</button>
@@ -339,7 +346,7 @@ describe('Modal Component', () => {
   
   describe('Nested Modals', () => {
     it('handles multiple modals with provider', () => {
-      render(
+      renderWithProviders(
         <ModalProvider>
           <Modal isOpen={true} onClose={mockOnClose} testId="modal1">
             <p>Modal 1</p>
@@ -358,7 +365,7 @@ describe('Modal Component', () => {
       const onClose1 = vi.fn()
       const onClose2 = vi.fn()
       
-      render(
+      renderWithProviders(
         <ModalProvider>
           <Modal isOpen={true} onClose={onClose1} testId="modal1" closeOnEsc={true}>
             <p>Modal 1</p>
@@ -383,7 +390,7 @@ describe('Modal Component', () => {
   
   describe('Animation', () => {
     it('applies animation styles when opening', () => {
-      render(
+      renderWithProviders(
         <Modal isOpen={true} onClose={mockOnClose} animationDuration={300}>
           <p>Content</p>
         </Modal>
@@ -394,13 +401,14 @@ describe('Modal Component', () => {
       expect(dialog.style.animation).toContain('300ms')
     })
     
-    it('applies close animation before closing', () => {
+    it('applies close animation before closing', async () => {
       const { rerender } = render(
         <Modal isOpen={true} onClose={mockOnClose} animationDuration={200}>
           <p>Content</p>
         </Modal>
       )
       
+      // Rerender with isOpen=false to trigger close animation
       rerender(
         <Modal isOpen={false} onClose={mockOnClose} animationDuration={200}>
           <p>Content</p>
@@ -408,7 +416,12 @@ describe('Modal Component', () => {
       )
       
       const dialog = screen.getByTestId('modal')
-      expect(dialog.style.animation).toContain('modalFadeOut')
+      
+      // Wait for the next tick to allow useEffect to apply the animation
+      await waitFor(() => {
+        expect(dialog.style.animation).toContain('modalFadeOut')
+      })
+      
       expect(dialog.style.animation).toContain('200ms')
     })
   })

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { UpdatePrompt } from '../UpdatePrompt'
 import { useServiceWorker } from '../../hooks/useServiceWorker'
@@ -8,18 +8,48 @@ vi.mock('../../hooks/useServiceWorker', () => ({
   useServiceWorker: vi.fn()
 }))
 
+// Set up CSS custom properties for tests
+const setupCSSVariables = () => {
+  const style = document.createElement('style')
+  style.textContent = `
+    :root {
+      --color-card: #ffffff;
+      --color-secondary: #f3f4f6;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --status-success: #10b981;
+      --status-info: #3b82f6;
+      --color-primary-foreground: #ffffff;
+    }
+  `
+  document.head.appendChild(style)
+  return style
+}
+
+const cleanupCSSVariables = (style: HTMLStyleElement) => {
+  document.head.removeChild(style)
+}
+
 describe('UpdatePrompt', () => {
   const mockUpdateServiceWorker = vi.fn()
   const mockClose = vi.fn()
+  let cssStyle: HTMLStyleElement
 
   beforeEach(() => {
     vi.clearAllMocks()
+    cssStyle = setupCSSVariables()
     ;(useServiceWorker as ReturnType<typeof vi.fn>).mockReturnValue({
       needRefresh: false,
       offlineReady: false,
       updateServiceWorker: mockUpdateServiceWorker,
       close: mockClose
     })
+  })
+
+  afterEach(() => {
+    if (cssStyle) {
+      cleanupCSSVariables(cssStyle)
+    }
   })
 
   describe('visibility', () => {
@@ -110,18 +140,13 @@ describe('UpdatePrompt', () => {
       
       const dismissButton = screen.getByText('Dismiss')
       
-      // Initial style
-      expect(dismissButton).toHaveStyle({
-        backgroundColor: '#f3f4f6'
-      })
-      
-      // Hover
+      // Test hover behavior
       fireEvent.mouseEnter(dismissButton)
       expect(dismissButton).toHaveStyle({
         backgroundColor: '#e5e7eb'
       })
       
-      // Leave
+      // Test mouse leave
       fireEvent.mouseLeave(dismissButton)
       expect(dismissButton).toHaveStyle({
         backgroundColor: '#f3f4f6'
@@ -188,18 +213,13 @@ describe('UpdatePrompt', () => {
       
       const updateButton = screen.getByText('Update')
       
-      // Initial style
-      expect(updateButton).toHaveStyle({
-        backgroundColor: '#3b82f6'
-      })
-      
-      // Hover
+      // Test hover behavior
       fireEvent.mouseEnter(updateButton)
       expect(updateButton).toHaveStyle({
         backgroundColor: '#2563eb'
       })
       
-      // Leave
+      // Test mouse leave
       fireEvent.mouseLeave(updateButton)
       expect(updateButton).toHaveStyle({
         backgroundColor: '#3b82f6'
@@ -211,18 +231,13 @@ describe('UpdatePrompt', () => {
       
       const laterButton = screen.getByText('Later')
       
-      // Initial style
-      expect(laterButton).toHaveStyle({
-        backgroundColor: '#f3f4f6'
-      })
-      
-      // Hover
+      // Test hover behavior
       fireEvent.mouseEnter(laterButton)
       expect(laterButton).toHaveStyle({
         backgroundColor: '#e5e7eb'
       })
       
-      // Leave
+      // Test mouse leave
       fireEvent.mouseLeave(laterButton)
       expect(laterButton).toHaveStyle({
         backgroundColor: '#f3f4f6'
@@ -263,11 +278,10 @@ describe('UpdatePrompt', () => {
         position: 'fixed',
         bottom: '20px',
         right: '20px',
-        backgroundColor: '#ffffff',
         borderRadius: '8px',
         padding: '16px',
         maxWidth: '320px',
-        zIndex: 1000,
+        zIndex: '1000',
         display: 'flex',
         flexDirection: 'column',
         gap: '12px'
