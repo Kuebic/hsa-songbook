@@ -9,12 +9,10 @@ import { ThemeProvider } from '@shared/contexts/ThemeContext'
 
 // Eagerly load the home page
 import { HomePage } from './pages/HomePage'
-import { TestEditorPage } from './pages/TestEditorPage'
-import { TestDragDrop } from '@features/setlists/components/TestDragDrop'
 
 // Lazy load other pages for code splitting
 const SearchPage = lazy(() => import('./pages/SearchPage').then(module => ({ default: module.SearchPage })))
-const SetlistDetailPage = lazy(() => import('./pages/SetlistDetailPage').then(module => ({ default: module.SetlistDetailPage })))
+const SetlistDetailPage = lazy(() => import('@features/setlists/pages/SetlistDetailPage').then(module => ({ default: module.SetlistDetailPage })))
 const SongListPage = lazy(() => import('@features/songs').then(module => ({ default: module.SongListPage })))
 const SongDetailPage = lazy(() => import('@features/songs').then(module => ({ default: module.SongDetailPage })))
 const SetlistPage = lazy(() => import('@features/setlists').then(module => ({ default: module.SetlistPage })))
@@ -41,16 +39,6 @@ function App() {
             <Route path="/" element={
               <ErrorBoundary level="page">
                 <HomePage />
-              </ErrorBoundary>
-            } />
-            <Route path="/test-editor" element={
-              <ErrorBoundary level="page">
-                <TestEditorPage />
-              </ErrorBoundary>
-            } />
-            <Route path="/test-drag" element={
-              <ErrorBoundary level="page">
-                <TestDragDrop />
               </ErrorBoundary>
             } />
             <Route 
