@@ -1,16 +1,15 @@
 import React from 'react'
 import { Sun, Moon, Monitor } from 'lucide-react'
-
-export type EditorTheme = 'light' | 'dark' | 'stage'
+import type { Theme } from '@shared/contexts/theme-types'
 
 interface ThemeSelectorProps {
-  currentTheme: EditorTheme
-  onThemeChange: (theme: EditorTheme) => void
+  currentTheme: Theme
+  onThemeChange: (theme: Theme) => void
   className?: string
 }
 
 interface ThemeOption {
-  value: EditorTheme
+  value: Theme
   icon: React.ReactNode
   label: string
   description: string

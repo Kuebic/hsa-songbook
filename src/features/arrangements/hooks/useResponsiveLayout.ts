@@ -1,33 +1,29 @@
 import { useState, useEffect } from 'react'
+import { useResponsiveLayout as useBaseResponsiveLayout } from '../components/ChordProEditor/hooks/useResponsiveLayout'
 
 export type LayoutOrientation = 'horizontal' | 'vertical'
 export type ViewMode = 'edit' | 'preview' | 'split'
 
+/**
+ * Hook for managing editor view modes based on responsive layout
+ * Uses the base responsive layout hook for device detection
+ */
 export function useResponsiveLayout() {
-  const [isMobile, setIsMobile] = useState(false)
+  const baseLayout = useBaseResponsiveLayout()
   const [orientation, setOrientation] = useState<LayoutOrientation>('horizontal')
   const [viewMode, setViewMode] = useState<ViewMode>('split')
 
   useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 768
-      setIsMobile(mobile)
-      
-      // Auto-switch to edit mode on mobile, split on desktop
-      if (mobile && viewMode === 'split') {
-        setViewMode('edit')
-      } else if (!mobile && (viewMode === 'edit' || viewMode === 'preview')) {
-        setViewMode('split')
-      }
+    // Auto-switch to edit mode on mobile, split on desktop
+    if (baseLayout.isMobile && viewMode === 'split') {
+      setViewMode('edit')
+    } else if (baseLayout.isDesktop && (viewMode === 'edit' || viewMode === 'preview')) {
+      setViewMode('split')
     }
-
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [viewMode])
+  }, [baseLayout.isMobile, baseLayout.isDesktop, viewMode])
 
   const toggleViewMode = () => {
-    if (isMobile) {
+    if (baseLayout.isMobile) {
       setViewMode(prev => prev === 'edit' ? 'preview' : 'edit')
     } else {
       setOrientation(prev => prev === 'horizontal' ? 'vertical' : 'horizontal')
@@ -35,7 +31,7 @@ export function useResponsiveLayout() {
   }
 
   return {
-    isMobile,
+    ...baseLayout,
     orientation,
     viewMode,
     toggleViewMode,
