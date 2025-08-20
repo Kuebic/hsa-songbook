@@ -290,7 +290,7 @@ export function createSongSchema(options?: {
       artist: z.string()
         .min(1, 'Artist is required')
         .max(100, 'Artist name must be less than 100 characters')
-    }) as any
+    }) as typeof songFormSchema
   }
   
   if (options?.requireYear) {
@@ -298,21 +298,21 @@ export function createSongSchema(options?: {
       compositionYear: z.number()
         .min(1000, 'Composition year is required')
         .max(currentYear, `Year cannot be in the future`)
-    }) as any
+    }) as typeof songFormSchema
   }
   
   if (options?.requireCCLI) {
     schema = schema.extend({
       ccli: z.string()
         .regex(ccliRegex, 'Valid CCLI number is required')
-    }) as any
+    }) as typeof songFormSchema
   }
   
   if (options?.requireSource) {
     schema = schema.extend({
       source: z.enum(SONG_SOURCES as readonly [string, ...string[]])
         .describe('Source is required')
-    }) as any
+    }) as typeof songFormSchema
   }
   
   if (options?.minThemes || options?.maxThemes) {
@@ -323,7 +323,7 @@ export function createSongSchema(options?: {
       themes: z.array(z.string())
         .min(minThemes, `At least ${minThemes} theme${minThemes > 1 ? 's' : ''} required`)
         .max(maxThemes, `Maximum ${maxThemes} themes allowed`)
-    }) as any
+    }) as typeof songFormSchema
   }
   
   return schema

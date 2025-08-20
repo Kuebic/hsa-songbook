@@ -63,7 +63,7 @@ export function useSlugGeneration(
 ): UseSlugGenerationReturn {
   const {
     autoGenerate: _autoGenerate = true,
-    debounceDelay = 500,
+    debounceDelay: _debounceDelay = 500,
     validateSlug = true,
     onSlugGenerated,
     onError,

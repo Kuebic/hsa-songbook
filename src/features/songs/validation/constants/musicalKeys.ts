@@ -49,7 +49,7 @@ export const ENHARMONIC_EQUIVALENTS: Record<string, string> = {
 export const DIFFICULTY_LEVELS = ['beginner', 'intermediate', 'advanced'] as const
 export type DifficultyLevel = typeof DIFFICULTY_LEVELS[number]
 
-// Tempo ranges
+// Tempo ranges (following arrangement validation limits: 40-240 BPM)
 export const TEMPO_RANGES = {
   LARGO: { min: 40, max: 60, label: 'Largo (Very Slow)' },
   ADAGIO: { min: 60, max: 70, label: 'Adagio (Slow)' },
@@ -59,8 +59,34 @@ export const TEMPO_RANGES = {
   ALLEGRO: { min: 130, max: 160, label: 'Allegro (Fast)' },
   VIVACE: { min: 160, max: 180, label: 'Vivace (Lively)' },
   PRESTO: { min: 180, max: 200, label: 'Presto (Very Fast)' },
-  PRESTISSIMO: { min: 200, max: 300, label: 'Prestissimo (Extremely Fast)' }
+  PRESTISSIMO: { min: 200, max: 240, label: 'Prestissimo (Extremely Fast)' }
 } as const
+
+// Tempo validation constants
+export const TEMPO_LIMITS = {
+  MIN: 40,
+  MAX: 240
+} as const
+
+// Capo position constants
+export const CAPO_LIMITS = {
+  MIN: 0,
+  MAX: 12
+} as const
+
+// Duration constants (in seconds)
+export const DURATION_LIMITS = {
+  MIN: 1,          // 1 second
+  MAX: 3600        // 1 hour
+} as const
+
+// Common arrangement tags for quick selection
+export const COMMON_ARRANGEMENT_TAGS = [
+  'acoustic', 'electric', 'fingerpicking', 'strumming', 'classical',
+  'jazz', 'blues', 'folk', 'pop', 'rock', 'country', 'latin',
+  'solo', 'duet', 'ensemble', 'easy', 'intermediate', 'advanced',
+  'slow', 'medium', 'fast', 'ballad', 'upbeat', 'contemplative'
+] as const
 
 export function getTempoLabel(bpm: number): string {
   for (const [, range] of Object.entries(TEMPO_RANGES)) {

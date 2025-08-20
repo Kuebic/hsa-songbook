@@ -76,3 +76,39 @@ export type {
   ReviewFilter,
   ReviewResponse
 } from './review.types'
+
+// Re-export arrangement types for convenience
+export type {
+  ArrangementWithTitle,
+  CreateArrangementPayload,
+  UpdateArrangementPayload,
+  ArrangementFormState,
+  ArrangementValidationErrors,
+  ArrangementManagementFormProps,
+  ArrangementManagementModalProps,
+  ArrangementSelectorProps,
+  ArrangementCardProps,
+  ArrangementListProps,
+  ArrangementService,
+  UseArrangementMutationsProps,
+  UseCreateArrangementOptions,
+  UseUpdateArrangementOptions,
+  UseDeleteArrangementOptions,
+  ArrangementRow,
+  ArrangementInsert,
+  ArrangementUpdate,
+  ArrangementMappingUtils,
+  ArrangementSearchParams,
+  ArrangementSearchResponse,
+  ArrangementFilter,
+  ArrangementModalState,
+  UseArrangementManagementModal,
+  ArrangementValidationResult,
+  ChordProValidationResult,
+  MashupValidationResult,
+  ArrangementFieldName,
+  ArrangementDifficulty,
+  ArrangementSortBy,
+  ArrangementLayout,
+  ArrangementModalMode
+} from './arrangement.types'
