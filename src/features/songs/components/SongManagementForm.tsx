@@ -53,7 +53,7 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
     source: song?.source || '',
     themes: song?.themes || [],
     notes: song?.notes || '',
-    isPublic: song?.metadata?.isPublic ?? false
+    isPublic: song?.metadata?.isPublic ?? true // Default to true for new songs
   })
   
   const [themeInput, setThemeInput] = useState('')
@@ -302,7 +302,8 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
     backgroundColor: 'var(--color-background)',
     color: 'var(--text-primary)',
     outline: 'none',
-    transition: 'border-color 0.2s'
+    transition: 'border-color 0.2s',
+    boxSizing: 'border-box'
   }
   
   const textareaStyles: React.CSSProperties = {

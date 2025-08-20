@@ -1,4 +1,3 @@
-import { Button } from '@shared/components/ui/Button'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useSongModal } from '../../contexts/SongModalContext'
 
@@ -17,15 +16,29 @@ export function AddSongButton() {
   if (!isSignedIn) return null
   
   return (
-    <Button 
+    <button 
       onClick={handleButtonClick}
-      variant="default"
-      size="sm"
       aria-label="Add new song"
       title="Add a new song to the library"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        padding: '0.5rem 1rem',
+        backgroundColor: 'var(--status-success)',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '0.875rem',
+        fontWeight: 500,
+        transition: 'opacity 0.2s'
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
     >
-      <span style={{ marginRight: '4px' }}>+</span>
+      <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>+</span>
       Add Song
-    </Button>
+    </button>
   )
 }

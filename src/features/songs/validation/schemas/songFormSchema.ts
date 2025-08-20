@@ -67,7 +67,7 @@ export const songFormSchema = z.object({
     .transform(val => val && val.length > 0 ? val : undefined),
   
   // Metadata
-  isPublic: z.boolean().default(false),
+  isPublic: z.boolean().default(true), // Default to true for new songs
   
   // Optional arrangement (for creating song with initial arrangement)
   arrangement: arrangementSchema.optional(),

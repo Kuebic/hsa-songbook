@@ -75,7 +75,11 @@ export function ArrangementManagementForm({
   
   // Hooks for data fetching and mutations
   const { songs } = useSongs()
-  const { createArrangement, updateArrangement } = useArrangementMutations()
+  
+  // Pass the current arrangement as initial data if editing
+  const { createArrangement, updateArrangement } = useArrangementMutations({
+    initialArrangements: arrangement ? [arrangement] : []
+  })
   
   // Ensure songs is always an array
   const existingSongs = useMemo(() => songs || [], [songs])
@@ -102,15 +106,23 @@ export function ArrangementManagementForm({
     }
   }, [currentSong, arrangement, formState.name])
   
-  // Auto-generate slug from name
+  // Auto-generate slug from name (only for new arrangements)
+  // For existing arrangements, keep the original slug to maintain URL stability
   useEffect(() => {
     if (formState.name && !arrangement) {
-      const slug = formState.name
+      // Generate a stable slug with random ID suffix
+      const baseSlug = formState.name
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
         .trim()
+      
+      // Add random suffix to ensure uniqueness and stability
+      // This prevents slug changes when the arrangement name is edited later
+      const randomSuffix = Math.random().toString(36).substring(2, 7)
+      const slug = `${baseSlug}-${randomSuffix}`
+      
       setFormState(prev => ({ ...prev, slug }))
     }
   }, [formState.name, arrangement])
@@ -285,7 +297,8 @@ export function ArrangementManagementForm({
     backgroundColor: 'var(--color-background)',
     color: 'var(--text-primary)',
     outline: 'none',
-    transition: 'border-color 0.2s'
+    transition: 'border-color 0.2s',
+    boxSizing: 'border-box'
   }
   
   const textareaStyles: React.CSSProperties = {
