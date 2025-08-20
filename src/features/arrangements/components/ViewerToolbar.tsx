@@ -4,13 +4,11 @@ import { TransposeControls } from './TransposeControls'
 import { FontPreferences } from './FontPreferences'
 // AddToSetlistDropdown removed - setlists under construction
 import type { EnhancedTranspositionState } from '../hooks/useTransposition'
-import type { Arrangement } from '../../songs/types/song.types'
 
 interface ViewerToolbarProps {
   onPrint: () => void
   onToggleStageMode: () => void
   isStageMode: boolean
-  _arrangement?: Arrangement
   // Enhanced transposition props
   transposition?: EnhancedTranspositionState & {
     transpose: (steps: number) => void
@@ -22,7 +20,6 @@ export function ViewerToolbar({
   onPrint, 
   onToggleStageMode, 
   isStageMode,
-  _arrangement,
   transposition
 }: ViewerToolbarProps) {
   

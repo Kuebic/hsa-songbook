@@ -158,7 +158,6 @@ export function ArrangementViewerPage() {
             onPrint={handlePrint}
             onToggleStageMode={toggleStageMode}
             isStageMode={isStageMode}
-            arrangement={arrangement}
             transposition={transpositionState}
           />
         )

@@ -1,6 +1,3 @@
-export { ArrangementForm } from './ArrangementForm'
 export { ArrangementList } from './ArrangementList'
-export { ChordEditor } from './ChordEditor'
-export { ArrangementSheet } from './ArrangementSheet'
-export { AddArrangementButton } from './AddArrangementButton'
 export { ArrangementSwitcher } from './ArrangementSwitcher'
+// Forms and editors removed - focusing on core viewing functionality

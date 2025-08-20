@@ -38,6 +38,9 @@ export interface Arrangement {
   chordData?: string // Server returns this field name for ChordPro text
   chordProText?: string // Alias for when sending data to server
   description?: string
+  notes?: string
+  capo?: number
+  duration?: number
   createdBy: string
   metadata?: {
     isMashup?: boolean
