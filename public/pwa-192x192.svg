@@ -3,12 +3,12 @@
   <rect width="192" height="192" fill="#1976d2"/>
   <text x="50%" y="50%" text-anchor="middle" dy=".3em" 
         fill="white" font-family="Arial, sans-serif" 
-        font-size="38.400000000000006px" font-weight="bold">
+        font-size="38.4px" font-weight="bold">
     HSA
   </text>
   <text x="50%" y="65%" text-anchor="middle" dy=".3em" 
         fill="white" font-family="Arial, sans-serif" 
-        font-size="19.200000000000003px">
+        font-size="19.2px">
     Songbook
   </text>
 </svg>
