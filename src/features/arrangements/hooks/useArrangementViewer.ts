@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { arrangementService } from '@features/songs/services/arrangementService'
-import type { ArrangementViewerData } from '../types/viewer.types'
+import { songService } from '@features/songs/services/songService'
+import type { ArrangementViewerData, ArrangementDTO } from '../types/viewer.types'
+import { mapDTOToViewModel } from '../types/viewer.types'
 
 export function useArrangementViewer(slug: string) {
   const [arrangement, setArrangement] = useState<ArrangementViewerData | null>(null)
@@ -30,45 +32,47 @@ export function useArrangementViewer(slug: string) {
         }
 
         if (data) {
-          // Use arrangement name as fallback for song title
-          const songTitle = data.name || 'Unknown Song'
-          const songSlug = '' // Will be provided via navigation state instead
-          const artist = '' // TODO: Implement when API format is clarified
+          // Cast to DTO type for type safety
+          const dto = data as ArrangementDTO
           
-          // Server now provides decompressed chordProText
-          // Use sample chord data if none exists (for demo purposes)
-          const sampleChordPro = `{title: ${songTitle || data.name}}
-{key: ${data.key || 'C'}}
-{tempo: ${data.tempo || 120}}
+          // Use the type-safe mapper function
+          const viewModel = mapDTOToViewModel(dto)
+          
+          // Fetch the associated song to get its slug and title
+          let songSlug = ''
+          let songTitle = viewModel.name || 'Unknown Song'
+          let artist = ''
+          
+          // If we have a songId, fetch the song details
+          if (viewModel.songIds && viewModel.songIds.length > 0) {
+            try {
+              const song = await songService.getSongById(viewModel.songIds[0])
+              if (song) {
+                songSlug = song.slug
+                songTitle = song.title
+                artist = song.artist || ''
+              }
+            } catch (err) {
+              console.warn('Failed to fetch song details for arrangement:', err)
+              // Continue without song details - fallback to songs list
+            }
+          }
+          
+          // Log if no chord data found (but don't assign fake data)
+          if (!viewModel.chordProText) {
+            console.info('No chord data found in arrangement:', dto.slug)
+            // Keep chordProText empty - ChordSheetViewer will show proper empty state
+          }
 
-[Verse 1]
-[C]Amazing grace, how [F]sweet the [C]sound
-That [C]saved a wretch like [G]me
-I [C]once was lost, but [F]now am [C]found
-Was [C]blind but [G]now I [C]see
-
-[Chorus]
-My [F]chains are gone, I've been set [C]free
-My God, my [F]Savior has ransomed [C]me
-And like a [F]flood His mercy [C]reigns
-Unending [Am]love, [G]amazing [C]grace`
-
-          setArrangement({
-            id: data.id,
-            name: data.name,
-            slug: data.slug,
-            songIds: data.songIds || [], // Added required field
+          // Set the properly typed arrangement data
+          const arrangementData: ArrangementViewerData = {
+            ...viewModel,
             songTitle,
             songSlug,
-            artist,
-            key: data.key || 'C', // Default to C if no key
-            tempo: data.tempo,
-            timeSignature: data.timeSignature,
-            difficulty: data.difficulty || 'beginner', // Default to beginner
-            chordProText: (data as unknown as Record<string, unknown>).chordProText as string || sampleChordPro, // Use sample if no data
-            tags: data.tags || [],
-            createdBy: data.createdBy || ''
-          })
+            artist
+          }
+          
+          setArrangement(arrangementData)
         } else {
           setError('Arrangement not found')
         }
