@@ -22,14 +22,13 @@ export { FormSelect } from './FormSelect'
 export { FormCheckbox, FormCheckboxGroup } from './FormCheckbox'
 export { FormRadioGroup } from './FormRadioGroup'
 
-// Button components
+// Button components - now using shadcn Button wrappers
 export { 
-  FormButton, 
   SubmitButton, 
   CancelButton, 
   ResetButton, 
-  DeleteButton 
-} from './FormButton'
+  DeleteButton
+} from './ButtonWrappers'
 
 // Support components
 export { FormError, FormErrorList, FormInlineError } from './FormError'
