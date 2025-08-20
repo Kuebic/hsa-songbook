@@ -305,7 +305,7 @@ export function ViewerControls({
                   min="12"
                   max="24"
                   value={fontSize}
-                  onChange={(e) => onFontSizeChange(Number(e.target.value))}
+                  onChange={(e) => onFontSizeChange?.(Number(e.target.value))}
                   style={{
                     width: '100%',
                     accentColor: 'var(--color-primary)'

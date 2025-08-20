@@ -2,7 +2,7 @@ import { Printer, Eye, EyeOff, Maximize } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { TransposeControls } from './TransposeControls'
 import { FontPreferences } from './FontPreferences'
-import { AddToSetlistDropdown } from '@features/setlists/components/selectors/AddToSetlistDropdown'
+// AddToSetlistDropdown removed - setlists under construction
 import type { EnhancedTranspositionState } from '../hooks/useTransposition'
 import type { Arrangement } from '../../songs/types/song.types'
 
@@ -10,7 +10,7 @@ interface ViewerToolbarProps {
   onPrint: () => void
   onToggleStageMode: () => void
   isStageMode: boolean
-  arrangement?: Arrangement
+  _arrangement?: Arrangement
   // Enhanced transposition props
   transposition?: EnhancedTranspositionState & {
     transpose: (steps: number) => void
@@ -22,7 +22,7 @@ export function ViewerToolbar({
   onPrint, 
   onToggleStageMode, 
   isStageMode,
-  arrangement,
+  _arrangement,
   transposition
 }: ViewerToolbarProps) {
   
@@ -68,14 +68,7 @@ export function ViewerToolbar({
           <span className="label">Fullscreen</span>
         </button>
         
-        {/* Add to Setlist Dropdown */}
-        {arrangement && (
-          <AddToSetlistDropdown
-            arrangement={arrangement}
-            variant="button"
-            className="toolbar-button"
-          />
-        )}
+        {/* Setlist feature coming soon */}
       </div>
       
       {/* Existing controls integration */}

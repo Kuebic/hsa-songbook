@@ -18,7 +18,7 @@ export class EditorStorageService {
   private readonly DRAFT_VERSION = 1;
   private readonly MAX_SESSION_SIZE = 4 * 1024 * 1024; // 4MB safety limit
   private readonly CLEANUP_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
-  private readonly MAX_DRAFT_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
+  // private readonly _MAX_DRAFT_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days (unused for now)
   
   /**
    * Initialize the storage service (Supabase doesn't need explicit initialization)

@@ -13,6 +13,9 @@ import {
   Song,
   Chord,
 } from 'chordsheetjs';
+
+// Type for items in chordsheetjs - use any for compatibility
+type Item = any;
 import type {
   ChordProMetadata,
   ValidationError,
@@ -24,6 +27,11 @@ import { enharmonicService } from './enharmonicService';
 interface ChordItem {
   chords?: string | string[];
   [key: string]: unknown;
+}
+
+// Type guard to check if an Item has chords
+function isChordItem(item: Item): item is ChordItem {
+  return 'chords' in item && item.chords !== undefined;
 }
 
 /**
@@ -194,7 +202,8 @@ export class ChordProService {
       
       song.lines.forEach(line => {
         if (line.items) {
-          line.items.forEach((item: ChordItem) => {
+          line.items.forEach((item: Item) => {
+          if (!isChordItem(item)) return;
             if ('chords' in item && item.chords) {
               if (typeof item.chords === 'string') {
                 const chord = Chord.parse(item.chords);
@@ -268,7 +277,8 @@ export class ChordProService {
     
     song.lines.forEach(line => {
       if (line.items) {
-        line.items.forEach((item: ChordItem) => {
+        line.items.forEach((item: Item) => {
+          if (!isChordItem(item)) return;
           if ('chords' in item && item.chords) {
             if (typeof item.chords === 'string') {
               item.chords = enharmonicService.convertChord(item.chords, modifier);
@@ -293,7 +303,8 @@ export class ChordProService {
     // Extract chords from all lines
     song.lines.forEach((line) => {
       if (line.items) {
-        line.items.forEach((item: ChordItem) => {
+        line.items.forEach((item: Item) => {
+          if (!isChordItem(item)) return;
           // Check if item has chords property (ChordLyricsPair)
           if ('chords' in item && item.chords) {
             if (typeof item.chords === 'string') {

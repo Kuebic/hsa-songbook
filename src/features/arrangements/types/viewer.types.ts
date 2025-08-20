@@ -29,16 +29,17 @@ export interface ArrangementViewerData {
   id: string
   name: string
   slug: string
+  songIds: string[]        // Added required property
   songTitle?: string
   songSlug?: string // Add song slug for navigation
   artist?: string
-  key?: string
+  key: string
   tempo?: number
   timeSignature?: string
-  difficulty?: 'beginner' | 'intermediate' | 'advanced'
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
   chordProText: string
   createdBy?: string
-  tags?: string[]
+  tags: string[]
 }
 
 export interface ChordSheetSettings {

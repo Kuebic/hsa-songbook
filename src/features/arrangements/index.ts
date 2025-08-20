@@ -6,7 +6,7 @@ export { ChordSheetViewer } from './components/ChordSheetViewer'
 export { ViewerHeader } from './components/ViewerHeader'
 export { ViewerControls } from './components/ViewerControls'
 export { ChordProEditor } from './components/ChordProEditor'
-export { ChordSyntaxHighlight } from './components/ChordSyntaxHighlight'
+// ChordSyntaxHighlight removed - ace editor dependency
 export { ChordPreviewPane } from './components/ChordPreviewPane'
 export { EditorToolbar } from './components/EditorToolbar'
 
@@ -30,11 +30,7 @@ export {
   insertDirectiveAtCursor
 } from './utils/chordProHighlighter'
 
-export {
-  defineChordProMode,
-  configureAceForChordPro,
-  chordProTheme
-} from './utils/aceChordProMode'
+// Ace editor utilities removed
 
 // Types
 export type {
@@ -47,5 +43,4 @@ export type {
 } from './types/viewer.types'
 
 export type { ChordProEditorProps } from './components/ChordProEditor'
-export type { ChordSyntaxHighlightProps, ChordSyntaxHighlightRef } from './components/ChordSyntaxHighlight'
 export type { ValidationResult } from './hooks/useChordProValidation'

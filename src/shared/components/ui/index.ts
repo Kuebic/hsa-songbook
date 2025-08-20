@@ -1,4 +1,4 @@
-export { Button, buttonVariants } from './button'
+export { Button, buttonVariants } from './Button'
 export { Separator } from './separator'
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs'
 export { Textarea } from './textarea'

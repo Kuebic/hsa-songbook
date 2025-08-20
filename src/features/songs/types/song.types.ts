@@ -10,6 +10,8 @@ export interface Song {
   notes?: string
   defaultArrangementId?: string
   metadata: SongMetadata
+  createdAt?: Date | string  // Added for compatibility
+  updatedAt?: Date | string  // Added for compatibility
 }
 
 export interface SongMetadata {

@@ -276,8 +276,8 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
   }, [handleCursorPositionChange]);
 
   // Handle selection range changes
-  const handleSelectionRangeChangeLocal = useCallback((range: [number, number]) => {
-    handleSelectionRangeChange(range);
+  const handleSelectionRangeChangeLocal = useCallback((_range: [number, number]) => {
+    handleSelectionRangeChange();
   }, [handleSelectionRangeChange]);
 
   // Calculate line and column

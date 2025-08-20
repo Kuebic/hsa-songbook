@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { SongTitleEdit } from './SongTitleEdit'
 import type { Song } from '../types/song.types'
 
 interface SongViewerProps {
@@ -21,10 +20,7 @@ export function SongViewer({
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
       <header style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
-          <SongTitleEdit 
-            song={song} 
-            onUpdate={setSong}
-          />
+          {song.title}
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem' }}>
           {song.artist} {song.compositionYear && `(${song.compositionYear})`}

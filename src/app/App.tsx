@@ -12,11 +12,9 @@ import { HomePage } from './pages/HomePage'
 
 // Lazy load other pages for code splitting
 const SearchPage = lazy(() => import('./pages/SearchPage').then(module => ({ default: module.SearchPage })))
-const SetlistDetailPage = lazy(() => import('@features/setlists/pages/SetlistDetailPage').then(module => ({ default: module.SetlistDetailPage })))
 const SongListPage = lazy(() => import('@features/songs').then(module => ({ default: module.SongListPage })))
 const SongDetailPage = lazy(() => import('@features/songs').then(module => ({ default: module.SongDetailPage })))
-const SetlistPage = lazy(() => import('@features/setlists').then(module => ({ default: module.SetlistPage })))
-const SetlistPlaybackPage = lazy(() => import('@features/setlists').then(module => ({ default: module.SetlistPlaybackPage })))
+const SetlistsPage = lazy(() => import('@features/setlists').then(module => ({ default: module.SetlistsPage })))
 const ArrangementViewerPage = lazy(() => import('@features/arrangements/pages/ArrangementViewerPage').then(module => ({ default: module.ArrangementViewerPage })))
 const ChordEditingPage = lazy(() => import('@features/arrangements/pages/ChordEditingPage').then(module => ({ default: module.ChordEditingPage })))
 
@@ -106,7 +104,7 @@ function App() {
               element={
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Setlists">
-                    <SetlistPage />
+                    <SetlistsPage />
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 
@@ -116,7 +114,7 @@ function App() {
               element={
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Setlist Details">
-                    <SetlistDetailPage />
+                    <SetlistsPage />
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 
@@ -126,7 +124,7 @@ function App() {
               element={
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Setlist Playback">
-                    <SetlistPlaybackPage />
+                    <SetlistsPage />
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 
@@ -136,7 +134,7 @@ function App() {
               element={
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Setlist Playback">
-                    <SetlistPlaybackPage />
+                    <SetlistsPage />
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 

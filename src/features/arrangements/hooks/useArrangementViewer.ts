@@ -57,15 +57,16 @@ Unending [Am]love, [G]amazing [C]grace`
             id: data.id,
             name: data.name,
             slug: data.slug,
+            songIds: data.songIds || [], // Added required field
             songTitle,
             songSlug,
             artist,
-            key: data.key,
+            key: data.key || 'C', // Default to C if no key
             tempo: data.tempo,
             timeSignature: data.timeSignature,
-            difficulty: data.difficulty,
+            difficulty: data.difficulty || 'beginner', // Default to beginner
             chordProText: (data as unknown as Record<string, unknown>).chordProText as string || sampleChordPro, // Use sample if no data
-            tags: data.tags,
+            tags: data.tags || [],
             createdBy: data.createdBy || ''
           })
         } else {
