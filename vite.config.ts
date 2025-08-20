@@ -18,7 +18,7 @@ export default defineConfig(() => ({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg', 'apple-touch-icon.svg', 'vite.svg'],
+      includeAssets: ['icon.svg', 'apple-touch-icon.svg'],
       manifest: {
         name: 'HSA Songbook',
         short_name: 'Songbook',
