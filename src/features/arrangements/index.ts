@@ -30,7 +30,50 @@ export {
   insertDirectiveAtCursor
 } from './utils/chordProHighlighter'
 
-// Ace editor utilities removed
+// ChordPro Integration Utilities
+export {
+  generateChordProTemplate,
+  generateFullChordProTemplate,
+  generateMinimalChordProTemplate,
+  mapArrangementToChordProMetadata,
+  updateChordProWithArrangementMetadata,
+  extractMetadataFromChordPro
+} from './utils/chordProTemplateGenerator'
+
+export {
+  storeChordProTemplate,
+  getChordProTemplate,
+  hasChordProTemplate,
+  clearChordProTemplate,
+  storeTemplateForArrangementCreation,
+  storeTemplateForArrangementEdit,
+  storeTemplateForSongCreation,
+  useChordProSessionData,
+  shouldPrefillEditor,
+  chordProEditorSessionService
+} from './utils/chordProEditorIntegration'
+
+export {
+  navigateToChordProEditor,
+  navigateToEditArrangement,
+  navigateToCreateArrangement,
+  navigateToArrangementView,
+  navigateToSongView,
+  createArrangementWorkflowNavigator,
+  safeNavigate,
+  isInChordProEditor,
+  getArrangementIdFromUrl,
+  hasPrefillFlag,
+  navigateWithConfirmation
+} from './utils/chordProNavigationUtils'
+
+// Services
+export { chordProService } from './services/chordProService'
+export { 
+  chordProWorkflowService,
+  useChordProWorkflow,
+  ChordProWorkflowImplementations
+} from './services/chordProWorkflowService'
 
 // Types
 export type {
@@ -44,3 +87,24 @@ export type {
 
 export type { ChordProEditorProps } from './components/ChordProEditor'
 export type { ValidationResult } from './hooks/useChordProValidation'
+
+// ChordPro Integration Types
+export type {
+  ChordProTemplate,
+  TemplateGenerationOptions
+} from './utils/chordProTemplateGenerator'
+
+export type {
+  EditorSessionData,
+  ChordProEditorSessionService
+} from './utils/chordProEditorIntegration'
+
+export type {
+  NavigationOptions,
+  NavigationResult,
+  ArrangementWorkflowNavigator
+} from './utils/chordProNavigationUtils'
+
+export type {
+  ChordProWorkflowService
+} from './services/chordProWorkflowService'

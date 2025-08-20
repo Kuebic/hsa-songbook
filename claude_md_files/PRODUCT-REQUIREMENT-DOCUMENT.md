@@ -13,7 +13,7 @@
 Unification musicians and worship leaders need a streamlined way to search, view, and organize chord charts for songs, with the ability to create setlists for performances while maintaining a clean, responsive interface across all devices.
 
 ### 1.3 Solution Overview
-A React + Vite web application that leverages ChordSheetJS libraries to parse and display chordpro-formatted songs, with search/filter capabilities, setlist creation functionality, and user contribution features. The app will be built with performance and database efficiency in mind to stay within MongoDB free-tier limitations.
+A React + Vite web application that leverages ChordSheetJS libraries to parse and display chordpro-formatted songs, with search/filter capabilities, setlist creation functionality, and user contribution features. The app is built with Supabase (PostgreSQL) for backend services, providing real-time capabilities, authentication, and efficient data management within the free tier limits.
 
 ---
 
@@ -226,9 +226,10 @@ Result: E - A - B - C#m
 - **OnSong Format**: For mobile app compatibility
 - **MIDI Export**: Basic chord progression as MIDI
 
-### 3.7 📱 Offline Capability
+### 3.7 📱 Offline Capability (Future Enhancement)
 
 - **Smart Caching**: Frequently accessed songs stored locally
+- **PWA Support**: Progressive Web App for offline functionality
 - **Offline Setlists**: Download setlists for offline use
 - **Sync Management**: Automatic sync when reconnected
 - **Storage Limits**: User-configurable cache size
@@ -246,34 +247,37 @@ Result: E - A - B - C#m
 | **Build Tool** | Vite | Fast development and building |
 | **UI Components** | ShadCN UI | Consistent design system |
 | **Styling** | Tailwind CSS | Utility-first CSS |
-| **Database** | MongoDB | Document storage |
-| **Authentication** | Clerk | User management |
+| **Database** | Supabase (PostgreSQL) | Relational database with real-time |
+| **Authentication** | Supabase Auth | User management with OAuth |
 | **Testing** | Vitest + RTL | Unit and integration tests |
 | **Chord Processing** | ChordSheetJS | ChordPro parsing |
 
 ### 4.2 💾 Database Design
 
-#### MongoDB Optimization (Free Tier: 512MB)
+#### Supabase Database Optimization (Free Tier)
 
-```javascript
-Collections Structure:
+```sql
+Table Structure:
 ├── songs (metadata only)
-│   └── Indexed: title, artist, tags
-├── arrangements (chord data, compressed)
-│   └── Indexed: songId, createdBy
-├── users
-│   └── Indexed: clerkId, email
+│   └── Indexed: slug, title, artist, themes (GIN)
+├── arrangements (chord data)
+│   └── Indexed: song_id, slug, created_by
+├── users (synced with auth.users)
+│   └── Indexed: email, username
 ├── setlists
-│   └── Indexed: createdBy, isPublic
+│   └── Indexed: created_by, is_public
+├── setlist_items (junction table)
+│   └── Indexed: setlist_id, position
 └── reviews
-    └── Indexed: arrangementId, userId
+    └── Indexed: arrangement_id, user_id
 ```
 
 #### Storage Strategies
-- ZSTD compression for chord data (60-80% reduction)
-- Separate metadata from content
-- Efficient indexing for < 500ms queries
-- Document size monitoring
+- Application-level compression for chord data if needed
+- Separate metadata from content tables
+- PostgreSQL GIN indexes for full-text search
+- Row-level security (RLS) for data access control
+- Real-time subscriptions via Supabase
 
 ### 4.3 ⚡ Performance Requirements
 
@@ -338,10 +342,11 @@ Login → Moderation Queue → Review Content → Approve/Edit → Handle Report
 
 ### 6.1 🔐 Authentication & Authorization
 
-- **OAuth 2.0**: Via Clerk authentication
-- **Role-Based Access**: Public, User, Admin levels
-- **Session Management**: Secure token handling
-- **Password Policy**: Enforced by Clerk
+- **OAuth 2.0**: Via Supabase Auth (Google, GitHub)
+- **Role-Based Access**: Public, User, Admin levels via RLS
+- **Session Management**: JWT tokens managed by Supabase
+- **Password Policy**: Enforced by Supabase Auth
+- **Anonymous Auth**: Guest access (future enhancement)
 
 ### 6.2 🛡️ Data Protection
 

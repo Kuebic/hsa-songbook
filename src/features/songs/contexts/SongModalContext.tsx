@@ -9,7 +9,7 @@ interface SongModalContextType {
   closeModal: () => void
 }
 
-const SongModalContext = createContext<SongModalContextType | null>(null)
+export const SongModalContext = createContext<SongModalContextType | null>(null)
 
 interface SongModalProviderProps {
   children: ReactNode

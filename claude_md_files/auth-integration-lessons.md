@@ -1,209 +1,236 @@
-# Authentication Integration Lessons: Clerk + MongoDB
+# Authentication Integration Lessons: Supabase + PostgreSQL
 
-This document captures key learnings from implementing inline song editing with Clerk authentication, focusing on common pitfalls and solutions for future projects.
+This document captures key learnings from implementing authentication with Supabase, focusing on common patterns and best practices for the HSA Songbook project.
 
-## The Core Problem: Authentication Data Type Mismatch
+## Core Architecture: Supabase Auth
 
-### What Went Wrong
-When implementing inline song title editing, the feature worked perfectly until it hit production authentication. The error was:
+### Current Implementation
+- **Authentication Provider**: Supabase Auth
+- **Database**: PostgreSQL (via Supabase)
+- **User IDs**: UUIDs (PostgreSQL native)
+- **Session Management**: JWT tokens via Supabase client
+
+### Authentication Flow
 ```
-BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
-```
-
-### Root Cause Analysis
-1. **Backend schema assumed MongoDB ObjectIds** for user references
-2. **Clerk provides string user IDs** like `user_30gF3AoBbVy1jTGIoMpqx0lH26V`
-3. **Code attempted to convert** Clerk IDs to ObjectIds: `new Types.ObjectId(userId)`
-4. **Conversion failed** because Clerk IDs don't match ObjectId format (24 hex chars)
-
-### The Authentication Flow Breakdown
-```
-Frontend (Clerk) → Backend (MongoDB Schema)
-user_30gF3A...   → new Types.ObjectId(userId) ❌ FAILS
+Frontend (React) → Supabase Auth → PostgreSQL Database
+User login      → JWT token     → UUID references
 ```
 
-## Red Flags You Should Watch For
+## Key Implementation Patterns
 
-### 🚨 Schema Design Warning Signs
+### User Table Synchronization
 ```typescript
-// DANGER: Assumes internal user management
-createdBy: {
-  type: Schema.Types.ObjectId,  // ← Will break with external auth
-  ref: 'User',                  // ← May not exist with Clerk
-  required: true
-}
-```
-
-### 🚨 Service Layer Warning Signs  
-```typescript
-// DANGER: Blindly converting external IDs
-const songData = {
-  metadata: {
-    createdBy: new Types.ObjectId(userId), // ← Will fail with Clerk
-    // ...
+// Sync Supabase Auth user to custom users table
+const syncUserData = async (user: User) => {
+  const userData = {
+    id: user.id,  // UUID from auth.users
+    email: user.email,
+    full_name: user.user_metadata?.full_name,
+    avatar_url: user.user_metadata?.avatar_url,
+    // Additional profile fields
   }
+  
+  await supabase
+    .from('users')
+    .upsert(userData, { onConflict: 'id' })
 }
 ```
 
-### 🚨 Auth Middleware Warning Signs
-```typescript
-// DANGER: Defaulting to problematic values
-req.auth = {
-  userId: userId || 'anonymous',  // ← 'anonymous' breaks ObjectId conversion
-  // ...
-}
+### Row Level Security (RLS)
+```sql
+-- Only authenticated users can create content
+CREATE POLICY "Users can create songs" ON songs
+  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+
+-- Users can only edit their own content
+CREATE POLICY "Users can update own songs" ON songs
+  FOR UPDATE USING (created_by = auth.uid());
 ```
 
-## The Complete Fix Strategy
+## Common Patterns & Solutions
 
-### 1. Schema Design for External Auth
-```typescript
-// GOOD: External auth-friendly schema
-metadata: {
-  createdBy: {
-    type: String,        // ← Accepts any string format
-    required: true       // ← Still enforce requirement
-  },
-  lastModifiedBy: {
-    type: String         // ← Consistent with createdBy
-  },
-  // ...
-}
+### 1. User Reference Pattern
+```sql
+-- PostgreSQL schema with UUID references
+CREATE TABLE songs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_by UUID REFERENCES users(id),
+  -- User ID is UUID, matches Supabase auth.users
+);
 ```
 
-### 2. Service Layer Best Practices
+### 2. Authentication Hook Pattern
 ```typescript
-// GOOD: Direct string assignment
-const songData = {
-  metadata: {
-    createdBy: userId,                    // ← No conversion needed
-    lastModifiedBy: userId,               // ← Consistent handling
-    // ...
-  }
-}
-
-// GOOD: Update operations
-updateData['metadata.lastModifiedBy'] = userId  // ← Direct assignment
-```
-
-### 3. Frontend Integration Pattern
-```typescript
-// GOOD: Send both token AND user ID
-async updateSong(id: string, data: Partial<Song>, token: string, userId?: string) {
-  return fetchAPI(`/songs/${id}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      ...(userId && { 'x-user-id': userId })  // ← Explicit user ID
-    },
-    body: JSON.stringify(data)
+// Custom useAuth hook wrapping Supabase
+export function useAuth() {
+  const [authState, setAuthState] = useState<AuthState>({
+    user: null,
+    session: null,
+    isLoaded: false,
+    isSignedIn: false
   })
+  
+  useEffect(() => {
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setAuthState({
+          user: session?.user || null,
+          session,
+          isLoaded: true,
+          isSignedIn: !!session
+        })
+      }
+    )
+    
+    return () => subscription.unsubscribe()
+  }, [])
+  
+  return authState
 }
 ```
 
-### 4. Auth Middleware Robustness
+### 3. Protected API Routes
 ```typescript
-// GOOD: Proper error handling for missing auth
-const userId = req.headers['x-user-id'] as string
-const token = req.headers.authorization?.replace('Bearer ', '')
-
-if (!userId && !token) {
-  throw new UnauthorizedError('No authentication provided')
-}
-
-req.auth = {
-  userId: userId || 'anonymous',  // ← Now safe because schema accepts strings
-  sessionId: `session-${userId || 'anonymous'}`
+// Middleware to verify authentication
+export async function requireAuth(req: Request) {
+  const token = req.headers.get('Authorization')?.replace('Bearer ', '')
+  
+  if (!token) {
+    throw new Error('No authorization token')
+  }
+  
+  const { data: { user }, error } = await supabase.auth.getUser(token)
+  
+  if (error || !user) {
+    throw new Error('Invalid token')
+  }
+  
+  return user
 }
 ```
 
-## Future Project Checklist
+## Best Practices
 
-### Before You Start Coding
+### 1. Always Use UUIDs
+- PostgreSQL native UUID type
+- Matches Supabase auth.users.id
+- No conversion needed between auth and database
 
-- [ ] **Identify your auth provider** (Clerk, Auth0, Firebase Auth, etc.)
-- [ ] **Check the user ID format** they provide
-- [ ] **Design database schema** to match the auth provider's format
-- [ ] **Avoid assuming MongoDB ObjectIds** for user references
+### 2. Leverage RLS Policies
+- Security at database level
+- Automatic user context via auth.uid()
+- No need to pass user IDs in queries
 
-### During Schema Design
-
-- [ ] **Use String for external user IDs** instead of ObjectId
-- [ ] **Document the expected format** in schema comments
-- [ ] **Consider indexing** user ID fields for performance
-- [ ] **Test with real auth provider data** early
-
-### During Service Implementation
-
-- [ ] **Never blindly convert** external IDs to ObjectIds
-- [ ] **Handle auth provider IDs directly** as strings
-- [ ] **Add logging** for auth-related operations during development
-- [ ] **Test the full auth flow** before considering feature complete
-
-### During Frontend Integration  
-
-- [ ] **Send both token and user ID** in headers when needed
-- [ ] **Check auth middleware expectations** for header format
-- [ ] **Test authenticated operations** in development environment
-- [ ] **Verify permission checks** work with real user IDs
-
-## Common Auth Provider ID Formats
-
-| Provider | Format | Example |
-|----------|--------|---------|
-| Clerk | `user_<random>` | `user_30gF3AoBbVy1jTGIoMpqx0lH26V` |
-| Auth0 | `auth0\|<id>` or `<provider>\|<id>` | `auth0\|507f1f77bcf86cd799439011` |
-| Firebase | Random string | `QmV4n2Z8K5vL9oP7rS3tU6w` |
-| MongoDB Native | ObjectId | `507f1f77bcf86cd799439011` |
-
-## Testing Strategy for Auth Integration
-
-### 1. Unit Tests with Mock Auth
+### 3. Handle Auth State Changes
 ```typescript
-// Test with actual auth provider ID formats
-const mockClerkUserId = 'user_30gF3AoBbVy1jTGIoMpqx0lH26V'
-const result = await songService.create(songData, mockClerkUserId)
-expect(result.metadata.createdBy).toBe(mockClerkUserId)
-```
-
-### 2. Integration Tests
-```typescript
-// Test the full flow: Frontend → Auth → Backend → Database
-it('should update song title with Clerk authentication', async () => {
-  // Mock Clerk auth response
-  // Send request with proper headers
-  // Verify database update
+// Listen for auth changes globally
+supabase.auth.onAuthStateChange((event, session) => {
+  switch(event) {
+    case 'SIGNED_IN':
+      // Sync user data, redirect
+      break
+    case 'SIGNED_OUT':
+      // Clear local state
+      break
+    case 'TOKEN_REFRESHED':
+      // Update stored token
+      break
+  }
 })
 ```
 
-### 3. Development Environment Testing
-- Set up development environment with actual auth provider
-- Test with real user accounts, not just mocked data
-- Verify auth token validation works correctly
-- Check that user permissions are enforced
+### 4. Error Handling
+```typescript
+try {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  })
+  
+  if (error) {
+    // Handle specific error codes
+    switch(error.message) {
+      case 'Invalid login credentials':
+        // Show user-friendly message
+        break
+      case 'Email not confirmed':
+        // Prompt for email verification
+        break
+    }
+  }
+} catch (err) {
+  // Network or unexpected errors
+}
+```
 
-## Key Takeaways
+## Future Enhancements
 
-1. **External auth providers use their own ID formats** - never assume MongoDB ObjectIds
-2. **Design your schema to match your auth provider** from day one
-3. **The "anonymous" fallback broke ObjectId conversion** - be careful with defaults
-4. **Frontend must send user ID explicitly** when backend needs it for permissions
-5. **Test auth integration early and often** - it's not just a frontend concern
+### Anonymous Authentication (Planned)
+```typescript
+// Allow guests to use app without account
+const { data, error } = await supabase.auth.signInAnonymously()
 
-## Prevention for Future Projects
+// Later convert to permanent account
+const { data: updateData } = await supabase.auth.updateUser({
+  email: 'user@example.com',
+  password: 'password'
+})
+```
 
-### Day 1 Questions
-- What authentication provider are we using?
-- What format do their user IDs use?
-- How will we store user references in our database?
-- What headers/data does our auth middleware expect?
+### Social Authentication Expansion
+- Currently: Email/password, Google, GitHub
+- Planned: Facebook, Apple, Microsoft
 
-### Architecture Review Checklist
-- [ ] Schema types match auth provider ID format
-- [ ] Service layer handles auth IDs correctly
-- [ ] Auth middleware has proper error handling
-- [ ] Frontend sends required auth headers
-- [ ] Permission checks work with actual user IDs
+### Session Persistence
+- Current: Browser session storage
+- Planned: Remember me option with refresh tokens
 
-By following these patterns and being mindful of auth provider specifics from the start, you can avoid the ObjectId conversion trap that caused this issue.
+## Migration Considerations
+
+### From Other Auth Providers
+1. Map user IDs to UUIDs
+2. Migrate user metadata to users table
+3. Update foreign key references
+4. Implement RLS policies
+
+### Database Migrations
+```sql
+-- Example: Add new auth provider
+ALTER TABLE users 
+ADD COLUMN provider VARCHAR(50) DEFAULT 'email';
+
+-- Track multiple auth methods
+CREATE TABLE user_identities (
+  user_id UUID REFERENCES users(id),
+  provider VARCHAR(50),
+  provider_id TEXT,
+  PRIMARY KEY (user_id, provider)
+);
+```
+
+## Security Checklist
+
+- ✅ Use HTTPS in production
+- ✅ Enable RLS on all tables
+- ✅ Validate permissions server-side
+- ✅ Store sensitive config in environment variables
+- ✅ Implement rate limiting on auth endpoints
+- ✅ Use secure session storage
+- ✅ Regular security audits of RLS policies
+
+## Common Pitfalls to Avoid
+
+1. **Don't trust client-side user IDs** - Always verify via auth token
+2. **Don't bypass RLS** - Use service role keys sparingly
+3. **Don't store passwords** - Let Supabase handle auth
+4. **Don't expose sensitive user data** - Use views with limited columns
+5. **Don't forget email verification** - Enable in Supabase dashboard
+
+## Resources
+
+- [Supabase Auth Documentation](https://supabase.com/docs/guides/auth)
+- [PostgreSQL RLS Guide](https://supabase.com/docs/guides/auth/row-level-security)
+- [JWT Best Practices](https://supabase.com/docs/guides/auth/jwts)
+
+This architecture provides a secure, scalable authentication system that integrates seamlessly with PostgreSQL's powerful features.

@@ -1,26 +1,69 @@
-// Public exports for the songs feature
+// === PAGES ===
 export { SongListPage } from './pages/SongListPage'
 export { SongDetailPage } from './pages/SongDetailPage'
-export { SongCard } from './components/SongCard'
-export { SongList } from './components/SongList'
-export { SongViewer } from './components/SongViewer'
+export { SongManagementExample } from './pages/SongManagementExample'
 
-// Arrangement components
-export { 
+// === COMPONENTS ===
+// Re-export all components from index for clean imports
+export {
+  // Core song components
+  SongCard,
+  SongList,
+  SongViewer,
+  GlobalSongModal,
+  InlineEditField,
+  
+  // Song management components
+  SongManagementForm,
+  SongManagementModal,
+  
+  // Arrangement management components
+  ArrangementManagementForm,
+  ArrangementManagementModal,
+  
+  // UI components
+  AddSongButton,
+  SongActions,
+  
+  // Arrangement components
   ArrangementList,
   ArrangementSwitcher
-} from './components/arrangements'
+} from './components'
 
-// Hooks
-export { useSongs, useSong } from './hooks/useSongs'
-export { useArrangements } from './hooks/useArrangements'
-export { useArrangementMutations } from './hooks/useArrangementMutations'
+// === HOOKS ===
+// Re-export all hooks from index for clean imports
+export {
+  // Song data hooks
+  useSongs,
+  useSong,
+  useSongMutations,
+  
+  // Song management hooks
+  useSongManagementModal,
+  useInlineEdit,
+  
+  // Arrangement management hooks
+  useArrangementManagementModal,
+  
+  // Arrangement hooks
+  useArrangements,
+  useArrangementMutations,
+  
+  // Mutation hooks
+  useCreateSong,
+  useUpdateSong,
+  useDeleteSong,
+  useRateSong
+} from './hooks'
 
-// Services
+// === CONTEXTS ===
+export { SongModalContext } from './contexts/SongModalContext'
+
+// === SERVICES ===
 export { songService } from './services/songService'
 export { arrangementService } from './services/arrangementService'
 
-// Types
+// === TYPES ===
 export type { 
   Song, 
   Arrangement, 
@@ -28,5 +71,25 @@ export type {
   SongMetadata
 } from './types/song.types'
 
-// Arrangement types
+// Validation types
+export type { SongFormData } from './validation/schemas/songFormSchema'
 export type { ArrangementFormData } from './validation/schemas/arrangementSchema'
+
+// === VALIDATION ===
+// Export schemas for external validation
+export { songFormSchema } from './validation/schemas/songFormSchema'
+export { arrangementSchema } from './validation/schemas/arrangementSchema'
+
+// Export validation constants
+export { 
+  SONG_SOURCES,
+  SOURCE_METADATA,
+  MUSICAL_KEYS
+} from './validation/constants'
+
+// Export validation utilities
+export {
+  generateUniqueSlug,
+  findSimilarSongs,
+  normalizeTheme
+} from './validation/utils'

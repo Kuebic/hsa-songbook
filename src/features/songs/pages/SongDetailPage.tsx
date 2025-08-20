@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom'
-// import { useState } from 'react' // Currently unused after removing sheet functionality
 import { SongViewer } from '../components/SongViewer'
 import { ArrangementList } from '../components/arrangements/ArrangementList'
+import { ArrangementManagementModal } from '../components/ArrangementManagementModal'
 import { useSong } from '../hooks/useSongs'
 import { useArrangements } from '../hooks/useArrangements'
 import { useAuth } from '@features/auth/hooks/useAuth'
-import { useArrangementMutations } from '../hooks/useArrangementMutations'
+import { useArrangementMutations, useArrangementManagementModal } from '../hooks'
 import { useNotification } from '@shared/components/notifications'
 import type { Arrangement } from '../types/song.types'
 
@@ -20,13 +20,27 @@ export function SongDetailPage() {
   } = useArrangements(song?.id)
   const { deleteArrangement } = useArrangementMutations()
   const { addNotification } = useNotification()
-  // Note: Arrangement editing functionality removed temporarily
-  // const [editingArrangement, setEditingArrangement] = useState<Arrangement | null>(null)
-  // const [showArrangementSheet, setShowArrangementSheet] = useState(false)
+  const { 
+    isOpen: isArrangementModalOpen,
+    selectedArrangement,
+    openEditModal,
+    openCreateModal,
+    closeModal
+  } = useArrangementManagementModal()
 
-  const handleEditArrangement = (_arrangement: Arrangement) => {
-    // TODO: Implement arrangement editing
-    console.log('Edit arrangement functionality coming soon')
+  const handleEditArrangement = (arrangement: Arrangement) => {
+    openEditModal(arrangement)
+  }
+  
+  const handleAddArrangement = () => {
+    if (song?.id) {
+      openCreateModal(song.id)
+    }
+  }
+  
+  const handleArrangementSuccess = () => {
+    refreshArrangements()
+    closeModal()
   }
 
   const handleDeleteArrangement = async (id: string) => {
@@ -132,14 +146,30 @@ export function SongDetailPage() {
           }}>
             Arrangements
           </h2>
-          {/* TODO: Add arrangement creation functionality */}
-          <span style={{ 
-            fontSize: '0.875rem', 
-            color: 'var(--text-secondary)',
-            fontStyle: 'italic'
-          }}>
-            Arrangement creation coming soon
-          </span>
+          {user && (
+            <button
+              onClick={handleAddArrangement}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 1rem',
+                backgroundColor: 'var(--status-success)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                transition: 'opacity 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>+</span>
+              Add Arrangement
+            </button>
+          )}
         </div>
         
         {arrangements.length > 0 ? (
@@ -161,7 +191,15 @@ export function SongDetailPage() {
         )}
       </div>
       
-      {/* TODO: Add arrangement editing functionality */}
+      {/* Arrangement Management Modal */}
+      <ArrangementManagementModal
+        isOpen={isArrangementModalOpen}
+        onClose={closeModal}
+        arrangement={selectedArrangement}
+        songId={song.id}
+        songTitle={song.title}
+        onSuccess={handleArrangementSuccess}
+      />
     </div>
   )
 }
