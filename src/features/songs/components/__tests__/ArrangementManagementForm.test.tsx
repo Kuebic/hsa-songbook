@@ -635,15 +635,18 @@ describe('ArrangementManagementForm', () => {
         isAdmin: false,
         isAnonymous: true,
         getToken: vi.fn().mockResolvedValue(null),
-        signIn: vi.fn(),
-        signOut: vi.fn(),
-        signUp: vi.fn(),
-        updateUser: vi.fn(),
-        refreshSession: vi.fn(),
-        deleteUser: vi.fn(),
+        getUserEmail: vi.fn().mockReturnValue(null),
+        getUserName: vi.fn().mockReturnValue('Guest User'),
+        getUserAvatar: vi.fn().mockReturnValue(undefined),
+        session: null,
+        signInWithProvider: vi.fn(),
+        signInWithEmail: vi.fn(),
+        signUpWithEmail: vi.fn(),
         resetPassword: vi.fn(),
-        updatePassword: vi.fn(),
-        sendOtp: vi.fn()
+        signInAnonymously: vi.fn(),
+        linkEmailToAnonymousUser: vi.fn(),
+        linkOAuthToAnonymousUser: vi.fn(),
+        signOut: vi.fn()
       })
       
       renderWithProviders(<ArrangementManagementForm />)
@@ -675,8 +678,34 @@ describe('ArrangementManagementForm', () => {
     it('should allow admins to edit any arrangement', () => {
       const mockUseAuth = vi.mocked(useAuthModule.useAuth)
       mockUseAuth.mockReturnValue({
-        user: { id: 'admin-123', email: 'admin@example.com', is_anonymous: false },
-        isAdmin: true
+        user: {
+          id: 'admin-123',
+          email: 'admin@example.com',
+          is_anonymous: false,
+          app_metadata: {},
+          user_metadata: {},
+          aud: 'authenticated',
+          created_at: new Date().toISOString()
+        } as unknown as User,
+        userId: 'admin-123',
+        sessionId: 'admin-session',
+        isLoaded: true,
+        isSignedIn: true,
+        isAdmin: true,
+        isAnonymous: false,
+        getToken: vi.fn().mockResolvedValue('mock-token'),
+        getUserEmail: vi.fn().mockReturnValue('admin@example.com'),
+        getUserName: vi.fn().mockReturnValue('Admin User'),
+        getUserAvatar: vi.fn().mockReturnValue(undefined),
+        session: null,
+        signInWithProvider: vi.fn(),
+        signInWithEmail: vi.fn(),
+        signUpWithEmail: vi.fn(),
+        resetPassword: vi.fn(),
+        signInAnonymously: vi.fn(),
+        linkEmailToAnonymousUser: vi.fn(),
+        linkOAuthToAnonymousUser: vi.fn(),
+        signOut: vi.fn()
       })
       
       const existingArrangement: Arrangement = {

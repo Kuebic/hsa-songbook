@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import React, { Component } from 'react'
 import userEvent from '@testing-library/user-event'
 import { ErrorBoundary } from '../ErrorBoundary'
 import { errorReportingService } from '../../services/errorReportingService'
@@ -20,13 +19,6 @@ function ThrowError({ shouldThrow }: { shouldThrow: boolean }) {
   return <div>No error</div>
 }
 
-// Component that throws an error in useEffect
-function ThrowErrorInEffect() {
-  React.useEffect(() => {
-    throw new Error('Effect error')
-  }, [])
-  return <div>Component with effect</div>
-}
 
 // Custom error fallback component
 function CustomErrorFallback({ error, resetErrorBoundary }: any) {
@@ -88,7 +80,7 @@ describe('ErrorBoundary', () => {
 
     it('should display error details in development mode', () => {
       const originalEnv = import.meta.env.DEV
-      // @ts-expect-error - Mocking env variable
+      // Mocking env variable
       import.meta.env.DEV = true
 
       render(
@@ -101,7 +93,7 @@ describe('ErrorBoundary', () => {
       const errorElements = screen.getAllByText(/Test error/i)
       expect(errorElements.length).toBeGreaterThan(0)
 
-      // @ts-expect-error - Restoring env variable
+      // Restoring env variable
       import.meta.env.DEV = originalEnv
     })
   })

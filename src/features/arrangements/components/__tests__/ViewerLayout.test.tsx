@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { ViewerLayout } from '../ViewerLayout'
 
 describe('ViewerLayout', () => {
@@ -11,7 +11,7 @@ describe('ViewerLayout', () => {
     observeMock = vi.fn()
     disconnectMock = vi.fn()
     
-    global.ResizeObserver = vi.fn().mockImplementation((callback) => ({
+    global.ResizeObserver = vi.fn().mockImplementation(() => ({
       observe: observeMock,
       unobserve: vi.fn(),
       disconnect: disconnectMock,

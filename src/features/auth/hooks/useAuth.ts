@@ -17,7 +17,7 @@ export function useAuth() {
   })
 
   // Sync user data to the users table with retry logic
-  const syncUserData = useCallback(async (user: User, retryCount = 0) => {
+  const syncUserData = useCallback(async (user: User, retryCount = 0): Promise<void> => {
     const MAX_RETRIES = 3
     const RETRY_DELAY = 1000 // 1 second
     const SYNC_COOLDOWN = 2000 // 2 seconds cooldown between syncs for the same user
@@ -39,7 +39,7 @@ export function useAuth() {
     }
     
     // Create and store the sync promise
-    const syncOperation = async () => {
+    const syncOperation = async (): Promise<void> => {
       try {
         const userData = {
           id: user.id,

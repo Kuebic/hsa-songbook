@@ -173,14 +173,14 @@ export function createArrangementSchema(options?: {
   requireTempo?: boolean
   requireDifficulty?: boolean
   maxChordDataSize?: number
-}) {
-  let schema = arrangementSchema
+}): any {
+  let schema: any = arrangementSchema
   
   if (options?.requireKey) {
     schema = schema.extend({
       key: z.enum(MUSICAL_KEYS as readonly [string, ...string[]])
         .describe('Please select a valid musical key')
-    }) as typeof schema
+    })
   }
   
   if (options?.requireTempo) {
@@ -188,14 +188,14 @@ export function createArrangementSchema(options?: {
       tempo: z.number()
         .min(40, 'Tempo is required (40-300 BPM)')
         .max(300, 'Tempo must be less than 300 BPM')
-    }) as typeof schema
+    })
   }
   
   if (options?.requireDifficulty) {
     schema = schema.extend({
       difficulty: z.enum(DIFFICULTY_LEVELS as readonly [string, ...string[]])
         .describe('Please select a valid difficulty level')
-    }) as typeof schema
+    })
   }
   
   if (options?.maxChordDataSize) {
@@ -203,7 +203,7 @@ export function createArrangementSchema(options?: {
       chordData: z.string()
         .min(1, 'Chord data is required')
         .max(options.maxChordDataSize, `Chord data must be less than ${options.maxChordDataSize} characters`)
-    }) as typeof schema
+    })
   }
   
   return schema

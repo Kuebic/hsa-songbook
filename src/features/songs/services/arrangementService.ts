@@ -441,9 +441,13 @@ export const arrangementService = {
         // Remove current slug from check list
         const filteredSlugs = existingSlugs.filter(slug => slug !== currentData.slug)
         
+        const songTitle = Array.isArray(currentData.songs) 
+          ? currentData.songs[0]?.title 
+          : (currentData.songs as { title: string })?.title
+        
         const newSlug = await generateArrangementSlug(
           arrangementData.name,
-          (currentData.songs as { title: string }).title,
+          songTitle || '',
           filteredSlugs
         )
         

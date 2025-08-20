@@ -17,7 +17,7 @@ export function SongDetailPage() {
   const { 
     arrangements, 
     refreshArrangements
-  } = useArrangements(song?.id)
+  } = useArrangements({ filter: { songId: song?.id } })
   const { deleteArrangement } = useArrangementMutations()
   const { addNotification } = useNotification()
   const { 

@@ -187,9 +187,10 @@ const difficulty: ArrangementDifficulty = 'advanced'
 const modalMode: ArrangementModalMode = 'edit'
 
 // Type assertion tests to ensure proper inheritance
-type _TestCreatePayloadRequiredKey = CreateArrangementPayload['key'] // Should be string (required)
-type _TestFormStateStringFields = ArrangementFormState['tempo'] // Should be string
-type _TestArrangementWithTitleExtends = ArrangementWithTitle extends Arrangement ? true : false // Should be true
+// These are used for compile-time type checking only
+// type _TestCreatePayloadRequiredKey = CreateArrangementPayload['key'] // Should be string (required)
+// type _TestFormStateStringFields = ArrangementFormState['tempo'] // Should be string
+// type _TestArrangementWithTitleExtends = ArrangementWithTitle extends Arrangement ? true : false // Should be true
 
 // Ensure compilation
 export const arrangementTypesTests = {

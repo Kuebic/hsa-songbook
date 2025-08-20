@@ -244,8 +244,23 @@ describe('ArrangementManagementModal Integration Tests', () => {
     })
 
     it('should remain open if form submission fails', async () => {
-      const mockMutations = vi.mocked(useArrangementMutationsModule.useArrangementMutations)()
-      mockMutations.createArrangement.mockRejectedValueOnce(new Error('Creation failed'))
+      const createArrangementMock = vi.fn().mockRejectedValueOnce(new Error('Creation failed'))
+      vi.mocked(useArrangementMutationsModule.useArrangementMutations).mockReturnValue({
+        createArrangement: createArrangementMock,
+        updateArrangement: vi.fn(),
+        updateArrangementName: vi.fn(),
+        updateArrangementField: vi.fn(),
+        deleteArrangement: vi.fn(),
+        rateArrangement: vi.fn(),
+        isCreating: false,
+        isUpdating: false,
+        isDeleting: false,
+        isRating: false,
+        error: null,
+        optimisticArrangements: [],
+        clearError: vi.fn(),
+        isAuthenticated: true
+      })
       
       const onClose = vi.fn()
       
@@ -600,8 +615,23 @@ ${Array.from({ length: 50 }, (_, i) => `{start_of_verse}
     })
 
     it('should handle network errors gracefully', async () => {
-      const mockMutations = vi.mocked(useArrangementMutationsModule.useArrangementMutations)()
-      mockMutations.createArrangement.mockRejectedValueOnce(new Error('Network error: Unable to connect'))
+      const createArrangementMock = vi.fn().mockRejectedValueOnce(new Error('Network error: Unable to connect'))
+      vi.mocked(useArrangementMutationsModule.useArrangementMutations).mockReturnValue({
+        createArrangement: createArrangementMock,
+        updateArrangement: vi.fn(),
+        updateArrangementName: vi.fn(),
+        updateArrangementField: vi.fn(),
+        deleteArrangement: vi.fn(),
+        rateArrangement: vi.fn(),
+        isCreating: false,
+        isUpdating: false,
+        isDeleting: false,
+        isRating: false,
+        error: null,
+        optimisticArrangements: [],
+        clearError: vi.fn(),
+        isAuthenticated: true
+      })
       
       renderWithProviders(
         <ArrangementManagementModal

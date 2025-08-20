@@ -96,7 +96,7 @@ export function useArrangementMutations(props: UseArrangementMutationsProps = {}
                       average: update.payload.rating
                     }
                   }
-                }
+                } as Arrangement
               : arrangement
           )
           break
@@ -195,6 +195,12 @@ export function useArrangementMutations(props: UseArrangementMutationsProps = {}
     
     setIsUpdating(true)
     setError(null)
+    
+    // Find existing arrangement for rollback
+    const existingArrangement = optimisticArrangements.find(a => a.id === id)
+    if (!existingArrangement) {
+      throw new Error('Arrangement not found')
+    }
     
     // Apply optimistic update
     startTransition(() => {

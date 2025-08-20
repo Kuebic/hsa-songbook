@@ -1,6 +1,6 @@
 import { render as rtlRender, type RenderOptions } from '@testing-library/react'
-import { ReactElement, ReactNode } from 'react'
-import { MemoryRouter, MemoryRouterProps } from 'react-router-dom'
+import type { ReactElement, ReactNode } from 'react'
+import { MemoryRouter, type MemoryRouterProps } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '@shared/contexts/ThemeContext'
 import type { Theme } from '@shared/contexts/theme-types'

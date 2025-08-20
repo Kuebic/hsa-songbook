@@ -14,7 +14,11 @@ describe('arrangementSchema', () => {
     it('should validate minimal valid arrangement data', () => {
       const validData: ArrangementFormData = {
         name: 'Test Arrangement',
-        difficulty: 'beginner'
+        key: 'C',
+        difficulty: 'beginner',
+        tags: [],
+        chordProText: '',
+        notes: undefined
       }
 
       const result = arrangementSchema.safeParse(validData)

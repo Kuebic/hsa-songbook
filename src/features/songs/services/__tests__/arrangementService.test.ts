@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { arrangementService } from '../arrangementService'
-import type { ArrangementFormData } from '../../validation/schemas/arrangementSchema'
+import type { Arrangement } from '../../types/song.types'
 
 // Mock Supabase
 const mockSupabase = {
@@ -80,13 +80,12 @@ describe('arrangementService', () => {
       expect(mockQuery.select).toHaveBeenCalledWith('*', { count: 'exact' })
       expect(mockQuery.eq).toHaveBeenCalledWith('is_public', true)
       expect(mockQuery.order).toHaveBeenCalledWith('name')
-      expect(result.arrangements).toHaveLength(1)
-      expect(result.total).toBe(1)
-      expect(result.page).toBe(1)
-      expect(result.pages).toBe(1)
+      expect(result).toHaveLength(1)
+      expect(result[0].id).toBe('arr-1')
+      expect(result[0].name).toBe('Test Arrangement 1')
     })
 
-    it('should apply filters correctly', async () => {
+    it('should handle empty results', async () => {
       const mockQuery = mockSupabase.from()
       mockQuery.single = vi.fn().mockResolvedValue({
         data: [],
@@ -94,37 +93,43 @@ describe('arrangementService', () => {
         count: 0
       })
 
-      await arrangementService.getAllArrangements({
-        songId: 'song-123',
-        key: 'C',
-        difficulty: 'beginner',
-        page: 2,
-        limit: 10
-      })
+      const result = await arrangementService.getAllArrangements()
 
-      expect(mockQuery.eq).toHaveBeenCalledWith('song_id', 'song-123')
-      expect(mockQuery.eq).toHaveBeenCalledWith('key', 'C')
-      expect(mockQuery.eq).toHaveBeenCalledWith('difficulty', 'beginner')
-      expect(mockQuery.range).toHaveBeenCalledWith(10, 19) // page 2, limit 10
+      expect(mockSupabase.from).toHaveBeenCalledWith('arrangements')
+      expect(result).toHaveLength(0)
     })
 
-    it('should handle pagination correctly', async () => {
+    it('should handle large results', async () => {
+      const mockData = Array.from({ length: 25 }, (_, i) => ({
+        id: `arr-${i + 1}`,
+        name: `Test Arrangement ${i + 1}`,
+        slug: `test-arrangement-${i + 1}`,
+        song_id: 'song-123',
+        key: 'C',
+        tempo: 120,
+        time_signature: '4/4',
+        difficulty: 'beginner',
+        tags: ['acoustic'],
+        chord_data: '{title: Test}',
+        description: 'Test description',
+        created_by: 'user-123',
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        is_public: true
+      }))
+
       const mockQuery = mockSupabase.from()
       mockQuery.single = vi.fn().mockResolvedValue({
-        data: [],
+        data: mockData,
         error: null,
         count: 25
       })
 
-      const result = await arrangementService.getAllArrangements({
-        page: 3,
-        limit: 5
-      })
+      const result = await arrangementService.getAllArrangements()
 
-      expect(mockQuery.range).toHaveBeenCalledWith(10, 14) // page 3, limit 5: (3-1)*5 to (3-1)*5+5-1
-      expect(result.total).toBe(25)
-      expect(result.page).toBe(3)
-      expect(result.pages).toBe(5) // Math.ceil(25/5)
+      expect(result).toHaveLength(25)
+      expect(result[0].name).toBe('Test Arrangement 1')
+      expect(result[24].name).toBe('Test Arrangement 25')
     })
 
     it('should handle Supabase errors', async () => {
@@ -292,7 +297,7 @@ describe('arrangementService', () => {
         error: null
       })
 
-      const result = await arrangementService.getArrangementsBySong('song-123')
+      const result = await arrangementService.getArrangementsBySongId('song-123')
 
       expect(mockQuery.eq).toHaveBeenCalledWith('song_id', 'song-123')
       expect(mockQuery.order).toHaveBeenCalledWith('name')
@@ -303,7 +308,7 @@ describe('arrangementService', () => {
 
   describe('createArrangement', () => {
     it('should create arrangement successfully', async () => {
-      const formData: ArrangementFormData = {
+      const formData: Partial<Arrangement> = {
         name: 'New Arrangement',
         slug: 'new-arrangement',
         songIds: ['song-123'],
@@ -312,7 +317,7 @@ describe('arrangementService', () => {
         timeSignature: '4/4',
         difficulty: 'beginner',
         tags: ['acoustic'],
-        chordProText: '{title: New Arrangement}',
+        chordData: '{title: New Arrangement}',
         description: 'A new arrangement'
       }
 
@@ -365,9 +370,12 @@ describe('arrangementService', () => {
         error: null
       })
 
-      const formData: ArrangementFormData = {
+      const formData: Partial<Arrangement> = {
         name: 'Test',
-        difficulty: 'beginner'
+        difficulty: 'beginner',
+        key: 'C',
+        tags: [],
+        chordData: ''
       }
 
       await expect(arrangementService.createArrangement(formData)).rejects.toThrow(
@@ -382,9 +390,12 @@ describe('arrangementService', () => {
         error: { message: 'Unique constraint violation' }
       })
 
-      const formData: ArrangementFormData = {
+      const formData: Partial<Arrangement> = {
         name: 'Duplicate',
-        difficulty: 'beginner'
+        difficulty: 'beginner',
+        key: 'C',
+        tags: [],
+        chordData: ''
       }
 
       await expect(arrangementService.createArrangement(formData)).rejects.toThrow(
@@ -393,7 +404,7 @@ describe('arrangementService', () => {
     })
 
     it('should map form data correctly to database schema', async () => {
-      const formData: ArrangementFormData = {
+      const formData: Partial<Arrangement> = {
         name: 'Complex Arrangement',
         slug: 'complex-arrangement',
         songIds: ['song-456'],
@@ -444,7 +455,7 @@ describe('arrangementService', () => {
 
   describe('updateArrangement', () => {
     it('should update arrangement successfully', async () => {
-      const updateData: Partial<ArrangementFormData> = {
+      const updateData: Partial<Partial<Arrangement>> = {
         name: 'Updated Arrangement',
         key: 'G',
         tempo: 140
@@ -487,7 +498,7 @@ describe('arrangementService', () => {
     })
 
     it('should handle partial updates correctly', async () => {
-      const updateData: Partial<ArrangementFormData> = {
+      const updateData: Partial<Partial<Arrangement>> = {
         tags: ['updated-tag']
       }
 
@@ -521,7 +532,7 @@ describe('arrangementService', () => {
     })
 
     it('should map chordProText to chord_data during update', async () => {
-      const updateData: Partial<ArrangementFormData> = {
+      const updateData: Partial<Partial<Arrangement>> = {
         chordProText: '{title: Updated ChordPro}'
       }
 

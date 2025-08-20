@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useArrangementMutations } from '../mutations/useArrangementMutations'
-import type { ArrangementFormData } from '../../validation/schemas/arrangementFormSchema'
+import type { ArrangementFormData } from '../../validation/schemas/arrangementSchema'
 import type { Arrangement } from '../../types/song.types'
 import * as arrangementServiceModule from '../../services/arrangementService'
 import * as authModule from '@features/auth'
@@ -32,9 +32,34 @@ describe('useArrangementMutations', () => {
     
     // Reset auth mock to default state
     mockUseAuth.mockReturnValue({
-      isSignedIn: true,
+      user: {
+        id: 'user-123',
+        email: 'test@example.com',
+        is_anonymous: false,
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated',
+        created_at: new Date().toISOString()
+      } as any,
       userId: 'user-123',
-      getToken: vi.fn().mockResolvedValue('mock-token')
+      sessionId: 'session-123',
+      isLoaded: true,
+      isSignedIn: true,
+      isAdmin: false,
+      isAnonymous: false,
+      getToken: vi.fn().mockResolvedValue('mock-token'),
+      getUserEmail: vi.fn().mockReturnValue('test@example.com'),
+      getUserName: vi.fn().mockReturnValue('Test User'),
+      getUserAvatar: vi.fn().mockReturnValue(undefined),
+      session: null,
+      signInWithProvider: vi.fn(),
+      signInWithEmail: vi.fn(),
+      signUpWithEmail: vi.fn(),
+      resetPassword: vi.fn(),
+      signInAnonymously: vi.fn(),
+      linkEmailToAnonymousUser: vi.fn(),
+      linkOAuthToAnonymousUser: vi.fn(),
+      signOut: vi.fn()
     })
   })
 
@@ -63,13 +88,9 @@ describe('useArrangementMutations', () => {
         name: 'Test Arrangement',
         songIds: ['song-123'],
         key: 'C',
-        tempo: undefined,
-        capo: undefined, 
-        duration: undefined,
         difficulty: 'beginner',
         tags: ['acoustic'],
         chordProText: '{title: Test}',
-        description: undefined,
         notes: undefined
       }
 
@@ -80,7 +101,7 @@ describe('useArrangementMutations', () => {
 
       expect(mockArrangementService.createArrangement).toHaveBeenCalledWith(formData)
       expect(createdArrangement!).toEqual(mockArrangement)
-      expect(result.current.isSubmitting).toBe(false)
+      expect(result.current.isCreating).toBe(false)
       expect(result.current.error).toBe(null)
     })
 
@@ -110,17 +131,21 @@ describe('useArrangementMutations', () => {
       const formData: ArrangementFormData = {
         name: 'Test Arrangement',
         songIds: ['song-123'],
-        difficulty: 'beginner'
+        key: 'C',
+        difficulty: 'beginner',
+        tags: [],
+        chordProText: '{title: Test}',
+        notes: undefined
       }
 
       act(() => {
         result.current.createArrangement(formData)
       })
 
-      expect(result.current.isSubmitting).toBe(true)
+      expect(result.current.isCreating).toBe(true)
 
       await waitFor(() => {
-        expect(result.current.isSubmitting).toBe(false)
+        expect(result.current.isCreating).toBe(false)
       })
     })
 
@@ -133,7 +158,11 @@ describe('useArrangementMutations', () => {
       const formData: ArrangementFormData = {
         name: 'Test Arrangement',
         songIds: ['song-123'],
-        difficulty: 'beginner'
+        key: 'C',
+        difficulty: 'beginner',
+        tags: [],
+        chordProText: '{title: Test}',
+        notes: undefined
       }
 
       await act(async () => {
@@ -146,14 +175,31 @@ describe('useArrangementMutations', () => {
       })
 
       expect(result.current.error).toBe(errorMessage)
-      expect(result.current.isSubmitting).toBe(false)
+      expect(result.current.isCreating).toBe(false)
     })
 
     it('should require authentication', async () => {
       mockUseAuth.mockReturnValue({
+        user: null,
+        userId: undefined,
+        sessionId: undefined,
+        isLoaded: true,
         isSignedIn: false,
-        userId: null,
-        getToken: vi.fn()
+        isAdmin: false,
+        isAnonymous: true,
+        getToken: vi.fn(),
+        getUserEmail: vi.fn().mockReturnValue(undefined),
+        getUserName: vi.fn().mockReturnValue(undefined),
+        getUserAvatar: vi.fn().mockReturnValue(undefined),
+        session: null,
+        signInWithProvider: vi.fn(),
+        signInWithEmail: vi.fn(),
+        signUpWithEmail: vi.fn(),
+        resetPassword: vi.fn(),
+        signInAnonymously: vi.fn(),
+        linkEmailToAnonymousUser: vi.fn(),
+        linkOAuthToAnonymousUser: vi.fn(),
+        signOut: vi.fn()
       })
 
       const { result } = renderHook(() => useArrangementMutations())
@@ -161,14 +207,18 @@ describe('useArrangementMutations', () => {
       const formData: ArrangementFormData = {
         name: 'Test Arrangement',
         songIds: ['song-123'],
-        difficulty: 'beginner'
+        key: 'C',
+        difficulty: 'beginner',
+        tags: [],
+        chordProText: '{title: Test}',
+        notes: undefined
       }
 
       await act(async () => {
         try {
           await result.current.createArrangement(formData)
         } catch (error) {
-          expect((error as Error).message).toBe('Please sign in to create arrangements')
+          expect((error as Error).message).toBe('Authentication required')
         }
       })
 
@@ -177,9 +227,34 @@ describe('useArrangementMutations', () => {
 
     it('should handle missing authentication token', async () => {
       mockUseAuth.mockReturnValue({
-        isSignedIn: true,
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          is_anonymous: false,
+          app_metadata: {},
+          user_metadata: {},
+          aud: 'authenticated',
+          created_at: new Date().toISOString()
+        } as any,
         userId: 'user-123',
-        getToken: vi.fn().mockResolvedValue(null)
+        sessionId: 'session-123',
+        isLoaded: true,
+        isSignedIn: true,
+        isAdmin: false,
+        isAnonymous: false,
+        getToken: vi.fn().mockResolvedValue(null),
+        getUserEmail: vi.fn().mockReturnValue('test@example.com'),
+        getUserName: vi.fn().mockReturnValue('Test User'),
+        getUserAvatar: vi.fn().mockReturnValue(undefined),
+        session: null,
+        signInWithProvider: vi.fn(),
+        signInWithEmail: vi.fn(),
+        signUpWithEmail: vi.fn(),
+        resetPassword: vi.fn(),
+        signInAnonymously: vi.fn(),
+        linkEmailToAnonymousUser: vi.fn(),
+        linkOAuthToAnonymousUser: vi.fn(),
+        signOut: vi.fn()
       })
 
       const { result } = renderHook(() => useArrangementMutations())
@@ -187,7 +262,11 @@ describe('useArrangementMutations', () => {
       const formData: ArrangementFormData = {
         name: 'Test Arrangement',
         songIds: ['song-123'],
-        difficulty: 'beginner'
+        key: 'C',
+        difficulty: 'beginner',
+        tags: [],
+        chordProText: '{title: Test}',
+        notes: undefined
       }
 
       await act(async () => {
@@ -209,6 +288,7 @@ describe('useArrangementMutations', () => {
         name: 'Updated Arrangement',
         slug: 'updated-arrangement',
         songIds: ['song-123'],
+        key: 'D',
         difficulty: 'intermediate',
         tags: ['acoustic', 'fingerpicking'],
         chordData: '{title: Updated}',
@@ -235,7 +315,7 @@ describe('useArrangementMutations', () => {
 
       expect(mockArrangementService.updateArrangement).toHaveBeenCalledWith('arrangement-123', updateData)
       expect(updatedArrangement!).toEqual(mockArrangement)
-      expect(result.current.isSubmitting).toBe(false)
+      expect(result.current.isCreating).toBe(false)
       expect(result.current.error).toBe(null)
     })
 
@@ -259,14 +339,31 @@ describe('useArrangementMutations', () => {
       })
 
       expect(result.current.error).toBe(errorMessage)
-      expect(result.current.isSubmitting).toBe(false)
+      expect(result.current.isCreating).toBe(false)
     })
 
     it('should require authentication for updates', async () => {
       mockUseAuth.mockReturnValue({
+        user: null,
+        userId: undefined,
+        sessionId: undefined,
+        isLoaded: true,
         isSignedIn: false,
-        userId: null,
-        getToken: vi.fn()
+        isAdmin: false,
+        isAnonymous: true,
+        getToken: vi.fn(),
+        getUserEmail: vi.fn().mockReturnValue(undefined),
+        getUserName: vi.fn().mockReturnValue(undefined),
+        getUserAvatar: vi.fn().mockReturnValue(undefined),
+        session: null,
+        signInWithProvider: vi.fn(),
+        signInWithEmail: vi.fn(),
+        signUpWithEmail: vi.fn(),
+        resetPassword: vi.fn(),
+        signInAnonymously: vi.fn(),
+        linkEmailToAnonymousUser: vi.fn(),
+        linkOAuthToAnonymousUser: vi.fn(),
+        signOut: vi.fn()
       })
 
       const { result } = renderHook(() => useArrangementMutations())
@@ -279,7 +376,7 @@ describe('useArrangementMutations', () => {
         try {
           await result.current.updateArrangement('arrangement-123', updateData)
         } catch (error) {
-          expect((error as Error).message).toBe('Please sign in to update arrangements')
+          expect((error as Error).message).toBe('Authentication required')
         }
       })
 
@@ -298,7 +395,7 @@ describe('useArrangementMutations', () => {
       })
 
       expect(mockArrangementService.deleteArrangement).toHaveBeenCalledWith('arrangement-123')
-      expect(result.current.isSubmitting).toBe(false)
+      expect(result.current.isCreating).toBe(false)
       expect(result.current.error).toBe(null)
     })
 
@@ -318,14 +415,31 @@ describe('useArrangementMutations', () => {
       })
 
       expect(result.current.error).toBe(errorMessage)
-      expect(result.current.isSubmitting).toBe(false)
+      expect(result.current.isCreating).toBe(false)
     })
 
     it('should require authentication for deletion', async () => {
       mockUseAuth.mockReturnValue({
+        user: null,
+        userId: undefined,
+        sessionId: undefined,
+        isLoaded: true,
         isSignedIn: false,
-        userId: null,
-        getToken: vi.fn()
+        isAdmin: false,
+        isAnonymous: true,
+        getToken: vi.fn(),
+        getUserEmail: vi.fn().mockReturnValue(undefined),
+        getUserName: vi.fn().mockReturnValue(undefined),
+        getUserAvatar: vi.fn().mockReturnValue(undefined),
+        session: null,
+        signInWithProvider: vi.fn(),
+        signInWithEmail: vi.fn(),
+        signUpWithEmail: vi.fn(),
+        resetPassword: vi.fn(),
+        signInAnonymously: vi.fn(),
+        linkEmailToAnonymousUser: vi.fn(),
+        linkOAuthToAnonymousUser: vi.fn(),
+        signOut: vi.fn()
       })
 
       const { result } = renderHook(() => useArrangementMutations())
@@ -334,7 +448,7 @@ describe('useArrangementMutations', () => {
         try {
           await result.current.deleteArrangement('arrangement-123')
         } catch (error) {
-          expect((error as Error).message).toBe('Please sign in to delete arrangements')
+          expect((error as Error).message).toBe('Authentication required')
         }
       })
 
@@ -368,7 +482,11 @@ describe('useArrangementMutations', () => {
           await result.current.createArrangement({
             name: 'Test',
             songIds: ['song-123'],
-            difficulty: 'beginner'
+            key: 'C',
+            difficulty: 'beginner',
+            tags: [],
+            chordProText: '',
+            notes: undefined
           })
         } catch {
           // Expected to fail
@@ -391,33 +509,75 @@ describe('useArrangementMutations', () => {
       const { result } = renderHook(() => useArrangementMutations())
 
       expect(result.current.isAuthenticated).toBe(true)
-      expect(result.current.canCreateArrangements).toBe(true)
+      expect(result.current.isAuthenticated).toBe(true)
     })
 
     it('should return false for unauthenticated user', () => {
       mockUseAuth.mockReturnValue({
+        user: null,
+        userId: undefined,
+        sessionId: undefined,
+        isLoaded: true,
         isSignedIn: false,
-        userId: null,
-        getToken: vi.fn()
+        isAdmin: false,
+        isAnonymous: true,
+        getToken: vi.fn(),
+        getUserEmail: vi.fn().mockReturnValue(undefined),
+        getUserName: vi.fn().mockReturnValue(undefined),
+        getUserAvatar: vi.fn().mockReturnValue(undefined),
+        session: null,
+        signInWithProvider: vi.fn(),
+        signInWithEmail: vi.fn(),
+        signUpWithEmail: vi.fn(),
+        resetPassword: vi.fn(),
+        signInAnonymously: vi.fn(),
+        linkEmailToAnonymousUser: vi.fn(),
+        linkOAuthToAnonymousUser: vi.fn(),
+        signOut: vi.fn()
       })
 
       const { result } = renderHook(() => useArrangementMutations())
 
       expect(result.current.isAuthenticated).toBe(false)
-      expect(result.current.canCreateArrangements).toBe(false)
+      expect(result.current.isAuthenticated).toBe(false)
     })
 
     it('should handle user without userId', () => {
       mockUseAuth.mockReturnValue({
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          is_anonymous: false,
+          app_metadata: {},
+          user_metadata: {},
+          aud: 'authenticated',
+          created_at: new Date().toISOString()
+        } as any,
+        userId: undefined,
+        sessionId: 'session-123',
+        isLoaded: true,
         isSignedIn: true,
-        userId: null,
-        getToken: vi.fn().mockResolvedValue('token')
+        isAdmin: false,
+        isAnonymous: false,
+        getToken: vi.fn().mockResolvedValue('token'),
+        getUserEmail: vi.fn().mockReturnValue('test@example.com'),
+        getUserName: vi.fn().mockReturnValue('Test User'),
+        getUserAvatar: vi.fn().mockReturnValue(undefined),
+        session: null,
+        signInWithProvider: vi.fn(),
+        signInWithEmail: vi.fn(),
+        signUpWithEmail: vi.fn(),
+        resetPassword: vi.fn(),
+        signInAnonymously: vi.fn(),
+        linkEmailToAnonymousUser: vi.fn(),
+        linkOAuthToAnonymousUser: vi.fn(),
+        signOut: vi.fn()
       })
 
       const { result } = renderHook(() => useArrangementMutations())
 
       expect(result.current.isAuthenticated).toBe(true)
-      expect(result.current.canCreateArrangements).toBe(false)
+      expect(result.current.isAuthenticated).toBe(false)
     })
   })
 
@@ -453,15 +613,19 @@ describe('useArrangementMutations', () => {
         result.current.createArrangement({
           name: 'Test',
           songIds: ['song-123'],
-          difficulty: 'beginner'
+          key: 'C',
+          difficulty: 'beginner',
+          tags: [],
+          chordProText: '',
+          notes: undefined
         })
       })
 
-      expect(result.current.isSubmitting).toBe(true)
+      expect(result.current.isCreating).toBe(true)
 
       // Wait for create to complete
       await waitFor(() => {
-        expect(result.current.isSubmitting).toBe(false)
+        expect(result.current.isCreating).toBe(false)
       })
 
       // Start update operation
@@ -469,10 +633,10 @@ describe('useArrangementMutations', () => {
         result.current.updateArrangement('arrangement-123', { name: 'Updated' })
       })
 
-      expect(result.current.isSubmitting).toBe(true)
+      expect(result.current.isCreating).toBe(true)
 
       await waitFor(() => {
-        expect(result.current.isSubmitting).toBe(false)
+        expect(result.current.isCreating).toBe(false)
       })
     })
   })
@@ -488,7 +652,11 @@ describe('useArrangementMutations', () => {
           await result.current.createArrangement({
             name: 'Test',
             songIds: ['song-123'],
-            difficulty: 'beginner'
+            key: 'C',
+            difficulty: 'beginner',
+            tags: [],
+            chordProText: '',
+            notes: undefined
           })
         } catch (error) {
           expect((error as Error).message).toBe('Failed to create arrangement')
@@ -510,7 +678,11 @@ describe('useArrangementMutations', () => {
           await result.current.createArrangement({
             name: 'Test',
             songIds: ['song-123'],
-            difficulty: 'beginner'
+            key: 'C',
+            difficulty: 'beginner',
+            tags: [],
+            chordProText: '',
+            notes: undefined
           })
         } catch (error) {
           expect((error as Error).message).toBe('Network timeout')

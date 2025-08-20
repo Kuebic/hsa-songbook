@@ -22,7 +22,7 @@ export function useArrangement(id: string, options: UseArrangementOptions = {}) 
     setError(null)
 
     try {
-      const arrangementData = await arrangementService.getArrangementById(id, includeChordData)
+      const arrangementData = await arrangementService.getArrangementById(id)
       setArrangement(arrangementData)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load arrangement'
@@ -71,7 +71,7 @@ export function useArrangementBySlug(slug: string, options: UseArrangementOption
     setError(null)
 
     try {
-      const arrangementData = await arrangementService.getArrangementBySlug(slug, includeChordData)
+      const arrangementData = await arrangementService.getArrangementBySlug(slug)
       setArrangement(arrangementData)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load arrangement'
