@@ -1,6 +1,6 @@
-import { useAuth } from '@clerk/clerk-react'
 import { Navigate, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
+import { useAuth } from '../hooks/useAuth'
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { isLoaded, isSignedIn } = useAuth()
+  const { isLoaded, isSignedIn, isAdmin } = useAuth()
   const location = useLocation()
 
   // Still loading auth state
@@ -18,9 +18,21 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center', 
-        minHeight: '50vh' 
+        minHeight: '50vh',
+        flexDirection: 'column',
+        gap: '1rem'
       }}>
-        <p>Loading...</p>
+        <div
+          style={{
+            width: '32px',
+            height: '32px',
+            border: '4px solid #e5e7eb',
+            borderTop: '4px solid #3b82f6',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }}
+        />
+        <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>Loading...</p>
       </div>
     )
   }
@@ -31,22 +43,53 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
   }
 
   // Check admin requirement
-  if (requireAdmin) {
-    // You would need to check admin status from user metadata
-    // This is a placeholder - implement based on your Clerk setup
-    const isAdmin = false // Replace with actual admin check
-    
-    if (!isAdmin) {
-      return (
-        <div style={{ 
-          padding: '2rem', 
-          textAlign: 'center' 
+  if (requireAdmin && !isAdmin) {
+    return (
+      <div style={{ 
+        padding: '2rem', 
+        textAlign: 'center',
+        maxWidth: '400px',
+        margin: '0 auto',
+        marginTop: '4rem'
+      }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
+        <h2 style={{ 
+          color: '#1f2937', 
+          marginBottom: '0.5rem',
+          fontSize: '1.5rem'
         }}>
-          <h2>Access Denied</h2>
-          <p>You need administrator privileges to access this page.</p>
-        </div>
-      )
-    }
+          Access Denied
+        </h2>
+        <p style={{ 
+          color: '#6b7280',
+          lineHeight: '1.5'
+        }}>
+          You need administrator privileges to access this page.
+        </p>
+        <button
+          onClick={() => window.history.back()}
+          style={{
+            marginTop: '1.5rem',
+            padding: '0.5rem 1rem',
+            backgroundColor: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '0.375rem',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            transition: 'background-color 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#2563eb'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#3b82f6'
+          }}
+        >
+          Go Back
+        </button>
+      </div>
+    )
   }
 
   return <>{children}</>

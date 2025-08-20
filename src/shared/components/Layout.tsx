@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
-import { Suspense, useEffect } from 'react'
+import { useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LazySignedIn, LazySignedOut, ClerkComponentLoader } from '@features/auth/components/LazyClerkComponents'
 import { AuthButtons, UserMenu } from '@features/auth'
+import { useAuth } from '@features/auth/hooks/useAuth'
 import { ErrorBoundary } from '@features/monitoring'
 import { AddSongButton } from '@features/songs/components/ui/AddSongButton'
 import { ThemeToggle } from './ThemeToggle'
@@ -13,6 +13,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation()
+  const { isSignedIn, isLoaded } = useAuth()
   const isEditorPage = location.pathname === '/test-editor' || 
                        location.pathname.includes('/arrangements/') ||
                        location.pathname.includes('/edit')
@@ -109,16 +110,12 @@ export function Layout({ children }: LayoutProps) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <ThemeToggle />
             <AddSongButton />
-            <Suspense fallback={<ClerkComponentLoader />}>
-              <LazySignedOut>
-                <AuthButtons />
-              </LazySignedOut>
-            </Suspense>
-            <Suspense fallback={<ClerkComponentLoader />}>
-              <LazySignedIn>
-                <UserMenu />
-              </LazySignedIn>
-            </Suspense>
+            {isLoaded && (
+              <>
+                {!isSignedIn && <AuthButtons />}
+                {isSignedIn && <UserMenu />}
+              </>
+            )}
           </div>
         </div>
       </nav>

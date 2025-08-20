@@ -1,6 +1,8 @@
+import { supabase } from '../../../lib/supabase'
 import type { Setlist, SetlistArrangement, CreateSetlistRequest, SetlistFilters, Page } from '../types/setlist.types'
+import type { Database } from '../../../lib/database.types'
 
-// Custom error classes for API operations (copied from existing pattern)
+// Custom error classes for API operations (kept for compatibility)
 export class APIError extends Error {
   statusCode?: number
   code?: string
@@ -31,63 +33,45 @@ export class NotFoundError extends APIError {
   }
 }
 
-// API service for setlists
-const API_BASE = '/api/v1'
+// Type mapping from Supabase to application types
+type SupabaseSetlist = Database['public']['Tables']['setlists']['Row']
+type SupabaseSetlistItem = Database['public']['Tables']['setlist_items']['Row']
 
-// Note: CacheEntry interface is available for future use if needed
-
-// Helper function for API calls with retry logic and caching
-async function fetchAPI<T>(
-  endpoint: string,
-  options: RequestInit = {},
-  retries = 3
-): Promise<T> {
-  let lastError: Error | undefined
-  
-  for (let i = 0; i < retries; i++) {
-    try {
-      const response = await fetch(`${API_BASE}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers
-        },
-        ...options
+// Convert Supabase data to application types
+function mapSupabaseSetlistToSetlist(
+  supabaseSetlist: SupabaseSetlist,
+  setlistItems: (SupabaseSetlistItem & { arrangement?: any })[] = []
+): Setlist {
+  const arrangements: SetlistArrangement[] = setlistItems
+    .sort((a, b) => a.position - b.position)
+    .map(item => ({
+      id: item.arrangement_id || '',
+      arrangementId: item.arrangement_id || '',
+      position: item.position,
+      notes: item.notes || undefined,
+      transposeSteps: item.transpose_steps || 0,
+      // Include arrangement data if available
+      ...(item.arrangement && {
+        name: item.arrangement.name,
+        slug: item.arrangement.slug,
+        key: item.arrangement.key,
+        tempo: item.arrangement.tempo,
+        difficulty: item.arrangement.difficulty,
+        chordData: item.arrangement.chord_data
       })
+    }))
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: 'Network error' }))
-        
-        if (response.status === 404) {
-          throw new NotFoundError(endpoint)
-        }
-        
-        throw new APIError(
-          error.message || `HTTP error! status: ${response.status}`,
-          response.status,
-          error.code
-        )
-      }
-
-      const data = await response.json()
-      const result = data.success ? (data.data || data.setlists || data) : data
-      
-      return result
-    } catch (error) {
-      lastError = error as Error
-      
-      // Don't retry on 4xx errors (client errors)
-      if (error instanceof APIError && error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
-        throw error
-      }
-      
-      // Network error - retry with exponential backoff
-      if (i < retries - 1) {
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000))
-      }
-    }
+  return {
+    id: supabaseSetlist.id,
+    name: supabaseSetlist.name,
+    description: supabaseSetlist.description || undefined,
+    createdBy: supabaseSetlist.created_by || '',
+    isPublic: supabaseSetlist.is_public,
+    shareId: supabaseSetlist.share_id || undefined,
+    arrangements,
+    createdAt: supabaseSetlist.created_at,
+    updatedAt: supabaseSetlist.updated_at
   }
-  
-  throw lastError || new NetworkError()
 }
 
 class SetlistService {
@@ -95,64 +79,217 @@ class SetlistService {
   private cacheTTL = 5 * 60 * 1000 // 5 minutes
 
   async getSetlists(filters?: SetlistFilters): Promise<Page<Setlist>> {
-    const params = new URLSearchParams()
-    if (filters?.userId) params.append('userId', filters.userId)
-    if (filters?.isPublic !== undefined) params.append('isPublic', String(filters.isPublic))
-    if (filters?.searchQuery) params.append('searchQuery', filters.searchQuery)
-    if (filters?.page !== undefined) params.append('page', String(filters.page))
-    if (filters?.size !== undefined) params.append('size', String(filters.size))
-    
-    return fetchAPI<Page<Setlist>>(`/setlists?${params.toString()}`)
+    try {
+      let query = supabase
+        .from('setlists')
+        .select(`
+          *,
+          setlist_items (
+            *,
+            arrangements (*)
+          )
+        `, { count: 'exact' })
+        .order('created_at', { ascending: false })
+
+      // Apply filters
+      if (filters?.userId) {
+        query = query.eq('created_by', filters.userId)
+      }
+      
+      if (filters?.isPublic !== undefined) {
+        query = query.eq('is_public', filters.isPublic)
+      }
+      
+      if (filters?.searchQuery) {
+        query = query.ilike('name', `%${filters.searchQuery}%`)
+      }
+
+      // Handle pagination
+      const page = filters?.page || 1
+      const size = filters?.size || 20
+      const offset = (page - 1) * size
+      query = query.range(offset, offset + size - 1)
+
+      const { data, error, count } = await query
+
+      if (error) {
+        throw new APIError(error.message, 500, 'SUPABASE_ERROR')
+      }
+
+      const setlists = (data || []).map(setlist => 
+        mapSupabaseSetlistToSetlist(setlist, setlist.setlist_items || [])
+      )
+
+      return {
+        items: setlists,
+        total: count || 0,
+        page,
+        size,
+        totalPages: Math.ceil((count || 0) / size)
+      }
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to fetch setlists')
+    }
   }
 
   async getSetlist(id: string, token?: string): Promise<Setlist> {
-    // Check cache first
-    const cached = this.cache.get(id)
-    if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
-      return cached.data
-    }
+    try {
+      // Check cache first
+      const cached = this.cache.get(id)
+      if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
+        return cached.data
+      }
 
-    const setlist = await fetchAPI<Setlist>(`/setlists/${id}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    })
-    
-    // Cache the result
-    this.cache.set(id, { data: setlist, timestamp: Date.now() })
-    return setlist
+      const { data, error } = await supabase
+        .from('setlists')
+        .select(`
+          *,
+          setlist_items (
+            *,
+            arrangements (*)
+          )
+        `)
+        .eq('id', id)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new NotFoundError(`Setlist with id ${id}`)
+        }
+        throw new APIError(error.message, 500, 'SUPABASE_ERROR')
+      }
+
+      const setlist = mapSupabaseSetlistToSetlist(data, data.setlist_items || [])
+      
+      // Cache the result
+      this.cache.set(id, { data: setlist, timestamp: Date.now() })
+      
+      return setlist
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to fetch setlist')
+    }
   }
 
   async getPublicSetlist(shareId: string): Promise<Setlist> {
-    return fetchAPI<Setlist>(`/setlists/public/${shareId}`)
+    try {
+      const { data, error } = await supabase
+        .from('setlists')
+        .select(`
+          *,
+          setlist_items (
+            *,
+            arrangements (*)
+          )
+        `)
+        .eq('share_id', shareId)
+        .eq('is_public', true)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new NotFoundError(`Public setlist with share ID ${shareId}`)
+        }
+        throw new APIError(error.message, 500, 'SUPABASE_ERROR')
+      }
+
+      return mapSupabaseSetlistToSetlist(data, data.setlist_items || [])
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to fetch public setlist')
+    }
   }
 
   async createSetlist(data: CreateSetlistRequest, token: string): Promise<Setlist> {
-    const setlist = await fetchAPI<Setlist>(`/setlists`, {
-      method: 'POST',
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-    
-    // Invalidate list cache
-    this.cache.clear()
-    return setlist
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new APIError('Authentication required', 401, 'UNAUTHORIZED')
+      }
+
+      const insertData = {
+        name: data.name,
+        description: data.description || null,
+        created_by: user.id,
+        is_public: data.isPublic || false
+      }
+
+      const { data: setlistData, error } = await supabase
+        .from('setlists')
+        .insert(insertData)
+        .select(`
+          *,
+          setlist_items (
+            *,
+            arrangements (*)
+          )
+        `)
+        .single()
+
+      if (error) {
+        throw new APIError(error.message, 400, 'SUPABASE_ERROR')
+      }
+
+      // Invalidate cache
+      this.cache.clear()
+      
+      return mapSupabaseSetlistToSetlist(setlistData, setlistData.setlist_items || [])
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to create setlist')
+    }
   }
 
   async updateSetlist(id: string, data: Partial<Setlist>, token: string): Promise<Setlist> {
-    const setlist = await fetchAPI<Setlist>(`/setlists/${id}`, {
-      method: 'PATCH',
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-    
-    // Update cache
-    this.cache.set(id, { data: setlist, timestamp: Date.now() })
-    return setlist
+    try {
+      const updateData: Partial<Database['public']['Tables']['setlists']['Update']> = {}
+      
+      if (data.name !== undefined) updateData.name = data.name
+      if (data.description !== undefined) updateData.description = data.description
+      if (data.isPublic !== undefined) updateData.is_public = data.isPublic
+
+      const { data: setlistData, error } = await supabase
+        .from('setlists')
+        .update(updateData)
+        .eq('id', id)
+        .select(`
+          *,
+          setlist_items (
+            *,
+            arrangements (*)
+          )
+        `)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new NotFoundError(`Setlist with id ${id}`)
+        }
+        throw new APIError(error.message, 400, 'SUPABASE_ERROR')
+      }
+
+      const setlist = mapSupabaseSetlistToSetlist(setlistData, setlistData.setlist_items || [])
+      
+      // Update cache
+      this.cache.set(id, { data: setlist, timestamp: Date.now() })
+      
+      return setlist
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to update setlist')
+    }
   }
 
   async reorderArrangements(
@@ -160,7 +297,44 @@ class SetlistService {
     arrangements: SetlistArrangement[], 
     token: string
   ): Promise<Setlist> {
-    return this.updateSetlist(setlistId, { arrangements }, token)
+    try {
+      // Clear existing setlist items and recreate with new positions
+      const { error: deleteError } = await supabase
+        .from('setlist_items')
+        .delete()
+        .eq('setlist_id', setlistId)
+
+      if (deleteError) {
+        throw new APIError(deleteError.message, 400, 'SUPABASE_ERROR')
+      }
+
+      // Insert reordered items
+      if (arrangements.length > 0) {
+        const setlistItems = arrangements.map((arr, index) => ({
+          setlist_id: setlistId,
+          arrangement_id: arr.arrangementId,
+          position: index,
+          notes: arr.notes || null,
+          transpose_steps: arr.transposeSteps || 0
+        }))
+
+        const { error: insertError } = await supabase
+          .from('setlist_items')
+          .insert(setlistItems)
+
+        if (insertError) {
+          throw new APIError(insertError.message, 400, 'SUPABASE_ERROR')
+        }
+      }
+
+      // Return updated setlist
+      return this.getSetlist(setlistId, token)
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to reorder arrangements')
+    }
   }
 
   async addArrangement(
@@ -169,32 +343,105 @@ class SetlistService {
     options: Partial<SetlistArrangement>,
     token: string
   ): Promise<Setlist> {
-    return fetchAPI<Setlist>(`/setlists/${setlistId}/arrangements`, {
-      method: 'POST',
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ arrangementId, ...options })
-    })
+    try {
+      // Get next position
+      const { data: existingItems } = await supabase
+        .from('setlist_items')
+        .select('position')
+        .eq('setlist_id', setlistId)
+        .order('position', { ascending: false })
+        .limit(1)
+
+      const nextPosition = (existingItems?.[0]?.position || -1) + 1
+
+      const { error } = await supabase
+        .from('setlist_items')
+        .insert({
+          setlist_id: setlistId,
+          arrangement_id: arrangementId,
+          position: options.position ?? nextPosition,
+          notes: options.notes || null,
+          transpose_steps: options.transposeSteps || 0
+        })
+
+      if (error) {
+        throw new APIError(error.message, 400, 'SUPABASE_ERROR')
+      }
+
+      // Return updated setlist
+      return this.getSetlist(setlistId, token)
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to add arrangement to setlist')
+    }
   }
 
   async likeSetlist(id: string, token: string): Promise<{ likes: number; liked: boolean }> {
-    return fetchAPI(`/setlists/${id}/like`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
+    try {
+      // For now, return mock data since likes aren't in the current schema
+      // This could be implemented with a separate likes table
+      return { likes: 0, liked: false }
+    } catch (error) {
+      throw new NetworkError('Failed to like setlist')
+    }
   }
 
   async duplicateSetlist(id: string, name: string, token: string): Promise<Setlist> {
-    return fetchAPI<Setlist>(`/setlists/${id}/duplicate`, {
-      method: 'POST',
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ name })
-    })
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new APIError('Authentication required', 401, 'UNAUTHORIZED')
+      }
+
+      // Get original setlist
+      const originalSetlist = await this.getSetlist(id, token)
+
+      // Create new setlist
+      const { data: newSetlistData, error: setlistError } = await supabase
+        .from('setlists')
+        .insert({
+          name,
+          description: originalSetlist.description || null,
+          created_by: user.id,
+          is_public: false // Duplicates are private by default
+        })
+        .select('*')
+        .single()
+
+      if (setlistError) {
+        throw new APIError(setlistError.message, 400, 'SUPABASE_ERROR')
+      }
+
+      // Copy arrangements if any
+      if (originalSetlist.arrangements.length > 0) {
+        const setlistItems = originalSetlist.arrangements.map(arr => ({
+          setlist_id: newSetlistData.id,
+          arrangement_id: arr.arrangementId,
+          position: arr.position,
+          notes: arr.notes || null,
+          transpose_steps: arr.transposeSteps || 0
+        }))
+
+        const { error: itemsError } = await supabase
+          .from('setlist_items')
+          .insert(setlistItems)
+
+        if (itemsError) {
+          throw new APIError(itemsError.message, 400, 'SUPABASE_ERROR')
+        }
+      }
+
+      // Return new setlist
+      return this.getSetlist(newSetlistData.id, token)
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to duplicate setlist')
+    }
   }
 
   clearCache() {

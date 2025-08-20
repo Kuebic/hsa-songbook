@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuth } from '@features/auth/hooks/useAuth'
 import { useSetlists } from '../hooks/useSetlists'
 import { CreateSetlistForm } from '../components/CreateSetlistForm'
 import { AuthPrompt } from '../components/AuthPrompt'

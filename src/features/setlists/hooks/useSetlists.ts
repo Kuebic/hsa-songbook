@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuth } from '@features/auth/hooks/useAuth'
 import type { Setlist, SetlistArrangement } from '../types/setlist.types'
 import type { Arrangement } from '@features/songs'
 

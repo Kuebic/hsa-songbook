@@ -1,6 +1,8 @@
+import { supabase } from '../../../lib/supabase'
 import type { Song, Arrangement, SongFilter } from '../types/song.types'
+import type { Database } from '../../../lib/database.types'
 
-// Custom error classes for API operations
+// Custom error classes for API operations (kept for compatibility)
 export class APIError extends Error {
   statusCode?: number
   code?: string
@@ -31,10 +33,60 @@ export class NotFoundError extends APIError {
   }
 }
 
-// API service for songs
-const API_BASE = '/api/v1'
+// Type mapping from Supabase to application types
+type SupabaseSong = Database['public']['Tables']['songs']['Row']
+type SupabaseArrangement = Database['public']['Tables']['arrangements']['Row']
 
-// Simple cache for deduplicating requests
+// Convert Supabase song to application Song type
+function mapSupabaseSongToSong(supabaseSong: SupabaseSong): Song {
+  return {
+    id: supabaseSong.id,
+    title: supabaseSong.title,
+    artist: supabaseSong.artist || '',
+    slug: supabaseSong.slug,
+    compositionYear: supabaseSong.composition_year || undefined,
+    ccli: supabaseSong.ccli || undefined,
+    themes: supabaseSong.themes || [],
+    source: supabaseSong.source || undefined,
+    notes: supabaseSong.notes || undefined,
+    defaultArrangementId: supabaseSong.default_arrangement_id || undefined,
+    metadata: {
+      createdBy: supabaseSong.created_by || undefined,
+      isPublic: supabaseSong.is_public,
+      ratings: {
+        average: Number(supabaseSong.rating_average),
+        count: supabaseSong.rating_count
+      },
+      views: supabaseSong.views
+    }
+  }
+}
+
+// Convert Supabase arrangement to application Arrangement type
+function mapSupabaseArrangementToArrangement(supabaseArrangement: SupabaseArrangement): Arrangement {
+  return {
+    id: supabaseArrangement.id,
+    name: supabaseArrangement.name,
+    slug: supabaseArrangement.slug,
+    songIds: [supabaseArrangement.song_id], // Note: single song ID in array for compatibility
+    key: supabaseArrangement.key || '',
+    tempo: supabaseArrangement.tempo || undefined,
+    timeSignature: supabaseArrangement.time_signature,
+    difficulty: (supabaseArrangement.difficulty as 'beginner' | 'intermediate' | 'advanced') || 'beginner',
+    tags: supabaseArrangement.tags || [],
+    chordData: supabaseArrangement.chord_data,
+    description: supabaseArrangement.description || undefined,
+    createdBy: supabaseArrangement.created_by || '',
+    metadata: {
+      isPublic: true, // Default for now
+      views: 0
+    },
+    createdAt: supabaseArrangement.created_at,
+    updatedAt: supabaseArrangement.updated_at
+  }
+}
+
+// Simple cache for deduplicating requests (keeping for compatibility)
 interface CacheEntry<T> {
   data: T
   timestamp: number
@@ -42,134 +94,168 @@ interface CacheEntry<T> {
 
 const requestCache = new Map<string, CacheEntry<unknown>>()
 const CACHE_TTL = 30000 // 30 seconds
-const pendingRequests = new Map<string, Promise<unknown>>()
 
-// Helper function for API calls with retry logic and caching
-async function fetchAPI<T>(
-  endpoint: string,
-  options: RequestInit = {},
-  retries = 3
-): Promise<T> {
-  // Create cache key from endpoint and method
-  const method = options.method || 'GET'
-  const cacheKey = `${method}:${endpoint}`
-  
-  // Check cache for GET requests
-  if (method === 'GET') {
-    const cached = requestCache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      return cached.data as T
-    }
-    
-    // Check if request is already pending
-    const pending = pendingRequests.get(cacheKey)
-    if (pending) {
-      return pending as Promise<T>
-    }
+// Helper function to handle caching
+function getCachedResult<T>(cacheKey: string): T | null {
+  const cached = requestCache.get(cacheKey)
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data as T
   }
-  
-  // Create the request promise
-  const requestPromise = (async () => {
-    let lastError: Error | undefined
-    
-    for (let i = 0; i < retries; i++) {
-    try {
-      const response = await fetch(`${API_BASE}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers
-        },
-        ...options
-      })
+  return null
+}
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: 'Network error' }))
-        
-        if (response.status === 404) {
-          throw new NotFoundError(endpoint)
-        }
-        
-        throw new APIError(
-          error.message || `HTTP error! status: ${response.status}`,
-          response.status,
-          error.code
-        )
-      }
-
-      const data = await response.json()
-      const result = data.success ? (data.data || data.songs || data) : data
-      
-      // Cache successful GET requests
-      if (method === 'GET') {
-        requestCache.set(cacheKey, {
-          data: result,
-          timestamp: Date.now()
-        })
-      }
-      
-      return result
-    } catch (error) {
-      lastError = error as Error
-      
-      // Don't retry on 4xx errors (client errors)
-      if (error instanceof APIError && error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
-        throw error
-      }
-      
-      // Network error - retry with exponential backoff
-      if (i < retries - 1) {
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000))
-      }
-    }
-  }
-  
-    throw lastError || new NetworkError()
-  })()
-  
-  // Store pending request for deduplication
-  if (method === 'GET') {
-    pendingRequests.set(cacheKey, requestPromise)
-    
-    // Clean up pending request when done
-    requestPromise.finally(() => {
-      pendingRequests.delete(cacheKey)
-    })
-  }
-  
-  return requestPromise
+function setCachedResult<T>(cacheKey: string, data: T): void {
+  requestCache.set(cacheKey, {
+    data,
+    timestamp: Date.now()
+  })
 }
 
 // Function to clear the cache (useful for mutations)
 function clearCache() {
   requestCache.clear()
-  pendingRequests.clear()
 }
 
 export const songService = {
   async getAllSongs(filter?: SongFilter): Promise<Song[]> {
-    const params = new URLSearchParams()
-    
-    if (filter) {
-      if (filter.searchQuery) params.append('searchQuery', filter.searchQuery)
-      if (filter.themes) filter.themes.forEach(theme => params.append('themes', theme))
-      if (filter.key) params.append('key', filter.key)
-      if (filter.difficulty) params.append('difficulty', filter.difficulty)
-    }
+    try {
+      // Check cache first
+      const cacheKey = `getAllSongs:${JSON.stringify(filter || {})}`
+      const cachedResult = getCachedResult<Song[]>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
+      }
 
-    const queryString = params.toString()
-    const endpoint = `/songs${queryString ? `?${queryString}` : ''}`
-    
-    const response = await fetchAPI<{ songs: Song[], pagination: Record<string, unknown> }>(endpoint)
-    // Handle the response structure - API returns { success: true, songs: [...] }
-    return Array.isArray(response) ? response : (response.songs || [])
+      let query = supabase
+        .from('songs')
+        .select(`
+          *,
+          arrangements!arrangements_song_id_fkey (*)
+        `)
+        .eq('is_public', true)
+        .order('title')
+
+      // Apply filters
+      if (filter) {
+        if (filter.searchQuery) {
+          // Use PostgreSQL full-text search
+          query = query.textSearch('title,artist', filter.searchQuery, {
+            type: 'websearch',
+            config: 'english'
+          })
+        }
+
+        if (filter.themes && filter.themes.length > 0) {
+          query = query.overlaps('themes', filter.themes)
+        }
+
+        if (filter.key) {
+          // For key filtering, we need to join with arrangements
+          query = query.eq('arrangements.key', filter.key)
+        }
+
+        if (filter.difficulty) {
+          query = query.eq('arrangements.difficulty', filter.difficulty)
+        }
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        console.error('Supabase error in getAllSongs:', error)
+        throw new APIError(error.message, 500, 'SUPABASE_ERROR')
+      }
+
+      const songs = (data || []).map(mapSupabaseSongToSong)
+      
+      // Cache the result
+      setCachedResult(cacheKey, songs)
+      
+      return songs
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to fetch songs')
+    }
   },
 
   async getSongById(id: string): Promise<Song> {
-    return fetchAPI<Song>(`/songs/${id}`)
+    try {
+      // Check cache first
+      const cacheKey = `getSongById:${id}`
+      const cachedResult = getCachedResult<Song>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
+      }
+
+      const { data, error } = await supabase
+        .from('songs')
+        .select(`
+          *,
+          arrangements!arrangements_song_id_fkey (*)
+        `)
+        .eq('id', id)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new NotFoundError(`Song with id ${id}`)
+        }
+        throw new APIError(error.message, 500, 'SUPABASE_ERROR')
+      }
+
+      const song = mapSupabaseSongToSong(data)
+      
+      // Cache the result
+      setCachedResult(cacheKey, song)
+      
+      return song
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to fetch song')
+    }
   },
 
   async getSongBySlug(slug: string): Promise<Song> {
-    return fetchAPI<Song>(`/songs/slug/${slug}`)
+    try {
+      // Check cache first
+      const cacheKey = `getSongBySlug:${slug}`
+      const cachedResult = getCachedResult<Song>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
+      }
+
+      const { data, error } = await supabase
+        .from('songs')
+        .select(`
+          *,
+          arrangements!arrangements_song_id_fkey (*)
+        `)
+        .eq('slug', slug)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new NotFoundError(`Song with slug ${slug}`)
+        }
+        throw new APIError(error.message, 500, 'SUPABASE_ERROR')
+      }
+
+      const song = mapSupabaseSongToSong(data)
+      
+      // Cache the result
+      setCachedResult(cacheKey, song)
+      
+      return song
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to fetch song')
+    }
   },
 
   async searchSongs(filter: SongFilter): Promise<Song[]> {
@@ -177,51 +263,176 @@ export const songService = {
   },
 
   async getArrangementsBySongId(songId: string): Promise<Arrangement[]> {
-    const response = await fetchAPI<Arrangement[]>(`/arrangements/song/${songId}`)
-    return Array.isArray(response) ? response : []
+    try {
+      // Check cache first
+      const cacheKey = `getArrangementsBySongId:${songId}`
+      const cachedResult = getCachedResult<Arrangement[]>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
+      }
+
+      const { data, error } = await supabase
+        .from('arrangements')
+        .select('*')
+        .eq('song_id', songId)
+        .order('name')
+
+      if (error) {
+        throw new APIError(error.message, 500, 'SUPABASE_ERROR')
+      }
+
+      const arrangements = (data || []).map(mapSupabaseArrangementToArrangement)
+      
+      // Cache the result
+      setCachedResult(cacheKey, arrangements)
+      
+      return arrangements
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to fetch arrangements')
+    }
   },
 
   async createSong(songData: Partial<Song>, token: string): Promise<Song> {
-    clearCache() // Clear cache after mutation
-    return fetchAPI<Song>('/songs', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(songData)
-    })
+    try {
+      clearCache() // Clear cache after mutation
+
+      // Get current user ID from token (Supabase handles this automatically via RLS)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new APIError('Authentication required', 401, 'UNAUTHORIZED')
+      }
+
+      // Map application Song type to Supabase insert type
+      const insertData = {
+        title: songData.title || '',
+        artist: songData.artist || null,
+        slug: songData.slug || '',
+        composition_year: songData.compositionYear || null,
+        ccli: songData.ccli || null,
+        themes: songData.themes || [],
+        source: songData.source || null,
+        notes: songData.notes || null,
+        created_by: user.id,
+        is_public: songData.metadata?.isPublic || false
+      }
+
+      const { data, error } = await supabase
+        .from('songs')
+        .insert(insertData)
+        .select(`
+          *,
+          arrangements!arrangements_song_id_fkey (*)
+        `)
+        .single()
+
+      if (error) {
+        throw new APIError(error.message, 400, 'SUPABASE_ERROR')
+      }
+
+      return mapSupabaseSongToSong(data)
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to create song')
+    }
   },
 
   async updateSong(id: string, songData: Partial<Song>, token: string, userId?: string): Promise<Song> {
-    clearCache() // Clear cache after mutation
-    return fetchAPI<Song>(`/songs/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...(userId && { 'x-user-id': userId })
-      },
-      body: JSON.stringify(songData)
-    })
+    try {
+      clearCache() // Clear cache after mutation
+
+      // Map application Song type to Supabase update type
+      const updateData: Partial<Database['public']['Tables']['songs']['Update']> = {}
+      
+      if (songData.title !== undefined) updateData.title = songData.title
+      if (songData.artist !== undefined) updateData.artist = songData.artist
+      if (songData.slug !== undefined) updateData.slug = songData.slug
+      if (songData.compositionYear !== undefined) updateData.composition_year = songData.compositionYear
+      if (songData.ccli !== undefined) updateData.ccli = songData.ccli
+      if (songData.themes !== undefined) updateData.themes = songData.themes
+      if (songData.source !== undefined) updateData.source = songData.source
+      if (songData.notes !== undefined) updateData.notes = songData.notes
+      if (songData.metadata?.isPublic !== undefined) updateData.is_public = songData.metadata.isPublic
+
+      const { data, error } = await supabase
+        .from('songs')
+        .update(updateData)
+        .eq('id', id)
+        .select(`
+          *,
+          arrangements!arrangements_song_id_fkey (*)
+        `)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new NotFoundError(`Song with id ${id}`)
+        }
+        throw new APIError(error.message, 400, 'SUPABASE_ERROR')
+      }
+
+      return mapSupabaseSongToSong(data)
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to update song')
+    }
   },
 
   async deleteSong(id: string, token: string): Promise<void> {
-    clearCache() // Clear cache after mutation
-    await fetch(`${API_BASE}/songs/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
+    try {
+      clearCache() // Clear cache after mutation
+
+      const { error } = await supabase
+        .from('songs')
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        throw new APIError(error.message, 400, 'SUPABASE_ERROR')
       }
-    })
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to delete song')
+    }
   },
 
   async rateSong(id: string, rating: number, token: string): Promise<Song> {
-    return fetchAPI<Song>(`/songs/${id}/rate`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ rating })
-    })
+    try {
+      // Get current user ID
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new APIError('Authentication required', 401, 'UNAUTHORIZED')
+      }
+
+      // Upsert the review (this will trigger the rating calculation via database triggers)
+      const { error: reviewError } = await supabase
+        .from('reviews')
+        .upsert({
+          song_id: id,
+          user_id: user.id,
+          rating,
+          updated_at: new Date().toISOString()
+        })
+
+      if (reviewError) {
+        throw new APIError(reviewError.message, 400, 'SUPABASE_ERROR')
+      }
+
+      // Return the updated song (rating will be automatically updated by trigger)
+      return this.getSongById(id)
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to rate song')
+    }
   }
 }

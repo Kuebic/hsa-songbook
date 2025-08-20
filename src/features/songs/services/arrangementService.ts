@@ -1,11 +1,37 @@
+import { supabase } from '../../../lib/supabase'
 import type { Arrangement } from '../types/song.types'
 import type { ArrangementFormData } from '../validation/schemas/arrangementSchema'
+import type { Database } from '../../../lib/database.types'
 
 // Use existing error classes from songService
 export { APIError, NetworkError, NotFoundError } from './songService'
 
-// API service for arrangements
-const API_BASE = '/api/v1'
+// Type mapping from Supabase to application types
+type SupabaseArrangement = Database['public']['Tables']['arrangements']['Row']
+
+// Convert Supabase arrangement to application Arrangement type
+function mapSupabaseArrangementToArrangement(supabaseArrangement: SupabaseArrangement): Arrangement {
+  return {
+    id: supabaseArrangement.id,
+    name: supabaseArrangement.name,
+    slug: supabaseArrangement.slug,
+    songIds: [supabaseArrangement.song_id], // Note: single song ID in array for compatibility
+    key: supabaseArrangement.key || '',
+    tempo: supabaseArrangement.tempo || undefined,
+    timeSignature: supabaseArrangement.time_signature,
+    difficulty: (supabaseArrangement.difficulty as 'beginner' | 'intermediate' | 'advanced') || 'beginner',
+    tags: supabaseArrangement.tags || [],
+    chordData: supabaseArrangement.chord_data,
+    description: supabaseArrangement.description || undefined,
+    createdBy: supabaseArrangement.created_by || '',
+    metadata: {
+      isPublic: true, // Default for now
+      views: 0
+    },
+    createdAt: supabaseArrangement.created_at,
+    updatedAt: supabaseArrangement.updated_at
+  }
+}
 
 // Simple cache for deduplicating requests
 interface CacheEntry<T> {
@@ -15,102 +41,26 @@ interface CacheEntry<T> {
 
 const arrangementCache = new Map<string, CacheEntry<unknown>>()
 const CACHE_TTL = 30000 // 30 seconds
-const pendingArrangementRequests = new Map<string, Promise<unknown>>()
 
-// Helper function for API calls with retry logic and caching
-async function fetchArrangementAPI<T>(
-  endpoint: string,
-  options: RequestInit = {},
-  retries = 3
-): Promise<T> {
-  // Create cache key from endpoint and method
-  const method = options.method || 'GET'
-  const cacheKey = `${method}:${endpoint}`
-  
-  // Check cache for GET requests
-  if (method === 'GET') {
-    const cached = arrangementCache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      return cached.data as T
-    }
-    
-    // Check if request is already pending
-    const pending = pendingArrangementRequests.get(cacheKey)
-    if (pending) {
-      return pending as Promise<T>
-    }
+// Helper function to handle caching
+function getCachedArrangementResult<T>(cacheKey: string): T | null {
+  const cached = arrangementCache.get(cacheKey)
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data as T
   }
-  
-  // Create the request promise
-  const requestPromise = (async () => {
-    let lastError: Error | undefined
-    let response: Response | undefined
-    
-    for (let i = 0; i < retries; i++) {
-      try {
-        response = await fetch(`${API_BASE}${endpoint}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-          },
-          ...options
-        })
+  return null
+}
 
-        if (!response.ok) {
-          const error = await response.json().catch(() => ({ message: 'Network error' }))
-          console.error('🚨 Server Error Response:', error)
-          console.error('🚨 Response status:', response.status)
-          console.error('🚨 Response headers:', Object.fromEntries(response.headers.entries()))
-          throw new Error(error.message || error.errors?.[0]?.message || `HTTP error! status: ${response.status}`)
-        }
-
-        const data = await response.json()
-        const result = data.success ? (data.data || data) : data
-        
-        // Cache successful GET requests
-        if (method === 'GET') {
-          arrangementCache.set(cacheKey, {
-            data: result,
-            timestamp: Date.now()
-          })
-        }
-        
-        return result
-      } catch (error) {
-        lastError = error as Error
-        
-        // Don't retry on 4xx errors (client errors)
-        if (response && response.status >= 400 && response.status < 500) {
-          throw error
-        }
-        
-        // Network error - retry with exponential backoff
-        if (i < retries - 1) {
-          await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000))
-        }
-      }
-    }
-    
-    throw lastError || new Error('Network request failed')
-  })()
-  
-  // Store pending request for deduplication
-  if (method === 'GET') {
-    pendingArrangementRequests.set(cacheKey, requestPromise)
-    
-    // Clean up pending request when done
-    requestPromise.finally(() => {
-      pendingArrangementRequests.delete(cacheKey)
-    })
-  }
-  
-  return requestPromise
+function setCachedArrangementResult<T>(cacheKey: string, data: T): void {
+  arrangementCache.set(cacheKey, {
+    data,
+    timestamp: Date.now()
+  })
 }
 
 // Function to clear the cache (useful for mutations)
 function clearArrangementCache() {
   arrangementCache.clear()
-  pendingArrangementRequests.clear()
 }
 
 export const arrangementService = {
@@ -121,65 +71,171 @@ export const arrangementService = {
     page?: number
     limit?: number
   }): Promise<{ arrangements: Arrangement[], total: number, page: number, pages: number }> {
-    const params = new URLSearchParams()
-    
-    if (filter) {
-      if (filter.songId) params.append('songId', filter.songId)
-      if (filter.key) params.append('key', filter.key)
-      if (filter.difficulty) params.append('difficulty', filter.difficulty)
-      if (filter.page) params.append('page', filter.page.toString())
-      if (filter.limit) params.append('limit', filter.limit.toString())
-    }
-
-    const queryString = params.toString()
-    const endpoint = `/arrangements${queryString ? `?${queryString}` : ''}`
-    
-    const data = await fetchArrangementAPI<{
-      arrangements?: Arrangement[]
-      data?: Arrangement[]
-      total?: number
-      pagination?: {
-        total: number
-        page: number
-        pages: number
+    try {
+      // Check cache first
+      const cacheKey = `getAllArrangements:${JSON.stringify(filter || {})}`
+      const cachedResult = getCachedArrangementResult<{ arrangements: Arrangement[], total: number, page: number, pages: number }>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
       }
-    }>(endpoint)
-    
-    // Handle different response structures
-    const arrangements = data.arrangements || data.data || []
-    const pagination = data.pagination || { total: arrangements.length, page: 1, pages: 1 }
-    
-    return {
-      arrangements,
-      total: data.total || pagination.total,
-      page: pagination.page,
-      pages: pagination.pages
+
+      let query = supabase
+        .from('arrangements')
+        .select('*', { count: 'exact' })
+        .eq('is_public', true)
+        .order('name')
+
+      // Apply filters
+      if (filter) {
+        if (filter.songId) {
+          query = query.eq('song_id', filter.songId)
+        }
+        if (filter.key) {
+          query = query.eq('key', filter.key)
+        }
+        if (filter.difficulty) {
+          query = query.eq('difficulty', filter.difficulty)
+        }
+
+        // Handle pagination
+        const page = filter.page || 1
+        const limit = filter.limit || 20
+        const offset = (page - 1) * limit
+        query = query.range(offset, offset + limit - 1)
+      }
+
+      const { data, error, count } = await query
+
+      if (error) {
+        console.error('Supabase error in getAllArrangements:', error)
+        throw new Error(error.message)
+      }
+
+      const arrangements = (data || []).map(mapSupabaseArrangementToArrangement)
+      const total = count || 0
+      const page = filter?.page || 1
+      const limit = filter?.limit || 20
+      const pages = Math.ceil(total / limit)
+
+      const result = { arrangements, total, page, pages }
+      
+      // Cache the result
+      setCachedArrangementResult(cacheKey, result)
+      
+      return result
+    } catch (error) {
+      console.error('Error in getAllArrangements:', error)
+      throw new Error('Failed to fetch arrangements')
     }
   },
 
   async getArrangementById(id: string, includeChordData = true): Promise<Arrangement> {
-    const params = new URLSearchParams()
-    if (!includeChordData) params.append('includeChordData', 'false')
-    
-    const queryString = params.toString()
-    const endpoint = `/arrangements/${id}${queryString ? `?${queryString}` : ''}`
-    
-    return fetchArrangementAPI<Arrangement>(endpoint)
+    try {
+      // Check cache first
+      const cacheKey = `getArrangementById:${id}:${includeChordData}`
+      const cachedResult = getCachedArrangementResult<Arrangement>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
+      }
+
+      let select = includeChordData ? '*' : '*, chord_data'
+      if (!includeChordData) {
+        select = 'id,name,slug,song_id,key,tempo,time_signature,difficulty,description,tags,created_by,created_at,updated_at'
+      }
+
+      const { data, error } = await supabase
+        .from('arrangements')
+        .select(select)
+        .eq('id', id)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new Error(`Arrangement with id ${id} not found`)
+        }
+        throw new Error(error.message)
+      }
+
+      const arrangement = mapSupabaseArrangementToArrangement(data)
+      
+      // Cache the result
+      setCachedArrangementResult(cacheKey, arrangement)
+      
+      return arrangement
+    } catch (error) {
+      console.error('Error in getArrangementById:', error)
+      throw new Error('Failed to fetch arrangement')
+    }
   },
 
   async getArrangementBySlug(slug: string, includeChordData = true): Promise<Arrangement> {
-    const params = new URLSearchParams()
-    if (!includeChordData) params.append('includeChordData', 'false')
-    
-    const queryString = params.toString()
-    const endpoint = `/arrangements/slug/${slug}${queryString ? `?${queryString}` : ''}`
-    
-    return fetchArrangementAPI<Arrangement>(endpoint)
+    try {
+      // Check cache first
+      const cacheKey = `getArrangementBySlug:${slug}:${includeChordData}`
+      const cachedResult = getCachedArrangementResult<Arrangement>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
+      }
+
+      let select = includeChordData ? '*' : '*, chord_data'
+      if (!includeChordData) {
+        select = 'id,name,slug,song_id,key,tempo,time_signature,difficulty,description,tags,created_by,created_at,updated_at'
+      }
+
+      const { data, error } = await supabase
+        .from('arrangements')
+        .select(select)
+        .eq('slug', slug)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new Error(`Arrangement with slug ${slug} not found`)
+        }
+        throw new Error(error.message)
+      }
+
+      const arrangement = mapSupabaseArrangementToArrangement(data)
+      
+      // Cache the result
+      setCachedArrangementResult(cacheKey, arrangement)
+      
+      return arrangement
+    } catch (error) {
+      console.error('Error in getArrangementBySlug:', error)
+      throw new Error('Failed to fetch arrangement')
+    }
   },
 
   async getArrangementsBySong(songId: string): Promise<Arrangement[]> {
-    const data = await fetchArrangementAPI<Arrangement[]>(`/arrangements/song/${songId}`)
-    return Array.isArray(data) ? data : []
+    try {
+      // Check cache first
+      const cacheKey = `getArrangementsBySong:${songId}`
+      const cachedResult = getCachedArrangementResult<Arrangement[]>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
+      }
+
+      const { data, error } = await supabase
+        .from('arrangements')
+        .select('*')
+        .eq('song_id', songId)
+        .order('name')
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      const arrangements = (data || []).map(mapSupabaseArrangementToArrangement)
+      
+      // Cache the result
+      setCachedArrangementResult(cacheKey, arrangements)
+      
+      return arrangements
+    } catch (error) {
+      console.error('Error in getArrangementsBySong:', error)
+      throw new Error('Failed to fetch arrangements for song')
+    }
   },
 
   async createArrangement(
@@ -187,28 +243,48 @@ export const arrangementService = {
     token: string,
     userId: string
   ): Promise<Arrangement> {
-    console.log('🔍 Creating arrangement with data:', arrangementData)
-    console.log('🔍 Arrangement data JSON:', JSON.stringify(arrangementData, null, 2))
-    console.log('🔍 Data being sent to server:', {
-      url: '/api/v1/arrangements',
-      headers: {
-        'Authorization': `Bearer ${token.substring(0, 20)}...`,
-        'x-user-id': userId,
-        'Content-Type': 'application/json'
-      },
-      bodySize: JSON.stringify(arrangementData).length
-    })
-    
-    clearArrangementCache()
-    return fetchArrangementAPI<Arrangement>('/arrangements', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'x-user-id': userId
-      },
-      body: JSON.stringify(arrangementData)
-    })
+    try {
+      clearArrangementCache()
+
+      // Get current user ID from Supabase auth
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('Authentication required')
+      }
+
+      // Map ArrangementFormData to Supabase insert type
+      const insertData = {
+        name: arrangementData.name,
+        song_id: arrangementData.songIds?.[0] || '', // Take first song ID
+        slug: arrangementData.slug,
+        chord_data: arrangementData.chordData || arrangementData.chordProText || '',
+        key: arrangementData.key || null,
+        tempo: arrangementData.tempo || null,
+        time_signature: arrangementData.timeSignature || '4/4',
+        difficulty: arrangementData.difficulty || null,
+        description: arrangementData.description || null,
+        tags: arrangementData.tags || [],
+        created_by: user.id
+      }
+
+      console.log('🔍 Creating arrangement with Supabase data:', insertData)
+
+      const { data, error } = await supabase
+        .from('arrangements')
+        .insert(insertData)
+        .select('*')
+        .single()
+
+      if (error) {
+        console.error('🚨 Supabase error creating arrangement:', error)
+        throw new Error(error.message)
+      }
+
+      return mapSupabaseArrangementToArrangement(data)
+    } catch (error) {
+      console.error('Error in createArrangement:', error)
+      throw new Error('Failed to create arrangement')
+    }
   },
 
   async updateArrangement(
@@ -217,39 +293,79 @@ export const arrangementService = {
     token: string,
     userId: string
   ): Promise<Arrangement> {
-    clearArrangementCache()
-    return fetchArrangementAPI<Arrangement>(`/arrangements/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'x-user-id': userId
-      },
-      body: JSON.stringify(arrangementData)
-    })
+    try {
+      clearArrangementCache()
+
+      // Map ArrangementFormData to Supabase update type
+      const updateData: Partial<Database['public']['Tables']['arrangements']['Update']> = {}
+      
+      if (arrangementData.name !== undefined) updateData.name = arrangementData.name
+      if (arrangementData.slug !== undefined) updateData.slug = arrangementData.slug
+      if (arrangementData.chordData !== undefined) updateData.chord_data = arrangementData.chordData
+      if (arrangementData.chordProText !== undefined) updateData.chord_data = arrangementData.chordProText
+      if (arrangementData.key !== undefined) updateData.key = arrangementData.key
+      if (arrangementData.tempo !== undefined) updateData.tempo = arrangementData.tempo
+      if (arrangementData.timeSignature !== undefined) updateData.time_signature = arrangementData.timeSignature
+      if (arrangementData.difficulty !== undefined) updateData.difficulty = arrangementData.difficulty
+      if (arrangementData.description !== undefined) updateData.description = arrangementData.description
+      if (arrangementData.tags !== undefined) updateData.tags = arrangementData.tags
+
+      const { data, error } = await supabase
+        .from('arrangements')
+        .update(updateData)
+        .eq('id', id)
+        .select('*')
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new Error(`Arrangement with id ${id} not found`)
+        }
+        throw new Error(error.message)
+      }
+
+      return mapSupabaseArrangementToArrangement(data)
+    } catch (error) {
+      console.error('Error in updateArrangement:', error)
+      throw new Error('Failed to update arrangement')
+    }
   },
 
   async deleteArrangement(id: string, token: string, userId: string): Promise<void> {
-    clearArrangementCache()
-    await fetchArrangementAPI<void>(`/arrangements/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'x-user-id': userId,
-        'x-user-role': 'ADMIN'
+    try {
+      clearArrangementCache()
+
+      const { error } = await supabase
+        .from('arrangements')
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        throw new Error(error.message)
       }
-    })
+    } catch (error) {
+      console.error('Error in deleteArrangement:', error)
+      throw new Error('Failed to delete arrangement')
+    }
   },
 
   async rateArrangement(id: string, rating: number, token: string, userId: string): Promise<Arrangement> {
-    clearArrangementCache()
-    return fetchArrangementAPI<Arrangement>(`/arrangements/${id}/rate`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'x-user-id': userId
-      },
-      body: JSON.stringify({ rating })
-    })
+    try {
+      clearArrangementCache()
+
+      // Get current user ID
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('Authentication required')
+      }
+
+      // Note: If we need arrangement ratings, we would create a separate ratings table
+      // For now, returning the arrangement as-is since arrangements don't have ratings in the current schema
+      
+      return this.getArrangementById(id)
+    } catch (error) {
+      console.error('Error in rateArrangement:', error)
+      throw new Error('Failed to rate arrangement')
+    }
   }
 }
