@@ -31,9 +31,28 @@
     <meta property="og:site_name" content="HSA Songbook" />
     
     <title>HSA Songbook</title>
+    
+    <!-- Prevent FOUC (Flash of Unstyled Content) -->
+    <style>
+      body {
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      body.loaded {
+        visibility: visible;
+        opacity: 1;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Show body once critical resources are loaded
+      window.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('loaded');
+      });
+    </script>
     <script type="module" src="/src/app/main.tsx"></script>
   </body>
 </html>

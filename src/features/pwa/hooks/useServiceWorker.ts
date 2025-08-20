@@ -1,5 +1,5 @@
-import { useRegisterSW } from 'virtual:pwa-register/react'
-import { useCallback, useEffect } from 'react'
+// PWA temporarily disabled - this is a stub implementation
+// To re-enable: set ENABLE_PWA = true in vite.config.ts and uncomment the real implementation below
 
 export interface ServiceWorkerHookReturn {
   offlineReady: boolean
@@ -7,6 +7,20 @@ export interface ServiceWorkerHookReturn {
   updateServiceWorker: (reloadPage?: boolean) => Promise<void>
   close: () => void
 }
+
+// Stub implementation when PWA is disabled
+export function useServiceWorker(): ServiceWorkerHookReturn {
+  return {
+    offlineReady: false,
+    needRefresh: false,
+    updateServiceWorker: async () => {},
+    close: () => {}
+  }
+}
+
+/* Original implementation - uncomment when re-enabling PWA
+import { useRegisterSW } from 'virtual:pwa-register/react'
+import { useCallback, useEffect } from 'react'
 
 export function useServiceWorker(): ServiceWorkerHookReturn {
   const {
@@ -55,3 +69,4 @@ export function useServiceWorker(): ServiceWorkerHookReturn {
     close
   }
 }
+*/

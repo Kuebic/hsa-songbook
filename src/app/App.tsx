@@ -1,8 +1,10 @@
-import { lazy, useEffect } from 'react'
+import { lazy } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout } from '@shared/components/Layout'
-import { UpdatePrompt, InstallPrompt, OfflineIndicator, LazyRouteWrapper } from '@features/pwa'
-import { setupOfflineHandlers } from '@features/pwa/utils/offline'
+// PWA features temporarily disabled
+// import { UpdatePrompt, InstallPrompt, OfflineIndicator, LazyRouteWrapper } from '@features/pwa'
+// import { setupOfflineHandlers } from '@features/pwa/utils/offline'
+import { LazyRouteWrapper } from '@features/pwa'
 import { ErrorBoundary, useWebVitals } from '@features/monitoring'
 import { NotificationProvider } from '@shared/components/notifications'
 import { ThemeProvider } from '@shared/contexts/ThemeContext'
@@ -22,10 +24,10 @@ function App() {
   // Initialize web vitals monitoring
   useWebVitals()
 
-  // Setup offline handlers on mount
-  useEffect(() => {
-    setupOfflineHandlers()
-  }, [])
+  // PWA offline handlers temporarily disabled
+  // useEffect(() => {
+  //   setupOfflineHandlers()
+  // }, [])
 
   return (
     <ErrorBoundary level="app">
@@ -140,10 +142,10 @@ function App() {
               } 
             />
             </Routes>
-            {/* PWA Components */}
-            <OfflineIndicator />
-            <UpdatePrompt />
-            <InstallPrompt />
+            {/* PWA Components - temporarily disabled */}
+            {/* <OfflineIndicator /> */}
+            {/* <UpdatePrompt /> */}
+            {/* <InstallPrompt /> */}
           </Layout>
         </BrowserRouter>
       </NotificationProvider>
