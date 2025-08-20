@@ -3,6 +3,7 @@ import { useAuth } from '@features/auth/hooks/useAuth';
 import { useNotification } from '@shared/components/notifications/useNotification';
 import { arrangementService } from '@features/songs/services/arrangementService';
 import { EditorStorageService } from '../services/EditorStorageService';
+import { arrangementExistenceStore } from '../stores/arrangementExistenceStore';
 
 interface UseExitSaveOptions {
   arrangementId: string;
@@ -58,28 +59,59 @@ export function useExitSave({
           throw new Error('Authentication required for saving');
         }
         
-        // Save to Supabase using existing arrangementService pattern
-        await arrangementService.updateArrangement(
-          arrangementId,
-          { chordProText: content }
-        );
+        // Check if this is a real arrangement ID (not a temporary one)
+        const isRealArrangement = arrangementId && 
+                                 !arrangementId.startsWith('new-') && 
+                                 arrangementId !== 'new-arrangement';
         
-        // Clear session draft after successful save
-        try {
-          await storageService.current.deleteDraft(arrangementId, userId);
-        } catch (cleanupError) {
-          console.warn('Failed to cleanup draft after save:', cleanupError);
-          // Don't throw - the main save succeeded
+        if (isRealArrangement && arrangementExistenceStore.exists(arrangementId)) {
+          // Try to save to Supabase
+          try {
+            await arrangementService.updateArrangement(
+              arrangementId,
+              { chordData: content }
+            );
+            
+            // Clear session draft after successful save
+            try {
+              await storageService.current.deleteDraft(arrangementId, userId);
+            } catch (cleanupError) {
+              console.warn('Failed to cleanup draft after save:', cleanupError);
+              // Don't throw - the main save succeeded
+            }
+          } catch (updateError: any) {
+            // If it's a not found error, mark it and treat it like a new arrangement
+            if (updateError?.message?.includes('not found') || updateError?.code === 'PGRST116') {
+              console.log('Arrangement not found in database, marking as non-existent:', arrangementId);
+              arrangementExistenceStore.markAsNonExistent(arrangementId);
+              // Don't throw - content is saved locally
+            } else {
+              // Re-throw other errors
+              throw updateError;
+            }
+          }
+        } else {
+          // For new arrangements or non-existent ones, only save locally
+          const reason = !isRealArrangement ? 'new arrangement' : 'non-existent arrangement';
+          console.log(`Skipping backend save for ${reason}:`, arrangementId);
         }
         
         setExitSaveState(prev => ({ ...prev, isSaving: false, lastSaveError: null }));
         
         // Show success notification
-        addNotification({
-          type: 'success',
-          title: 'Saved',
-          message: 'Changes saved successfully'
-        });
+        if (isRealArrangement) {
+          addNotification({
+            type: 'success',
+            title: 'Saved',
+            message: 'Changes saved successfully'
+          });
+        } else {
+          addNotification({
+            type: 'info',
+            title: 'Draft Saved',
+            message: 'Your changes are saved locally. Create the arrangement to save to the server.'
+          });
+        }
         
         onSaveSuccess?.();
         
@@ -129,7 +161,7 @@ export function useExitSave({
       }
       
       const data = JSON.stringify({
-        chordProText: content
+        chordData: content
       });
       
       const blob = new Blob([data], { type: 'application/json' });

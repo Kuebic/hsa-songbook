@@ -3,6 +3,7 @@ import { throttle, debounce } from 'lodash-es';
 import { EditorStorageService } from '../services/EditorStorageService';
 import { arrangementService } from '@features/songs/services/arrangementService';
 import { useAuth } from '@features/auth/hooks/useAuth';
+import { arrangementExistenceStore } from '../stores/arrangementExistenceStore';
 
 interface UseAutoSaveOptions {
   arrangementId: string;
@@ -51,6 +52,14 @@ export function useAutoSave({
     }
   }, [enabled]);
   
+  // Reset arrangement existence when arrangement ID changes
+  useEffect(() => {
+    // Don't reset if it's a temporary ID
+    if (arrangementId && !arrangementId.startsWith('new-')) {
+      arrangementExistenceStore.reset(arrangementId);
+    }
+  }, [arrangementId]);
+  
   // Perform save operation (both local and backend)
   const performSave = useCallback(async (
     saveContent: string, 
@@ -87,13 +96,29 @@ export function useAutoSave({
       if (force || timeSinceLastBackendSave > 10000) { // 10 seconds minimum between backend saves
         try {
           const token = await getToken();
-          if (token && userId && arrangementId !== 'new-arrangement') {
-            // Only save to backend if we have auth and a real arrangement ID
-            await arrangementService.updateArrangement(
-              arrangementId,
-              { chordProText: saveContent }
-            );
-            lastBackendSaveRef.current = now;
+          // Only save to backend if we have auth and a real arrangement ID (not a temporary one)
+          const isRealArrangement = arrangementId && 
+                                   !arrangementId.startsWith('new-') && 
+                                   arrangementId !== 'new-arrangement';
+          
+          if (token && userId && isRealArrangement && arrangementExistenceStore.exists(arrangementId)) {
+            // First check if the arrangement exists before trying to update
+            try {
+              await arrangementService.updateArrangement(
+                arrangementId,
+                { chordData: saveContent }
+              );
+              lastBackendSaveRef.current = now;
+            } catch (updateError: any) {
+              // If it's a not found error, skip backend saves for this arrangement
+              if (updateError?.message?.includes('not found') || updateError?.code === 'PGRST116') {
+                console.log('Arrangement not found in database, marking as non-existent:', arrangementId);
+                arrangementExistenceStore.markAsNonExistent(arrangementId); // Don't try again
+              } else {
+                // Re-throw other errors
+                throw updateError;
+              }
+            }
           }
         } catch (backendError) {
           // Don't fail the whole save if backend fails - local is saved
