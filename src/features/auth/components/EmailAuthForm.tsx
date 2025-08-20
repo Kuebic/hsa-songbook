@@ -2,14 +2,14 @@ import { useState, useRef } from 'react'
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 import { useAuth } from '../hooks/useAuth'
 
-type AuthMode = 'signin' | 'signup' | 'reset'
+type AuthMode = 'signin' | 'signup' | 'reset' | 'anonymous'
 
 interface EmailAuthFormProps {
   onSuccess?: () => void
 }
 
 export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
-  const { signInWithEmail, signUpWithEmail, resetPassword } = useAuth()
+  const { signInWithEmail, signUpWithEmail, resetPassword, signInAnonymously } = useAuth()
   const [mode, setMode] = useState<AuthMode>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,7 +17,7 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined)
   const turnstileRef = useRef<TurnstileInstance>(null)
 
   // Captcha configuration
@@ -40,24 +40,26 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
     setError(null)
     setSuccess(null)
 
-    // Validation
-    if (!email || !email.includes('@')) {
-      setError('Please enter a valid email address')
-      return
-    }
+    // Validation for non-anonymous modes
+    if (mode !== 'anonymous') {
+      if (!email || !email.includes('@')) {
+        setError('Please enter a valid email address')
+        return
+      }
 
-    if (mode === 'signup') {
-      if (!password || password.length < 6) {
-        setError('Password must be at least 6 characters')
+      if (mode === 'signup') {
+        if (!password || password.length < 6) {
+          setError('Password must be at least 6 characters')
+          return
+        }
+        if (password !== confirmPassword) {
+          setError('Passwords do not match')
+          return
+        }
+      } else if (mode === 'signin' && !password) {
+        setError('Please enter your password')
         return
       }
-      if (password !== confirmPassword) {
-        setError('Passwords do not match')
-        return
-      }
-    } else if (mode === 'signin' && !password) {
-      setError('Please enter your password')
-      return
     }
 
     // Check for captcha token only if siteKey is configured
@@ -80,6 +82,9 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
         await resetPassword(email, captchaToken)
         setSuccess('Password reset email sent. Please check your inbox.')
         setMode('signin')
+      } else if (mode === 'anonymous') {
+        await signInAnonymously(captchaToken)
+        onSuccess?.()
       }
     } catch (err) {
       console.error('Auth error:', err)
@@ -89,7 +94,7 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
       // Reset the captcha on error since tokens are one-time use
       if (turnstileRef.current) {
         turnstileRef.current.reset()
-        setCaptchaToken(null)
+        setCaptchaToken(undefined)
       }
     } finally {
       setIsLoading(false)
@@ -97,7 +102,7 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
       // Reset captcha after successful submission (tokens are one-time use)
       if (turnstileRef.current) {
         turnstileRef.current.reset()
-        setCaptchaToken(null)
+        setCaptchaToken(undefined)
       }
     }
   }
@@ -109,7 +114,7 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
     // Reset captcha when switching modes
     if (turnstileRef.current) {
       turnstileRef.current.reset()
-      setCaptchaToken(null)
+      setCaptchaToken(undefined)
     }
   }
 
@@ -205,6 +210,7 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
           {mode === 'signin' && 'Sign In to Your Account'}
           {mode === 'signup' && 'Create New Account'}
           {mode === 'reset' && 'Reset Password'}
+          {mode === 'anonymous' && 'Continue as Guest'}
         </h2>
 
         {error && (
@@ -231,29 +237,44 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
           </div>
         )}
 
-        <div>
-          <label htmlFor="email" style={labelStyles}>
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
-            required
-            autoComplete="email"
-            style={inputStyles}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = '#3b82f6'
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = '#d1d5db'
-            }}
-          />
-        </div>
+        {mode === 'anonymous' && (
+          <div style={{
+            padding: '0.75rem',
+            backgroundColor: '#e0f2fe',
+            color: '#0369a1',
+            borderRadius: '4px',
+            fontSize: '0.875rem',
+            marginBottom: '1rem'
+          }}>
+            Continue as a guest user to explore the app without signing up. You can convert to a permanent account later by adding email or OAuth login.
+          </div>
+        )}
 
-        {mode !== 'reset' && (
+        {mode !== 'anonymous' && (
+          <div>
+            <label htmlFor="email" style={labelStyles}>
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+              autoComplete="email"
+              style={inputStyles}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#3b82f6'
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#d1d5db'
+              }}
+            />
+          </div>
+        )}
+
+        {mode !== 'reset' && mode !== 'anonymous' && (
           <div>
             <label htmlFor="password" style={labelStyles}>
               Password
@@ -317,10 +338,10 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
               }}
               onError={() => {
                 setError('Captcha verification failed. Please try again.')
-                setCaptchaToken(null)
+                setCaptchaToken(undefined)
               }}
               onExpire={() => {
-                setCaptchaToken(null)
+                setCaptchaToken(undefined)
                 setError('Captcha expired. Please complete the verification again.')
               }}
               options={{
@@ -369,6 +390,7 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
               {mode === 'signin' && 'Sign In'}
               {mode === 'signup' && 'Create Account'}
               {mode === 'reset' && 'Send Reset Email'}
+              {mode === 'anonymous' && 'Continue as Guest'}
             </>
           )}
         </button>
@@ -384,6 +406,16 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
             >
               Forgot Password?
             </button>
+            <span style={{ margin: '0 0.5rem', color: '#6b7280' }}>|</span>
+            <button
+              type="button"
+              onClick={() => {
+                handleModeChange('anonymous')
+              }}
+              style={linkStyles}
+            >
+              Continue as Guest
+            </button>
           </div>
         )}
 
@@ -397,6 +429,20 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
               style={linkStyles}
             >
               Back to Sign In
+            </button>
+          </div>
+        )}
+
+        {mode === 'anonymous' && (
+          <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+            <button
+              type="button"
+              onClick={() => {
+                handleModeChange('signin')
+              }}
+              style={linkStyles}
+            >
+              Sign In with Account
             </button>
           </div>
         )}

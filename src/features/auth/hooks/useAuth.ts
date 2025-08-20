@@ -1,13 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase, getCurrentSession } from '../../../lib/supabase'
-import type { User, Session } from '@supabase/supabase-js'
-
-interface AuthState {
-  user: User | null
-  session: Session | null
-  isLoaded: boolean
-  isSignedIn: boolean
-}
+import type { User, AuthState } from '../types'
 
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>({
@@ -146,6 +139,9 @@ export function useAuth() {
   // Check if user has admin role
   const isAdmin = authState.user?.email?.includes('@admin.hsa-songbook.com') || 
                   authState.user?.user_metadata?.role === 'admin'
+  
+  // Check if user is anonymous
+  const isAnonymous = authState.user?.is_anonymous === true
 
   // Sign in with OAuth provider
   const signInWithProvider = useCallback(async (provider: 'google' | 'github') => {
@@ -213,6 +209,52 @@ export function useAuth() {
     }
   }, [])
 
+  // Sign in anonymously
+  const signInAnonymously = useCallback(async (captchaToken?: string) => {
+    const { data, error } = await supabase.auth.signInAnonymously(
+      captchaToken ? { options: { captchaToken } } : undefined
+    )
+    
+    if (error) {
+      console.error('Error signing in anonymously:', error)
+      throw error
+    }
+    
+    return data
+  }, [])
+
+  // Convert anonymous user to permanent user by linking email
+  const linkEmailToAnonymousUser = useCallback(async (email: string, password?: string) => {
+    const { data: updateData, error: updateError } = await supabase.auth.updateUser({
+      email,
+      ...(password && { password })
+    })
+    
+    if (updateError) {
+      console.error('Error linking email to anonymous user:', updateError)
+      throw updateError
+    }
+    
+    return updateData
+  }, [])
+
+  // Convert anonymous user to permanent user by linking OAuth
+  const linkOAuthToAnonymousUser = useCallback(async (provider: 'google' | 'github') => {
+    const { data, error } = await supabase.auth.linkIdentity({ 
+      provider,
+      options: {
+        redirectTo: window.location.origin
+      }
+    })
+    
+    if (error) {
+      console.error('Error linking OAuth to anonymous user:', error)
+      throw error
+    }
+    
+    return data
+  }, [])
+
   // Sign out
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut()
@@ -230,13 +272,15 @@ export function useAuth() {
     isLoaded: authState.isLoaded,
     isSignedIn: authState.isSignedIn,
     isAdmin,
+    isAnonymous,
     getToken,
     
     // Helper methods (Clerk-compatible)
     getUserEmail: () => authState.user?.email,
     getUserName: () => authState.user?.user_metadata?.full_name || 
                        authState.user?.user_metadata?.name || 
-                       authState.user?.email?.split('@')[0] || 'User',
+                       authState.user?.email?.split('@')[0] || 
+                       (isAnonymous ? 'Guest User' : 'User'),
     getUserAvatar: () => authState.user?.user_metadata?.avatar_url,
     
     // Supabase-specific methods
@@ -245,6 +289,9 @@ export function useAuth() {
     signInWithEmail,
     signUpWithEmail,
     resetPassword,
+    signInAnonymously,
+    linkEmailToAnonymousUser,
+    linkOAuthToAnonymousUser,
     signOut
   }
 }
