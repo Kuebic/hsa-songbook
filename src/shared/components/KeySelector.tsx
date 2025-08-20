@@ -32,7 +32,7 @@ export function KeySelector({
   disabled = false,
   label = 'Musical Key',
   required = false,
-  className
+  className: _className
 }: KeySelectorProps) {
   // Support both prop names for backward compatibility
   const actualValue = value || currentKey || ''

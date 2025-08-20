@@ -138,11 +138,11 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
     enabled: true
   });
   
-  // Exit save to MongoDB
+  // Exit save to Supabase
   const {
     // isSaving: isExitSaving, // Can be used to show saving state
     needsSave,
-    saveNow: saveToMongoDB
+    saveNow: saveToSupabase
   } = useExitSave({
     arrangementId,
     content,
@@ -316,7 +316,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
       e.preventDefault();
       try {
         if (needsSave) {
-          await saveToMongoDB();
+          await saveToSupabase();
         }
         if (onSave) {
           onSave(content);
@@ -325,7 +325,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
         console.error('Save failed:', error);
       }
     }
-  }, [content, onSave, needsSave, saveToMongoDB]);
+  }, [content, onSave, needsSave, saveToSupabase]);
 
   return (
     <div 
@@ -369,7 +369,7 @@ export const ChordProEditor: React.FC<ChordProEditorProps> = ({
               onClick={async () => {
                 try {
                   if (needsSave) {
-                    await saveToMongoDB();
+                    await saveToSupabase();
                   }
                   if (onSave) {
                     onSave(content);

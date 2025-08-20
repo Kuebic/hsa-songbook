@@ -11,6 +11,12 @@ export const arrangementSchema = z.object({
     .max(100, 'Arrangement name must be less than 100 characters')
     .trim(),
   
+  slug: z.string()
+    .min(1, 'Slug is required')
+    .max(100, 'Slug must be less than 100 characters')
+    .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
+    .optional(),
+  
   // Musical properties
   key: z.enum(MUSICAL_KEYS as readonly [string, ...string[]])
     .optional()
@@ -45,6 +51,14 @@ export const arrangementSchema = z.object({
     .max(50000, 'Chord data is too large (max 50KB)')
     .optional()
     .default(''),
+  
+  chordData: z.string()
+    .max(50000, 'Chord data is too large (max 50KB)')
+    .optional(),
+  
+  description: z.string()
+    .max(1000, 'Description must be less than 1000 characters')
+    .optional(),
   
   // Mashup support (multiple songs in one arrangement)
   songIds: z.array(z.string())
@@ -87,12 +101,15 @@ export type UpdateArrangementFormData = z.infer<typeof updateArrangementSchema>
  */
 export const arrangementFieldSchemas = {
   name: arrangementSchema.shape.name,
+  slug: arrangementSchema.shape.slug,
   key: arrangementSchema.shape.key,
   tempo: arrangementSchema.shape.tempo,
   timeSignature: arrangementSchema.shape.timeSignature,
   difficulty: arrangementSchema.shape.difficulty,
   tags: arrangementSchema.shape.tags,
   chordData: arrangementSchema.shape.chordData,
+  chordProText: arrangementSchema.shape.chordProText,
+  description: arrangementSchema.shape.description,
   notes: arrangementSchema.shape.notes,
   capo: arrangementSchema.shape.capo,
   duration: arrangementSchema.shape.duration
@@ -163,7 +180,8 @@ export function createArrangementSchema(options?: {
   if (options?.requireKey) {
     schema = schema.extend({
       key: z.enum(MUSICAL_KEYS as readonly [string, ...string[]])
-    })
+        .describe('Please select a valid musical key')
+    }) as any
   }
   
   if (options?.requireTempo) {
@@ -171,13 +189,14 @@ export function createArrangementSchema(options?: {
       tempo: z.number()
         .min(40, 'Tempo is required (40-300 BPM)')
         .max(300, 'Tempo must be less than 300 BPM')
-    })
+    }) as any
   }
   
   if (options?.requireDifficulty) {
     schema = schema.extend({
       difficulty: z.enum(DIFFICULTY_LEVELS as readonly [string, ...string[]])
-    })
+        .describe('Please select a valid difficulty level')
+    }) as any
   }
   
   if (options?.maxChordDataSize) {
@@ -185,7 +204,7 @@ export function createArrangementSchema(options?: {
       chordData: z.string()
         .min(1, 'Chord data is required')
         .max(options.maxChordDataSize, `Chord data must be less than ${options.maxChordDataSize} characters`)
-    })
+    }) as any
   }
   
   return schema

@@ -23,18 +23,18 @@ export class RealtimeService {
   /**
    * Subscribe to changes on a specific table
    */
-  static subscribe<T = Record<string, unknown>>(
+  static subscribe<T extends Record<string, any> = Record<string, any>>(
     table: keyof Database['public']['Tables'],
     listener: RealtimeListener<T>,
     filter?: { column: string; value: string }
   ): string {
-    const subscriptionId = `${table}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const subscriptionId = `${table as string}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     
     const channel = supabase.channel(`realtime-${subscriptionId}`)
     
     // Build postgres changes subscription
     const postgresChanges = channel.on(
-      'postgres_changes',
+      'postgres_changes' as any,
       {
         event: '*',
         schema: 'public',
@@ -44,8 +44,8 @@ export class RealtimeService {
       (payload: RealtimePostgresChangesPayload<T>) => {
         listener({
           eventType: payload.eventType,
-          new: payload.new || null,
-          old: payload.old || null,
+          new: (payload.new as T) || null,
+          old: (payload.old as T) || null,
           table: table as string
         })
       }
@@ -128,7 +128,7 @@ export class RealtimeService {
    * Unsubscribe from all real-time updates
    */
   static unsubscribeAll(): void {
-    for (const [subscriptionId, channel] of activeSubscriptions) {
+    for (const [_subscriptionId, channel] of activeSubscriptions) {
       supabase.removeChannel(channel)
     }
     activeSubscriptions.clear()
@@ -178,7 +178,7 @@ export class RealtimeService {
  */
 import { useEffect, useRef } from 'react'
 
-export function useRealtimeSubscription<T>(
+export function useRealtimeSubscription<T extends Record<string, any> = Record<string, any>>(
   table: keyof Database['public']['Tables'],
   listener: RealtimeListener<T>,
   filter?: { column: string; value: string },

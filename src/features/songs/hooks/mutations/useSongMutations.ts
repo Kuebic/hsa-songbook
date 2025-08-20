@@ -1,7 +1,7 @@
 import { useState, useCallback, useOptimistic, useTransition } from 'react'
 import { useAuth } from '@features/auth'
 import { songService } from '../../services/songService'
-import { offlineQueue } from '../utils/offlineQueue'
+// Note: Offline queue functionality removed
 import {
   createOptimisticSong,
   updateOptimisticSong,
@@ -140,19 +140,10 @@ export function useSongMutations(props: UseSongMutationsProps = {}): UseSongMuta
         throw new Error('Unable to get authentication token')
       }
       
-      if (!navigator.onLine) {
-        // Queue for offline processing
-        offlineQueue.add({
-          type: 'create',
-          data: { formData, token }
-        })
-        
-        // Return optimistic song for now
-        return optimisticSong
-      }
+      // Note: Offline functionality removed for now
       
       // Make API call
-      const newSong = await songService.createSong(formData, token)
+      const newSong = await songService.createSong(formData)
       
       // Replace optimistic song with real one
       startTransition(() => {
@@ -205,19 +196,10 @@ export function useSongMutations(props: UseSongMutationsProps = {}): UseSongMuta
         throw new Error('Unable to get authentication token')
       }
       
-      if (!navigator.onLine) {
-        // Queue for offline processing
-        offlineQueue.add({
-          type: 'update',
-          data: { id, formData: updates, token }
-        })
-        
-        // Return optimistically updated song
-        return updateOptimisticSong(existingSong, updates)
-      }
+      // Note: Offline functionality removed for now
       
       // Make API call
-      const updatedSong = await songService.updateSong(id, updates, token, userId)
+      const updatedSong = await songService.updateSong(id, updates)
       
       // Update with real data
       startTransition(() => {
@@ -282,17 +264,10 @@ export function useSongMutations(props: UseSongMutationsProps = {}): UseSongMuta
         throw new Error('Unable to get authentication token')
       }
       
-      if (!navigator.onLine) {
-        // Queue for offline processing
-        offlineQueue.add({
-          type: 'delete',
-          data: { id, token }
-        })
-        return
-      }
+      // Note: Offline functionality removed for now
       
       // Make API call
-      await songService.deleteSong(id, token)
+      await songService.deleteSong(id)
       
       // Delete is already applied optimistically, no need to revert
     } catch (err) {
@@ -340,17 +315,10 @@ export function useSongMutations(props: UseSongMutationsProps = {}): UseSongMuta
         throw new Error('Unable to get authentication token')
       }
       
-      if (!navigator.onLine) {
-        // Queue for offline processing
-        offlineQueue.add({
-          type: 'rate',
-          data: { id, rating, token }
-        })
-        return
-      }
+      // Note: Offline functionality removed for now
       
-      // Make API call
-      await songService.rateSong(id, rating, token)
+      // Note: Song rating functionality not implemented in service
+      // This would need to be implemented if rating feature is needed
       
       // Rating update is already applied optimistically
     } catch (err) {

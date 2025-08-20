@@ -42,7 +42,7 @@ export function useExitSave({
     storageService.current.initialize().catch(console.error);
   }, []);
   
-  // Perform exit save to MongoDB
+  // Perform exit save to Supabase
   const performExitSave = useCallback(async (): Promise<void> => {
     if (!enabled || !isDirty || savePromiseRef.current) {
       return;
@@ -58,12 +58,10 @@ export function useExitSave({
           throw new Error('Authentication required for saving');
         }
         
-        // Save to MongoDB using existing arrangementService pattern
+        // Save to Supabase using existing arrangementService pattern
         await arrangementService.updateArrangement(
           arrangementId,
-          { chordProText: content },
-          token,
-          userId
+          { chordProText: content }
         );
         
         // Clear session draft after successful save

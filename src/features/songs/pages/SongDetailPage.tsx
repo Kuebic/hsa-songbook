@@ -1,13 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+// import { useState } from 'react' // Currently unused after removing sheet functionality
 import { SongViewer } from '../components/SongViewer'
-import { AddArrangementButton } from '../components/arrangements/AddArrangementButton'
 import { ArrangementList } from '../components/arrangements/ArrangementList'
 import { useSong } from '../hooks/useSongs'
 import { useArrangements } from '../hooks/useArrangements'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useArrangementMutations } from '../hooks/useArrangementMutations'
-import { ArrangementSheet } from '../components/arrangements/ArrangementSheet'
 import { useNotification } from '@shared/components/notifications'
 import type { Arrangement } from '../types/song.types'
 
@@ -22,12 +20,13 @@ export function SongDetailPage() {
   } = useArrangements(song?.id)
   const { deleteArrangement } = useArrangementMutations()
   const { addNotification } = useNotification()
-  const [editingArrangement, setEditingArrangement] = useState<Arrangement | null>(null)
-  const [showArrangementSheet, setShowArrangementSheet] = useState(false)
+  // Note: Arrangement editing functionality removed temporarily
+  // const [editingArrangement, setEditingArrangement] = useState<Arrangement | null>(null)
+  // const [showArrangementSheet, setShowArrangementSheet] = useState(false)
 
-  const handleEditArrangement = (arrangement: Arrangement) => {
-    setEditingArrangement(arrangement)
-    setShowArrangementSheet(true)
+  const handleEditArrangement = (_arrangement: Arrangement) => {
+    // TODO: Implement arrangement editing
+    console.log('Edit arrangement functionality coming soon')
   }
 
   const handleDeleteArrangement = async (id: string) => {
@@ -52,15 +51,16 @@ export function SongDetailPage() {
     }
   }
 
-  const handleArrangementSheetClose = () => {
-    setShowArrangementSheet(false)
-    setEditingArrangement(null)
-  }
-
-  const handleArrangementSuccess = () => {
-    refreshArrangements()
-    handleArrangementSheetClose()
-  }
+  // Note: Sheet-related handlers removed temporarily
+  // const handleArrangementSheetClose = () => {
+  //   setShowArrangementSheet(false)
+  //   setEditingArrangement(null)
+  // }
+  //
+  // const handleArrangementSuccess = () => {
+  //   refreshArrangements()
+  //   handleArrangementSheetClose()
+  // }
 
   if (loading) {
     return (
@@ -132,11 +132,14 @@ export function SongDetailPage() {
           }}>
             Arrangements
           </h2>
-          <AddArrangementButton 
-            songId={song.id} 
-            songTitle={song.title}
-            onArrangementAdded={refreshArrangements}
-          />
+          {/* TODO: Add arrangement creation functionality */}
+          <span style={{ 
+            fontSize: '0.875rem', 
+            color: 'var(--text-secondary)',
+            fontStyle: 'italic'
+          }}>
+            Arrangement creation coming soon
+          </span>
         </div>
         
         {arrangements.length > 0 ? (
@@ -146,7 +149,6 @@ export function SongDetailPage() {
             onDelete={isAdmin ? handleDeleteArrangement : undefined}
             songTitle={song.title}
             songSlug={song.slug}
-            compact
           />
         ) : (
           <p style={{ 
@@ -159,17 +161,7 @@ export function SongDetailPage() {
         )}
       </div>
       
-      {/* Edit Arrangement Sheet */}
-      {showArrangementSheet && (
-        <ArrangementSheet
-          isOpen={showArrangementSheet}
-          onClose={handleArrangementSheetClose}
-          songId={song.id}
-          songTitle={song.title}
-          arrangement={editingArrangement || undefined}
-          onSuccess={handleArrangementSuccess}
-        />
-      )}
+      {/* TODO: Add arrangement editing functionality */}
     </div>
   )
 }

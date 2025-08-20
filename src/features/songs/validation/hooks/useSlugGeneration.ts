@@ -139,25 +139,26 @@ export function useSlugGeneration(
 
   /**
    * Generate slug with debouncing for auto-generation
+   * Note: Currently unused but kept for potential future use
    */
-  const _generateSlugDebounced = useCallback(
-    (title: string, artist?: string) => {
-      clearDebounce()
-
-      if (!title || title.trim().length === 0) {
-        setSlugState('')
-        setError(null)
-        return
-      }
-
-      const timer = setTimeout(() => {
-        generateSlug(title, artist)
-      }, debounceDelay)
-
-      setDebounceTimer(timer)
-    },
-    [generateSlug, debounceDelay, clearDebounce]
-  )
+  // const _generateSlugDebounced = useCallback(
+  //   (title: string, artist?: string) => {
+  //     clearDebounce()
+  //
+  //     if (!title || title.trim().length === 0) {
+  //       setSlugState('')
+  //       setError(null)
+  //       return
+  //     }
+  //
+  //     const timer = setTimeout(() => {
+  //       generateSlug(title, artist)
+  //     }, debounceDelay)
+  //
+  //     setDebounceTimer(timer)
+  //   },
+  //   [generateSlug, debounceDelay, clearDebounce]
+  // )
 
   /**
    * Regenerate slug with new random ID

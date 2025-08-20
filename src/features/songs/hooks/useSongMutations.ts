@@ -17,7 +17,7 @@ export function useSongMutations() {
     }
     
     // Only send the title field for update
-    return songService.updateSong(songId, { title }, token, userId)
+    return songService.updateSong(songId, { title })
   }, [getToken, userId, isSignedIn])
   
   const updateSongField = useCallback(async (
@@ -35,7 +35,7 @@ export function useSongMutations() {
     }
     
     // Send only the specific field for update
-    return songService.updateSong(songId, { [field]: value }, token, userId)
+    return songService.updateSong(songId, { [field]: value })
   }, [getToken, userId, isSignedIn])
   
   return {

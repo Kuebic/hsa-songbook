@@ -221,9 +221,9 @@ export default defineConfig(() => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          'clerk': ['@clerk/clerk-react'],
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'monitoring': ['web-vitals', 'react-error-boundary']
+          'monitoring': ['web-vitals', 'react-error-boundary'],
+          'supabase': ['@supabase/supabase-js']
         }
       }
     }

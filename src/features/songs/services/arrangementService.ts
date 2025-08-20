@@ -138,14 +138,9 @@ export const arrangementService = {
         return cachedResult
       }
 
-      let select = includeChordData ? '*' : '*, chord_data'
-      if (!includeChordData) {
-        select = 'id,name,slug,song_id,key,tempo,time_signature,difficulty,description,tags,created_by,created_at,updated_at'
-      }
-
       const { data, error } = await supabase
         .from('arrangements')
-        .select(select)
+        .select('*')
         .eq('id', id)
         .single()
 
@@ -177,14 +172,9 @@ export const arrangementService = {
         return cachedResult
       }
 
-      let select = includeChordData ? '*' : '*, chord_data'
-      if (!includeChordData) {
-        select = 'id,name,slug,song_id,key,tempo,time_signature,difficulty,description,tags,created_by,created_at,updated_at'
-      }
-
       const { data, error } = await supabase
         .from('arrangements')
-        .select(select)
+        .select('*')
         .eq('slug', slug)
         .single()
 
@@ -239,9 +229,7 @@ export const arrangementService = {
   },
 
   async createArrangement(
-    arrangementData: ArrangementFormData,
-    token: string,
-    userId: string
+    arrangementData: ArrangementFormData
   ): Promise<Arrangement> {
     try {
       clearArrangementCache()
@@ -256,7 +244,7 @@ export const arrangementService = {
       const insertData = {
         name: arrangementData.name,
         song_id: arrangementData.songIds?.[0] || '', // Take first song ID
-        slug: arrangementData.slug,
+        slug: arrangementData.slug || '',
         chord_data: arrangementData.chordData || arrangementData.chordProText || '',
         key: arrangementData.key || null,
         tempo: arrangementData.tempo || null,
@@ -289,9 +277,7 @@ export const arrangementService = {
 
   async updateArrangement(
     id: string,
-    arrangementData: Partial<ArrangementFormData>,
-    token: string,
-    userId: string
+    arrangementData: Partial<ArrangementFormData>
   ): Promise<Arrangement> {
     try {
       clearArrangementCache()
@@ -331,7 +317,7 @@ export const arrangementService = {
     }
   },
 
-  async deleteArrangement(id: string, token: string, userId: string): Promise<void> {
+  async deleteArrangement(id: string): Promise<void> {
     try {
       clearArrangementCache()
 
@@ -349,23 +335,4 @@ export const arrangementService = {
     }
   },
 
-  async rateArrangement(id: string, rating: number, token: string, userId: string): Promise<Arrangement> {
-    try {
-      clearArrangementCache()
-
-      // Get current user ID
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        throw new Error('Authentication required')
-      }
-
-      // Note: If we need arrangement ratings, we would create a separate ratings table
-      // For now, returning the arrangement as-is since arrangements don't have ratings in the current schema
-      
-      return this.getArrangementById(id)
-    } catch (error) {
-      console.error('Error in rateArrangement:', error)
-      throw new Error('Failed to rate arrangement')
-    }
-  }
 }

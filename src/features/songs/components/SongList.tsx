@@ -14,7 +14,7 @@ interface SongListProps {
 const SongListComponent: React.FC<SongListProps> = ({ 
   songs, 
   onSongClick, 
-  onSongUpdate, 
+  onSongUpdate: _onSongUpdate, // Currently unused since SongCard doesn't use it
   onSongDelete, 
   loading, 
   error 
@@ -57,7 +57,6 @@ const SongListComponent: React.FC<SongListProps> = ({
           key={song.id} 
           song={song} 
           onClick={onSongClick}
-          onUpdate={onSongUpdate}
           onDelete={onSongDelete}
         />
       ))}

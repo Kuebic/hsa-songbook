@@ -10,14 +10,14 @@ The ChordPro editor implements a robust multi-layer save system:
 
 ### 1. Auto-Save (Background)
 - **Frequency**: Debounced after 2 seconds of inactivity
-- **Backend Save**: Every 10+ seconds to MongoDB
+- **Backend Save**: Every 10+ seconds to Supabase
 - **Local Save**: Immediate to session storage for recovery
 - **Status**: ✅ Working - saves content automatically while typing
 
 ### 2. Manual Save
 - **Save Button**: Visible in toolbar, enabled when changes exist
 - **Keyboard Shortcut**: Ctrl+S (Windows/Linux) or Cmd+S (Mac)
-- **Behavior**: Immediately saves to MongoDB
+- **Behavior**: Immediately saves to Supabase
 - **Status**: ✅ Working - both button and shortcut functional
 
 ### 3. Exit Save
@@ -29,7 +29,7 @@ The ChordPro editor implements a robust multi-layer save system:
 ## Implementation Details
 
 ### Key Files
-- `useAutoSave.ts` - Auto-save logic with MongoDB integration
+- `useAutoSave.ts` - Auto-save logic with Supabase integration
 - `useExitSave.ts` - Exit/unmount save handling
 - `ChordProEditor/index.tsx` - Save button and Ctrl+S implementation
 - `EditorStorageService.ts` - Local storage management
@@ -38,7 +38,7 @@ The ChordPro editor implements a robust multi-layer save system:
 1. User types in editor
 2. Content saved to session storage immediately
 3. After 2 seconds of no typing, auto-save triggers
-4. If 10+ seconds since last backend save, saves to MongoDB
+4. If 10+ seconds since last backend save, saves to Supabase
 5. Save indicator shows "Saving..." then "Saved [time]"
 6. On exit, ensures final save before leaving
 
@@ -52,7 +52,7 @@ The ChordPro editor implements a robust multi-layer save system:
 
 ### Test Results
 ✅ All 11 core tests passing:
-- Save to MongoDB with correct parameters
+- Save to Supabase with correct parameters
 - Handle save failures gracefully
 - Skip save for new arrangements
 - Enforce 10-second minimum between saves
@@ -72,7 +72,7 @@ The ChordPro editor implements a robust multi-layer save system:
 - **Error State**: Shows "Save failed" if error occurs
 
 ### Data Protection
-- **Triple Redundancy**: Session storage + MongoDB + exit save
+- **Triple Redundancy**: Session storage + Supabase + exit save
 - **Conflict Prevention**: 10-second throttle prevents excessive saves
 - **Recovery**: Can recover from session storage if backend fails
 - **Authentication**: Only saves when user is authenticated

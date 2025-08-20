@@ -5,10 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:server": "cd server && npm run dev",
-    "dev:full": "concurrently \"npm run dev\" \"npm run dev:server\"",
     "build": "tsc -b && vite build",
-    "build:server": "cd server && npm run build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
@@ -17,9 +14,7 @@
     "test:watch": "vitest --watch",
     "test:ci": "vitest run --coverage",
     "analyze": "npm run build && open dist/stats.html",
-    "analyze:ci": "npm run build && npx vite-bundle-visualizer --format json > bundle-stats.json",
-    "install:all": "npm install && cd server && npm install",
-    "migrate:supabase": "node migrate-to-supabase.js"
+    "analyze:ci": "npm run build && npx vite-bundle-visualizer --format json > bundle-stats.json"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.18.6",
@@ -58,7 +53,6 @@
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.539.0",
     "lz-string": "^1.5.0",
-    "mongoose": "^8.17.1",
     "nanoid": "^5.1.5",
     "react": "^19.1.0",
     "react-ace": "^14.0.1",

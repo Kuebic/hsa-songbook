@@ -77,7 +77,7 @@ export function ChordEditingPage() {
         
         await arrangementService.updateArrangement(arrangementId, {
           chordProText
-        }, token, userId)
+        })
         
         addNotification({
           type: 'success',

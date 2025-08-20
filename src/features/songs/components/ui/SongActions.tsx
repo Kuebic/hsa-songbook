@@ -1,58 +1,27 @@
 import { useState } from 'react'
 import { useAuth } from '@features/auth/hooks/useAuth'
-import { SongFormModal } from '../forms/SongFormModal'
 import { useSongMutations } from '@features/songs/hooks/mutations/useSongMutations'
 import { useNotification } from '@shared/components/notifications'
 import type { Song } from '@features/songs/types/song.types'
-import type { SongFormData } from '@features/songs/validation/schemas/songFormSchema'
 
 interface SongActionsProps {
   song: Song
   onDelete?: (songId: string) => void
-  onUpdate?: (song: Song) => void
 }
 
-export function SongActions({ song, onDelete, onUpdate }: SongActionsProps) {
+export function SongActions({ song, onDelete }: SongActionsProps) {
   const { isSignedIn, user, isAdmin } = useAuth()
-  const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   
-  const { updateSong, deleteSong } = useSongMutations()
+  const { deleteSong } = useSongMutations()
   const { addNotification } = useNotification()
   
   // Check permissions
   const isOwner = user?.id === song.metadata.createdBy
-  const canEdit = isSignedIn && (isOwner || isAdmin)
   const canDelete = isSignedIn && (isOwner || isAdmin)
   
-  if (!canEdit && !canDelete) return null
-  
-  const handleUpdate = async (data: SongFormData) => {
-    setIsSubmitting(true)
-    
-    try {
-      const updatedSong = await updateSong(song.id, data)
-      
-      addNotification({
-        type: 'success',
-        title: 'Song updated successfully',
-        message: `"${updatedSong.title}" has been updated`
-      })
-      
-      onUpdate?.(updatedSong)
-      setShowEditModal(false)
-    } catch (error) {
-      addNotification({
-        type: 'error',
-        title: 'Failed to update song',
-        message: error instanceof Error ? error.message : 'Please try again'
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  if (!canDelete) return null
   
   const handleDelete = async () => {
     setIsDeleting(true)
@@ -79,13 +48,7 @@ export function SongActions({ song, onDelete, onUpdate }: SongActionsProps) {
     }
   }
   
-  const actionContainerStyles: React.CSSProperties = {
-    display: 'flex',
-    gap: '8px',
-    marginTop: '12px'
-  }
-  
-  const buttonStyles: React.CSSProperties = {
+  const deleteButtonStyles: React.CSSProperties = {
     padding: '6px 12px',
     backgroundColor: 'transparent',
     border: '1px solid #e2e8f0',
@@ -95,16 +58,7 @@ export function SongActions({ song, onDelete, onUpdate }: SongActionsProps) {
     display: 'flex',
     alignItems: 'center',
     gap: '4px',
-    transition: 'all 0.2s'
-  }
-  
-  const editButtonStyles: React.CSSProperties = {
-    ...buttonStyles,
-    color: '#3b82f6'
-  }
-  
-  const deleteButtonStyles: React.CSSProperties = {
-    ...buttonStyles,
+    transition: 'all 0.2s',
     color: '#ef4444'
   }
   
@@ -131,57 +85,23 @@ export function SongActions({ song, onDelete, onUpdate }: SongActionsProps) {
   
   return (
     <>
-      <div style={actionContainerStyles}>
-        {canEdit && (
-          <button
-            onClick={() => setShowEditModal(true)}
-            style={editButtonStyles}
-            onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = '#eff6ff'
-              e.currentTarget.style.borderColor = '#3b82f6'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.borderColor = '#e2e8f0'
-            }}
-            aria-label={`Edit ${song.title}`}
-            disabled={isSubmitting}
-          >
-            <span>✏️</span>
-            <span>Edit</span>
-          </button>
-        )}
-        
-        {canDelete && (
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            style={deleteButtonStyles}
-            onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = '#fef2f2'
-              e.currentTarget.style.borderColor = '#ef4444'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.borderColor = '#e2e8f0'
-            }}
-            aria-label={`Delete ${song.title}`}
-            disabled={isDeleting}
-          >
-            <span>🗑️</span>
-            <span>Delete</span>
-          </button>
-        )}
-      </div>
-      
-      {showEditModal && (
-        <SongFormModal
-          isOpen={showEditModal}
-          onClose={() => setShowEditModal(false)}
-          onSubmit={handleUpdate}
-          song={song}
-          isSubmitting={isSubmitting}
-        />
-      )}
+      <button
+        onClick={() => setShowDeleteConfirm(true)}
+        style={deleteButtonStyles}
+        onMouseEnter={e => {
+          e.currentTarget.style.backgroundColor = '#fef2f2'
+          e.currentTarget.style.borderColor = '#ef4444'
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.backgroundColor = 'transparent'
+          e.currentTarget.style.borderColor = '#e2e8f0'
+        }}
+        aria-label={`Delete ${song.title}`}
+        disabled={isDeleting}
+      >
+        <span>🗑️</span>
+        <span>Delete</span>
+      </button>
       
       {showDeleteConfirm && (
         <>

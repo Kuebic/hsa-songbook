@@ -295,11 +295,11 @@ export const songService = {
     }
   },
 
-  async createSong(songData: Partial<Song>, token: string): Promise<Song> {
+  async createSong(songData: Partial<Song>): Promise<Song> {
     try {
       clearCache() // Clear cache after mutation
 
-      // Get current user ID from token (Supabase handles this automatically via RLS)
+      // Get current user ID (Supabase handles this automatically via RLS)
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         throw new APIError('Authentication required', 401, 'UNAUTHORIZED')
@@ -341,7 +341,7 @@ export const songService = {
     }
   },
 
-  async updateSong(id: string, songData: Partial<Song>, token: string, userId?: string): Promise<Song> {
+  async updateSong(id: string, songData: Partial<Song>): Promise<Song> {
     try {
       clearCache() // Clear cache after mutation
 
@@ -384,7 +384,7 @@ export const songService = {
     }
   },
 
-  async deleteSong(id: string, token: string): Promise<void> {
+  async deleteSong(id: string): Promise<void> {
     try {
       clearCache() // Clear cache after mutation
 
@@ -404,35 +404,4 @@ export const songService = {
     }
   },
 
-  async rateSong(id: string, rating: number, token: string): Promise<Song> {
-    try {
-      // Get current user ID
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        throw new APIError('Authentication required', 401, 'UNAUTHORIZED')
-      }
-
-      // Upsert the review (this will trigger the rating calculation via database triggers)
-      const { error: reviewError } = await supabase
-        .from('reviews')
-        .upsert({
-          song_id: id,
-          user_id: user.id,
-          rating,
-          updated_at: new Date().toISOString()
-        })
-
-      if (reviewError) {
-        throw new APIError(reviewError.message, 400, 'SUPABASE_ERROR')
-      }
-
-      // Return the updated song (rating will be automatically updated by trigger)
-      return this.getSongById(id)
-    } catch (error) {
-      if (error instanceof APIError) {
-        throw error
-      }
-      throw new NetworkError('Failed to rate song')
-    }
-  }
 }

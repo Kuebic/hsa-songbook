@@ -6,11 +6,10 @@ import styles from './SongCard.module.css'
 interface SongCardProps {
   song: Song
   onClick?: (song: Song) => void
-  onUpdate?: (song: Song) => void
   onDelete?: (songId: string) => void
 }
 
-export const SongCard = memo(function SongCard({ song, onClick, onUpdate, onDelete }: SongCardProps) {
+export const SongCard = memo(function SongCard({ song, onClick, onDelete }: SongCardProps) {
   const handleClick = useCallback(() => {
     onClick?.(song)
   }, [onClick, song])
@@ -48,7 +47,6 @@ export const SongCard = memo(function SongCard({ song, onClick, onUpdate, onDele
       <div onClick={e => e.stopPropagation()}>
         <SongActions 
           song={song}
-          onUpdate={onUpdate}
           onDelete={onDelete}
         />
       </div>

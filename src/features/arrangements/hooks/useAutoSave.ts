@@ -78,7 +78,7 @@ export function useAutoSave({
         userId
       );
       
-      // Save to MongoDB backend periodically (every 10 seconds minimum)
+      // Save to Supabase backend periodically (every 10 seconds minimum)
       const now = new Date();
       const timeSinceLastBackendSave = lastBackendSaveRef.current 
         ? now.getTime() - lastBackendSaveRef.current.getTime()
@@ -91,9 +91,7 @@ export function useAutoSave({
             // Only save to backend if we have auth and a real arrangement ID
             await arrangementService.updateArrangement(
               arrangementId,
-              { chordProText: saveContent },
-              token,
-              userId
+              { chordProText: saveContent }
             );
             lastBackendSaveRef.current = now;
           }

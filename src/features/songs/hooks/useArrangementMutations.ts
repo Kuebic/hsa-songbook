@@ -28,9 +28,7 @@ export function useArrangementMutations() {
       console.log('🔐 Auth info:', { userId, tokenPrefix: token?.substring(0, 50) })
 
       const arrangement = await arrangementService.createArrangement(
-        arrangementData,
-        token,
-        userId
+        arrangementData
       )
 
       return arrangement
@@ -62,9 +60,7 @@ export function useArrangementMutations() {
 
       const arrangement = await arrangementService.updateArrangement(
         id,
-        arrangementData,
-        token,
-        userId
+        arrangementData
       )
 
       return arrangement
@@ -91,7 +87,7 @@ export function useArrangementMutations() {
         throw new Error('Unable to get authentication token')
       }
 
-      await arrangementService.deleteArrangement(id, token, userId)
+      await arrangementService.deleteArrangement(id)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete arrangement'
       setError(errorMessage)
@@ -102,38 +98,12 @@ export function useArrangementMutations() {
   }, [isSignedIn, userId, getToken])
 
   const rateArrangement = useCallback(async (
-    id: string,
-    rating: number
+    _id: string,
+    _rating: number
   ): Promise<Arrangement> => {
-    if (!isSignedIn || !userId) {
-      throw new Error('Please sign in to rate arrangements')
-    }
-
-    setIsSubmitting(true)
-    setError(null)
-
-    try {
-      const token = await getToken()
-      if (!token) {
-        throw new Error('Unable to get authentication token')
-      }
-
-      const arrangement = await arrangementService.rateArrangement(
-        id,
-        rating,
-        token,
-        userId
-      )
-
-      return arrangement
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to rate arrangement'
-      setError(errorMessage)
-      throw new Error(errorMessage)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }, [isSignedIn, userId, getToken])
+    // Note: Rating functionality not implemented in arrangement service
+    throw new Error('Arrangement rating is not yet implemented')
+  }, [])
 
   const clearError = useCallback(() => {
     setError(null)
