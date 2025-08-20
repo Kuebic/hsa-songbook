@@ -8,6 +8,8 @@ import { LazyRouteWrapper } from '@features/pwa'
 import { ErrorBoundary, useWebVitals } from '@features/monitoring'
 import { NotificationProvider } from '@shared/components/notifications'
 import { ThemeProvider } from '@shared/contexts/ThemeContext'
+import { SongModalProvider } from '@features/songs/contexts/SongModalContext'
+import { GlobalSongModal } from '@features/songs/components/GlobalSongModal'
 
 // Eagerly load the home page
 import { HomePage } from './pages/HomePage'
@@ -33,7 +35,8 @@ function App() {
     <ErrorBoundary level="app">
       <ThemeProvider>
         <NotificationProvider>
-          <BrowserRouter>
+          <SongModalProvider>
+            <BrowserRouter>
           <Layout>
             <Routes>
             <Route path="/" element={
@@ -147,8 +150,12 @@ function App() {
             {/* <UpdatePrompt /> */}
             {/* <InstallPrompt /> */}
           </Layout>
-        </BrowserRouter>
-      </NotificationProvider>
+          
+          {/* Global Song Management Modal */}
+          <GlobalSongModal />
+            </BrowserRouter>
+          </SongModalProvider>
+        </NotificationProvider>
       </ThemeProvider>
     </ErrorBoundary>
   )

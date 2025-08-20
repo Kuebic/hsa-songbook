@@ -32,50 +32,32 @@ export function Modal({
     finalFocusRef
   })
   
-  // Open/close dialog
+  // Open dialog when modal is rendered (since it only renders when isOpen=true)
   useEffect(() => {
     const dialog = dialogRef.current
-    if (!dialog) return
+    if (!dialog || !isOpen) return
     
-    if (isOpen) {
-      // Only show modal if it's not already open
-      if (!dialog.open) {
-        dialog.showModal()
-      }
-      registerModal(modalId)
-      
-      // Handle backdrop clicks
-      const handleClick = (e: MouseEvent) => {
-        if (closeOnOverlayClick && e.target === dialog) {
-          // Click was directly on the dialog element (backdrop)
-          onClose()
-        }
-      }
-      
-      dialog.addEventListener('click', handleClick)
-      
-      return () => {
-        dialog.removeEventListener('click', handleClick)
-      }
-    } else {
-      // Only close if dialog is actually open
-      if (dialog.open) {
-        // Animate out before closing
-        dialog.style.animation = `modalFadeOut ${animationDuration}ms ease-out`
-        setTimeout(() => {
-          if (dialog.open) {
-            dialog.close()
-          }
-          dialog.style.animation = ''
-        }, animationDuration)
-      }
-      unregisterModal(modalId)
+    // Show modal
+    if (!dialog.open) {
+      dialog.showModal()
     }
+    registerModal(modalId)
+    
+    // Handle backdrop clicks
+    const handleClick = (e: MouseEvent) => {
+      if (closeOnOverlayClick && e.target === dialog) {
+        // Click was directly on the dialog element (backdrop)
+        onClose()
+      }
+    }
+    
+    dialog.addEventListener('click', handleClick)
     
     return () => {
+      dialog.removeEventListener('click', handleClick)
       unregisterModal(modalId)
     }
-  }, [isOpen, modalId, animationDuration, registerModal, unregisterModal, closeOnOverlayClick, onClose])
+  }, [isOpen, modalId, registerModal, unregisterModal, closeOnOverlayClick, onClose])
   
   // Handle ESC key
   const handleCancel = useCallback((e: React.SyntheticEvent<HTMLDialogElement>) => {
@@ -112,6 +94,11 @@ export function Modal({
     zIndex: 99999 // Ensure modal appears above all other content including editor overlays
   }
   
+  // Don't render anything if modal should not be open
+  if (!isOpen) {
+    return null
+  }
+
   return (
     <>
       <style>{`
