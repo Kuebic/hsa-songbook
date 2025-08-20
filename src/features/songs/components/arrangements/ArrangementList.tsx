@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@features/auth'
 import { useNotification } from '@shared/components/notifications'
 import { getArrangementDisplayName } from '../../utils/arrangementNaming'
@@ -30,7 +30,10 @@ export function ArrangementList({
 }: ArrangementListProps) {
   const { isSignedIn, isAdmin } = useAuth()
   const { addNotification } = useNotification()
+  const navigate = useNavigate()
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [clickedId, setClickedId] = useState<string | null>(null)
   
   const handleDelete = async (arrangement: Arrangement) => {
     if (!onDelete) return
@@ -128,9 +131,17 @@ export function ArrangementList({
     backgroundColor: selectedId === arrangement.id ? 'var(--color-accent)' : 'var(--color-card)',
     border: selectedId === arrangement.id ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
     borderRadius: '8px',
-    cursor: onSelect ? 'pointer' : 'default',
+    cursor: 'pointer',
     transition: 'all 0.2s ease',
-    position: 'relative'
+    position: 'relative',
+    transform: clickedId === arrangement.id 
+      ? 'scale(0.98)' 
+      : hoveredId === arrangement.id 
+        ? 'translateY(-2px)' 
+        : 'translateY(0)',
+    boxShadow: hoveredId === arrangement.id 
+      ? '0 4px 12px rgba(0, 0, 0, 0.15)' 
+      : '0 1px 3px rgba(0, 0, 0, 0.1)'
   })
   
   const headerStyles: React.CSSProperties = {
@@ -193,7 +204,27 @@ export function ArrangementList({
         <div
           key={arrangement.id}
           style={itemStyles(arrangement)}
-          onClick={() => onSelect?.(arrangement)}
+          onClick={(e) => {
+            // Prevent navigation if clicking on action buttons or links
+            const target = e.target as HTMLElement
+            if (target.closest('button') || target.closest('a')) {
+              return
+            }
+            
+            // Trigger click animation
+            setClickedId(arrangement.id)
+            setTimeout(() => setClickedId(null), 150)
+            
+            // Navigate to arrangement view
+            navigate(`/arrangements/${arrangement.slug}`, {
+              state: songSlug ? { fromSong: songSlug } : undefined
+            })
+            
+            // Call onSelect if provided
+            onSelect?.(arrangement)
+          }}
+          onMouseEnter={() => setHoveredId(arrangement.id)}
+          onMouseLeave={() => setHoveredId(null)}
         >
           {deletingId === arrangement.id && (
             <div style={{
@@ -215,21 +246,15 @@ export function ArrangementList({
           
           <div style={headerStyles}>
             <div style={{ flex: 1 }}>
-              <Link
-                to={`/arrangements/${arrangement.slug}`}
-                state={songSlug ? { fromSong: songSlug } : undefined}
-                onClick={(e) => e.stopPropagation()}
-                className="arrangement-title-link"
+              <div
                 style={{
                   ...titleStyles,
-                  textDecoration: 'none',
-                  display: 'inline-block',
-                  transition: 'color 0.2s ease'
+                  display: 'inline-block'
                 }}
-                title="View arrangement"
+                title="Click card to view arrangement"
               >
                 {getArrangementDisplayName(arrangement, 'song', songTitle)}
-              </Link>
+              </div>
               
               <div style={metaStyles}>
                 {arrangement.key && <span>Key: {arrangement.key}</span>}
