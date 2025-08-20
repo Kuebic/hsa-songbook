@@ -13,9 +13,8 @@ A modern, responsive web application for searching, viewing, and managing worshi
 ### ✏️ ChordPro Editor
 - **Live Preview**: Split-screen editor with real-time ChordPro rendering
 - **Auto-Save**: Three-tier storage system with automatic saving every 30 seconds
-- **Undo/Redo**: Robust command pattern implementation with configurable history (in the works)
 - **Syntax Highlighting**: CodeMirror-powered editor with ChordPro syntax support
-- **Music-Based Transpose**: Intelligent transposition using musical relationships, not simple math (in the works)
+- **Transpose**: Simple semitone-based transposition using ChordSheetJS
 - **Directive Support**: Full support for ChordPro directives ({title}, {key}, {tempo}, etc.)
 
 ### 📋 Setlist Management
@@ -140,24 +139,18 @@ hsa-songbook/
 
 ## Key Features Implementation
 
-### Command Pattern for Undo/Redo
-The editor implements a sophisticated command pattern with:
-- Configurable history size (default: 100 commands)
-- Command merging within time windows (500ms)
-- Support for INSERT_TEXT, DELETE_TEXT, REPLACE_TEXT operations
 
 ### Auto-Save Architecture
 Three-tier storage system ensures data persistence:
-1. **Memory State**: Immediate command history
+1. **Memory State**: Current editor content
 2. **Session Storage**: Tab-specific recovery
 3. **IndexedDB**: Persistent storage with compression
 
-### Music-Based Transposition
-Intelligent transpose that understands music theory:
-- Maintains proper key signatures
-- Preserves chord qualities (major/minor)
-- Smart enharmonic choices (C# vs Db)
-- Circle of fifths navigation
+### Transposition
+Standard semitone-based transposition:
+- Shift chords up/down by semitones
+- Basic enharmonic preference (sharp/flat)
+- Powered by ChordSheetJS library
 
 ## Performance Targets
 
