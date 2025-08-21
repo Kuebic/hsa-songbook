@@ -1,107 +1,449 @@
 /**
  * @file unified-chord-display.css
- * @description Unified styles for chord sheet rendering across preview and viewer
+ * @description Optimized styles for native ChordSheetJS rendering
+ * Works directly with ChordSheetJS formatter output without regex processing
  */
 
-/* Base container styles */
+/* ==========================================
+   Base Container Styles
+   ========================================== */
+.chord-sheet-content,
 .chord-sheet-rendered {
   width: 100%;
   padding: 20px;
   box-sizing: border-box;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  font-family: var(--font-family-mono, monospace);
+  line-height: var(--line-height, 1.6);
 }
 
-/* ChordSheetJS HTML Div Formatter styles */
-.chord-sheet-rendered .chord-sheet {
+/* ==========================================
+   Native ChordSheetJS Classes
+   ========================================== */
+
+/* Root chord sheet container */
+.chord-sheet-content .chord-sheet {
   width: 100%;
 }
 
-.chord-sheet-rendered .row {
+/* Row container - flexbox for chord/lyric alignment */
+.chord-sheet-content .row {
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
   align-items: flex-end;
-  min-height: 2.5em;
-  margin-bottom: 0.25rem;
 }
 
-.chord-sheet-rendered .column {
+/* Column container - vertical chord/lyric pairs */
+.chord-sheet-content .column {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  margin-right: 0.125rem;
+  min-width: 0; /* Prevent overflow */
   position: relative;
 }
 
-.chord-sheet-rendered .chord {
-  line-height: 1;
+/* Chord text styling */
+.chord-sheet-content .chord {
+  font-weight: 600;
+  line-height: 1.2;
   margin-bottom: 0.125rem;
   white-space: nowrap;
-  min-height: 1.2em;
-  font-weight: 600;
   font-size: 0.95em;
   letter-spacing: 0.02em;
 }
 
-.chord-sheet-rendered .lyrics {
+/* Empty chord slots for alignment */
+.chord-sheet-content .chord:empty {
+  min-height: 1.2em;
+  visibility: hidden;
+}
+
+/* Lyrics text styling */
+.chord-sheet-content .lyrics {
   line-height: 1.4;
   white-space: pre;
   margin: 0;
   padding: 0;
 }
 
-/* Paragraph and section styles */
-.chord-sheet-rendered .paragraph {
-  margin-bottom: 0.75em;
+/* Handle empty lyrics for chord positioning */
+.chord-sheet-content .lyrics:empty::after {
+  content: ' ';
+  white-space: pre;
 }
 
-.chord-sheet-rendered .paragraph-label {
+/* ==========================================
+   Section Styles
+   ========================================== */
+
+/* Paragraph containers */
+.chord-sheet-content .paragraph {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+}
+
+/* Section type modifiers */
+.chord-sheet-content .paragraph.verse,
+.chord-sheet-content .paragraph.chorus,
+.chord-sheet-content .paragraph.bridge {
+  position: relative;
+}
+
+/* Section labels */
+.chord-sheet-content .verse-label,
+.chord-sheet-content .chorus-label,
+.chord-sheet-content .bridge-label,
+.chord-sheet-content .tag-label,
+.chord-sheet-content .intro-label,
+.chord-sheet-content .outro-label {
   font-weight: bold;
-  margin-bottom: 0.5em;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
   display: block;
   text-transform: uppercase;
   font-size: 0.9em;
   letter-spacing: 0.05em;
 }
 
-/* Comment styles */
-.chord-sheet-rendered .comment {
-  font-style: italic;
-  opacity: 0.8;
-  margin: 0.5em 0;
-  display: block;
-}
+/* ==========================================
+   Metadata & Directives
+   ========================================== */
 
-/* Directive styles */
-.chord-sheet-rendered .directive {
-  font-weight: bold;
-  margin: 0.5em 0;
-  display: block;
-}
-
-/* Metadata styles */
-.chord-sheet-rendered .title {
+/* Song title */
+.chord-sheet-content .title,
+.chord-sheet-content h1.title {
   font-size: 1.5em;
   font-weight: bold;
   margin-bottom: 0.5em;
   display: block;
 }
 
-.chord-sheet-rendered .subtitle,
-.chord-sheet-rendered .artist {
+/* Subtitle/Artist */
+.chord-sheet-content .subtitle,
+.chord-sheet-content h2.subtitle,
+.chord-sheet-content .artist {
   font-size: 1.1em;
   opacity: 0.9;
   margin-bottom: 0.5em;
   display: block;
 }
 
-/* Empty and error states */
-.chord-sheet-rendered .empty-state {
+/* Comments */
+.chord-sheet-content .comment {
+  font-style: italic;
+  opacity: 0.8;
+  margin: 0.5em 0;
+  display: block;
+}
+
+/* Directives */
+.chord-sheet-content .directive {
+  font-weight: bold;
+  margin: 0.5em 0;
+  display: block;
+}
+
+/* ==========================================
+   Theme: Light (Default)
+   ========================================== */
+.chord-sheet-content {
+  background-color: transparent;
+  color: #111827;
+}
+
+.chord-sheet-content .chord {
+  color: #2563eb;
+}
+
+.chord-sheet-content .verse-label,
+.chord-sheet-content .chorus-label,
+.chord-sheet-content .bridge-label {
+  color: #7c3aed;
+}
+
+.chord-sheet-content .comment {
+  color: #6b7280;
+}
+
+.chord-sheet-content .directive {
+  color: #7c3aed;
+}
+
+/* ==========================================
+   Theme: Dark
+   ========================================== */
+.chord-sheet-content[data-theme="dark"] {
+  background-color: transparent;
+  color: #f9fafb;
+}
+
+.chord-sheet-content[data-theme="dark"] .chord {
+  color: #60a5fa;
+}
+
+.chord-sheet-content[data-theme="dark"] .lyrics {
+  color: #f9fafb;
+}
+
+.chord-sheet-content[data-theme="dark"] .verse-label,
+.chord-sheet-content[data-theme="dark"] .chorus-label,
+.chord-sheet-content[data-theme="dark"] .bridge-label {
+  color: #a78bfa;
+}
+
+.chord-sheet-content[data-theme="dark"] .comment {
+  color: #d1d5db;
+}
+
+.chord-sheet-content[data-theme="dark"] .directive {
+  color: #a78bfa;
+}
+
+/* ==========================================
+   Theme: Stage Mode
+   ========================================== */
+.chord-sheet-content[data-theme="stage"] {
+  background-color: #000000;
+  color: #ffffff;
+  padding: 2rem;
+}
+
+.chord-sheet-content[data-theme="stage"] .chord {
+  color: #fbbf24;
+  font-weight: 700;
+  font-size: 1.2em;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+.chord-sheet-content[data-theme="stage"] .lyrics {
+  color: #ffffff;
+  font-size: 1.1em;
+}
+
+.chord-sheet-content[data-theme="stage"] .verse-label,
+.chord-sheet-content[data-theme="stage"] .chorus-label,
+.chord-sheet-content[data-theme="stage"] .bridge-label {
+  color: #f59e0b;
+  font-size: 1.2em;
+}
+
+.chord-sheet-content[data-theme="stage"] .comment {
+  color: #fde68a;
+}
+
+/* ==========================================
+   Mobile Optimizations
+   ========================================== */
+
+/* Touch-friendly sizing */
+@media (pointer: coarse) {
+  .chord-sheet-content .chord {
+    min-height: 44px; /* iOS touch target */
+    padding: 0.5rem 0;
+  }
+  
+  .chord-sheet-content .row {
+    min-height: 3em;
+  }
+}
+
+/* Small screens */
+@media (max-width: 768px) {
+  .chord-sheet-content {
+    padding: 15px;
+  }
+  
+  .chord-sheet-content .row {
+    font-size: 1.05em;
+  }
+  
+  .chord-sheet-content .chord {
+    font-size: 1em;
+  }
+  
+  .chord-sheet-content .title {
+    font-size: 1.3em;
+  }
+  
+  .chord-sheet-content .subtitle {
+    font-size: 1em;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .chord-sheet-content {
+    padding: 10px;
+  }
+  
+  .chord-sheet-content .chord {
+    font-size: 0.95em;
+  }
+  
+  .chord-sheet-content .lyrics {
+    font-size: 0.95em;
+  }
+  
+  /* Prevent horizontal scroll */
+  .chord-sheet-content .row {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+/* ==========================================
+   Print Optimizations
+   ========================================== */
+@media print {
+  .chord-sheet-content {
+    background-color: white !important;
+    color: black !important;
+    padding: 0 !important;
+    font-size: 10pt !important;
+    line-height: 1.2 !important;
+  }
+  
+  .chord-sheet-content .chord {
+    color: black !important;
+    font-weight: bold !important;
+    font-size: 9pt !important;
+  }
+  
+  .chord-sheet-content .lyrics {
+    color: black !important;
+    font-size: 10pt !important;
+  }
+  
+  .chord-sheet-content .verse-label,
+  .chord-sheet-content .chorus-label,
+  .chord-sheet-content .bridge-label {
+    color: black !important;
+    border-bottom: 1px solid black;
+    page-break-after: avoid;
+  }
+  
+  .chord-sheet-content .row {
+    page-break-inside: avoid;
+  }
+  
+  .chord-sheet-content .paragraph {
+    page-break-inside: avoid;
+  }
+}
+
+/* ==========================================
+   Virtual Scrolling Support
+   ========================================== */
+.virtual-chord-scroller {
+  position: relative;
+  overflow: auto;
+}
+
+.virtual-scroll-container {
+  position: relative;
+  overflow: auto;
+}
+
+.virtual-viewport {
+  position: relative;
+}
+
+.virtual-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.virtual-section {
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.scroll-indicator {
+  position: absolute;
+  right: 2px;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.scroll-thumb {
+  position: absolute;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.scroll-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================
+   Performance Optimizations
+   ========================================== */
+
+/* Use GPU acceleration for transforms */
+.chord-sheet-content .row {
+  will-change: transform;
+}
+
+/* Optimize repaints */
+.chord-sheet-content .chord,
+.chord-sheet-content .lyrics {
+  contain: layout style;
+}
+
+/* Reduce layout thrashing */
+.chord-sheet-content .paragraph {
+  contain: layout;
+}
+
+/* ==========================================
+   Responsive Chord Sheet Component
+   ========================================== */
+.responsive-chord-sheet {
+  position: relative;
+  width: 100%;
+}
+
+.responsive-chord-sheet.mobile-view {
+  font-size: calc(100vw / 30);
+  max-font-size: 18px;
+  min-font-size: 14px;
+}
+
+.responsive-chord-sheet.tablet-view {
+  font-size: 16px;
+}
+
+.responsive-chord-sheet.touch-enabled {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.responsive-chord-sheet.stage-mode {
+  background: #000000;
+  color: #ffffff;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+/* ==========================================
+   Error & Empty States
+   ========================================== */
+.empty-state {
   text-align: center;
   padding: 40px;
   opacity: 0.6;
 }
 
-.chord-sheet-rendered .error-state {
+.error-state {
   background-color: #fee;
   border: 1px solid #fcc;
   border-radius: 4px;
@@ -109,169 +451,46 @@
   margin: 20px;
 }
 
-.chord-sheet-rendered .error-state h3 {
+.error-state h3 {
   color: #c00;
   margin-top: 0;
 }
 
-.chord-sheet-rendered .error-state p {
+.error-state p {
   color: #800;
 }
 
-/* Theme: Light (default) */
-.chord-sheet-rendered {
-  background-color: #ffffff;
-  color: #111827;
-}
-
-.chord-sheet-rendered .chord {
-  color: #2563eb;
-}
-
-.chord-sheet-rendered .paragraph-label {
-  color: #7c3aed;
-}
-
-.chord-sheet-rendered .comment {
-  color: #6b7280;
-}
-
-.chord-sheet-rendered .directive {
-  color: #7c3aed;
-}
-
-/* Theme: Dark */
-[data-theme="dark"] .chord-sheet-rendered {
-  background-color: #1f2937;
-  color: #f9fafb;
-}
-
-[data-theme="dark"] .chord-sheet-rendered .chord {
-  color: #60a5fa;
-}
-
-[data-theme="dark"] .chord-sheet-rendered .lyrics {
-  color: #f9fafb;
-}
-
-[data-theme="dark"] .chord-sheet-rendered .paragraph-label {
-  color: #a78bfa;
-}
-
-[data-theme="dark"] .chord-sheet-rendered .comment {
-  color: #d1d5db;
-}
-
-[data-theme="dark"] .chord-sheet-rendered .directive {
-  color: #a78bfa;
-}
-
-/* Theme: Stage Mode */
-[data-theme="stage"] .chord-sheet-rendered {
-  background-color: #000000;
-  color: #ffffff;
-}
-
-[data-theme="stage"] .chord-sheet-rendered .chord {
-  color: #fbbf24;
-  font-weight: 700;
-  font-size: 1.1em;
-}
-
-[data-theme="stage"] .chord-sheet-rendered .lyrics {
-  color: #ffffff;
-}
-
-[data-theme="stage"] .chord-sheet-rendered .paragraph-label {
-  color: #f59e0b;
-}
-
-[data-theme="stage"] .chord-sheet-rendered .comment {
-  color: #d1d5db;
-}
-
-[data-theme="stage"] .chord-sheet-rendered .directive {
-  color: #f59e0b;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .chord-sheet-rendered {
-    padding: 15px;
-  }
-
-  .chord-sheet-rendered .title {
-    font-size: 1.3em;
-  }
-
-  .chord-sheet-rendered .subtitle,
-  .chord-sheet-rendered .artist {
-    font-size: 1em;
-  }
-}
-
-@media (max-width: 480px) {
-  .chord-sheet-rendered {
-    padding: 10px;
-  }
-
-  .chord-sheet-rendered .chord {
-    font-size: 0.9em;
-  }
-
-  .chord-sheet-rendered .lyrics {
-    font-size: 0.95em;
-  }
-}
-
-/* Print styles */
-@media print {
-  .chord-sheet-rendered {
-    background-color: white !important;
-    color: black !important;
-    padding: 0 !important;
-  }
-
-  .chord-sheet-rendered .chord {
-    color: #000 !important;
-    font-weight: bold !important;
-  }
-
-  .chord-sheet-rendered .paragraph-label {
-    color: #000 !important;
-    border-bottom: 1px solid #000;
-  }
-}
-
-/* Scrollbar styles for consistency */
-.chord-sheet-rendered::-webkit-scrollbar {
+/* ==========================================
+   Scrollbar Styling
+   ========================================== */
+.chord-sheet-content::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.chord-sheet-rendered::-webkit-scrollbar-track {
+.chord-sheet-content::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.1);
   border-radius: 4px;
 }
 
-.chord-sheet-rendered::-webkit-scrollbar-thumb {
+.chord-sheet-content::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 4px;
 }
 
-.chord-sheet-rendered::-webkit-scrollbar-thumb:hover {
+.chord-sheet-content::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.5);
 }
 
 /* Dark theme scrollbar */
-[data-theme="dark"] .chord-sheet-rendered::-webkit-scrollbar-track {
+.chord-sheet-content[data-theme="dark"]::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
 }
 
-[data-theme="dark"] .chord-sheet-rendered::-webkit-scrollbar-thumb {
+.chord-sheet-content[data-theme="dark"]::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
 }
 
-[data-theme="dark"] .chord-sheet-rendered::-webkit-scrollbar-thumb:hover {
+.chord-sheet-content[data-theme="dark"]::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }

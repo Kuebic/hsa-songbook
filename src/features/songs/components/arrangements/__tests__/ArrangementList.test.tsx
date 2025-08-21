@@ -10,6 +10,31 @@ vi.mock('@features/auth', () => ({
   useAuth: vi.fn()
 }))
 
+// Helper to create complete auth mock
+const createAuthMock = (overrides: Partial<ReturnType<typeof useAuth>> = {}) => ({
+  user: null,
+  userId: undefined,
+  sessionId: undefined,
+  isLoaded: true,
+  isSignedIn: false,
+  isAdmin: false,
+  isAnonymous: false,
+  getToken: vi.fn().mockResolvedValue(null),
+  getUserEmail: vi.fn().mockReturnValue(undefined),
+  getUserName: vi.fn().mockReturnValue('User'),
+  getUserAvatar: vi.fn().mockReturnValue(undefined),
+  session: null,
+  signInWithProvider: vi.fn(),
+  signInWithEmail: vi.fn(),
+  signUpWithEmail: vi.fn(),
+  resetPassword: vi.fn(),
+  signInAnonymously: vi.fn(),
+  linkEmailToAnonymousUser: vi.fn(),
+  linkOAuthToAnonymousUser: vi.fn(),
+  signOut: vi.fn(),
+  ...overrides
+})
+
 // Mock notification hook
 vi.mock('@shared/components/notifications', () => ({
   useNotification: () => ({
@@ -20,7 +45,7 @@ vi.mock('@shared/components/notifications', () => ({
 describe('ArrangementList Authentication', () => {
   const mockArrangement: Arrangement = {
     id: 'arr-1',
-    songId: 'song-1',
+    songIds: ['song-1'],
     name: 'Test Arrangement',
     slug: 'test-arrangement',
     key: 'C',
@@ -38,14 +63,7 @@ describe('ArrangementList Authentication', () => {
   })
 
   it('should not show Chord Editor button when user is not authenticated', () => {
-    vi.mocked(useAuth).mockReturnValue({
-      isLoaded: true,
-      isSignedIn: false,
-      isAdmin: false,
-      userId: null,
-      getToken: vi.fn(),
-      signOut: vi.fn()
-    })
+    vi.mocked(useAuth).mockReturnValue(createAuthMock())
 
     render(
       <MemoryRouter>
@@ -64,14 +82,12 @@ describe('ArrangementList Authentication', () => {
   })
 
   it('should show Chord Editor button when user is the creator', () => {
-    vi.mocked(useAuth).mockReturnValue({
-      isLoaded: true,
+    vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
-      isAdmin: false,
       userId: 'user-123', // Same as arrangement.createdBy
-      getToken: vi.fn().mockResolvedValue('mock-token'),
-      signOut: vi.fn()
-    })
+      user: { id: 'user-123' } as any,
+      getToken: vi.fn().mockResolvedValue('mock-token')
+    }))
 
     render(
       <MemoryRouter>
@@ -87,14 +103,12 @@ describe('ArrangementList Authentication', () => {
   })
 
   it('should not show Chord Editor button when user is not the creator', () => {
-    vi.mocked(useAuth).mockReturnValue({
-      isLoaded: true,
+    vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
-      isAdmin: false,
       userId: 'different-user', // Different from arrangement.createdBy
-      getToken: vi.fn().mockResolvedValue('mock-token'),
-      signOut: vi.fn()
-    })
+      user: { id: 'different-user' } as any,
+      getToken: vi.fn().mockResolvedValue('mock-token')
+    }))
 
     render(
       <MemoryRouter>
@@ -110,14 +124,13 @@ describe('ArrangementList Authentication', () => {
   })
 
   it('should show Chord Editor button when user is admin (even if not creator)', () => {
-    vi.mocked(useAuth).mockReturnValue({
-      isLoaded: true,
+    vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
       isAdmin: true,
       userId: 'admin-456', // Different from arrangement.createdBy but admin
-      getToken: vi.fn().mockResolvedValue('mock-token'),
-      signOut: vi.fn()
-    })
+      user: { id: 'admin-456' } as any,
+      getToken: vi.fn().mockResolvedValue('mock-token')
+    }))
 
     render(
       <MemoryRouter>
@@ -133,14 +146,7 @@ describe('ArrangementList Authentication', () => {
   })
 
   it('should not show Edit Details button when not authenticated', () => {
-    vi.mocked(useAuth).mockReturnValue({
-      isLoaded: true,
-      isSignedIn: false,
-      isAdmin: false,
-      userId: null,
-      getToken: vi.fn(),
-      signOut: vi.fn()
-    })
+    vi.mocked(useAuth).mockReturnValue(createAuthMock())
 
     const onEdit = vi.fn()
 
@@ -162,14 +168,12 @@ describe('ArrangementList Authentication', () => {
     const onEdit = vi.fn()
 
     // Test creator can see Edit Details
-    vi.mocked(useAuth).mockReturnValue({
-      isLoaded: true,
+    vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
-      isAdmin: false,
       userId: 'user-123', // Same as arrangement.createdBy
-      getToken: vi.fn().mockResolvedValue('mock-token'),
-      signOut: vi.fn()
-    })
+      user: { id: 'user-123' } as any,
+      getToken: vi.fn().mockResolvedValue('mock-token')
+    }))
 
     const { rerender } = render(
       <MemoryRouter>
@@ -185,14 +189,12 @@ describe('ArrangementList Authentication', () => {
     expect(screen.getByText('Edit Details')).toBeInTheDocument()
 
     // Test non-creator cannot see Edit Details
-    vi.mocked(useAuth).mockReturnValue({
-      isLoaded: true,
+    vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
-      isAdmin: false,
       userId: 'different-user',
-      getToken: vi.fn().mockResolvedValue('mock-token'),
-      signOut: vi.fn()
-    })
+      user: { id: 'different-user' } as any,
+      getToken: vi.fn().mockResolvedValue('mock-token')
+    }))
 
     rerender(
       <MemoryRouter>
@@ -208,14 +210,13 @@ describe('ArrangementList Authentication', () => {
     expect(screen.queryByText('Edit Details')).not.toBeInTheDocument()
 
     // Test admin can see Edit Details
-    vi.mocked(useAuth).mockReturnValue({
-      isLoaded: true,
+    vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
       isAdmin: true,
       userId: 'admin-456',
-      getToken: vi.fn().mockResolvedValue('mock-token'),
-      signOut: vi.fn()
-    })
+      user: { id: 'admin-456' } as any,
+      getToken: vi.fn().mockResolvedValue('mock-token')
+    }))
 
     rerender(
       <MemoryRouter>
@@ -233,14 +234,12 @@ describe('ArrangementList Authentication', () => {
 
   it('should only show Delete button for admin users', () => {
     // Test non-admin authenticated user
-    vi.mocked(useAuth).mockReturnValue({
-      isLoaded: true,
+    vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
-      isAdmin: false,
       userId: 'user-123',
-      getToken: vi.fn().mockResolvedValue('mock-token'),
-      signOut: vi.fn()
-    })
+      user: { id: 'user-123' } as any,
+      getToken: vi.fn().mockResolvedValue('mock-token')
+    }))
 
     const onDelete = vi.fn()
 
@@ -258,14 +257,13 @@ describe('ArrangementList Authentication', () => {
     expect(screen.queryByText('Delete')).not.toBeInTheDocument()
 
     // Test admin user
-    vi.mocked(useAuth).mockReturnValue({
-      isLoaded: true,
+    vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
       isAdmin: true,
       userId: 'admin-123',
-      getToken: vi.fn().mockResolvedValue('mock-token'),
-      signOut: vi.fn()
-    })
+      user: { id: 'admin-123' } as any,
+      getToken: vi.fn().mockResolvedValue('mock-token')
+    }))
 
     rerender(
       <MemoryRouter>
@@ -282,14 +280,13 @@ describe('ArrangementList Authentication', () => {
   })
 
   it('should hide all actions when showActions is false', () => {
-    vi.mocked(useAuth).mockReturnValue({
-      isLoaded: true,
+    vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
       isAdmin: true,
       userId: 'admin-123',
-      getToken: vi.fn().mockResolvedValue('mock-token'),
-      signOut: vi.fn()
-    })
+      user: { id: 'admin-123' } as any,
+      getToken: vi.fn().mockResolvedValue('mock-token')
+    }))
 
     render(
       <MemoryRouter>
