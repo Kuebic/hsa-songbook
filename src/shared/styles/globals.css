@@ -51,25 +51,31 @@ a:hover {
 body {
   margin: 0;
   min-width: 320px;
-  min-height: 100vh;
-  overflow: hidden; /* Prevent body scroll */
+  overflow-x: hidden; /* Prevent horizontal scroll only */
+  overflow-y: auto;   /* Allow vertical scroll */
+  overscroll-behavior: none; /* Prevent pull-to-refresh */
 }
 
 #root {
   width: 100%;
-  height: 100vh; /* Use fixed height instead of min-height */
-  overflow: hidden; /* Prevent root scroll */
-}
-
-/* Allow scrolling only within specific containers */
-#root.editor-page {
-  overflow: hidden;
-}
-
-#root:not(.editor-page) {
-  overflow: auto; /* Allow scrolling on non-editor pages */
-  height: auto;
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#root.editor-page {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden; /* Only for editor pages */
+}
+
+/* Safe area support for notched devices */
+:root {
+  --safe-area-top: env(safe-area-inset-top);
+  --safe-area-bottom: env(safe-area-inset-bottom);
+  --safe-area-left: env(safe-area-inset-left);
+  --safe-area-right: env(safe-area-inset-right);
 }
 
 h1 {

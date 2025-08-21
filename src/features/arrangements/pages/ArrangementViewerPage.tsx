@@ -12,6 +12,8 @@ import { ViewerHeader } from '../components/ViewerHeader'
 import { ViewerToolbar } from '../components/ViewerToolbar'
 import { ViewerControls } from '../components/ViewerControls'
 import { ChordSheetViewer } from '../components/ChordSheetViewer'
+import { CollapsibleToolbar } from '@features/responsive/components/CollapsibleToolbar'
+import { useViewport } from '@features/responsive/hooks/useViewport'
 import '../styles/viewer-layout.css'
 import '../styles/stage-mode.css'
 import '../styles/transpose.css'
@@ -25,6 +27,7 @@ export function ArrangementViewerPage() {
     fontSize,
     setFontSize
   } = useChordSheetSettings()
+  const viewport = useViewport()
   
   // Extract the original key from the ChordPro content
   const originalKey = useMemo(() => {
@@ -154,12 +157,27 @@ export function ArrangementViewerPage() {
       header={!isStageMode && <ViewerHeader arrangement={arrangement} />}
       toolbar={
         !isStageMode && (
-          <ViewerToolbar
-            onPrint={handlePrint}
-            onToggleStageMode={toggleStageMode}
-            isStageMode={isStageMode}
-            transposition={transpositionState}
-          />
+          viewport.isMobile ? (
+            <CollapsibleToolbar
+              autoHide={true}
+              showFloatingActions={true}
+              floatingActions={['transpose', 'stage']}
+            >
+              <ViewerToolbar
+                onPrint={handlePrint}
+                onToggleStageMode={toggleStageMode}
+                isStageMode={isStageMode}
+                transposition={transpositionState}
+              />
+            </CollapsibleToolbar>
+          ) : (
+            <ViewerToolbar
+              onPrint={handlePrint}
+              onToggleStageMode={toggleStageMode}
+              isStageMode={isStageMode}
+              transposition={transpositionState}
+            />
+          )
         )
       }
       content={
