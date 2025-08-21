@@ -50,10 +50,8 @@ A modern, responsive web application for searching, viewing, and managing worshi
 - **PWA**: Vite PWA plugin with Workbox
 - **Performance**: < 3s initial load, < 100ms route changes
 
-### Backend (Optional)
-- **API**: Express server with MongoDB
-- **Database**: MongoDB with optimized schema
-- **Authentication**: Clerk integration
+### Backend
+- Supabase
 
 ## Getting Started
 
@@ -82,7 +80,7 @@ cp .env.example .env
 
 4. Start the development server:
 ```bash
-npm run dev:full
+npm run dev
 ```
 
 The app will be available at `http://localhost:5173`
@@ -97,15 +95,6 @@ npm run lint          # Run ESLint
 npm run test          # Run test suite with Vitest
 npm run test:ui       # Open Vitest UI
 npm run test:coverage # Generate test coverage report
-```
-
-### Development with Backend
-
-To run the full stack application:
-
-```bash
-npm run install:all   # Install frontend and backend dependencies
-npm run dev:full      # Start both frontend and backend servers
 ```
 
 ## Project Structure
@@ -131,7 +120,6 @@ hsa-songbook/
 │   │   ├── styles/       # Global styles
 │   │   └── validation/   # Zod schemas
 │   └── lib/              # Utility functions
-├── server/               # Backend API (optional)
 ├── public/               # Static assets and PWA icons
 ├── PRPs/                 # Project requirement documents
 └── claude_md_files/      # Development documentation

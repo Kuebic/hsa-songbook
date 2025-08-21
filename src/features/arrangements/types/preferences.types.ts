@@ -51,6 +51,9 @@ export interface RenderOptions {
   
   /** Show/hide chord diagrams */
   showDiagrams?: boolean;
+  
+  /** Theme for rendering (used for cache key) */
+  theme?: string;
 }
 
 export const DEFAULT_PREFERENCES: ChordDisplayPreferences = {

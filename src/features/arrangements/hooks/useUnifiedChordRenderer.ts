@@ -11,6 +11,7 @@ import { chordPreferencesService } from '../services/chordPreferencesService';
 import { ChordSheetFormatterFactory } from '../formatters/ChordSheetFormatterFactory';
 import { chordRenderCache } from '../services/ChordRenderCacheService';
 import { PerformanceMonitor } from '../components/ChordProEditor/utils/performance';
+import { useTheme } from '@shared/contexts/ThemeContext';
 import type { ChordDisplayPreferences, RenderOptions } from '../types/preferences.types';
 
 export interface UseUnifiedChordRendererReturn {
@@ -33,6 +34,7 @@ export interface UseUnifiedChordRendererReturn {
  * Uses native ChordSheetJS formatting without regex processing
  */
 export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
+  const { theme: appTheme } = useTheme();
   const [preferences, setPreferences] = useState<ChordDisplayPreferences>(
     chordPreferencesService.getPreferences()
   );
@@ -69,7 +71,8 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
    * Get theme colors based on current theme preference
    */
   const getThemeColors = useCallback(() => {
-    switch (preferences.theme) {
+    // Use the actual app theme instead of preferences
+    switch (appTheme) {
       case 'dark':
         return {
           chord: '#60a5fa',
@@ -95,7 +98,7 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
           background: '#ffffff'
         };
     }
-  }, [preferences.theme]);
+  }, [appTheme]);
 
   /**
    * Wrap HTML with theme styling
@@ -175,8 +178,8 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
       </style>
     `;
 
-    return `${themeCSS}<div class="chord-sheet-rendered chord-sheet-content" data-theme="${preferences.theme}" style="font-size: ${fontSize}px; font-family: ${fontFamily}; line-height: ${preferences.lineHeight};">${html}</div>`;
-  }, [preferences, getThemeColors]);
+    return `${themeCSS}<div class="chord-sheet-rendered chord-sheet-content" data-theme="${appTheme}" style="font-size: ${fontSize}px; font-family: ${fontFamily}; line-height: ${preferences.lineHeight};">${html}</div>`;
+  }, [preferences, getThemeColors, appTheme]);
 
   /**
    * Optimized ChordPro rendering with multi-level caching
@@ -189,8 +192,10 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
     performanceMonitor.mark('render-start');
 
     try {
+      // Include theme in options for cache key generation
+      const optionsWithTheme = { ...options, theme: appTheme };
       // Generate cache key for styled output
-      const cacheKey = chordRenderCache.generateKey(content, options);
+      const cacheKey = chordRenderCache.generateKey(content, optionsWithTheme);
       
       // Check Level 3 cache (styled HTML)
       let styledHtml = chordRenderCache.getStyledHtml(cacheKey);
@@ -284,7 +289,7 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
         </div>
       `;
     }
-  }, [wrapWithTheme, performanceMonitor]);
+  }, [wrapWithTheme, performanceMonitor, appTheme]);
 
   /**
    * Check if content is valid ChordPro
