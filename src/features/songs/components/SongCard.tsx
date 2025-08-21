@@ -39,11 +39,6 @@ export const SongCard = memo(function SongCard({ song, onClick, onDelete }: Song
           </span>
         )) || <span style={{ color: 'var(--text-secondary)', fontSize: '0.8em', fontStyle: 'italic' }}>No themes</span>}
       </div>
-      {song.metadata.ratings && (
-        <div className={styles.ratings}>
-          ⭐ {song.metadata.ratings.average.toFixed(1)} ({song.metadata.ratings.count} reviews)
-        </div>
-      )}
       <div onClick={e => e.stopPropagation()}>
         <SongActions 
           song={song}

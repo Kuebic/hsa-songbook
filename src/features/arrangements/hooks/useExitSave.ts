@@ -79,9 +79,10 @@ export function useExitSave({
               console.warn('Failed to cleanup draft after save:', cleanupError);
               // Don't throw - the main save succeeded
             }
-          } catch (updateError: any) {
+          } catch (updateError) {
             // If it's a not found error, mark it and treat it like a new arrangement
-            if (updateError?.message?.includes('not found') || updateError?.code === 'PGRST116') {
+            const error = updateError as Error & { code?: string };
+            if (error?.message?.includes('not found') || error?.code === 'PGRST116') {
               console.log('Arrangement not found in database, marking as non-existent:', arrangementId);
               arrangementExistenceStore.markAsNonExistent(arrangementId);
               // Don't throw - content is saved locally

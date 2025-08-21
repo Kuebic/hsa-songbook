@@ -276,7 +276,7 @@ describe('useIsTouchDevice', () => {
     expect(result.current).toBe(true)
 
     // Clean up
-    delete (window as any).ontouchstart
+    delete (window as Window & { ontouchstart?: () => void }).ontouchstart
   })
 
   it('should detect touch device when maxTouchPoints > 0', () => {
@@ -301,7 +301,7 @@ describe('useIsTouchDevice', () => {
       writable: true,
       value: 0,
     })
-    delete (window as any).ontouchstart
+    delete (window as Window & { ontouchstart?: () => void }).ontouchstart
 
     const { result } = renderHook(() => useIsTouchDevice())
 
@@ -346,7 +346,7 @@ describe('usePrefersReducedMotion', () => {
   })
 
   it('should update when preference changes', async () => {
-    let changeHandler: ((event: any) => void) | null = null
+    let changeHandler: ((event: MediaQueryListEvent) => void) | null = null
     const mockMediaQuery = {
       matches: false,
       addEventListener: vi.fn((event, handler) => {
@@ -367,7 +367,7 @@ describe('usePrefersReducedMotion', () => {
     // Simulate preference change
     act(() => {
       mockMediaQuery.matches = true
-      if (changeHandler) changeHandler({})
+      if (changeHandler) changeHandler({} as MediaQueryListEvent)
     })
 
     await waitFor(() => {

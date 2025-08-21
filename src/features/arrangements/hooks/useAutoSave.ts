@@ -109,9 +109,10 @@ export function useAutoSave({
                 { chordData: saveContent }
               );
               lastBackendSaveRef.current = now;
-            } catch (updateError: any) {
+            } catch (updateError) {
               // If it's a not found error, skip backend saves for this arrangement
-              if (updateError?.message?.includes('not found') || updateError?.code === 'PGRST116') {
+              const error = updateError as Error & { code?: string };
+              if (error?.message?.includes('not found') || error?.code === 'PGRST116') {
                 console.log('Arrangement not found in database, marking as non-existent:', arrangementId);
                 arrangementExistenceStore.markAsNonExistent(arrangementId); // Don't try again
               } else {

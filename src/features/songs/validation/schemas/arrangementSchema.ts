@@ -173,8 +173,8 @@ export function createArrangementSchema(options?: {
   requireTempo?: boolean
   requireDifficulty?: boolean
   maxChordDataSize?: number
-}): any {
-  let schema: any = arrangementSchema
+}): z.ZodObject<z.ZodRawShape> {
+  let schema = arrangementSchema as z.ZodObject<z.ZodRawShape>
   
   if (options?.requireKey) {
     schema = schema.extend({

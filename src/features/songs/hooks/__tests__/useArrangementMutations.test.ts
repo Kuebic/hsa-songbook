@@ -3,6 +3,7 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import { useArrangementMutations } from '../mutations/useArrangementMutations'
 import type { ArrangementFormData } from '../../validation/schemas/arrangementSchema'
 import type { Arrangement } from '../../types/song.types'
+import type { User } from '@features/auth/types'
 import * as arrangementServiceModule from '../../services/arrangementService'
 import * as authModule from '@features/auth'
 
@@ -40,7 +41,7 @@ describe('useArrangementMutations', () => {
         user_metadata: {},
         aud: 'authenticated',
         created_at: new Date().toISOString()
-      } as any,
+      } as User,
       userId: 'user-123',
       sessionId: 'session-123',
       isLoaded: true,
@@ -235,7 +236,7 @@ describe('useArrangementMutations', () => {
           user_metadata: {},
           aud: 'authenticated',
           created_at: new Date().toISOString()
-        } as any,
+        } as User,
         userId: 'user-123',
         sessionId: 'session-123',
         isLoaded: true,
@@ -552,7 +553,7 @@ describe('useArrangementMutations', () => {
           user_metadata: {},
           aud: 'authenticated',
           created_at: new Date().toISOString()
-        } as any,
+        } as User,
         userId: undefined,
         sessionId: 'session-123',
         isLoaded: true,

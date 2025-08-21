@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from '@features/auth'
 import { useAuth } from '@features/auth/hooks/useAuth'
+import type { User } from '@features/auth/types'
 
 // Mock the useAuth hook
 vi.mock('@features/auth/hooks/useAuth', () => ({
@@ -93,7 +94,15 @@ describe('Authentication Protection for Chord Editor', () => {
       isLoaded: true,
       isSignedIn: true,
       userId: 'user-123',
-      user: { id: 'user-123' } as any,
+      user: { 
+        id: 'user-123',
+        email: 'test@example.com',
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated',
+        created_at: '',
+        updated_at: ''
+      } as User,
       getToken: vi.fn().mockResolvedValue('mock-token')
     }))
 

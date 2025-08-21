@@ -3,9 +3,9 @@ import type { ReactNode } from 'react';
 import type { Theme } from './theme-types';
 import { ThemeContext } from './theme-context';
 
-// Re-export for backward compatibility
-export { useTheme } from './useTheme';
+// Re-export types for backward compatibility
 export type { Theme, ThemeContextType } from './theme-types';
+export { useTheme } from './useTheme';
 
 const getInitialTheme = (): Theme => {
   if (typeof window !== 'undefined') {

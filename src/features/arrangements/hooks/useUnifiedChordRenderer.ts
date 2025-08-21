@@ -250,8 +250,10 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
         const formatter = ChordSheetFormatterFactory.getFormatterForContext(context);
         
         // Format to HTML (formatter returns an object with toString method)
-        const formatted = (formatter as any).format(song);
-        html = formatted?.toString ? formatted.toString() : String(formatted);
+        const formatted = (formatter as unknown as { format: (song: ChordSheetJS.Song) => unknown }).format(song!);
+        html = typeof formatted === 'object' && formatted && 'toString' in formatted 
+          ? (formatted as { toString(): string }).toString() 
+          : String(formatted);
         
         // Cache formatted HTML
         chordRenderCache.setFormattedHtml(cacheKey, html!);

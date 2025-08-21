@@ -19,7 +19,7 @@ vi.mock('@features/auth', () => ({
 }))
 
 vi.mock('@features/monitoring', () => ({
-  ErrorBoundary: ({ children }: any) => <div>{children}</div>,
+  ErrorBoundary: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
 vi.mock('@features/songs/components/ui/AddSongButton', () => ({
@@ -46,7 +46,7 @@ describe('Layout', () => {
     vi.mocked(useAuth).mockReturnValue({
       isSignedIn: false,
       isLoaded: true,
-    } as any)
+    } as unknown as ReturnType<typeof useAuth>)
   })
 
   describe('Rendering', () => {
@@ -110,7 +110,7 @@ describe('Layout', () => {
       vi.mocked(useAuth).mockReturnValue({
         isSignedIn: false,
         isLoaded: true,
-      } as any)
+      } as unknown as ReturnType<typeof useAuth>)
 
       renderWithRouter(
         <Layout>
@@ -126,7 +126,7 @@ describe('Layout', () => {
       vi.mocked(useAuth).mockReturnValue({
         isSignedIn: true,
         isLoaded: true,
-      } as any)
+      } as unknown as ReturnType<typeof useAuth>)
 
       renderWithRouter(
         <Layout>
@@ -142,7 +142,7 @@ describe('Layout', () => {
       vi.mocked(useAuth).mockReturnValue({
         isSignedIn: false,
         isLoaded: false,
-      } as any)
+      } as unknown as ReturnType<typeof useAuth>)
 
       renderWithRouter(
         <Layout>

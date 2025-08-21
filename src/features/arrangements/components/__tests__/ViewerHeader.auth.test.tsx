@@ -5,6 +5,7 @@ import { ViewerHeader } from '../ViewerHeader'
 import { useAuth } from '@features/auth'
 import type { ArrangementViewerData } from '../../types/viewer.types'
 
+
 // Mock auth hook
 vi.mock('@features/auth', () => ({
   useAuth: vi.fn()
@@ -38,7 +39,7 @@ describe('ViewerHeader Authorization', () => {
       userId: null,
       getToken: vi.fn(),
       signOut: vi.fn()
-    } as any)
+    } as unknown as ReturnType<typeof useAuth>)
 
     render(
       <MemoryRouter>
@@ -58,7 +59,7 @@ describe('ViewerHeader Authorization', () => {
       userId: 'user-123', // Same as arrangement.createdBy
       getToken: vi.fn().mockResolvedValue('mock-token'),
       signOut: vi.fn()
-    } as any)
+    } as unknown as ReturnType<typeof useAuth>)
 
     render(
       <MemoryRouter>
@@ -78,7 +79,7 @@ describe('ViewerHeader Authorization', () => {
       userId: 'different-user', // Different from arrangement.createdBy
       getToken: vi.fn().mockResolvedValue('mock-token'),
       signOut: vi.fn()
-    } as any)
+    } as unknown as ReturnType<typeof useAuth>)
 
     render(
       <MemoryRouter>
@@ -98,7 +99,7 @@ describe('ViewerHeader Authorization', () => {
       userId: 'admin-456', // Different from arrangement.createdBy but admin
       getToken: vi.fn().mockResolvedValue('mock-token'),
       signOut: vi.fn()
-    } as any)
+    } as unknown as ReturnType<typeof useAuth>)
 
     render(
       <MemoryRouter>
@@ -123,7 +124,7 @@ describe('ViewerHeader Authorization', () => {
       userId: 'user-123',
       getToken: vi.fn().mockResolvedValue('mock-token'),
       signOut: vi.fn()
-    } as any)
+    } as unknown as ReturnType<typeof useAuth>)
 
     render(
       <MemoryRouter>

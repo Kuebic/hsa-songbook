@@ -14,8 +14,8 @@ import {
   Chord,
 } from 'chordsheetjs';
 
-// Type for items in chordsheetjs - use any for compatibility
-type Item = any;
+// Type for items in chordsheetjs
+type Item = ChordItem | { toString(): string };
 import type {
   ChordProMetadata,
   ValidationError,

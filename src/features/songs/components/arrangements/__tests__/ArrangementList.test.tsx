@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { ArrangementList } from '../ArrangementList'
 import { useAuth } from '@features/auth'
 import type { Arrangement } from '@features/songs/types/song.types'
+import type { User } from '@features/auth/types'
 
 // Mock auth hook
 vi.mock('@features/auth', () => ({
@@ -85,7 +86,7 @@ describe('ArrangementList Authentication', () => {
     vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
       userId: 'user-123', // Same as arrangement.createdBy
-      user: { id: 'user-123' } as any,
+      user: { id: 'user-123' } as User,
       getToken: vi.fn().mockResolvedValue('mock-token')
     }))
 
@@ -106,7 +107,7 @@ describe('ArrangementList Authentication', () => {
     vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
       userId: 'different-user', // Different from arrangement.createdBy
-      user: { id: 'different-user' } as any,
+      user: { id: 'different-user' } as User,
       getToken: vi.fn().mockResolvedValue('mock-token')
     }))
 
@@ -128,7 +129,7 @@ describe('ArrangementList Authentication', () => {
       isSignedIn: true,
       isAdmin: true,
       userId: 'admin-456', // Different from arrangement.createdBy but admin
-      user: { id: 'admin-456' } as any,
+      user: { id: 'admin-456' } as User,
       getToken: vi.fn().mockResolvedValue('mock-token')
     }))
 
@@ -171,7 +172,7 @@ describe('ArrangementList Authentication', () => {
     vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
       userId: 'user-123', // Same as arrangement.createdBy
-      user: { id: 'user-123' } as any,
+      user: { id: 'user-123' } as User,
       getToken: vi.fn().mockResolvedValue('mock-token')
     }))
 
@@ -192,7 +193,7 @@ describe('ArrangementList Authentication', () => {
     vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
       userId: 'different-user',
-      user: { id: 'different-user' } as any,
+      user: { id: 'different-user' } as User,
       getToken: vi.fn().mockResolvedValue('mock-token')
     }))
 
@@ -214,7 +215,7 @@ describe('ArrangementList Authentication', () => {
       isSignedIn: true,
       isAdmin: true,
       userId: 'admin-456',
-      user: { id: 'admin-456' } as any,
+      user: { id: 'admin-456' } as User,
       getToken: vi.fn().mockResolvedValue('mock-token')
     }))
 
@@ -237,7 +238,7 @@ describe('ArrangementList Authentication', () => {
     vi.mocked(useAuth).mockReturnValue(createAuthMock({
       isSignedIn: true,
       userId: 'user-123',
-      user: { id: 'user-123' } as any,
+      user: { id: 'user-123' } as User,
       getToken: vi.fn().mockResolvedValue('mock-token')
     }))
 
@@ -261,7 +262,7 @@ describe('ArrangementList Authentication', () => {
       isSignedIn: true,
       isAdmin: true,
       userId: 'admin-123',
-      user: { id: 'admin-123' } as any,
+      user: { id: 'admin-123' } as User,
       getToken: vi.fn().mockResolvedValue('mock-token')
     }))
 
@@ -284,7 +285,7 @@ describe('ArrangementList Authentication', () => {
       isSignedIn: true,
       isAdmin: true,
       userId: 'admin-123',
-      user: { id: 'admin-123' } as any,
+      user: { id: 'admin-123' } as User,
       getToken: vi.fn().mockResolvedValue('mock-token')
     }))
 

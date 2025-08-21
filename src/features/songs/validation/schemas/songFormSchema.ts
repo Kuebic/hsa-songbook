@@ -282,8 +282,8 @@ export function createSongSchema(options?: {
   requireSource?: boolean
   minThemes?: number
   maxThemes?: number
-}): any {
-  let schema: any = songFormSchema
+}): z.ZodObject<z.ZodRawShape> {
+  let schema = songFormSchema as z.ZodObject<z.ZodRawShape>
   
   if (options?.requireArtist) {
     schema = schema.extend({

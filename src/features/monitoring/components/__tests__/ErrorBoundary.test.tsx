@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ErrorBoundary } from '../ErrorBoundary'
 import { errorReportingService } from '../../services/errorReportingService'
+import type { ErrorFallbackProps } from '../../types/monitoring.types'
 
 // Mock the error reporting service
 vi.mock('../../services/errorReportingService', () => ({
@@ -21,7 +22,7 @@ function ThrowError({ shouldThrow }: { shouldThrow: boolean }) {
 
 
 // Custom error fallback component
-function CustomErrorFallback({ error, resetErrorBoundary }: any) {
+function CustomErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   return (
     <div>
       <h2>Custom Error</h2>

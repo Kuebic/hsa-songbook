@@ -178,17 +178,19 @@ export class ChordSheetFormatterFactory {
     type: FormatterType,
     customConfig?: unknown
   ): ChordSheetJS.Formatter {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const config = customConfig as any;
     switch (type) {
       case 'responsive':
-        return new ChordSheetJS.HtmlDivFormatter(customConfig as any);
+        return new ChordSheetJS.HtmlDivFormatter(config);
       case 'print':
-        return new ChordSheetJS.HtmlTableFormatter(customConfig as any);
+        return new ChordSheetJS.HtmlTableFormatter(config);
       case 'text':
-        return new ChordSheetJS.TextFormatter(customConfig as any);
+        return new ChordSheetJS.TextFormatter(config);
       case 'chordpro':
-        return new ChordSheetJS.ChordProFormatter(customConfig as any);
+        return new ChordSheetJS.ChordProFormatter(config);
       default:
-        return new ChordSheetJS.HtmlDivFormatter(customConfig as any);
+        return new ChordSheetJS.HtmlDivFormatter(config);
     }
   }
 }

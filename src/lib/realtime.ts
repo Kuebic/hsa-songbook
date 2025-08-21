@@ -23,7 +23,7 @@ export class RealtimeService {
   /**
    * Subscribe to changes on a specific table
    */
-  static subscribe<T extends Record<string, any> = Record<string, any>>(
+  static subscribe<T extends Record<string, unknown> = Record<string, unknown>>(
     table: keyof Database['public']['Tables'],
     listener: RealtimeListener<T>,
     filter?: { column: string; value: string }
@@ -34,7 +34,7 @@ export class RealtimeService {
     
     // Build postgres changes subscription
     const postgresChanges = channel.on(
-      'postgres_changes' as any,
+      'postgres_changes' as const,
       {
         event: '*',
         schema: 'public',
@@ -145,7 +145,7 @@ export class RealtimeService {
   /**
    * Send a presence signal (for showing who's currently editing)
    */
-  static async sendPresence(channel: string, payload: { user: string; action: string; [key: string]: any }): Promise<void> {
+  static async sendPresence(channel: string, payload: { user: string; action: string; [key: string]: unknown }): Promise<void> {
     const presenceChannel = supabase.channel(channel)
     
     await presenceChannel
@@ -178,11 +178,11 @@ export class RealtimeService {
  */
 import { useEffect, useRef } from 'react'
 
-export function useRealtimeSubscription<T extends Record<string, any> = Record<string, any>>(
+export function useRealtimeSubscription<T extends Record<string, unknown> = Record<string, unknown>>(
   table: keyof Database['public']['Tables'],
   listener: RealtimeListener<T>,
   filter?: { column: string; value: string },
-  dependencies: any[] = []
+  dependencies: React.DependencyList = []
 ) {
   const subscriptionIdRef = useRef<string | null>(null)
   
