@@ -3,6 +3,7 @@
 /* Import theme variables */
 @import './themes.css';
 @import './alignment.css'; /* Import standardized font definitions */
+@import './cjk-support.css'; /* Import CJK language support */
 
 /* Main container wrapper - adds max-width on desktop */
 .chord-pro-editor-wrapper {

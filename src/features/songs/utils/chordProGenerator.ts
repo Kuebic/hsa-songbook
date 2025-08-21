@@ -1,5 +1,8 @@
 import { splitArrangementName } from './arrangementNaming'
 import type { ArrangementFormData } from '../validation/schemas/arrangementSchema'
+import type { MultilingualText, LanguageCode } from '../../multilingual/types/multilingual.types'
+import { multilingualService } from '../../multilingual/services/multilingualService'
+import { DEFAULT_LANGUAGE } from '../../multilingual/types/multilingual.types'
 
 export interface ChordProGeneratorOptions {
   songTitle?: string
@@ -8,6 +11,10 @@ export interface ChordProGeneratorOptions {
   tempo?: number
   timeSignature?: string
   includeTemplate?: boolean
+  // Multilingual options
+  lyrics?: MultilingualText
+  selectedLanguage?: LanguageCode
+  includeLyrics?: boolean
 }
 
 /**
@@ -178,6 +185,205 @@ export function generateBasicChordProTemplate(
     'Second verse here...',
     ''
   )
+
+  return lines.join('\n')
+}
+
+/**
+ * Generates ChordPro content with multilingual lyrics
+ */
+export function generateChordProWithLyrics(
+  formData: Partial<ArrangementFormData>,
+  songTitle?: string,
+  lyrics?: MultilingualText,
+  selectedLanguage?: LanguageCode,
+  fallbackLanguage: LanguageCode = DEFAULT_LANGUAGE
+): string {
+  const { arrangementSuffix } = splitArrangementName(formData.name || '', songTitle)
+
+  const lines: string[] = []
+
+  // Title directive
+  if (songTitle) {
+    lines.push(`{title: ${songTitle}}`)
+  }
+
+  // Subtitle directive (arrangement name)
+  if (arrangementSuffix) {
+    lines.push(`{subtitle: ${arrangementSuffix}}`)
+  }
+
+  // Language directive for multilingual support
+  const targetLanguage = selectedLanguage || fallbackLanguage
+  if (targetLanguage !== DEFAULT_LANGUAGE) {
+    lines.push(`{language: ${targetLanguage}}`)
+  }
+
+  // Key directive
+  if (formData.key) {
+    lines.push(`{key: ${formData.key}}`)
+  }
+
+  // Tempo directive
+  if (formData.tempo) {
+    lines.push(`{tempo: ${formData.tempo}}`)
+  }
+
+  // Time signature directive
+  if (formData.timeSignature) {
+    lines.push(`{time: ${formData.timeSignature}}`)
+  }
+
+  // Add empty line after directives
+  if (lines.length > 0) {
+    lines.push('')
+  }
+
+  // Get lyrics content in target language
+  let lyricsContent = ''
+  if (lyrics && Object.keys(lyrics).length > 0) {
+    lyricsContent = multilingualService.getText(lyrics, targetLanguage, fallbackLanguage)
+  }
+
+  if (lyricsContent.trim()) {
+    // Parse and format existing lyrics
+    const formattedLyrics = formatLyricsForChordPro(lyricsContent)
+    lines.push(formattedLyrics)
+  } else {
+    // Add basic template structure if no lyrics available
+    lines.push(
+      '# No lyrics available in the selected language',
+      '# Use the template below to add chords and structure',
+      '',
+      '[Verse 1]',
+      '[I]Add your lyrics here with [V]chords above each syllable',
+      '[vi]Each line shows the chord [IV]changes throughout',
+      '',
+      '[Chorus]',
+      '[I]This is where the [V]chorus lyrics go',
+      '[vi]With the main [IV]melody and [I]hook',
+      '',
+      '[Verse 2]',
+      '[I]Second verse continues the [V]story here',
+      '[vi]Building on the first [IV]verse theme',
+      '',
+      '[Bridge]',
+      '[vi]This section provides [IV]contrast',
+      '[I]Leading back to the [V]final chorus',
+      '',
+      '[Outro]',
+      '[| ][vi][] | ][IV][] | ][I][] |]'
+    )
+  }
+
+  // Convert Nashville numbers to actual chords based on key
+  let content = lines.join('\n')
+
+  if (formData.key) {
+    const chords = getNashvilleChords(formData.key)
+
+    content = content
+      .replace(/\[I\]/g, `[${chords.I}]`)
+      .replace(/\[IV\]/g, `[${chords.IV}]`)
+      .replace(/\[V\]/g, `[${chords.V}]`)
+      .replace(/\[vi\]/g, `[${chords.vi}]`)
+  }
+
+  return content
+}
+
+/**
+ * Format plain text lyrics for ChordPro structure
+ */
+function formatLyricsForChordPro(lyricsText: string): string {
+  if (!lyricsText?.trim()) {
+    return ''
+  }
+
+  const lines = lyricsText.trim().split('\n')
+  const formattedLines: string[] = []
+  let currentSection = ''
+  let inSection = false
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim()
+    
+    // Skip empty lines but preserve them for spacing
+    if (!line) {
+      if (inSection) {
+        formattedLines.push('')
+      }
+      continue
+    }
+    
+    // Check if this line looks like a section header (common patterns)
+    const sectionMatch = line.match(/^(verse|chorus|bridge|intro|outro|tag|pre-?chorus|interlude)\s*(\d+)?$/i)
+    
+    if (sectionMatch) {
+      // This is a section header
+      if (inSection) {
+        formattedLines.push('') // Add spacing before new section
+      }
+      
+      const sectionName = sectionMatch[1]
+      const sectionNumber = sectionMatch[2] || ''
+      currentSection = `[${sectionName.charAt(0).toUpperCase() + sectionName.slice(1).toLowerCase()}${sectionNumber ? ' ' + sectionNumber : ''}]`
+      
+      formattedLines.push(currentSection)
+      inSection = true
+    } else {
+      // This is a lyrics line
+      if (!inSection) {
+        // Start with a default Verse 1 if no section was specified
+        formattedLines.push('[Verse 1]')
+        inSection = true
+      }
+      
+      // Add the lyrics line (chords will need to be added manually by the user)
+      formattedLines.push(line)
+    }
+  }
+
+  return formattedLines.join('\n')
+}
+
+/**
+ * Generate ChordPro template with multilingual lyrics preview
+ */
+export function generateMultilingualChordProTemplate(
+  songTitle: string,
+  arrangementName: string,
+  lyrics: MultilingualText,
+  availableLanguages: LanguageCode[]
+): string {
+  const lines: string[] = []
+
+  // Add header comment explaining multilingual options
+  lines.push('# Multilingual ChordPro Template')
+  lines.push(`# Available languages: ${availableLanguages.join(', ')}`)
+  lines.push('# You can switch languages in the arrangement editor')
+  lines.push('')
+
+  // Basic metadata
+  lines.push(`{title: ${songTitle}}`)
+  lines.push(`{subtitle: ${arrangementName}}`)
+  lines.push('')
+
+  // Show lyrics preview in each available language
+  for (const language of availableLanguages) {
+    const langContent = lyrics[language]?.trim()
+    if (langContent) {
+      const langInfo = multilingualService.getLanguageDisplayName(language)
+      lines.push(`# ${langInfo} lyrics preview:`)
+      lines.push(`# ${langContent.split('\n').slice(0, 2).join(' ').substring(0, 80)}...`)
+      lines.push('')
+    }
+  }
+
+  lines.push('# The selected language lyrics will be inserted here when you create the arrangement')
+  lines.push('[Verse 1]')
+  lines.push('Lyrics will be automatically populated based on your language selection')
+  lines.push('')
 
   return lines.join('\n')
 }

@@ -1,0 +1,244 @@
+/**
+ * @file cjk-support.css
+ * @description Enhanced CJK (Chinese, Japanese, Korean) support for ChordPro editor
+ */
+
+/* CJK-aware font stacks */
+:root {
+  /* Monospace font stack with comprehensive CJK support */
+  --editor-font-family-cjk: 
+    'SF Mono',                    /* macOS */
+    'Monaco',                     /* macOS fallback */
+    'Menlo',                      /* macOS older */
+    'Consolas',                   /* Windows */
+    'Courier New',                /* Cross-platform fallback */
+    'PingFang SC',                /* Chinese Simplified (macOS) */
+    'PingFang TC',                /* Chinese Traditional (macOS) */
+    'Hiragino Kaku Gothic ProN',  /* Japanese (macOS) */
+    'Hiragino Sans',              /* Japanese (macOS newer) */
+    'Yu Gothic',                  /* Japanese (Windows) */
+    'Meiryo',                     /* Japanese (Windows older) */
+    'Malgun Gothic',              /* Korean (Windows) */
+    'Apple SD Gothic Neo',        /* Korean (macOS) */
+    'Noto Sans Mono CJK',         /* Web font */
+    'Source Han Code JP',         /* Adobe CJK */
+    'Droid Sans Fallback',        /* Android */
+    monospace;                    /* Generic fallback */
+
+  /* Enhanced line height for CJK characters */
+  --editor-line-height-cjk: 1.7;
+
+  /* Letter spacing for better CJK character separation */
+  --editor-letter-spacing-cjk: 0.02em;
+
+  /* Word spacing adjustments for mixed text */
+  --editor-word-spacing-cjk: 0.1em;
+}
+
+/* CJK-aware font application */
+.chord-editor-textarea.cjk-mode,
+.syntax-highlighter.cjk-mode,
+.editor-layers.cjk-mode {
+  font-family: var(--editor-font-family-cjk);
+  line-height: var(--editor-line-height-cjk);
+  letter-spacing: var(--editor-letter-spacing-cjk);
+  word-spacing: var(--editor-word-spacing-cjk);
+}
+
+/* Language-specific optimizations */
+.chord-editor-textarea[lang="ja"],
+.chord-editor-textarea[lang="ja-romaji"],
+.syntax-highlighter[lang="ja"],
+.syntax-highlighter[lang="ja-romaji"] {
+  font-family: 
+    'Hiragino Kaku Gothic ProN',
+    'Hiragino Sans',
+    'Yu Gothic',
+    'Meiryo',
+    var(--editor-font-family-cjk);
+}
+
+.chord-editor-textarea[lang="ko"],
+.chord-editor-textarea[lang="ko-romaji"],
+.syntax-highlighter[lang="ko"],
+.syntax-highlighter[lang="ko-romaji"] {
+  font-family: 
+    'Malgun Gothic',
+    'Apple SD Gothic Neo',
+    var(--editor-font-family-cjk);
+}
+
+.chord-editor-textarea[lang="zh"],
+.chord-editor-textarea[lang="zh-CN"],
+.chord-editor-textarea[lang="zh-TW"],
+.syntax-highlighter[lang="zh"],
+.syntax-highlighter[lang="zh-CN"],
+.syntax-highlighter[lang="zh-TW"] {
+  font-family: 
+    'PingFang SC',
+    'PingFang TC',
+    'Microsoft YaHei',
+    'SimHei',
+    var(--editor-font-family-cjk);
+}
+
+/* IME composition support */
+.chord-editor-textarea:focus {
+  /* Ensure IME composition is visible */
+  ime-mode: auto;
+  text-rendering: optimizeLegibility;
+}
+
+/* IME composition highlighting */
+.chord-editor-textarea::selection {
+  background: var(--selection-bg);
+}
+
+/* Improved text rendering for CJK */
+.chord-editor-textarea.cjk-mode,
+.syntax-highlighter.cjk-mode {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* CJK character width compensation */
+.chord-editor-textarea.cjk-mode {
+  /* Slightly larger font size for better CJK readability */
+  font-size: calc(var(--editor-font-size, 16px) * 1.05);
+}
+
+.syntax-highlighter.cjk-mode {
+  font-size: calc(var(--editor-font-size, 16px) * 1.05);
+}
+
+/* Mobile CJK optimizations */
+@media (max-width: 768px) {
+  .chord-editor-textarea.cjk-mode,
+  .syntax-highlighter.cjk-mode {
+    /* Larger font size on mobile for CJK readability */
+    font-size: calc(var(--editor-font-size, 16px) * 1.1);
+    line-height: 1.8;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .chord-editor-textarea.cjk-mode,
+  .syntax-highlighter.cjk-mode {
+    -webkit-font-smoothing: subpixel-antialiased;
+    text-rendering: geometricPrecision;
+  }
+}
+
+/* RTL language support (for future expansion) */
+.chord-editor-textarea[dir="rtl"],
+.syntax-highlighter[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Mixed content handling */
+.chord-editor-textarea.mixed-script,
+.syntax-highlighter.mixed-script {
+  font-family: var(--editor-font-family-cjk);
+  line-height: var(--editor-line-height-cjk);
+  /* Better handling of mixed Latin/CJK content */
+  font-variant-numeric: tabular-nums;
+}
+
+/* Vertical text support (for traditional Japanese/Chinese) */
+.chord-editor-textarea.vertical-text,
+.syntax-highlighter.vertical-text {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  /* Adjust dimensions for vertical layout */
+  height: auto;
+  min-height: 200px;
+}
+
+/* CJK punctuation handling */
+.chord-editor-textarea.cjk-mode,
+.syntax-highlighter.cjk-mode {
+  /* Better handling of CJK punctuation */
+  text-spacing: ideograph-alpha ideograph-numeric;
+  hanging-punctuation: first last;
+}
+
+/* Language indicator overlay */
+.editor-layers.cjk-mode::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  background: var(--editor-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--editor-divider);
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.editor-layers.cjk-mode:focus-within::before {
+  opacity: 1;
+}
+
+/* CJK-specific syntax highlighting adjustments */
+.syntax-chord.cjk-mode {
+  /* Ensure chord symbols remain readable in CJK context */
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  background: rgba(59, 130, 246, 0.15);
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
+.syntax-directive.cjk-mode {
+  /* Better visibility for directives in CJK text */
+  background: rgba(168, 85, 247, 0.1);
+  padding: 0 1px;
+  border-radius: 2px;
+}
+
+/* Input method editor composition styles */
+.chord-editor-textarea[data-composing="true"] {
+  /* Style for text being composed via IME */
+  position: relative;
+}
+
+.chord-editor-textarea[data-composing="true"]::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--focus-ring);
+  opacity: 0.6;
+}
+
+/* Accessibility improvements for CJK */
+.chord-editor-textarea.cjk-mode:focus {
+  /* Enhanced focus indication for CJK users */
+  box-shadow: 
+    0 0 0 2px var(--focus-ring),
+    0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Screen reader support for CJK content */
+.sr-only-cjk {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  /* Ensure CJK content is read correctly */
+  font-family: var(--editor-font-family-cjk);
+}

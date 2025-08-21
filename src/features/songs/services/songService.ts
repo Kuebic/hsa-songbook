@@ -1,6 +1,8 @@
 import { supabase } from '../../../lib/supabase'
 import type { Song, Arrangement, SongFilter } from '../types/song.types'
 import type { Database } from '../../../lib/database.types'
+import type { MultilingualText, LanguageCode, LyricsSource } from '../../multilingual/types/multilingual.types'
+import { isValidLanguageCode, DEFAULT_LANGUAGE } from '../../multilingual/types/multilingual.types'
 
 // Custom error classes for API operations (kept for compatibility)
 export class APIError extends Error {
@@ -37,6 +39,32 @@ export class NotFoundError extends APIError {
 type SupabaseSong = Database['public']['Tables']['songs']['Row']
 type SupabaseArrangement = Database['public']['Tables']['arrangements']['Row']
 
+// Helper function to safely parse JSONB lyrics
+function parseSupabaseLyrics(lyricsJson: unknown): MultilingualText {
+  if (!lyricsJson) return {};
+  
+  try {
+    const parsed = typeof lyricsJson === 'string' ? JSON.parse(lyricsJson) : lyricsJson;
+    
+    if (!parsed || typeof parsed !== 'object') {
+      return {};
+    }
+    
+    // Filter to only valid language codes
+    const validLyrics: MultilingualText = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      if (isValidLanguageCode(key) && typeof value === 'string') {
+        validLyrics[key] = value;
+      }
+    }
+    
+    return validLyrics;
+  } catch (error) {
+    console.warn('Failed to parse lyrics JSONB:', error);
+    return {};
+  }
+}
+
 // Convert Supabase song to application Song type
 function mapSupabaseSongToSong(supabaseSong: SupabaseSong): Song {
   return {
@@ -50,6 +78,14 @@ function mapSupabaseSongToSong(supabaseSong: SupabaseSong): Song {
     source: supabaseSong.source || undefined,
     notes: supabaseSong.notes || undefined,
     defaultArrangementId: supabaseSong.default_arrangement_id || undefined,
+    // Multilingual lyrics fields
+    lyrics: parseSupabaseLyrics(supabaseSong.lyrics),
+    originalLanguage: (supabaseSong.original_language && isValidLanguageCode(supabaseSong.original_language)) 
+      ? supabaseSong.original_language as LanguageCode 
+      : DEFAULT_LANGUAGE,
+    lyricsVerified: supabaseSong.lyrics_verified || false,
+    lyricsSource: (supabaseSong.lyrics_source as LyricsSource) || 'user',
+    autoConversionEnabled: supabaseSong.auto_conversion_enabled || false,
     metadata: {
       createdBy: supabaseSong.created_by || undefined,
       isPublic: supabaseSong.is_public,
@@ -316,7 +352,13 @@ export const songService = {
         source: songData.source || null,
         notes: songData.notes || null,
         created_by: user.id,
-        is_public: songData.metadata?.isPublic || false
+        is_public: songData.metadata?.isPublic || false,
+        // Multilingual fields
+        lyrics: songData.lyrics ? JSON.stringify(songData.lyrics) : null,
+        original_language: songData.originalLanguage || DEFAULT_LANGUAGE,
+        lyrics_verified: songData.lyricsVerified || false,
+        lyrics_source: songData.lyricsSource || 'user',
+        auto_conversion_enabled: songData.autoConversionEnabled || false
       }
 
       const { data, error } = await supabase
@@ -357,6 +399,13 @@ export const songService = {
       if (songData.source !== undefined) updateData.source = songData.source
       if (songData.notes !== undefined) updateData.notes = songData.notes
       if (songData.metadata?.isPublic !== undefined) updateData.is_public = songData.metadata.isPublic
+      
+      // Multilingual fields
+      if (songData.lyrics !== undefined) updateData.lyrics = songData.lyrics ? JSON.stringify(songData.lyrics) : null
+      if (songData.originalLanguage !== undefined) updateData.original_language = songData.originalLanguage
+      if (songData.lyricsVerified !== undefined) updateData.lyrics_verified = songData.lyricsVerified
+      if (songData.lyricsSource !== undefined) updateData.lyrics_source = songData.lyricsSource
+      if (songData.autoConversionEnabled !== undefined) updateData.auto_conversion_enabled = songData.autoConversionEnabled
 
       const { data, error } = await supabase
         .from('songs')

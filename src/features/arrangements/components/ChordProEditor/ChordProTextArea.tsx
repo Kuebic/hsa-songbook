@@ -3,9 +3,10 @@
  * @description Native textarea component with ChordPro-specific enhancements
  */
 
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { cn } from '../../../../lib/utils';
 import type { Theme } from '@shared/contexts/ThemeContext';
+import { textProcessingUtils } from '../../../../features/multilingual/utils/textProcessing';
 
 interface ChordProTextAreaProps {
   value: string;
@@ -24,6 +25,10 @@ interface ChordProTextAreaProps {
   className?: string;
   readOnly?: boolean;
   autoFocus?: boolean;
+  // CJK support props
+  language?: string;
+  enableCJKMode?: boolean;
+  onLanguageDetected?: (language: string, containsCJK: boolean) => void;
 }
 
 export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
@@ -42,10 +47,53 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
   placeholder = 'Start typing your ChordPro song...',
   className,
   readOnly = false,
-  autoFocus = false
+  autoFocus = false,
+  // CJK support props
+  language,
+  enableCJKMode = false,
+  onLanguageDetected
 }) => {
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const textareaRef = externalRef || internalRef;
+  
+  // CJK support state
+  const [isComposing, setIsComposing] = useState(false);
+  const [detectedLanguage, setDetectedLanguage] = useState<string>('');
+  const [containsCJK, setContainsCJK] = useState(false);
+
+  /**
+   * Detect language and CJK content
+   */
+  const detectContentLanguage = useCallback((text: string) => {
+    if (!text || !enableCJKMode) return;
+
+    const hasCJK = textProcessingUtils.containsCJKCharacters(text);
+    
+    setContainsCJK(hasCJK);
+    
+    if (hasCJK !== containsCJK || detectedLanguage !== (language || '')) {
+      const newLanguage = language || (hasCJK ? 'cjk' : 'en');
+      setDetectedLanguage(newLanguage);
+      onLanguageDetected?.(newLanguage, hasCJK);
+    }
+  }, [enableCJKMode, containsCJK, detectedLanguage, language, onLanguageDetected]);
+
+  /**
+   * Handle IME composition start
+   */
+  const handleCompositionStart = useCallback(() => {
+    setIsComposing(true);
+  }, []);
+
+  /**
+   * Handle IME composition end
+   */
+  const handleCompositionEnd = useCallback((e: React.CompositionEvent<HTMLTextAreaElement>) => {
+    setIsComposing(false);
+    
+    // Trigger language detection after composition
+    detectContentLanguage(e.currentTarget.value);
+  }, [detectContentLanguage]);
 
   /**
    * Handle text changes and trigger auto-completion
@@ -55,9 +103,14 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
     
     onChange(newValue);
     
+    // Detect language changes if not currently composing
+    if (!isComposing && enableCJKMode) {
+      detectContentLanguage(newValue);
+    }
+    
     // Call onInput for autocomplete handling
     onInput?.();
-  }, [onChange, onInput]);
+  }, [onChange, onInput, isComposing, enableCJKMode, detectContentLanguage]);
 
   /**
    * Handle selection changes
@@ -219,21 +272,30 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
   }, [onBeforeInput]);
 
   /**
-   * Get theme-specific classes
+   * Get theme-specific classes with CJK support
    */
   const getThemeClasses = () => {
     // Base classes for the textarea - text-transparent allows syntax to show through
     // The debug class is added separately to make text visible in red
     const baseClasses = 'resize-none focus:outline-none bg-transparent text-transparent';
     
+    // CJK mode classes
+    const cjkClasses = enableCJKMode && (containsCJK || detectedLanguage.includes('cjk')) ? 'cjk-mode' : '';
+    
+    let themeClasses;
     switch (theme) {
       case 'dark':
-        return cn(baseClasses, 'caret-white');
+        themeClasses = cn(baseClasses, 'caret-white');
+        break;
       case 'stage':
-        return cn(baseClasses, 'caret-yellow-300');
+        themeClasses = cn(baseClasses, 'caret-yellow-300');
+        break;
       default:
-        return cn(baseClasses, 'caret-gray-900');
+        themeClasses = cn(baseClasses, 'caret-gray-900');
+        break;
     }
+    
+    return cn(themeClasses, cjkClasses);
   };
 
   /**
@@ -259,13 +321,20 @@ export const ChordProTextArea: React.FC<ChordProTextAreaProps> = ({
       onKeyDown={handleKeyDown}
       onBeforeInput={handleBeforeInput}
       onScroll={handleScroll}
+      onCompositionStart={handleCompositionStart}
+      onCompositionEnd={handleCompositionEnd}
       placeholder={placeholder}
       readOnly={readOnly}
       className={cn(getThemeClasses(), 'chord-editor-textarea', className)}
+      lang={language || detectedLanguage || undefined}
+      data-composing={isComposing}
+      data-cjk-mode={enableCJKMode && (containsCJK || detectedLanguage.includes('cjk'))}
       spellCheck={false}
       autoComplete="off"
       autoCorrect="off"
       autoCapitalize="off"
+      // IME support
+      inputMode={containsCJK ? 'text' : 'text'}
     />
   );
 };

@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { SONG_SOURCES } from '../constants/sources'
 import { arrangementSchema } from './arrangementSchema'
 import { normalizeThemes } from '../utils/themeNormalization'
+import { isValidLanguageCode, isNativeLanguageCode } from '@features/multilingual/types/multilingual.types'
 
 // CCLI validation regex (numeric, 5-7 digits)
 const ccliRegex = /^\d{5,7}$/
@@ -65,6 +66,41 @@ export const songFormSchema = z.object({
     .max(2000, 'Notes must be less than 2000 characters')
     .optional()
     .transform(val => val && val.length > 0 ? val : undefined),
+
+  // Multilingual Lyrics Support
+  lyrics: z.record(z.string(), z.string())
+    .optional()
+    .default({})
+    .refine(
+      (lyrics) => {
+        // Validate that all keys are valid language codes
+        return Object.keys(lyrics || {}).every(key => isValidLanguageCode(key))
+      },
+      { message: 'Invalid language code in lyrics' }
+    )
+    .refine(
+      (lyrics) => {
+        // Validate that all lyrics are under 10000 characters
+        return Object.values(lyrics || {}).every(content => content.length <= 10000)
+      },
+      { message: 'Lyrics content exceeds maximum length (10000 characters)' }
+    ),
+
+  originalLanguage: z.string()
+    .default('en')
+    .refine(
+      (lang) => isValidLanguageCode(lang) && isNativeLanguageCode(lang),
+      { message: 'Original language must be a native script (en, ja, or ko)' }
+    ),
+
+  lyricsVerified: z.boolean()
+    .default(false),
+
+  lyricsSource: z.enum(['user', 'import', 'opensong'])
+    .default('user'),
+
+  autoConversionEnabled: z.boolean()
+    .default(false),
   
   // Metadata
   isPublic: z.boolean().default(true), // Default to true for new songs
@@ -127,6 +163,38 @@ const updateBaseSchema = z.object({
     .max(2000, 'Notes must be less than 2000 characters')
     .optional()
     .transform(val => val && val.length > 0 ? val : undefined),
+
+  // Multilingual Lyrics Support (update schema)
+  lyrics: z.record(z.string(), z.string())
+    .optional()
+    .refine(
+      (lyrics) => {
+        if (!lyrics) return true
+        return Object.keys(lyrics).every(key => isValidLanguageCode(key))
+      },
+      { message: 'Invalid language code in lyrics' }
+    )
+    .refine(
+      (lyrics) => {
+        if (!lyrics) return true
+        return Object.values(lyrics).every(content => content.length <= 10000)
+      },
+      { message: 'Lyrics content exceeds maximum length (10000 characters)' }
+    ),
+
+  originalLanguage: z.string()
+    .refine(
+      (lang) => isValidLanguageCode(lang) && isNativeLanguageCode(lang),
+      { message: 'Original language must be a native script (en, ja, or ko)' }
+    )
+    .optional(),
+
+  lyricsVerified: z.boolean().optional(),
+
+  lyricsSource: z.enum(['user', 'import', 'opensong']).optional(),
+
+  autoConversionEnabled: z.boolean().optional(),
+
   isPublic: z.boolean(), // No default value for update schema
   arrangement: arrangementSchema.optional(),
   slug: z.string()
@@ -157,6 +225,12 @@ export const songFieldSchemas = {
   source: songFormSchema.shape.source,
   themes: songFormSchema.shape.themes,
   notes: songFormSchema.shape.notes,
+  // Multilingual fields
+  lyrics: songFormSchema.shape.lyrics,
+  originalLanguage: songFormSchema.shape.originalLanguage,
+  lyricsVerified: songFormSchema.shape.lyricsVerified,
+  lyricsSource: songFormSchema.shape.lyricsSource,
+  autoConversionEnabled: songFormSchema.shape.autoConversionEnabled,
   isPublic: songFormSchema.shape.isPublic,
   slug: songFormSchema.shape.slug
 } as const

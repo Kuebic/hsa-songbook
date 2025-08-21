@@ -10,6 +10,15 @@ import { SONG_SOURCES, SOURCE_METADATA, type SongSource } from '../validation/co
 import { normalizeThemes } from '../validation/utils/themeNormalization'
 import { useNotification } from '@shared/components/notifications'
 import type { Song } from '../types/song.types'
+// Multilingual support
+import { LyricsEditor } from '@features/multilingual/components/LyricsEditor'
+import { LabeledLanguageSelector } from '@features/multilingual/components/LanguageSelector'
+import type { 
+  MultilingualText, 
+  LanguageCode, 
+  LyricsSource 
+} from '@features/multilingual/types/multilingual.types'
+import { DEFAULT_LANGUAGE, isValidLanguageCode } from '@features/multilingual/types/multilingual.types'
 
 interface SongManagementFormProps {
   song?: Song // For editing existing song
@@ -27,6 +36,12 @@ interface FormState {
   themes: string[]
   notes: string
   isPublic: boolean
+  // Multilingual lyrics fields
+  lyrics: MultilingualText
+  originalLanguage: LanguageCode
+  lyricsVerified: boolean
+  lyricsSource: LyricsSource
+  autoConversionEnabled: boolean
 }
 
 interface ValidationErrors {
@@ -37,6 +52,10 @@ interface ValidationErrors {
   source?: string
   themes?: string
   notes?: string
+  // Multilingual validation errors
+  lyrics?: string
+  originalLanguage?: string
+  lyricsSource?: string
 }
 
 export function SongManagementForm({ song, onSuccess, onCancel, isModal = false }: SongManagementFormProps) {
@@ -53,12 +72,22 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
     source: song?.source || '',
     themes: song?.themes || [],
     notes: song?.notes || '',
-    isPublic: song?.metadata?.isPublic ?? true // Default to true for new songs
+    isPublic: song?.metadata?.isPublic ?? true, // Default to true for new songs
+    // Multilingual lyrics fields
+    lyrics: song?.lyrics || (song?.notes ? { [DEFAULT_LANGUAGE]: song.notes } : {}),
+    originalLanguage: song?.originalLanguage || DEFAULT_LANGUAGE,
+    lyricsVerified: song?.lyricsVerified || false,
+    lyricsSource: song?.lyricsSource || 'user',
+    autoConversionEnabled: song?.autoConversionEnabled || false
   })
   
   const [themeInput, setThemeInput] = useState('')
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Multilingual lyrics state
+  const [lyricsValid, setLyricsValid] = useState(true)
+  const [lyricsErrors, setLyricsErrors] = useState<Record<LanguageCode, string>>({})
   
   // Hooks for data fetching and mutations
   const { songs } = useSongs()
@@ -139,10 +168,37 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
     }
   }, [themeInput, existingSongs, formState.themes])
   
-  const handleFieldChange = (field: keyof FormState, value: string | boolean | string[]) => {
+  const handleFieldChange = (field: keyof FormState, value: string | boolean | string[] | MultilingualText | LanguageCode | LyricsSource) => {
     setFormState(prev => ({ ...prev, [field]: value }))
     // Clear validation error for this field
     setValidationErrors(prev => ({ ...prev, [field]: undefined }))
+  }
+
+  // Handlers for multilingual lyrics
+  const handleLyricsChange = (lyrics: MultilingualText) => {
+    handleFieldChange('lyrics', lyrics)
+  }
+
+  const handleLyricsValidationChange = (isValid: boolean, errors: Record<LanguageCode, string>) => {
+    setLyricsValid(isValid)
+    setLyricsErrors(errors)
+    
+    // Update form validation errors if there are lyrics errors
+    if (!isValid && Object.keys(errors).length > 0) {
+      setValidationErrors(prev => ({
+        ...prev,
+        lyrics: 'Please fix lyrics validation errors'
+      }))
+    } else {
+      setValidationErrors(prev => {
+        const { lyrics: _lyrics, ...rest } = prev
+        return rest
+      })
+    }
+  }
+
+  const handleOriginalLanguageChange = (language: LanguageCode) => {
+    handleFieldChange('originalLanguage', language)
   }
   
   const handleAddTheme = () => {
@@ -170,7 +226,13 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
       source: formState.source as SongSource || undefined,
       themes: formState.themes,
       notes: formState.notes || undefined,
-      isPublic: formState.isPublic
+      isPublic: formState.isPublic,
+      // Multilingual fields
+      lyrics: formState.lyrics,
+      originalLanguage: formState.originalLanguage,
+      lyricsVerified: formState.lyricsVerified,
+      lyricsSource: formState.lyricsSource,
+      autoConversionEnabled: formState.autoConversionEnabled
     }
     
     // Validate using Zod schema
@@ -181,19 +243,25 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
         const field = issue.path[0] as keyof ValidationErrors
         errors[field] = issue.message
       })
-      setValidationErrors(errors)
-      return false
     }
-    
+
+    // Check multilingual-specific validations
+    if (!lyricsValid) {
+      errors.lyrics = 'Please fix lyrics validation errors'
+    }
+
+    // Validate original language
+    if (!isValidLanguageCode(formState.originalLanguage)) {
+      errors.originalLanguage = 'Please select a valid original language'
+    }
+
     // Check for exact duplicates
     if (!song && duplicateDetection.hasExactMatch) {
       errors.title = 'A song with this exact title and artist already exists'
-      setValidationErrors(errors)
-      return false
     }
     
-    setValidationErrors({})
-    return true
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
   }
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -215,7 +283,13 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
         themes: normalizeThemes(formState.themes),
         notes: formState.notes.trim() || undefined,
         isPublic: formState.isPublic,
-        slug: song?.slug || slugGeneration.slug || undefined
+        slug: song?.slug || slugGeneration.slug || undefined,
+        // Multilingual fields
+        lyrics: formState.lyrics,
+        originalLanguage: formState.originalLanguage,
+        lyricsVerified: formState.lyricsVerified,
+        lyricsSource: formState.lyricsSource,
+        autoConversionEnabled: formState.autoConversionEnabled
       }
       
       let result: Song
@@ -638,6 +712,74 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
         )}
       </div>
       
+      {/* Original Language Field */}
+      <div>
+        <LabeledLanguageSelector
+          label="Original Language"
+          value={formState.originalLanguage}
+          onChange={handleOriginalLanguageChange}
+          availableLanguages={['en', 'ja', 'ko']} // Only native scripts for original language
+          required={true}
+          error={validationErrors.originalLanguage}
+          description="The primary language this song was written in"
+        />
+      </div>
+
+      {/* Multilingual Lyrics Editor */}
+      <div>
+        <label style={labelStyles}>
+          Lyrics (Multilingual Support)
+        </label>
+        <LyricsEditor
+          lyrics={formState.lyrics}
+          onChange={handleLyricsChange}
+          onValidationChange={handleLyricsValidationChange}
+          initialActiveLanguage={formState.originalLanguage}
+          placeholder="Enter lyrics..."
+          maxLength={10000}
+          showCharacterCount={true}
+          autoHeight={false}
+        />
+        {validationErrors.lyrics && (
+          <div style={errorStyles}>{validationErrors.lyrics}</div>
+        )}
+        {Object.keys(lyricsErrors).length > 0 && (
+          <div style={errorStyles}>
+            Lyrics validation errors: {Object.entries(lyricsErrors).map(([lang, error]) => 
+              `${lang}: ${error}`
+            ).join(', ')}
+          </div>
+        )}
+      </div>
+
+      {/* Lyrics Verification */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <input
+          id="lyricsVerified"
+          type="checkbox"
+          checked={formState.lyricsVerified}
+          onChange={(e) => handleFieldChange('lyricsVerified', e.target.checked)}
+          style={{ width: 'auto' }}
+        />
+        <label htmlFor="lyricsVerified" style={{ ...labelStyles, margin: 0 }}>
+          Lyrics have been verified for accuracy
+        </label>
+      </div>
+
+      {/* Auto-conversion checkbox (for future feature) */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <input
+          id="autoConversionEnabled"
+          type="checkbox"
+          checked={formState.autoConversionEnabled}
+          onChange={(e) => handleFieldChange('autoConversionEnabled', e.target.checked)}
+          style={{ width: 'auto' }}
+        />
+        <label htmlFor="autoConversionEnabled" style={{ ...labelStyles, margin: 0 }}>
+          Enable automatic Romaji conversion (future feature)
+        </label>
+      </div>
+
       {/* Notes Field */}
       <div>
         <label htmlFor="notes" style={labelStyles}>
@@ -648,9 +790,12 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
           value={formState.notes}
           onChange={(e) => handleFieldChange('notes', e.target.value)}
           style={textareaStyles}
-          placeholder="Additional notes about this song"
+          placeholder="Additional notes about this song (separate from lyrics)"
           maxLength={2000}
         />
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+          Use the lyrics editor above for song lyrics. This field is for additional metadata.
+        </div>
         {validationErrors.notes && (
           <div style={errorStyles}>{validationErrors.notes}</div>
         )}

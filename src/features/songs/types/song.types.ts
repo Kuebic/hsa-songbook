@@ -1,3 +1,5 @@
+import type { MultilingualText, LanguageCode, LyricsSource } from '../../multilingual/types/multilingual.types'
+
 export interface Song {
   id: string
   title: string
@@ -9,6 +11,12 @@ export interface Song {
   source?: string
   notes?: string
   defaultArrangementId?: string
+  // Multilingual lyrics support
+  lyrics?: MultilingualText      // NEW: {"en": "...", "ja": "...", "ja-romaji": "...", "ko": "...", "ko-romaji": "..."}
+  originalLanguage?: LanguageCode // NEW: Primary language (native script only: 'en', 'ja', 'ko')
+  lyricsVerified?: boolean        // NEW: Verification status
+  lyricsSource?: LyricsSource     // NEW: Source tracking
+  autoConversionEnabled?: boolean // NEW: Flag for future auto-conversion feature
   metadata: SongMetadata
   createdAt?: Date | string  // Added for compatibility
   updatedAt?: Date | string  // Added for compatibility
