@@ -3,30 +3,22 @@ import { useParams } from 'react-router-dom'
 import { useArrangementViewer } from '../hooks/useArrangementViewer'
 import { useTransposition } from '../hooks/useTransposition'
 import { useTransposeKeyboard } from '../hooks/useTransposeKeyboard'
-import { useChordSheetSettings } from '../hooks/useChordSheetSettings'
 import { usePrint } from '../hooks/usePrint'
-import { useStageMode } from '../hooks/useStageMode'
 import { extractKeyFromChordPro } from '../utils/chordProUtils'
 import { ViewerLayout } from '../components/ViewerLayout'
 import { ViewerHeader } from '../components/ViewerHeader'
 import { ViewerToolbar } from '../components/ViewerToolbar'
-import { ViewerControls } from '../components/ViewerControls'
 import { ChordSheetViewer } from '../components/ChordSheetViewer'
+import { StageCustomizer } from '../components/StageCustomizer'
 import { CollapsibleToolbar } from '@features/responsive/components/CollapsibleToolbar'
 import { useViewport } from '@features/responsive/hooks/useViewport'
 import '../styles/viewer-layout.css'
-import '../styles/stage-mode.css'
 import '../styles/transpose.css'
 
 export function ArrangementViewerPage() {
   const { slug } = useParams<{ slug: string }>()
   const { arrangement, loading, error } = useArrangementViewer(slug!)
-  const { isStageMode, toggleStageMode } = useStageMode()
   const { handlePrint, printRef } = usePrint()
-  const { 
-    fontSize,
-    setFontSize
-  } = useChordSheetSettings()
   const viewport = useViewport()
   const [_toolbarHeight, setToolbarHeight] = useState(0)
   
@@ -51,7 +43,7 @@ export function ArrangementViewerPage() {
   useTransposeKeyboard(
     transpositionState.transpose,
     transpositionState.reset,
-    !isStageMode // Disable in stage mode as it has its own controls
+    true // Always enable keyboard shortcuts
   )
   
   // Keyboard shortcuts for print - MUST be before any conditional returns
@@ -79,9 +71,6 @@ export function ArrangementViewerPage() {
           // Simple transpose up action for FAB
           transpositionState.transpose(1)
           break
-        case 'stage':
-          toggleStageMode()
-          break
         default:
           break
       }
@@ -92,7 +81,7 @@ export function ArrangementViewerPage() {
     return () => {
       window.removeEventListener('toolbar-action', handleToolbarAction as EventListener)
     }
-  }, [transpositionState, toggleStageMode])
+  }, [transpositionState])
   
   // Handle toolbar visibility change
   const handleToolbarVisibilityChange = useCallback((_visible: boolean, height: number) => {
@@ -184,10 +173,14 @@ export function ArrangementViewerPage() {
   
   
   return (
-    <ViewerLayout
-      header={!isStageMode && <ViewerHeader arrangement={arrangement} />}
+    <>
+      {/* Stage customization when in stage theme */}
+      <StageCustomizer arrangementId={arrangement.id} />
+      
+      <ViewerLayout
+      header={<ViewerHeader arrangement={arrangement} />}
       toolbar={
-        !isStageMode && (
+        (
           viewport.isMobile ? (
             <CollapsibleToolbar
               // Core Behavior
@@ -212,7 +205,7 @@ export function ArrangementViewerPage() {
               
               // Floating Actions
               showFloatingActions={true}
-              floatingActions={['transpose', 'stage']}
+              floatingActions={[]}
               
               // Callbacks
               onVisibilityChange={handleToolbarVisibilityChange}
@@ -227,8 +220,6 @@ export function ArrangementViewerPage() {
             >
               <ViewerToolbar
                 onPrint={handlePrint}
-                onToggleStageMode={toggleStageMode}
-                isStageMode={isStageMode}
                 transposition={transpositionState}
               />
             </CollapsibleToolbar>
@@ -239,14 +230,13 @@ export function ArrangementViewerPage() {
               autoHideOnDesktop={false}
               showFloatingActions={false}
               showToggleButton={false}
+              defaultVisible={true}  // Ensure toolbar is visible by default
               onVisibilityChange={handleToolbarVisibilityChange}
               persistKey={`toolbar-state-${arrangement.id}`}
               enablePersistence={true}
             >
               <ViewerToolbar
                 onPrint={handlePrint}
-                onToggleStageMode={toggleStageMode}
-                isStageMode={isStageMode}
                 transposition={transpositionState}
               />
             </CollapsibleToolbar>
@@ -258,22 +248,12 @@ export function ArrangementViewerPage() {
         <div ref={printRef} style={{ height: '100%' }}>
           <ChordSheetViewer 
             chordProText={arrangement.chordProText}
-            isStageMode={isStageMode}
             transposition={transpositionState.semitones}
           />
         </div>
       }
-      controls={
-        isStageMode ? (
-          <ViewerControls
-            transposition={transpositionState}
-            fontSize={fontSize}
-            onFontSizeChange={setFontSize}
-            isMinimalMode={true}
-            onToggleMinimalMode={toggleStageMode}
-          />
-        ) : null
-      }
+      controls={null}
     />
+    </>
   )
 }
