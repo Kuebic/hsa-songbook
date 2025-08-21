@@ -359,3 +359,109 @@
 [data-theme="dark"] .font-size-increase:hover {
   background-color: #374151;
 }
+
+/* Stage theme overrides */
+[data-theme="stage"] .font-preferences-panel {
+  background: #0a0a0a;
+  border-color: #333333;
+}
+
+[data-theme="stage"] .font-preferences-header {
+  border-color: #333333;
+}
+
+[data-theme="stage"] .font-preferences-header h3 {
+  color: #ffffff;
+}
+
+[data-theme="stage"] .close-button {
+  color: #e0e0e0;
+}
+
+[data-theme="stage"] .close-button:hover {
+  background-color: #1a1a1a;
+}
+
+[data-theme="stage"] .preference-group label {
+  color: #ffffff;
+}
+
+[data-theme="stage"] .preference-group select,
+[data-theme="stage"] .color-text-input {
+  background-color: #1a1a1a;
+  border-color: #333333;
+  color: #ffffff;
+}
+
+[data-theme="stage"] .preference-group select:hover {
+  border-color: #555555;
+}
+
+[data-theme="stage"] .preference-group select:focus {
+  border-color: #ffeb3b;
+  box-shadow: 0 0 0 3px rgba(255, 235, 59, 0.1);
+}
+
+[data-theme="stage"] .font-size-value,
+[data-theme="stage"] .line-height-value,
+[data-theme="stage"] .scroll-speed-value,
+[data-theme="stage"] .font-size-display {
+  color: #e0e0e0;
+}
+
+[data-theme="stage"] .color-input-wrapper input[type="color"] {
+  border-color: #333333;
+}
+
+[data-theme="stage"] .color-text-input:focus {
+  border-color: #ffeb3b;
+  box-shadow: 0 0 0 3px rgba(255, 235, 59, 0.1);
+}
+
+[data-theme="stage"] .font-size-control input[type="range"],
+[data-theme="stage"] .line-height-control input[type="range"],
+[data-theme="stage"] .scroll-speed-control input[type="range"] {
+  background: #333333;
+}
+
+[data-theme="stage"] .font-size-control input[type="range"]::-webkit-slider-thumb,
+[data-theme="stage"] .line-height-control input[type="range"]::-webkit-slider-thumb,
+[data-theme="stage"] .scroll-speed-control input[type="range"]::-webkit-slider-thumb {
+  background: #ffeb3b;
+}
+
+[data-theme="stage"] .reset-button {
+  background-color: #1a1a1a;
+  border-color: #333333;
+  color: #ffffff;
+}
+
+[data-theme="stage"] .reset-button:hover {
+  background-color: #333333;
+}
+
+[data-theme="stage"] .preference-actions {
+  border-color: #333333;
+}
+
+[data-theme="stage"] .font-preferences-compact {
+  background: #1a1a1a;
+}
+
+[data-theme="stage"] .font-size-decrease,
+[data-theme="stage"] .font-size-increase,
+[data-theme="stage"] .font-family-select-compact {
+  background-color: #0a0a0a;
+  border-color: #333333;
+  color: #ffffff;
+}
+
+[data-theme="stage"] .font-size-decrease:hover,
+[data-theme="stage"] .font-size-increase:hover {
+  background-color: #1a1a1a;
+}
+
+[data-theme="stage"] .font-family-select-compact:focus {
+  border-color: #ffeb3b;
+  box-shadow: 0 0 0 3px rgba(255, 235, 59, 0.1);
+}
