@@ -1,0 +1,465 @@
+/**
+ * Mobile navigation component styles
+ * Responsive, accessible, and performant styles for mobile navigation
+ */
+
+/* ============================================
+   Hamburger Button Styles
+   ============================================ */
+
+.hamburger-button {
+  display: none;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--nav-text);
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  z-index: 1001;
+}
+
+@media (max-width: 767px) {
+  .hamburger-button {
+    display: flex;
+  }
+}
+
+.hamburger-button:hover {
+  background-color: var(--nav-hover);
+}
+
+.hamburger-button:active {
+  opacity: 0.7;
+  transform: scale(0.98);
+}
+
+.hamburger-button:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   Navigation Overlay Styles
+   ============================================ */
+
+.nav-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 9998;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.nav-overlay.open {
+  opacity: 1;
+}
+
+/* ============================================
+   Navigation Drawer Styles
+   ============================================ */
+
+.nav-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  height: 100dvh;
+  width: 280px;
+  max-width: 85vw;
+  background-color: var(--color-background);
+  border-right: 1px solid var(--color-border);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-out;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  
+  /* Safe area support */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-drawer.open {
+  transform: translateX(0);
+}
+
+/* Drawer header */
+.nav-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  min-height: 64px;
+  flex-shrink: 0;
+}
+
+.nav-drawer-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.nav-drawer-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-drawer-close:hover {
+  background-color: var(--color-muted);
+  color: var(--text-primary);
+}
+
+.nav-drawer-close:active {
+  transform: scale(0.95);
+}
+
+.nav-drawer-close:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* Navigation list */
+.nav-drawer-content {
+  flex: 1;
+  padding: 8px 0;
+  overflow-y: auto;
+}
+
+.nav-drawer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-drawer-item {
+  margin: 0;
+}
+
+.nav-drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  margin: 0 8px;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 16px; /* Prevent iOS zoom */
+  font-weight: 400;
+  border-radius: 8px;
+  background-color: transparent;
+  transition: all 0.2s ease;
+  min-height: 44px; /* Touch target minimum */
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  position: relative;
+}
+
+.nav-drawer-link:hover {
+  background-color: var(--color-muted);
+}
+
+.nav-drawer-link:active {
+  background-color: var(--nav-hover);
+  transform: scale(0.98);
+}
+
+.nav-drawer-link:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: -2px;
+}
+
+.nav-drawer-link.active {
+  background-color: var(--color-accent);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.nav-drawer-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background-color: var(--color-primary);
+  border-radius: 0 2px 2px 0;
+}
+
+/* Drawer footer */
+.nav-drawer-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-border);
+  font-size: 14px;
+  color: var(--text-tertiary);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   Floating Action Button Styles
+   ============================================ */
+
+.floating-actions {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  right: calc(24px + env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+.fab-button {
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.fab-button-primary {
+  width: 56px;
+  height: 56px;
+  background-color: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+.fab-button-secondary {
+  width: 48px;
+  height: 48px;
+  background-color: var(--color-secondary);
+  color: var(--color-secondary-foreground);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.fab-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.fab-button:active {
+  transform: scale(0.95);
+}
+
+.fab-button:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* FAB animations */
+@keyframes fabSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.fab-enter {
+  animation: fabSlideIn 0.3s ease-out forwards;
+}
+
+/* ============================================
+   Responsive Breakpoints
+   ============================================ */
+
+/* Hide mobile navigation on tablet and desktop */
+@media (min-width: 768px) {
+  .hamburger-button {
+    display: none !important;
+  }
+  
+  .nav-drawer,
+  .nav-overlay,
+  .floating-actions {
+    display: none !important;
+  }
+}
+
+/* Small mobile adjustments */
+@media (max-width: 380px) {
+  .nav-drawer {
+    width: 100vw;
+    max-width: 100vw;
+  }
+  
+  .nav-drawer-link {
+    padding: 16px;
+    margin: 0 4px;
+  }
+  
+  .floating-actions {
+    bottom: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    right: calc(16px + env(safe-area-inset-right));
+  }
+  
+  .fab-button-primary {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .fab-button-secondary {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* ============================================
+   Theme Support
+   ============================================ */
+
+/* Dark theme adjustments */
+[data-theme="dark"] .nav-drawer {
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .nav-overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Stage theme adjustments */
+[data-theme="stage"] .nav-drawer {
+  background-color: var(--color-background);
+  border-right-color: var(--color-border);
+}
+
+[data-theme="stage"] .fab-button-primary {
+  background-color: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+/* ============================================
+   Accessibility & Motion
+   ============================================ */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .hamburger-button,
+  .nav-drawer,
+  .nav-overlay,
+  .nav-drawer-link,
+  .fab-button {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .nav-drawer.open {
+    transform: translateX(0);
+  }
+  
+  .nav-overlay.open {
+    opacity: 1;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .nav-drawer {
+    border-right: 2px solid var(--color-border);
+  }
+  
+  .nav-drawer-link {
+    border: 1px solid transparent;
+  }
+  
+  .nav-drawer-link:focus-visible {
+    border-color: var(--color-ring);
+  }
+  
+  .fab-button {
+    border: 2px solid var(--color-border);
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.nav-drawer-link:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.hamburger-button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.fab-button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ============================================
+   Performance Optimizations
+   ============================================ */
+
+/* GPU acceleration for smooth animations */
+.nav-drawer,
+.nav-overlay,
+.fab-button {
+  will-change: transform;
+}
+
+.nav-drawer.open,
+.nav-overlay.open {
+  will-change: auto;
+}
+
+/* Prevent text selection during interactions */
+.hamburger-button,
+.nav-drawer-link,
+.fab-button {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Improve scrolling on iOS */
+.nav-drawer-content {
+  -webkit-overflow-scrolling: touch;
+}

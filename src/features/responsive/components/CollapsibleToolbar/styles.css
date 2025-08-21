@@ -1,0 +1,422 @@
+/**
+ * Collapsible toolbar component styles
+ * Auto-hiding toolbar with smooth animations and floating actions
+ */
+
+/* ============================================
+   Collapsible Toolbar Styles
+   ============================================ */
+
+.collapsible-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-color: var(--nav-background);
+  border-bottom: 1px solid var(--color-border);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  
+  /* Safe area support */
+  padding-top: env(safe-area-inset-top);
+  
+  /* GPU acceleration for smooth animations */
+  will-change: transform;
+}
+
+.collapsible-toolbar.visible {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.collapsible-toolbar.hidden {
+  transform: translateY(-100%);
+  box-shadow: none;
+}
+
+/* Toolbar content wrapper */
+.toolbar-content {
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+}
+
+@media (max-width: 767px) {
+  .toolbar-content {
+    min-height: 56px;
+    padding: 0 12px;
+  }
+}
+
+/* ============================================
+   Floating Actions Styles
+   ============================================ */
+
+.floating-actions {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  right: calc(24px + env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+/* Primary FAB (show toolbar) */
+.fab-primary {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: var(--color-primary-foreground);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.fab-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.fab-primary:active {
+  transform: scale(0.95);
+}
+
+.fab-primary:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* Secondary FABs */
+.fab-secondary {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--color-secondary);
+  color: var(--color-secondary-foreground);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  opacity: 0;
+  transform: translateY(20px) scale(0.8);
+}
+
+.fab-secondary.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.fab-secondary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.fab-secondary:active {
+  transform: scale(0.9);
+}
+
+.fab-secondary:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* FAB animations */
+@keyframes fabSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fabSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+  }
+}
+
+.fab-enter {
+  animation: fabSlideIn 0.3s ease-out forwards;
+}
+
+.fab-exit {
+  animation: fabSlideOut 0.2s ease-in forwards;
+}
+
+/* Staggered animation for multiple FABs */
+.fab-secondary:nth-child(2) {
+  animation-delay: 0.05s;
+}
+
+.fab-secondary:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+.fab-secondary:nth-child(4) {
+  animation-delay: 0.15s;
+}
+
+/* ============================================
+   Toolbar States
+   ============================================ */
+
+/* Toolbar when auto-hide is disabled */
+.collapsible-toolbar.auto-hide-disabled {
+  position: relative;
+  transform: none !important;
+  transition: none;
+}
+
+/* Toolbar when permanently hidden */
+.collapsible-toolbar.permanently-hidden {
+  display: none;
+}
+
+/* Toolbar during user interaction */
+.collapsible-toolbar.user-hidden {
+  transform: translateY(-100%);
+}
+
+.collapsible-toolbar.user-shown {
+  transform: translateY(0);
+}
+
+/* ============================================
+   Responsive Behavior
+   ============================================ */
+
+/* Mobile adjustments */
+@media (max-width: 767px) {
+  .collapsible-toolbar {
+    /* More aggressive auto-hide on mobile */
+    transform: translateY(-100%);
+  }
+  
+  .collapsible-toolbar.visible {
+    transform: translateY(0);
+  }
+  
+  .floating-actions {
+    bottom: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    right: calc(16px + env(safe-area-inset-right));
+  }
+  
+  .fab-primary {
+    width: 52px;
+    height: 52px;
+  }
+  
+  .fab-secondary {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .collapsible-toolbar {
+    /* Less aggressive auto-hide on tablet */
+    transition: transform 0.4s ease-in-out;
+  }
+}
+
+/* Desktop adjustments */
+@media (min-width: 1024px) {
+  .collapsible-toolbar {
+    /* Disable auto-hide on desktop by default */
+    position: relative;
+    transform: none;
+  }
+  
+  .floating-actions {
+    /* Hide FABs on desktop */
+    display: none;
+  }
+}
+
+/* Small screens */
+@media (max-width: 380px) {
+  .fab-primary {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .fab-secondary {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .floating-actions {
+    gap: 10px;
+  }
+}
+
+/* ============================================
+   Theme Support
+   ============================================ */
+
+/* Dark theme */
+[data-theme="dark"] .collapsible-toolbar {
+  background-color: var(--nav-background);
+  border-bottom-color: var(--color-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .fab-primary {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .fab-secondary {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Stage theme */
+[data-theme="stage"] .collapsible-toolbar {
+  background-color: var(--nav-background);
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme="stage"] .fab-primary {
+  background-color: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+/* ============================================
+   Accessibility & Motion
+   ============================================ */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .collapsible-toolbar {
+    transition: none !important;
+  }
+  
+  .fab-primary,
+  .fab-secondary {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .fab-secondary.show {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .collapsible-toolbar {
+    border-bottom: 2px solid var(--color-border);
+  }
+  
+  .fab-primary,
+  .fab-secondary {
+    border: 2px solid var(--color-border);
+  }
+}
+
+/* Focus management */
+.collapsible-toolbar:focus-within {
+  /* Keep toolbar visible when focused */
+  transform: translateY(0) !important;
+}
+
+/* Keyboard navigation support */
+.fab-primary:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.fab-secondary:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ============================================
+   Performance Optimizations
+   ============================================ */
+
+/* GPU acceleration */
+.collapsible-toolbar {
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.fab-primary,
+.fab-secondary {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Optimize for 60fps animations */
+.collapsible-toolbar.animating {
+  will-change: transform;
+}
+
+.collapsible-toolbar:not(.animating) {
+  will-change: auto;
+}
+
+/* Prevent text selection */
+.fab-primary,
+.fab-secondary {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* ============================================
+   Toolbar Interaction States
+   ============================================ */
+
+/* When toolbar is being interacted with */
+.collapsible-toolbar.interacting {
+  transform: translateY(0) !important;
+  transition: transform 0.2s ease-out;
+}
+
+/* Hover states for desktop */
+@media (hover: hover) and (pointer: fine) {
+  .collapsible-toolbar:hover {
+    transform: translateY(0) !important;
+  }
+  
+  .fab-primary:hover,
+  .fab-secondary:hover {
+    filter: brightness(1.1);
+  }
+}
+
+/* Active states */
+.fab-primary:active,
+.fab-secondary:active {
+  filter: brightness(0.9);
+}
