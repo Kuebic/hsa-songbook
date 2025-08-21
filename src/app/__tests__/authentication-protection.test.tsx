@@ -28,9 +28,6 @@ const createAuthMock = (overrides: Partial<ReturnType<typeof useAuth>> = {}) => 
   signInWithEmail: vi.fn(),
   signUpWithEmail: vi.fn(),
   resetPassword: vi.fn(),
-  signInAnonymously: vi.fn(),
-  linkEmailToAnonymousUser: vi.fn(),
-  linkOAuthToAnonymousUser: vi.fn(),
   signOut: vi.fn(),
   ...overrides
 })

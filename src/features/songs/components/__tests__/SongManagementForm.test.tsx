@@ -4,12 +4,11 @@ import userEvent from '@testing-library/user-event'
 import { SongManagementForm } from '../SongManagementForm'
 import { NotificationProvider } from '@shared/components/notifications'
 import type { Song } from '../../types/song.types'
-import type { User } from '@supabase/supabase-js'
 
 // Mock the hooks
 vi.mock('@features/auth/hooks/useAuth', () => ({
   useAuth: vi.fn(() => ({
-    user: { id: 'user-123', email: 'test@example.com', is_anonymous: false },
+    user: { id: 'user-123', email: 'test@example.com' },
     isAdmin: false
   }))
 }))
@@ -360,24 +359,6 @@ describe('SongManagementForm', () => {
   })
 
   describe('Permission Handling', () => {
-    it('should show guest user notice for anonymous users', () => {
-      vi.mocked(useAuth).mockReturnValue({
-        user: { 
-          id: 'anon-123', 
-          is_anonymous: true, 
-          email: null,
-          app_metadata: {},
-          user_metadata: {},
-          aud: 'authenticated',
-          created_at: new Date().toISOString()
-        } as unknown as User,
-        isAdmin: false
-      } as ReturnType<typeof useAuth>)
-      
-      renderWithProviders(<SongManagementForm />)
-      
-      expect(screen.getByText(/you're adding this song as a guest/i)).toBeInTheDocument()
-    })
   })
 
   describe('Cancel Functionality', () => {
@@ -392,6 +373,3 @@ describe('SongManagementForm', () => {
     })
   })
 })
-
-// Import for mocking
-import { useAuth } from '@features/auth/hooks/useAuth'

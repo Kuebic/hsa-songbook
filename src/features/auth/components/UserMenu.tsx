@@ -1,11 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { ConvertAnonymousUser } from './ConvertAnonymousUser'
 
 export function UserMenu() {
-  const { user, getUserName, getUserAvatar, signOut, isAnonymous } = useAuth()
+  const { user, getUserName, getUserAvatar, signOut } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
-  const [showConversion, setShowConversion] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -39,56 +37,6 @@ export function UserMenu() {
   const userName = getUserName()
   const userAvatar = getUserAvatar()
 
-  // Show conversion modal separately
-  if (showConversion) {
-    return (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000
-      }}>
-        <div style={{
-          backgroundColor: 'var(--color-background)',
-          borderRadius: '8px',
-          padding: '2rem',
-          position: 'relative',
-          maxWidth: '90%',
-          maxHeight: '90vh',
-          overflow: 'auto'
-        }}>
-          <button
-            onClick={() => setShowConversion(false)}
-            style={{
-              position: 'absolute',
-              top: '1rem',
-              right: '1rem',
-              background: 'none',
-              border: 'none',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              color: 'var(--text-primary)',
-              padding: '0.25rem',
-              lineHeight: 1
-            }}
-            aria-label="Close"
-          >
-            ×
-          </button>
-          <ConvertAnonymousUser 
-            onSuccess={() => setShowConversion(false)}
-            onCancel={() => setShowConversion(false)}
-          />
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div ref={menuRef} style={{ position: 'relative' }}>
@@ -141,40 +89,11 @@ export function UserMenu() {
               {userName}
             </div>
             <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-              {isAnonymous ? '👤 Guest User' : user.email}
+              {user.email}
             </div>
           </div>
 
           <div style={{ padding: '0.5rem 0' }}>
-            {isAnonymous && (
-              <button
-                onClick={() => {
-                  setIsOpen(false)
-                  setShowConversion(true)
-                }}
-                style={{
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: '0.5rem 1rem',
-                  fontSize: '0.875rem',
-                  color: '#059669',
-                  backgroundColor: '#ecfdf5',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s',
-                  fontWeight: '500'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#d1fae5'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ecfdf5'
-                }}
-              >
-                🚀 Upgrade Account
-              </button>
-            )}
-            
             <button
               onClick={() => {
                 setIsOpen(false)

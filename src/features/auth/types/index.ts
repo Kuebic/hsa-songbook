@@ -1,9 +1,7 @@
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js'
 
-// Extend the Supabase User type to include is_anonymous property
-export interface User extends SupabaseUser {
-  is_anonymous?: boolean
-}
+// Re-export Supabase User type directly
+export type User = SupabaseUser
 
 // Type for auth state
 export interface AuthState {

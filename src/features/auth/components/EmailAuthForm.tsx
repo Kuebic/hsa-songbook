@@ -1,15 +1,17 @@
 import { useState, useRef } from 'react'
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 import { useAuth } from '../hooks/useAuth'
+import { Button } from '@shared/components/ui/Button'
+import styles from './EmailAuthForm.module.css'
 
-type AuthMode = 'signin' | 'signup' | 'reset' | 'anonymous'
+type AuthMode = 'signin' | 'signup' | 'reset'
 
 interface EmailAuthFormProps {
   onSuccess?: () => void
 }
 
 export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
-  const { signInWithEmail, signUpWithEmail, resetPassword, signInAnonymously } = useAuth()
+  const { signInWithEmail, signUpWithEmail, resetPassword } = useAuth()
   const [mode, setMode] = useState<AuthMode>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -40,26 +42,24 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
     setError(null)
     setSuccess(null)
 
-    // Validation for non-anonymous modes
-    if (mode !== 'anonymous') {
-      if (!email || !email.includes('@')) {
-        setError('Please enter a valid email address')
-        return
-      }
+    // Validation
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address')
+      return
+    }
 
-      if (mode === 'signup') {
-        if (!password || password.length < 6) {
-          setError('Password must be at least 6 characters')
-          return
-        }
-        if (password !== confirmPassword) {
-          setError('Passwords do not match')
-          return
-        }
-      } else if (mode === 'signin' && !password) {
-        setError('Please enter your password')
+    if (mode === 'signup') {
+      if (!password || password.length < 6) {
+        setError('Password must be at least 6 characters')
         return
       }
+      if (password !== confirmPassword) {
+        setError('Passwords do not match')
+        return
+      }
+    } else if (mode === 'signin' && !password) {
+      setError('Please enter your password')
+      return
     }
 
     // Check for captcha token only if siteKey is configured
@@ -82,9 +82,6 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
         await resetPassword(email, captchaToken)
         setSuccess('Password reset email sent. Please check your inbox.')
         setMode('signin')
-      } else if (mode === 'anonymous') {
-        await signInAnonymously(captchaToken)
-        onSuccess?.()
       }
     } catch (err) {
       console.error('Auth error:', err)
@@ -210,7 +207,6 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
           {mode === 'signin' && 'Sign In to Your Account'}
           {mode === 'signup' && 'Create New Account'}
           {mode === 'reset' && 'Reset Password'}
-          {mode === 'anonymous' && 'Continue as Guest'}
         </h2>
 
         {error && (
@@ -237,21 +233,7 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
           </div>
         )}
 
-        {mode === 'anonymous' && (
-          <div style={{
-            padding: '0.75rem',
-            backgroundColor: '#e0f2fe',
-            color: '#0369a1',
-            borderRadius: '4px',
-            fontSize: '0.875rem',
-            marginBottom: '1rem'
-          }}>
-            Continue as a guest user to explore the app without signing up. You can convert to a permanent account later by adding email or OAuth login.
-          </div>
-        )}
-
-        {mode !== 'anonymous' && (
-          <div>
+        <div>
             <label htmlFor="email" style={labelStyles}>
               Email
             </label>
@@ -272,9 +254,8 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
               }}
             />
           </div>
-        )}
 
-        {mode !== 'reset' && mode !== 'anonymous' && (
+        {mode !== 'reset' && (
           <div>
             <label htmlFor="password" style={labelStyles}>
               Password
@@ -390,32 +371,21 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
               {mode === 'signin' && 'Sign In'}
               {mode === 'signup' && 'Create Account'}
               {mode === 'reset' && 'Send Reset Email'}
-              {mode === 'anonymous' && 'Continue as Guest'}
             </>
           )}
         </button>
 
         {mode === 'signin' && (
-          <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-            <button
+          <div className={styles.authFormActions}>
+            <Button 
+              variant="link" 
+              size="sm"
               type="button"
-              onClick={() => {
-                handleModeChange('reset')
-              }}
-              style={linkStyles}
+              onClick={() => handleModeChange('reset')}
+              className={styles.forgotPasswordButton}
             >
               Forgot Password?
-            </button>
-            <span style={{ margin: '0 0.5rem', color: '#6b7280' }}>|</span>
-            <button
-              type="button"
-              onClick={() => {
-                handleModeChange('anonymous')
-              }}
-              style={linkStyles}
-            >
-              Continue as Guest
-            </button>
+            </Button>
           </div>
         )}
 
@@ -433,19 +403,6 @@ export function EmailAuthForm({ onSuccess }: EmailAuthFormProps = {}) {
           </div>
         )}
 
-        {mode === 'anonymous' && (
-          <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-            <button
-              type="button"
-              onClick={() => {
-                handleModeChange('signin')
-              }}
-              style={linkStyles}
-            >
-              Sign In with Account
-            </button>
-          </div>
-        )}
       </form>
 
       <style>{`

@@ -12,7 +12,7 @@ export function AddSongButton() {
   // Don't render until auth state is loaded
   if (!isLoaded) return null
   
-  // Only show for authenticated users (including anonymous)
+  // Only show for authenticated users
   if (!isSignedIn) return null
   
   return (

@@ -36,7 +36,6 @@ describe('useArrangementMutations', () => {
       user: {
         id: 'user-123',
         email: 'test@example.com',
-        is_anonymous: false,
         app_metadata: {},
         user_metadata: {},
         aud: 'authenticated',
@@ -47,7 +46,6 @@ describe('useArrangementMutations', () => {
       isLoaded: true,
       isSignedIn: true,
       isAdmin: false,
-      isAnonymous: false,
       getToken: vi.fn().mockResolvedValue('mock-token'),
       getUserEmail: vi.fn().mockReturnValue('test@example.com'),
       getUserName: vi.fn().mockReturnValue('Test User'),
@@ -57,9 +55,6 @@ describe('useArrangementMutations', () => {
       signInWithEmail: vi.fn(),
       signUpWithEmail: vi.fn(),
       resetPassword: vi.fn(),
-      signInAnonymously: vi.fn(),
-      linkEmailToAnonymousUser: vi.fn(),
-      linkOAuthToAnonymousUser: vi.fn(),
       signOut: vi.fn()
     })
   })
@@ -100,7 +95,21 @@ describe('useArrangementMutations', () => {
         createdArrangement = await result.current.createArrangement(formData)
       })
 
-      expect(mockArrangementService.createArrangement).toHaveBeenCalledWith(formData)
+      expect(mockArrangementService.createArrangement).toHaveBeenCalledWith({
+        name: 'Test Arrangement',
+        slug: undefined,
+        songIds: ['song-123'],
+        key: 'C',
+        tempo: undefined,
+        timeSignature: '4/4',
+        difficulty: 'beginner',
+        tags: ['acoustic'],
+        chordData: '{title: Test}',
+        description: undefined,
+        notes: undefined,
+        capo: undefined,
+        duration: undefined
+      })
       expect(createdArrangement!).toEqual(mockArrangement)
       expect(result.current.isCreating).toBe(false)
       expect(result.current.error).toBe(null)
@@ -175,7 +184,8 @@ describe('useArrangementMutations', () => {
         }
       })
 
-      expect(result.current.error).toBe(errorMessage)
+      expect(result.current.error).toBeInstanceOf(Error)
+      expect(result.current.error?.message).toBe(errorMessage)
       expect(result.current.isCreating).toBe(false)
     })
 
@@ -187,7 +197,6 @@ describe('useArrangementMutations', () => {
         isLoaded: true,
         isSignedIn: false,
         isAdmin: false,
-        isAnonymous: true,
         getToken: vi.fn(),
         getUserEmail: vi.fn().mockReturnValue(undefined),
         getUserName: vi.fn().mockReturnValue(undefined),
@@ -197,9 +206,6 @@ describe('useArrangementMutations', () => {
         signInWithEmail: vi.fn(),
         signUpWithEmail: vi.fn(),
         resetPassword: vi.fn(),
-        signInAnonymously: vi.fn(),
-        linkEmailToAnonymousUser: vi.fn(),
-        linkOAuthToAnonymousUser: vi.fn(),
         signOut: vi.fn()
       })
 
@@ -231,8 +237,7 @@ describe('useArrangementMutations', () => {
         user: {
           id: 'user-123',
           email: 'test@example.com',
-          is_anonymous: false,
-          app_metadata: {},
+            app_metadata: {},
           user_metadata: {},
           aud: 'authenticated',
           created_at: new Date().toISOString()
@@ -242,8 +247,7 @@ describe('useArrangementMutations', () => {
         isLoaded: true,
         isSignedIn: true,
         isAdmin: false,
-        isAnonymous: false,
-        getToken: vi.fn().mockResolvedValue(null),
+          getToken: vi.fn().mockResolvedValue(null),
         getUserEmail: vi.fn().mockReturnValue('test@example.com'),
         getUserName: vi.fn().mockReturnValue('Test User'),
         getUserAvatar: vi.fn().mockReturnValue(undefined),
@@ -252,9 +256,6 @@ describe('useArrangementMutations', () => {
         signInWithEmail: vi.fn(),
         signUpWithEmail: vi.fn(),
         resetPassword: vi.fn(),
-        signInAnonymously: vi.fn(),
-        linkEmailToAnonymousUser: vi.fn(),
-        linkOAuthToAnonymousUser: vi.fn(),
         signOut: vi.fn()
       })
 
@@ -339,7 +340,8 @@ describe('useArrangementMutations', () => {
         }
       })
 
-      expect(result.current.error).toBe(errorMessage)
+      expect(result.current.error).toBeInstanceOf(Error)
+      expect(result.current.error?.message).toBe(errorMessage)
       expect(result.current.isCreating).toBe(false)
     })
 
@@ -351,7 +353,6 @@ describe('useArrangementMutations', () => {
         isLoaded: true,
         isSignedIn: false,
         isAdmin: false,
-        isAnonymous: true,
         getToken: vi.fn(),
         getUserEmail: vi.fn().mockReturnValue(undefined),
         getUserName: vi.fn().mockReturnValue(undefined),
@@ -361,9 +362,6 @@ describe('useArrangementMutations', () => {
         signInWithEmail: vi.fn(),
         signUpWithEmail: vi.fn(),
         resetPassword: vi.fn(),
-        signInAnonymously: vi.fn(),
-        linkEmailToAnonymousUser: vi.fn(),
-        linkOAuthToAnonymousUser: vi.fn(),
         signOut: vi.fn()
       })
 
@@ -415,7 +413,8 @@ describe('useArrangementMutations', () => {
         }
       })
 
-      expect(result.current.error).toBe(errorMessage)
+      expect(result.current.error).toBeInstanceOf(Error)
+      expect(result.current.error?.message).toBe(errorMessage)
       expect(result.current.isCreating).toBe(false)
     })
 
@@ -427,7 +426,6 @@ describe('useArrangementMutations', () => {
         isLoaded: true,
         isSignedIn: false,
         isAdmin: false,
-        isAnonymous: true,
         getToken: vi.fn(),
         getUserEmail: vi.fn().mockReturnValue(undefined),
         getUserName: vi.fn().mockReturnValue(undefined),
@@ -437,9 +435,6 @@ describe('useArrangementMutations', () => {
         signInWithEmail: vi.fn(),
         signUpWithEmail: vi.fn(),
         resetPassword: vi.fn(),
-        signInAnonymously: vi.fn(),
-        linkEmailToAnonymousUser: vi.fn(),
-        linkOAuthToAnonymousUser: vi.fn(),
         signOut: vi.fn()
       })
 
@@ -494,7 +489,8 @@ describe('useArrangementMutations', () => {
         }
       })
 
-      expect(result.current.error).toBe('Test error')
+      expect(result.current.error).toBeInstanceOf(Error)
+      expect(result.current.error?.message).toBe('Test error')
 
       // Clear the error
       act(() => {
@@ -521,7 +517,6 @@ describe('useArrangementMutations', () => {
         isLoaded: true,
         isSignedIn: false,
         isAdmin: false,
-        isAnonymous: true,
         getToken: vi.fn(),
         getUserEmail: vi.fn().mockReturnValue(undefined),
         getUserName: vi.fn().mockReturnValue(undefined),
@@ -531,9 +526,6 @@ describe('useArrangementMutations', () => {
         signInWithEmail: vi.fn(),
         signUpWithEmail: vi.fn(),
         resetPassword: vi.fn(),
-        signInAnonymously: vi.fn(),
-        linkEmailToAnonymousUser: vi.fn(),
-        linkOAuthToAnonymousUser: vi.fn(),
         signOut: vi.fn()
       })
 
@@ -548,8 +540,7 @@ describe('useArrangementMutations', () => {
         user: {
           id: 'user-123',
           email: 'test@example.com',
-          is_anonymous: false,
-          app_metadata: {},
+            app_metadata: {},
           user_metadata: {},
           aud: 'authenticated',
           created_at: new Date().toISOString()
@@ -559,8 +550,7 @@ describe('useArrangementMutations', () => {
         isLoaded: true,
         isSignedIn: true,
         isAdmin: false,
-        isAnonymous: false,
-        getToken: vi.fn().mockResolvedValue('token'),
+          getToken: vi.fn().mockResolvedValue('token'),
         getUserEmail: vi.fn().mockReturnValue('test@example.com'),
         getUserName: vi.fn().mockReturnValue('Test User'),
         getUserAvatar: vi.fn().mockReturnValue(undefined),
@@ -569,9 +559,6 @@ describe('useArrangementMutations', () => {
         signInWithEmail: vi.fn(),
         signUpWithEmail: vi.fn(),
         resetPassword: vi.fn(),
-        signInAnonymously: vi.fn(),
-        linkEmailToAnonymousUser: vi.fn(),
-        linkOAuthToAnonymousUser: vi.fn(),
         signOut: vi.fn()
       })
 
@@ -664,7 +651,8 @@ describe('useArrangementMutations', () => {
         }
       })
 
-      expect(result.current.error).toBe('Failed to create arrangement')
+      expect(result.current.error).toBeInstanceOf(Error)
+      expect(result.current.error?.message).toBe('Failed to create arrangement')
     })
 
     it('should handle network timeout errors', async () => {
@@ -690,7 +678,8 @@ describe('useArrangementMutations', () => {
         }
       })
 
-      expect(result.current.error).toBe('Network timeout')
+      expect(result.current.error).toBeInstanceOf(Error)
+      expect(result.current.error?.message).toBe('Network timeout')
     })
   })
 
@@ -738,7 +727,21 @@ describe('useArrangementMutations', () => {
         await result.current.createArrangement(formData)
       })
 
-      expect(mockArrangementService.createArrangement).toHaveBeenCalledWith(formData)
+      expect(mockArrangementService.createArrangement).toHaveBeenCalledWith({
+        name: 'Complete Arrangement',
+        slug: 'complete-arrangement',
+        songIds: ['song-123'],
+        key: 'C',
+        tempo: 120,
+        timeSignature: '4/4',
+        difficulty: 'intermediate',
+        tags: ['acoustic', 'fingerpicking'],
+        chordData: '{title: Complete}',
+        description: 'A complete arrangement',
+        notes: 'Some notes',
+        capo: 2,
+        duration: 240
+      })
     })
   })
 })

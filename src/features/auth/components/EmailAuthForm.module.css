@@ -1,0 +1,50 @@
+.forgotPasswordButton {
+  /* Base styles */
+  color: var(--primary, #3b82f6);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.forgotPasswordButton:hover {
+  opacity: 0.8;
+  text-decoration-thickness: 2px;
+}
+
+.forgotPasswordButton:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] .forgotPasswordButton {
+  color: var(--primary, #60a5fa);
+}
+
+[data-theme="dark"] .forgotPasswordButton:hover {
+  color: var(--primary-hover, #93bbfc);
+}
+
+/* Stage theme overrides */
+[data-theme="stage"] .forgotPasswordButton {
+  color: var(--stage-accent, #fbbf24);
+  text-shadow: 0 0 2px rgba(251, 191, 36, 0.3);
+}
+
+[data-theme="stage"] .forgotPasswordButton:hover {
+  text-shadow: 0 0 4px rgba(251, 191, 36, 0.5);
+  color: var(--stage-accent-hover, #fcd34d);
+}
+
+/* Form actions container */
+.authFormActions {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}

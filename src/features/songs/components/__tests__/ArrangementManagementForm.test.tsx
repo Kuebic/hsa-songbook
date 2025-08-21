@@ -11,7 +11,7 @@ import * as useAuthModule from '@features/auth/hooks/useAuth'
 // Mock the hooks
 vi.mock('@features/auth/hooks/useAuth', () => ({
   useAuth: vi.fn(() => ({
-    user: { id: 'user-123', email: 'test@example.com', is_anonymous: false },
+    user: { id: 'user-123', email: 'test@example.com' },
     userId: 'user-123',
     sessionId: 'session-123',
     isLoaded: true,
@@ -616,43 +616,6 @@ describe('ArrangementManagementForm', () => {
   })
 
   describe('Permission Handling', () => {
-    it('should show guest user notice for anonymous users', () => {
-      const mockUseAuth = vi.mocked(useAuthModule.useAuth)
-      mockUseAuth.mockReturnValue({
-        user: { 
-          id: 'anon-123', 
-          is_anonymous: true, 
-          email: null,
-          app_metadata: {},
-          user_metadata: {},
-          aud: 'authenticated',
-          created_at: new Date().toISOString()
-        } as unknown as User,
-        userId: 'anon-123',
-        sessionId: 'anon-session',
-        isLoaded: true,
-        isSignedIn: false,
-        isAdmin: false,
-        isAnonymous: true,
-        getToken: vi.fn().mockResolvedValue(null),
-        getUserEmail: vi.fn().mockReturnValue(null),
-        getUserName: vi.fn().mockReturnValue('Guest User'),
-        getUserAvatar: vi.fn().mockReturnValue(undefined),
-        session: null,
-        signInWithProvider: vi.fn(),
-        signInWithEmail: vi.fn(),
-        signUpWithEmail: vi.fn(),
-        resetPassword: vi.fn(),
-        signInAnonymously: vi.fn(),
-        linkEmailToAnonymousUser: vi.fn(),
-        linkOAuthToAnonymousUser: vi.fn(),
-        signOut: vi.fn()
-      })
-      
-      renderWithProviders(<ArrangementManagementForm />)
-      
-      expect(screen.getByText(/you're adding this arrangement as a guest/i)).toBeInTheDocument()
-    })
 
     it('should prevent editing arrangements not owned by user', () => {
       const existingArrangement: Arrangement = {
@@ -681,7 +644,6 @@ describe('ArrangementManagementForm', () => {
         user: {
           id: 'admin-123',
           email: 'admin@example.com',
-          is_anonymous: false,
           app_metadata: {},
           user_metadata: {},
           aud: 'authenticated',
@@ -692,7 +654,6 @@ describe('ArrangementManagementForm', () => {
         isLoaded: true,
         isSignedIn: true,
         isAdmin: true,
-        isAnonymous: false,
         getToken: vi.fn().mockResolvedValue('mock-token'),
         getUserEmail: vi.fn().mockReturnValue('admin@example.com'),
         getUserName: vi.fn().mockReturnValue('Admin User'),
@@ -702,9 +663,6 @@ describe('ArrangementManagementForm', () => {
         signInWithEmail: vi.fn(),
         signUpWithEmail: vi.fn(),
         resetPassword: vi.fn(),
-        signInAnonymously: vi.fn(),
-        linkEmailToAnonymousUser: vi.fn(),
-        linkOAuthToAnonymousUser: vi.fn(),
         signOut: vi.fn()
       })
       

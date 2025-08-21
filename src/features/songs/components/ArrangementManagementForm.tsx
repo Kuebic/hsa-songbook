@@ -252,7 +252,7 @@ export function ArrangementManagementForm({
   
   // Check permissions
   const canEdit = arrangement ? (isAdmin || arrangement.createdBy === user?.id) : true
-  const canCreate = user !== null // Including anonymous users
+  const canCreate = user !== null
   
   if (!canCreate && !arrangement) {
     return (
@@ -594,20 +594,6 @@ export function ArrangementManagementForm({
         </button>
       </div>
       
-      {/* Guest User Notice */}
-      {user?.is_anonymous && !arrangement && (
-        <div style={{
-          padding: '0.75rem',
-          backgroundColor: 'var(--color-accent)',
-          color: 'var(--color-accent-foreground)',
-          border: '1px solid var(--status-warning)',
-          borderRadius: '4px',
-          fontSize: '0.875rem',
-          textAlign: 'center'
-        }}>
-          You're adding this arrangement as a guest. Consider creating an account to manage your arrangements later.
-        </div>
-      )}
     </form>
   )
 }

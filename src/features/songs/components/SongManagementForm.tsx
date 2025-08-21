@@ -257,7 +257,7 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
   
   // Check permissions
   const canEdit = song ? (isAdmin || song.metadata?.createdBy === user?.id) : true
-  const canCreate = user !== null // Including anonymous users
+  const canCreate = user !== null
   
   if (!canCreate && !song) {
     return (
@@ -721,20 +721,6 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
         </button>
       </div>
       
-      {/* Guest User Notice */}
-      {user?.is_anonymous && !song && (
-        <div style={{
-          padding: '0.75rem',
-          backgroundColor: 'var(--color-accent)',
-          color: 'var(--color-accent-foreground)',
-          border: '1px solid var(--status-warning)',
-          borderRadius: '4px',
-          fontSize: '0.875rem',
-          textAlign: 'center'
-        }}>
-          You're adding this song as a guest. Consider creating an account to manage your songs later.
-        </div>
-      )}
     </form>
   )
 }
