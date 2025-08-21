@@ -19,6 +19,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
+      className="theme-toggle-button"
       style={{
         background: 'transparent',
         border: '1px solid var(--color-border)',
@@ -39,9 +40,10 @@ export function ThemeToggle() {
         e.currentTarget.style.backgroundColor = 'transparent';
       }}
       aria-label={`Switch to ${themeLabels[theme]} theme`}
+      title={`${themeLabels[theme]} theme`}
     >
-      <span>{themeIcons[theme]}</span>
-      <span>{themeLabels[theme]}</span>
+      <span style={{ fontSize: '1.125rem' }}>{themeIcons[theme]}</span>
+      <span className="theme-label">{themeLabels[theme]}</span>
     </button>
   );
 }

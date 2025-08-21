@@ -118,51 +118,6 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
           )}
         </div>
         
-        <div style={{
-          display: 'flex',
-          gap: '0.5rem',
-          alignItems: 'center'
-        }}>
-          {arrangement.key && (
-            <span style={{
-              padding: '0.25rem 0.75rem',
-              backgroundColor: 'var(--color-accent)',
-              color: 'var(--color-primary)',
-              borderRadius: '0.375rem',
-              fontSize: '0.875rem',
-              fontWeight: '500'
-            }}>
-              Key: {arrangement.key}
-            </span>
-          )}
-          {arrangement.tempo && (
-            <span style={{
-              padding: '0.25rem 0.75rem',
-              backgroundColor: 'var(--color-accent)',
-              color: 'var(--status-success)',
-              borderRadius: '0.375rem',
-              fontSize: '0.875rem',
-              fontWeight: '500'
-            }}>
-              {arrangement.tempo} BPM
-            </span>
-          )}
-          {arrangement.difficulty && (
-            <span style={{
-              padding: '0.25rem 0.75rem',
-              backgroundColor: 'var(--color-accent)',
-              color: arrangement.difficulty === 'beginner' ? 'var(--status-success)' :
-                     arrangement.difficulty === 'intermediate' ? 'var(--status-warning)' :
-                     'var(--status-error)',
-              borderRadius: '0.375rem',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              textTransform: 'capitalize'
-            }}>
-              {arrangement.difficulty}
-            </span>
-          )}
-        </div>
       </div>
     </header>
   )

@@ -146,6 +146,17 @@
     padding: 1rem;
   }
   
+  /* Hide theme toggle text label on mobile, show only icon */
+  .theme-toggle-button .theme-label {
+    display: none;
+  }
+  
+  .theme-toggle-button {
+    padding: 0.5rem !important;
+    min-width: 40px;
+    justify-content: center;
+  }
+  
   .footer-content {
     padding: 1rem;
     font-size: 0.875rem;
