@@ -1,11 +1,16 @@
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { AuthButtons, UserMenu } from '@features/auth'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { ErrorBoundary } from '@features/monitoring'
 import { AddSongButton } from '@features/songs/components/ui/AddSongButton'
 import { ThemeToggle } from './ThemeToggle'
+// NEW IMPORTS
+import { MobileNavigation } from '@features/responsive/components/MobileNavigation'
+import { useViewport } from '@features/responsive/hooks/useViewport'
+import { useResponsiveNav } from '@features/responsive/hooks/useResponsiveNav'
+import './layout.css'
 
 interface LayoutProps {
   children: ReactNode
@@ -14,9 +19,19 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const location = useLocation()
   const { isSignedIn, isLoaded } = useAuth()
+  const viewport = useViewport()
+  const nav = useResponsiveNav()
+  
   const isEditorPage = location.pathname === '/test-editor' || 
                        location.pathname.includes('/arrangements/') ||
                        location.pathname.includes('/edit')
+
+  const navItems = useMemo(() => [
+    { to: '/', label: 'Home' },
+    { to: '/songs', label: 'Songs' },
+    { to: '/search', label: 'Search' },
+    { to: '/setlists', label: 'Setlists' }
+  ], [])
 
   // Add class to root element for CSS targeting
   useEffect(() => {
@@ -37,136 +52,79 @@ export function Layout({ children }: LayoutProps) {
   }, [isEditorPage])
 
   return (
-    <div style={{ 
-      height: isEditorPage ? '100vh' : 'auto',
-      minHeight: isEditorPage ? 'unset' : '100vh', 
-      display: 'flex', 
-      flexDirection: 'column',
-      overflow: isEditorPage ? 'hidden' : 'visible'
-    }}>
+    <div className={`layout-container ${isEditorPage ? 'editor-page' : ''}`}>
       <ErrorBoundary level="section" isolate>
-        <nav style={{ 
-          backgroundColor: 'var(--nav-background)',
-          color: 'var(--nav-text)',
-          width: '100%'
-        }}>
-          <div style={{ 
-            maxWidth: '1280px',
-            margin: '0 auto',
-            padding: '1rem 2rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
-              <h1 style={{ fontSize: '1.5rem', margin: 0 }}>
-                🎵 HSA Songbook
-              </h1>
-            
-            <div style={{ display: 'flex', gap: '2rem' }}>
-            <NavLink 
-              to="/"
-              style={({ isActive }) => ({
-                color: isActive ? 'var(--nav-active)' : 'var(--nav-text)',
-                textDecoration: 'none',
-                fontWeight: isActive ? 'bold' : 'normal'
-              })}
-            >
-              Home
-            </NavLink>
-            <NavLink 
-              to="/songs"
-              style={({ isActive }) => ({
-                color: isActive ? 'var(--nav-active)' : 'var(--nav-text)',
-                textDecoration: 'none',
-                fontWeight: isActive ? 'bold' : 'normal'
-              })}
-            >
-              Songs
-            </NavLink>
-            <NavLink 
-              to="/search"
-              style={({ isActive }) => ({
-                color: isActive ? 'var(--nav-active)' : 'var(--nav-text)',
-                textDecoration: 'none',
-                fontWeight: isActive ? 'bold' : 'normal'
-              })}
-            >
-              Search
-            </NavLink>
-            <NavLink 
-              to="/setlists"
-              style={({ isActive }) => ({
-                color: isActive ? 'var(--nav-active)' : 'var(--nav-text)',
-                textDecoration: 'none',
-                fontWeight: isActive ? 'bold' : 'normal'
-              })}
-            >
-              Setlists
-            </NavLink>
-            </div>
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <ThemeToggle />
-            <AddSongButton />
-            {isLoaded && (
+        <nav className="nav-header">
+          <div className="nav-container">
+            {/* Mobile Navigation */}
+            {viewport.isMobile && (
+              <MobileNavigation 
+                items={navItems}
+                isOpen={nav.isMenuOpen}
+                onToggle={nav.toggleMenu}
+                onClose={nav.closeMenu}
+              />
+            )}
+
+            {/* Desktop Navigation */}
+            {!viewport.isMobile && (
               <>
-                {!isSignedIn && <AuthButtons />}
-                {isSignedIn && <UserMenu />}
+                <div className="nav-brand">
+                  <h1>🎵 HSA Songbook</h1>
+                </div>
+                
+                <div className="nav-links">
+                  {navItems.map(item => (
+                    <NavLink 
+                      key={item.to}
+                      to={item.to}
+                      className={({ isActive }) => 
+                        `nav-link ${isActive ? 'active' : ''}`
+                      }
+                    >
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
               </>
             )}
+
+            {/* Mobile Brand (when menu is not open) */}
+            {viewport.isMobile && !nav.isMenuOpen && (
+              <div className="nav-brand-mobile">
+                <h1>🎵 HSA</h1>
+              </div>
+            )}
+            
+            <div className="nav-actions">
+              <ThemeToggle />
+              <AddSongButton />
+              {isLoaded && (
+                <>
+                  {!isSignedIn && <AuthButtons />}
+                  {isSignedIn && <UserMenu />}
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
       </ErrorBoundary>
       
-      <main style={{ 
-        flex: 1,
-        backgroundColor: 'var(--color-foreground)',
-        width: '100%'
-      }}>
-        {isEditorPage ? (
-          // Full width for editor pages
-          <div style={{
-            width: '100%',
-            height: '100%',
-            overflow: 'hidden'
-          }}>
-            <ErrorBoundary level="section">
-              {children}
-            </ErrorBoundary>
-          </div>
-        ) : (
-          // Standard width for other pages
-          <div style={{
-            maxWidth: '1280px',
-            margin: '0 auto',
-            padding: '2rem'
-          }}>
-            <ErrorBoundary level="section">
-              {children}
-            </ErrorBoundary>
-          </div>
-        )}
+      <main className="main-content">
+        <ErrorBoundary level="section">
+          {children}
+        </ErrorBoundary>
       </main>
       
-      <ErrorBoundary level="section" isolate>
-        <footer style={{ 
-          backgroundColor: 'var(--nav-background)',
-          color: 'var(--text-tertiary)',
-          width: '100%'
-        }}>
-          <div style={{
-            maxWidth: '1280px',
-            margin: '0 auto',
-            padding: '1rem 2rem',
-            textAlign: 'center'
-          }}>
-            © 2025 HSA Songbook. All rights reserved.
-          </div>
-        </footer>
-      </ErrorBoundary>
+      {!isEditorPage && (
+        <ErrorBoundary level="section" isolate>
+          <footer className="footer">
+            <div className="footer-content">
+              © 2025 HSA Songbook. All rights reserved.
+            </div>
+          </footer>
+        </ErrorBoundary>
+      )}
     </div>
   )
 }
