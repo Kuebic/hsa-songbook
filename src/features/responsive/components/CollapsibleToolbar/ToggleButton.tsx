@@ -4,7 +4,7 @@
  */
 
 import { memo } from 'react'
-import { ChevronDown, ChevronUp, Pin, PinOff } from 'lucide-react'
+import { ChevronDown, Menu, Pin, PinOff } from 'lucide-react'
 import { usePrefersReducedMotion } from '../../hooks/useViewport'
 
 export interface ToggleButtonProps {
@@ -144,7 +144,7 @@ export const ToggleButton = memo(function ToggleButton({
           }
         }}
       >
-        {isVisible ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        {isVisible ? <ChevronDown size={20} /> : <Menu size={20} />}
       </button>
 
       {/* CSS animations */}
