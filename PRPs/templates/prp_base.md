@@ -49,8 +49,8 @@ _Before writing this PRP, validate: "If someone knew nothing about this codebase
   why: [Specific methods/concepts needed for implementation]
   critical: [Key insights that prevent common implementation errors]
 
-- file: [exact/path/to/pattern/file.py]
-  why: [Specific pattern to follow - class structure, error handling, etc.]
+- file: [exact/path/to/pattern/file.ts or .tsx]
+  why: [Specific pattern to follow - component structure, error handling, etc.]
   pattern: [Brief description of what pattern to extract]
   gotcha: [Known constraints or limitations to avoid]
 
@@ -73,10 +73,11 @@ _Before writing this PRP, validate: "If someone knew nothing about this codebase
 
 ### Known Gotchas of our codebase & Library Quirks
 
-```python
-# CRITICAL: [Library name] requires [specific setup]
-# Example: FastAPI requires async functions for endpoints
-# Example: This ORM doesn't support batch inserts over 1000 records
+```typescript
+// CRITICAL: [Library name] requires [specific setup]
+// Example: Supabase requires proper RLS policies for data access
+// Example: React Query needs proper cache key management
+// Example: ChordSheetJS requires specific input format for parsing
 ```
 
 ## Implementation Blueprint
@@ -85,96 +86,114 @@ _Before writing this PRP, validate: "If someone knew nothing about this codebase
 
 Create the core data models, we ensure type safety and consistency.
 
-```python
+```typescript
 Examples:
- - orm models
- - pydantic models
- - pydantic schemas
- - pydantic validators
+ - TypeScript interfaces
+ - Zod validation schemas
+ - Supabase database types
+ - React component prop types
 
 ```
 
 ### Implementation Tasks (ordered by dependencies)
 
 ```yaml
-Task 1: CREATE src/models/{domain}_models.py
-  - IMPLEMENT: {SpecificModel}Request, {SpecificModel}Response Pydantic models
-  - FOLLOW pattern: src/models/existing_model.py (field validation approach)
-  - NAMING: CamelCase for classes, snake_case for fields
-  - PLACEMENT: Domain-specific model file in src/models/
+Task 1: CREATE src/features/{domain}/types/{domain}.types.ts
+  - IMPLEMENT: TypeScript interfaces for domain entities
+  - FOLLOW pattern: src/features/songs/types/song.types.ts (interface structure)
+  - NAMING: PascalCase for interfaces, camelCase for properties
+  - PLACEMENT: Feature-specific types directory
 
-Task 2: CREATE src/services/{domain}_service.py
-  - IMPLEMENT: {Domain}Service class with async methods
-  - FOLLOW pattern: src/services/database_service.py (service structure, error handling)
-  - NAMING: {Domain}Service class, async def create_*, get_*, update_*, delete_* methods
-  - DEPENDENCIES: Import models from Task 1
-  - PLACEMENT: Service layer in src/services/
+Task 2: CREATE src/features/{domain}/validation/{domain}Schemas.ts
+  - IMPLEMENT: Zod validation schemas for forms and API inputs
+  - FOLLOW pattern: src/features/songs/validation/songFormSchema.ts (schema structure)
+  - NAMING: camelCase schema names with descriptive suffixes
+  - DEPENDENCIES: Import types from Task 1
+  - PLACEMENT: Feature validation directory
 
-Task 3: CREATE src/tools/{action}_{resource}.py
-  - IMPLEMENT: MCP tool wrapper calling service methods
-  - FOLLOW pattern: src/tools/existing_tool.py (FastMCP tool structure)
-  - NAMING: snake_case file name, descriptive tool function name
-  - DEPENDENCIES: Import service from Task 2
-  - PLACEMENT: Tool layer in src/tools/
+Task 3: CREATE src/features/{domain}/services/{domain}Service.ts
+  - IMPLEMENT: Service class with Supabase operations
+  - FOLLOW pattern: src/features/songs/services/songService.ts (service structure, error handling)
+  - METHODS: create(), getById(), update(), delete(), query operations
+  - DEPENDENCIES: Import types and schemas from Tasks 1-2
+  - PLACEMENT: Service layer in feature directory
 
-Task 4: MODIFY src/main.py or src/server.py
-  - INTEGRATE: Register new tool with MCP server
-  - FIND pattern: existing tool registrations
-  - ADD: Import and register new tool following existing pattern
-  - PRESERVE: Existing tool registrations and server configuration
+Task 4: CREATE src/features/{domain}/hooks/use{Domain}.ts
+  - IMPLEMENT: React Query hooks for data fetching
+  - FOLLOW pattern: Existing hooks in codebase (TanStack Query patterns)
+  - HOOKS: useQuery for fetching, useMutation for updates
+  - DEPENDENCIES: Import service from Task 3
+  - PLACEMENT: Feature hooks directory
 
-Task 5: CREATE src/services/tests/test_{domain}_service.py
-  - IMPLEMENT: Unit tests for all service methods (happy path, edge cases, error handling)
-  - FOLLOW pattern: src/services/tests/test_existing_service.py (fixture usage, assertion patterns)
-  - NAMING: test_{method}_{scenario} function naming
-  - COVERAGE: All public methods with positive and negative test cases
+Task 5: CREATE src/features/{domain}/components/{DomainComponent}.tsx
+  - IMPLEMENT: React components for feature UI
+  - FOLLOW pattern: src/features/songs/components/SongCard.tsx (component structure)
+  - PROPS: Typed props interfaces, proper event handlers
+  - DEPENDENCIES: Import hooks from Task 4
+  - PLACEMENT: Feature components directory
+
+Task 6: CREATE src/features/{domain}/services/tests/{domain}Service.test.ts
+  - IMPLEMENT: Unit tests for service methods (happy path, edge cases, error handling)
+  - FOLLOW pattern: Existing test files (Vitest setup, mock patterns)
+  - NAMING: describe() blocks for methods, test() for scenarios
+  - COVERAGE: All service methods with positive and negative test cases
   - PLACEMENT: Tests alongside the code they test
-
-Task 6: CREATE src/tools/tests/test_{action}_{resource}.py
-  - IMPLEMENT: Unit tests for MCP tool functionality
-  - FOLLOW pattern: src/tools/tests/test_existing_tool.py (MCP tool testing approach)
-  - MOCK: External service dependencies
-  - COVERAGE: Tool input validation, success responses, error handling
-  - PLACEMENT: Tool tests in src/tools/tests/
 ```
 
 ### Implementation Patterns & Key Details
 
-```python
-# Show critical patterns and gotchas - keep concise, focus on non-obvious details
+```typescript
+// Show critical patterns and gotchas - keep concise, focus on non-obvious details
 
-# Example: Service method pattern
-async def {domain}_operation(self, request: {Domain}Request) -> {Domain}Response:
-    # PATTERN: Input validation first (follow src/services/existing_service.py)
-    validated = self.validate_request(request)
+// Example: Service method pattern
+class {Domain}Service {
+  async create{Domain}(data: Create{Domain}Input): Promise<{Domain}> {
+    // PATTERN: Zod validation first (follow existing service patterns)
+    const validated = {domain}Schema.parse(data);
 
-    # GOTCHA: [Library-specific constraint or requirement]
-    # PATTERN: Error handling approach (reference existing service pattern)
-    # CRITICAL: [Non-obvious requirement or configuration detail]
+    // GOTCHA: [Library-specific constraint or requirement]
+    // PATTERN: Supabase error handling approach (reference existing service pattern)
+    // CRITICAL: [Non-obvious requirement or configuration detail]
 
-    return {Domain}Response(status="success", data=result)
+    const { data: result, error } = await this.supabase
+      .from('{domain}s')
+      .insert(validated)
+      .select()
+      .single();
 
-# Example: MCP tool pattern
-@app.tool()
-async def {tool_name}({parameters}) -> str:
-    # PATTERN: Tool validation and service delegation (see src/tools/existing_tool.py)
-    # RETURN: JSON string with standardized response format
+    if (error) throw new DatabaseError(error.message);
+    return result;
+  }
+}
+
+// Example: React component pattern
+export function {Domain}Component({ {prop}: {Domain}Props }) {
+  // PATTERN: React Query for data fetching (see existing components)
+  const { data, isLoading, error } = use{Domain}(id);
+  
+  // PATTERN: Error boundaries and loading states
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorDisplay error={error} />;
+  
+  // RETURN: JSX with proper TypeScript typing
+  return <div>{/* component content */}</div>;
+}
 ```
 
 ### Integration Points
 
 ```yaml
 DATABASE:
-  - migration: "Add column 'feature_enabled' to users table"
-  - index: "CREATE INDEX idx_feature_lookup ON users(feature_id)"
+  - migration: "supabase/migrations/20250121_add_feature.sql"
+  - rls: "CREATE POLICY feature_policy ON features FOR ALL USING (auth.uid() = user_id)"
 
-CONFIG:
-  - add to: config/settings.py
-  - pattern: "FEATURE_TIMEOUT = int(os.getenv('FEATURE_TIMEOUT', '30'))"
+TYPES:
+  - update: "src/lib/database.types.ts"
+  - generate: "npx supabase gen types typescript --local > src/lib/database.types.ts"
 
-ROUTES:
-  - add to: src/api/routes.py
-  - pattern: "router.include_router(feature_router, prefix='/feature')"
+ROUTING:
+  - add to: "src/app/App.tsx"
+  - pattern: "<Route path='/feature' element={<FeaturePage />} />"
 ```
 
 ## Validation Loop
@@ -183,14 +202,12 @@ ROUTES:
 
 ```bash
 # Run after each file creation - fix before proceeding
-ruff check src/{new_files} --fix     # Auto-format and fix linting issues
-mypy src/{new_files}                 # Type checking with specific files
-ruff format src/{new_files}          # Ensure consistent formatting
+npm run lint                         # ESLint check and auto-fix
+npm run build                        # TypeScript compilation check
 
-# Project-wide validation
-ruff check src/ --fix
-mypy src/
-ruff format src/
+# Project-wide validation  
+npm run lint
+npm run build
 
 # Expected: Zero errors. If errors exist, READ output and fix before proceeding.
 ```
@@ -199,15 +216,15 @@ ruff format src/
 
 ```bash
 # Test each component as it's created
-uv run pytest src/services/tests/test_{domain}_service.py -v
-uv run pytest src/tools/tests/test_{action}_{resource}.py -v
+npm run test -- src/features/{domain}/services/{domain}Service.test.ts
+npm run test -- src/features/{domain}/components/{Component}.test.tsx
 
 # Full test suite for affected areas
-uv run pytest src/services/tests/ -v
-uv run pytest src/tools/tests/ -v
+npm run test -- src/features/{domain}
+npm run test
 
-# Coverage validation (if coverage tools available)
-uv run pytest src/ --cov=src --cov-report=term-missing
+# Coverage validation
+npm run test:coverage
 
 # Expected: All tests pass. If failing, debug root cause and fix implementation.
 ```
@@ -215,27 +232,24 @@ uv run pytest src/ --cov=src --cov-report=term-missing
 ### Level 3: Integration Testing (System Validation)
 
 ```bash
-# Service startup validation
-uv run python main.py &
+# Application startup validation
+npm run dev &
 sleep 3  # Allow startup time
 
 # Health check validation
-curl -f http://localhost:8000/health || echo "Service health check failed"
-
-# Feature-specific endpoint testing
-curl -X POST http://localhost:8000/{your_endpoint} \
-  -H "Content-Type: application/json" \
-  -d '{"test": "data"}' \
-  | jq .  # Pretty print JSON response
-
-# MCP server validation (if MCP-based)
-# Test MCP tool functionality
-echo '{"method": "tools/call", "params": {"name": "{tool_name}", "arguments": {}}}' | \
-  uv run python -m src.main
+curl -f http://localhost:5173 || echo "Development server not responding"
 
 # Database validation (if database integration)
-# Verify database schema, connections, migrations
-psql $DATABASE_URL -c "SELECT 1;" || echo "Database connection failed"
+npx supabase status --local
+npx supabase db query "SELECT 1" --local
+
+# Feature-specific testing
+# Navigate to feature page in browser
+# Test user interactions manually
+
+# Database migration validation
+npx supabase migration up --local
+npx supabase gen types typescript --local > src/lib/database.types.ts
 
 # Expected: All integrations working, proper responses, no connection errors
 ```
@@ -243,31 +257,37 @@ psql $DATABASE_URL -c "SELECT 1;" || echo "Database connection failed"
 ### Level 4: Creative & Domain-Specific Validation
 
 ```bash
-# MCP Server Validation Examples:
+# React Component Testing:
 
-# Playwright MCP (for web interfaces)
-playwright-mcp --url http://localhost:8000 --test-user-journey
+# Visual regression testing (if available)
+npm run test:visual
 
-# Docker MCP (for containerized services)
-docker-mcp --build --test --cleanup
+# Accessibility testing
+npm run test:a11y
 
-# Database MCP (for data operations)
-database-mcp --validate-schema --test-queries --check-performance
+# Performance testing (if performance requirements)
+npm run test:performance
+
+# E2E testing with Playwright (if available)
+npm run test:e2e
+
+# Mobile responsiveness testing
+# Test on different screen sizes manually
+# Chrome DevTools -> Device Toolbar
+
+# Cross-browser testing
+# Test in Chrome, Firefox, Safari
+
+# PWA validation (if PWA features)
+npm run build
+npm run preview
+# Test offline functionality
+
+# Supabase RLS policy testing
+npx supabase db test --local
 
 # Custom Business Logic Validation
 # [Add domain-specific validation commands here]
-
-# Performance Testing (if performance requirements)
-ab -n 100 -c 10 http://localhost:8000/{endpoint}
-
-# Security Scanning (if security requirements)
-bandit -r src/
-
-# Load Testing (if scalability requirements)
-# wrk -t12 -c400 -d30s http://localhost:8000/{endpoint}
-
-# API Documentation Validation (if API endpoints)
-# swagger-codegen validate -i openapi.json
 
 # Expected: All creative validations pass, performance meets requirements
 ```
@@ -277,10 +297,10 @@ bandit -r src/
 ### Technical Validation
 
 - [ ] All 4 validation levels completed successfully
-- [ ] All tests pass: `uv run pytest src/ -v`
-- [ ] No linting errors: `uv run ruff check src/`
-- [ ] No type errors: `uv run mypy src/`
-- [ ] No formatting issues: `uv run ruff format src/ --check`
+- [ ] All tests pass: `npm run test`
+- [ ] No linting errors: `npm run lint`
+- [ ] No type errors: `npm run build`
+- [ ] TypeScript strict mode compliance
 
 ### Feature Validation
 
@@ -311,6 +331,8 @@ bandit -r src/
 - ❌ Don't create new patterns when existing ones work
 - ❌ Don't skip validation because "it should work"
 - ❌ Don't ignore failing tests - fix them
-- ❌ Don't use sync functions in async context
-- ❌ Don't hardcode values that should be config
-- ❌ Don't catch all exceptions - be specific
+- ❌ Don't mix async/await with Promise chains
+- ❌ Don't hardcode values that should be environment variables
+- ❌ Don't ignore TypeScript errors - fix them
+- ❌ Don't skip React hook dependency arrays
+- ❌ Don't forget to handle loading and error states
