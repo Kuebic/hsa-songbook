@@ -64,6 +64,8 @@ export interface ToolbarVisibilityState {
   isUserHidden: boolean
   isPermanentlyHidden: boolean
   autoHideEnabled: boolean
+  isPinned: boolean
+  height: number
 }
 
 export interface ToolbarVisibilityActions {
@@ -72,6 +74,9 @@ export interface ToolbarVisibilityActions {
   toggle: () => void
   setAutoHide: (enabled: boolean) => void
   setPermanentlyHidden: (hidden: boolean) => void
+  pin: () => void
+  unpin: () => void
+  setHeight: (height: number) => void
 }
 
 export interface ToolbarVisibilityReturn extends ToolbarVisibilityState, ToolbarVisibilityActions {}
@@ -113,13 +118,48 @@ export interface NavOverlayProps {
   className?: string
 }
 
-// Collapsible toolbar props
+// Collapsible toolbar props - Enhanced as per PRD
 export interface CollapsibleToolbarProps {
+  // Core Behavior
   children: React.ReactNode
-  autoHide?: boolean
-  showFloatingActions?: boolean
-  floatingActions?: string[]
+  autoHide?: boolean              // Enable auto-hide behavior
+  autoHideDelay?: number          // Milliseconds before hiding (default: 3000)
+  defaultVisible?: boolean        // Initial visibility state
+  
+  // Device-Specific Settings
+  autoHideOnMobile?: boolean      // Override for mobile devices
+  autoHideOnTablet?: boolean      // Override for tablet devices
+  autoHideOnDesktop?: boolean     // Override for desktop
+  
+  // Scroll Behavior
+  showOnScrollUp?: boolean        // Show when scrolling up
+  hideOnScrollDown?: boolean      // Hide when scrolling down
+  scrollThreshold?: number        // Pixels before triggering
+  
+  // Activity Detection
+  detectMouse?: boolean           // Track mouse movement
+  detectTouch?: boolean           // Track touch events
+  detectKeyboard?: boolean        // Track keyboard activity
+  
+  // Floating Actions
+  showFloatingActions?: boolean   // Show FAB when hidden
+  floatingActions?: string[]      // Actions to show in FAB
+  
+  // Callbacks
+  onVisibilityChange?: (visible: boolean, height: number) => void
+  
+  // Persistence
+  persistKey?: string             // LocalStorage key
+  enablePersistence?: boolean     // Save user preferences
+  
+  // Styling
   className?: string
+  height?: number | 'auto'
+  zIndex?: number
+  
+  // Manual Control
+  showToggleButton?: boolean      // Show manual toggle
+  toggleButtonPosition?: 'left' | 'right'
 }
 
 export interface FloatingActionsProps {

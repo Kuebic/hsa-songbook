@@ -221,44 +221,62 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
 
         // Apply transposition if specified
         if (options?.transpose !== undefined && options.transpose !== 0) {
-          // Clone song to avoid mutating cached version
-          const songClone = JSON.parse(JSON.stringify(song));
+          // Re-parse the content to get a fresh song object for transposition
+          // This avoids issues with deep cloning that loses prototype methods
+          const parser = new ChordSheetJS.ChordProParser();
+          const transposedSong = parser.parse(content);
           
-          // Manually transpose all chords (workaround for ChordSheetJS v12.3.1 bug)
-          songClone.lines.forEach((line: ChordSheetJS.Line) => {
-            if (line.items) {
-              line.items.forEach((item) => {
-                if ('chords' in item && item.chords && typeof item.chords === 'string') {
-                  // Skip section markers
-                  const sectionMarkers = ['Verse', 'Chorus', 'Bridge', 'Intro', 'Outro', 'Pre-Chorus', 'Tag', 'Coda'];
-                  if (!sectionMarkers.includes(item.chords)) {
-                    try {
-                      const chord = Chord.parse(item.chords);
-                      if (chord) {
-                        const transposedChord = chord.transpose(options.transpose!);
-                        (item as ChordSheetJS.ChordLyricsPair).chords = transposedChord.toString();
+          // Use ChordSheetJS's built-in transpose method if available
+          if (typeof transposedSong.transpose === 'function') {
+            song = transposedSong.transpose(options.transpose);
+          } else {
+            // Fallback: Manually transpose all chords
+            transposedSong.lines.forEach((line: ChordSheetJS.Line) => {
+              if (line.items) {
+                line.items.forEach((item) => {
+                  if ('chords' in item && item.chords && typeof item.chords === 'string') {
+                    // Skip section markers
+                    const sectionMarkers = ['Verse', 'Chorus', 'Bridge', 'Intro', 'Outro', 'Pre-Chorus', 'Tag', 'Coda'];
+                    if (!sectionMarkers.includes(item.chords)) {
+                      try {
+                        const chord = Chord.parse(item.chords);
+                        if (chord) {
+                          const transposedChord = chord.transpose(options.transpose!);
+                          (item as ChordSheetJS.ChordLyricsPair).chords = transposedChord.toString();
+                        }
+                      } catch (_e) {
+                        // Silently skip unparseable chords
                       }
-                    } catch (_e) {
-                      // Silently skip unparseable chords
                     }
                   }
-                }
-              });
-            }
-          });
-          
-          song = songClone;
+                });
+              }
+            });
+            
+            song = transposedSong;
+          }
         }
 
         // Get appropriate formatter from factory
         const context = options?.showDiagrams ? 'viewer' : 'preview';
         const formatter = ChordSheetFormatterFactory.getFormatterForContext(context);
         
-        // Format to HTML (formatter returns an object with toString method)
-        const formatted = (formatter as unknown as { format: (song: ChordSheetJS.Song) => unknown }).format(song!);
-        html = typeof formatted === 'object' && formatted && 'toString' in formatted 
-          ? (formatted as { toString(): string }).toString() 
-          : String(formatted);
+        // Ensure song has required structure before formatting
+        if (!song || !song.lines) {
+          console.error('Invalid song structure for formatting:', song);
+          html = '<div class="error">Error: Invalid song structure</div>';
+        } else {
+          // Format to HTML (formatter returns an object with toString method)
+          try {
+            const formatted = (formatter as unknown as { format: (song: ChordSheetJS.Song) => unknown }).format(song);
+            html = typeof formatted === 'object' && formatted && 'toString' in formatted 
+              ? (formatted as { toString(): string }).toString() 
+              : String(formatted);
+          } catch (formatError) {
+            console.error('Error formatting song:', formatError);
+            html = '<div class="error">Error formatting chord sheet</div>';
+          }
+        }
         
         // Cache formatted HTML
         chordRenderCache.setFormattedHtml(cacheKey, html!);

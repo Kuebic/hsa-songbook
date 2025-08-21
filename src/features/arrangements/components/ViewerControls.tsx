@@ -43,24 +43,31 @@ export function ViewerControls({
         gap: '0.5rem',
         zIndex: 1000
       }}>
-        {/* Exit button */}
+        {/* Exit button - more prominent for mobile */}
         <button
           onClick={onToggleMinimalMode}
           className="stage-mode-exit"
           style={{
-            padding: '0.75rem',
-            backgroundColor: 'rgba(255, 0, 0, 0.2)',
+            padding: '0.75rem 1rem',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
             color: 'white',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            borderRadius: '50%',
+            border: '2px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '2rem',
             cursor: 'pointer',
-            fontSize: '1.25rem',
-            transition: 'all 0.2s'
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
           }}
           aria-label="Exit stage mode"
-          title="Exit stage mode (ESC)"
+          title="Exit stage mode (ESC or pull down)"
         >
-          ✕
+          <span style={{ fontSize: '1.25rem' }}>✕</span>
+          <span className="exit-text">Exit</span>
         </button>
         
         {/* Minimal transpose controls */}

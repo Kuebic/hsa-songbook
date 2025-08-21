@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { useArrangementViewer } from '../hooks/useArrangementViewer'
 import { useTransposition } from '../hooks/useTransposition'
@@ -28,6 +28,7 @@ export function ArrangementViewerPage() {
     setFontSize
   } = useChordSheetSettings()
   const viewport = useViewport()
+  const [_toolbarHeight, setToolbarHeight] = useState(0)
   
   // Extract the original key from the ChordPro content
   const originalKey = useMemo(() => {
@@ -67,6 +68,36 @@ export function ArrangementViewerPage() {
       window.removeEventListener('keydown', handleKeyboardPrint)
     }
   }, [handlePrint])
+  
+  // Handle floating action button clicks
+  useEffect(() => {
+    const handleToolbarAction = (e: CustomEvent) => {
+      const action = e.detail.action
+      
+      switch (action) {
+        case 'transpose':
+          // Simple transpose up action for FAB
+          transpositionState.transpose(1)
+          break
+        case 'stage':
+          toggleStageMode()
+          break
+        default:
+          break
+      }
+    }
+    
+    window.addEventListener('toolbar-action', handleToolbarAction as EventListener)
+    
+    return () => {
+      window.removeEventListener('toolbar-action', handleToolbarAction as EventListener)
+    }
+  }, [transpositionState, toggleStageMode])
+  
+  // Handle toolbar visibility change
+  const handleToolbarVisibilityChange = useCallback((_visible: boolean, height: number) => {
+    setToolbarHeight(height)
+  }, [])
   
   if (loading) {
     return (
@@ -159,9 +190,40 @@ export function ArrangementViewerPage() {
         !isStageMode && (
           viewport.isMobile ? (
             <CollapsibleToolbar
+              // Core Behavior
               autoHide={true}
+              autoHideDelay={3000}
+              defaultVisible={true}
+              
+              // Device-Specific Settings
+              autoHideOnMobile={true}
+              autoHideOnTablet={true}
+              autoHideOnDesktop={false}
+              
+              // Scroll Behavior
+              showOnScrollUp={true}
+              hideOnScrollDown={true}
+              scrollThreshold={10}
+              
+              // Activity Detection
+              detectMouse={true}
+              detectTouch={true}
+              detectKeyboard={true}
+              
+              // Floating Actions
               showFloatingActions={true}
               floatingActions={['transpose', 'stage']}
+              
+              // Callbacks
+              onVisibilityChange={handleToolbarVisibilityChange}
+              
+              // Persistence
+              persistKey={`toolbar-state-${arrangement.id}`}
+              enablePersistence={true}
+              
+              // Manual Control
+              showToggleButton={true}
+              toggleButtonPosition="right"
             >
               <ViewerToolbar
                 onPrint={handlePrint}
@@ -171,15 +233,27 @@ export function ArrangementViewerPage() {
               />
             </CollapsibleToolbar>
           ) : (
-            <ViewerToolbar
-              onPrint={handlePrint}
-              onToggleStageMode={toggleStageMode}
-              isStageMode={isStageMode}
-              transposition={transpositionState}
-            />
+            <CollapsibleToolbar
+              // Desktop configuration
+              autoHide={false}
+              autoHideOnDesktop={false}
+              showFloatingActions={false}
+              showToggleButton={false}
+              onVisibilityChange={handleToolbarVisibilityChange}
+              persistKey={`toolbar-state-${arrangement.id}`}
+              enablePersistence={true}
+            >
+              <ViewerToolbar
+                onPrint={handlePrint}
+                onToggleStageMode={toggleStageMode}
+                isStageMode={isStageMode}
+                transposition={transpositionState}
+              />
+            </CollapsibleToolbar>
           )
         )
       }
+      onToolbarHeightChange={setToolbarHeight}
       content={
         <div ref={printRef} style={{ height: '100%' }}>
           <ChordSheetViewer 

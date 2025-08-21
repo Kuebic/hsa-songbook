@@ -16,12 +16,14 @@ export function useToolbarVisibility(
   const [isUserHidden, setIsUserHidden] = useState(false)
   const [isPermanentlyHidden, setIsPermanentlyHidden] = useState(false)
   const [autoHideEnabled, setAutoHideEnabled] = useState(true)
+  const [isPinned, setIsPinned] = useState(false)
+  const [height, setHeight] = useState(0)
   
   const { scrollDirection, scrollY } = useScrollDirection(scrollThreshold)
 
   // Auto-hide logic based on scroll behavior
   useEffect(() => {
-    if (!autoHideEnabled || isUserHidden || isPermanentlyHidden) return
+    if (!autoHideEnabled || isUserHidden || isPermanentlyHidden || isPinned) return
 
     // Always show when at top of page
     if (scrollY <= autoHideThreshold) {
@@ -40,7 +42,8 @@ export function useToolbarVisibility(
     scrollY, 
     autoHideEnabled, 
     isUserHidden, 
-    isPermanentlyHidden, 
+    isPermanentlyHidden,
+    isPinned,
     autoHideThreshold
   ])
 
@@ -82,6 +85,17 @@ export function useToolbarVisibility(
     }
   }, [])
 
+  // Pin/unpin functionality
+  const pin = useCallback(() => {
+    setIsPinned(true)
+    setIsVisible(true)
+    setIsUserHidden(false)
+  }, [])
+
+  const unpin = useCallback(() => {
+    setIsPinned(false)
+  }, [])
+
   // Load preferences from localStorage
   useEffect(() => {
     try {
@@ -112,11 +126,16 @@ export function useToolbarVisibility(
     isUserHidden,
     isPermanentlyHidden,
     autoHideEnabled,
+    isPinned,
+    height,
     show,
     hide,
     toggle,
     setAutoHide,
-    setPermanentlyHidden
+    setPermanentlyHidden,
+    pin,
+    unpin,
+    setHeight
   }
 }
 
