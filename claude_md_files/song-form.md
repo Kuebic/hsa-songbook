@@ -8,7 +8,6 @@
     notes: 'Modern hymn with rich theological content',
     metadata: {
       isPublic: true, (default true, admin can set to false)
-      ratings: { average: 4.9, count: 115 },
       views: 1450,
       createdBy: 'system-seed-user',
       lastModifiedBy: 'system-seed-user'
@@ -174,7 +173,7 @@ Song Form Design & Duplicate Prevention Strategy
     return isAdmin || song.metadata.createdBy === userId
   }
 
-  const canEditArrangement = (arrangement: IArrangement, userId: string, isAdmin: boolean) 
+  const canEditArrangement = (arrangement: IArrangement, userId: string, isAdmin: boolean)
   => {
     return isAdmin || arrangement.createdBy === userId
   }

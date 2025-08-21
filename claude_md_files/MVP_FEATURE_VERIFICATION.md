@@ -22,7 +22,6 @@ This document provides a systematic guide for verifying every feature of the HSA
 - **Core Auth**: `src/features/auth/hooks/useAuth.ts`
 - **Components**: `src/features/auth/components/AuthButtons.tsx`, `src/features/auth/components/UserMenu.tsx`
 - **Protected Routes**: `src/features/auth/components/ProtectedRoute.tsx`
-- **Clerk Integration**: `src/features/auth/components/LazyClerkComponents.tsx`
 
 ### What to Verify:
 - Login/logout functionality works
