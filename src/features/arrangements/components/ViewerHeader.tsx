@@ -5,7 +5,7 @@ import type { ViewerHeaderProps } from '../types/viewer.types'
 export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
   const navigate = useNavigate()
   const location = useLocation()
-  const { isSignedIn } = useAuth()
+  const { isSignedIn, isAdmin, userId } = useAuth()
   
   const handleBack = () => {
     // Strategy 1: If we have the song slug from arrangement data, use it
@@ -68,7 +68,7 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
             </span>
           </button>
           
-          {isSignedIn && arrangement.slug && (
+          {isSignedIn && arrangement.slug && (arrangement.createdBy === userId || isAdmin) && (
             <Link
               to={`/arrangements/${arrangement.slug}/edit`}
               style={{

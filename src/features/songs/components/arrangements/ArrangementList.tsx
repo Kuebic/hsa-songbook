@@ -28,7 +28,7 @@ export function ArrangementList({
   songTitle,
   songSlug
 }: ArrangementListProps) {
-  const { isSignedIn, isAdmin } = useAuth()
+  const { isSignedIn, isAdmin, userId } = useAuth()
   const { addNotification } = useNotification()
   const navigate = useNavigate()
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -269,22 +269,26 @@ export function ArrangementList({
             
             {showActions && (
               <div style={actionsStyles}>
-                <Link
-                  to={`/arrangements/${arrangement.slug}/edit`}
-                  onClick={(e) => e.stopPropagation()}
-                  style={{
-                    ...actionButtonStyles,
-                    textDecoration: 'none',
-                    color: 'var(--status-success)',
-                    borderColor: 'var(--status-success)',
-                    display: 'inline-block'
-                  }}
-                  title="Open in chord editor"
-                >
-                  Chord Editor
-                </Link>
+                {/* Show Chord Editor only for the creator or admin */}
+                {isSignedIn && (arrangement.createdBy === userId || isAdmin) && (
+                  <Link
+                    to={`/arrangements/${arrangement.slug}/edit`}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      ...actionButtonStyles,
+                      textDecoration: 'none',
+                      color: 'var(--status-success)',
+                      borderColor: 'var(--status-success)',
+                      display: 'inline-block'
+                    }}
+                    title="Open in chord editor"
+                  >
+                    Chord Editor
+                  </Link>
+                )}
                 
-                {(isSignedIn || isAdmin) && onEdit && (
+                {/* Show Edit Details only for the creator or admin */}
+                {isSignedIn && (arrangement.createdBy === userId || isAdmin) && onEdit && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
@@ -300,6 +304,7 @@ export function ArrangementList({
                   </button>
                 )}
                 
+                {/* Delete is still admin-only */}
                 {onDelete && isAdmin && (
                   <button
                     onClick={(e) => {

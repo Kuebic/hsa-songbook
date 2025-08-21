@@ -10,6 +10,7 @@ import { NotificationProvider } from '@shared/components/notifications'
 import { ThemeProvider } from '@shared/contexts/ThemeContext'
 import { SongModalProvider } from '@features/songs/contexts/SongModalContext'
 import { GlobalSongModal } from '@features/songs/components/GlobalSongModal'
+import { ProtectedRoute } from '@features/auth'
 
 // Eagerly load the home page
 import { HomePage } from './pages/HomePage'
@@ -79,7 +80,9 @@ function App() {
               element={
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Chord Editor">
-                    <ChordEditingPage />
+                    <ProtectedRoute>
+                      <ChordEditingPage />
+                    </ProtectedRoute>
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 
@@ -89,7 +92,9 @@ function App() {
               element={
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="New Arrangement">
-                    <ChordEditingPage />
+                    <ProtectedRoute>
+                      <ChordEditingPage />
+                    </ProtectedRoute>
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 
