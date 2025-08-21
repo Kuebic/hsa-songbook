@@ -1,5 +1,4 @@
-import { Printer, Eye, EyeOff, Maximize } from 'lucide-react'
-import { cn } from '../../../lib/utils'
+import { Printer, Maximize } from 'lucide-react'
 import { TransposeControls } from './TransposeControls'
 import { FontPreferences } from './FontPreferences'
 // AddToSetlistDropdown removed - setlists under construction
@@ -7,8 +6,6 @@ import type { EnhancedTranspositionState } from '../hooks/useTransposition'
 
 interface ViewerToolbarProps {
   onPrint: () => void
-  onToggleStageMode: () => void
-  isStageMode: boolean
   // Enhanced transposition props
   transposition?: EnhancedTranspositionState & {
     transpose: (steps: number) => void
@@ -17,9 +14,7 @@ interface ViewerToolbarProps {
 }
 
 export function ViewerToolbar({ 
-  onPrint, 
-  onToggleStageMode, 
-  isStageMode,
+  onPrint,
   transposition
 }: ViewerToolbarProps) {
   
@@ -35,17 +30,6 @@ export function ViewerToolbar({
         >
           <Printer className="icon" />
           <span className="label">Print</span>
-        </button>
-        
-        {/* Stage Mode Toggle */}
-        <button
-          onClick={onToggleStageMode}
-          className={cn('toolbar-button', isStageMode && 'active')}
-          title="Toggle stage mode (F)"
-          aria-label="Stage mode"
-        >
-          {isStageMode ? <EyeOff className="icon" /> : <Eye className="icon" />}
-          <span className="label">Stage</span>
         </button>
         
         {/* Fullscreen Button */}

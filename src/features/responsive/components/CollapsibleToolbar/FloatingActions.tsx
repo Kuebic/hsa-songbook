@@ -4,13 +4,12 @@
  */
 
 import { memo } from 'react'
-import { ChevronUp, Music2, Eye, Edit, Zap } from 'lucide-react'
+import { ChevronUp, Music2, Edit, Zap } from 'lucide-react'
 import { usePrefersReducedMotion } from '../../hooks/useViewport'
 import type { FloatingActionsProps } from '../../types'
 
 const actionIcons = {
   transpose: Music2,
-  stage: Eye,
   edit: Edit,
   show: ChevronUp,
   settings: Zap
@@ -18,7 +17,6 @@ const actionIcons = {
 
 const actionLabels = {
   transpose: 'Transpose',
-  stage: 'Stage Mode',
   edit: 'Edit',
   show: 'Show Toolbar',
   settings: 'Settings'

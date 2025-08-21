@@ -81,6 +81,9 @@ export function CollapsibleToolbar({
   useEffect(() => {
     if (!defaultVisible) {
       toolbar.hide()
+    } else if (defaultVisible && !shouldAutoHide) {
+      // Force show on desktop when autoHide is disabled
+      toolbar.show()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

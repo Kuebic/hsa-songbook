@@ -157,6 +157,10 @@
   color: #2563eb;
 }
 
+.chord-sheet-content .lyrics {
+  color: #111827;
+}
+
 .chord-sheet-content .verse-label,
 .chord-sheet-content .chorus-label,
 .chord-sheet-content .bridge-label {

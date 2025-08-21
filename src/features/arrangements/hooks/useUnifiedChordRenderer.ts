@@ -347,10 +347,10 @@ export function useUnifiedChordRenderer(): UseUnifiedChordRendererReturn {
     return chordRenderCache.getMetrics();
   }, []);
 
-  // Clear styled cache when preferences change
+  // Clear styled cache when preferences or theme change
   useEffect(() => {
     chordRenderCache.clearLevel('styled');
-  }, [preferences]);
+  }, [preferences, appTheme]);
 
   return {
     renderChordSheet,

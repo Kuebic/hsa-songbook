@@ -55,6 +55,8 @@ export {
   useNavPersistence
 } from './hooks/useResponsiveNav'
 
+export { useNativeBackNavigation } from './hooks/useNativeBackNavigation'
+
 // Scroll hooks
 export {
   useScrollDirection,

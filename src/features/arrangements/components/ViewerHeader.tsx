@@ -1,11 +1,22 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@features/auth'
+import { useNativeBackNavigation } from '@features/responsive'
 import type { ViewerHeaderProps } from '../types/viewer.types'
 
 export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const { isSignedIn, isAdmin, userId } = useAuth()
+  
+  // Setup native back navigation for mobile
+  const { isEnabled: isMobileNav } = useNativeBackNavigation({
+    enabled: true,
+    fallbackPath: '/songs',
+    arrangement: {
+      id: arrangement.id,
+      songSlug: arrangement.songSlug
+    }
+  })
   
   const handleBack = () => {
     // Strategy 1: If we have the song slug from arrangement data, use it
@@ -27,7 +38,7 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
   }
   
   return (
-    <header className="viewer-header">
+    <header className={`viewer-header ${isMobileNav ? 'viewer-header--mobile' : ''}`}>
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -37,7 +48,9 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
         backgroundColor: 'var(--color-background)'
       }}>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button
+          {/* Only show back button on desktop */}
+          {!isMobileNav && (
+            <button
             onClick={handleBack}
             style={{
               display: 'flex',
@@ -67,6 +80,7 @@ export function ViewerHeader({ arrangement }: ViewerHeaderProps) {
                   : 'Back to Songs'}
             </span>
           </button>
+          )}
           
           {isSignedIn && arrangement.slug && (arrangement.createdBy === userId || isAdmin) && (
             <Link

@@ -6,7 +6,6 @@ import '../styles/unified-chord-display.css'
 import '../styles/chordsheet.css'
 
 interface EnhancedChordSheetViewerProps extends ChordSheetViewerProps {
-  isStageMode?: boolean
   transposition?: number
 }
 
@@ -14,7 +13,6 @@ const ChordSheetViewerComponent: React.FC<EnhancedChordSheetViewerProps> = ({
   chordProText, 
   onCenterTap,
   className,
-  isStageMode = false,
   transposition = 0
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -63,7 +61,6 @@ const ChordSheetViewerComponent: React.FC<EnhancedChordSheetViewerProps> = ({
       ref={containerRef}
       className={clsx(
         "chord-sheet-container",
-        isStageMode && "stage-mode-content",
         className
       )}
       onClick={handleCenterTap}
@@ -84,7 +81,7 @@ const ChordSheetViewerComponent: React.FC<EnhancedChordSheetViewerProps> = ({
           overflowX: 'hidden',
           position: 'relative',
           maxHeight: '100%',
-          padding: isStageMode ? '2rem' : '0.5rem 1rem'
+          padding: '0.5rem 1rem'
         }}
         dangerouslySetInnerHTML={{ __html: formattedHtml }}
       />
