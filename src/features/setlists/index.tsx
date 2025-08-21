@@ -21,7 +21,7 @@ export function SetlistsPage() {
         }}>
           🚧 Under Construction
         </h1>
-        
+
         <h2 style={{
           fontSize: '1.5rem',
           marginBottom: '1.5rem',
@@ -29,17 +29,17 @@ export function SetlistsPage() {
         }}>
           Setlists Feature Coming Soon
         </h2>
-        
+
         <p style={{
           fontSize: '1.125rem',
           color: 'var(--text-secondary)',
           lineHeight: '1.6',
           marginBottom: '2rem'
         }}>
-          We're working hard to bring you an amazing setlist management experience. 
+          We're working hard to bring you an amazing setlist management experience.
           This feature will allow you to create, organize, and share your performance setlists.
         </p>
-        
+
         <div style={{
           padding: '1.5rem',
           backgroundColor: 'var(--color-accent)',
@@ -63,13 +63,11 @@ export function SetlistsPage() {
             <li style={{ marginBottom: '0.5rem' }}>✨ Create and manage multiple setlists</li>
             <li style={{ marginBottom: '0.5rem' }}>🎵 Drag and drop song ordering</li>
             <li style={{ marginBottom: '0.5rem' }}>📱 Mobile-friendly performance mode</li>
-            <li style={{ marginBottom: '0.5rem' }}>🔄 Real-time collaboration</li>
-            <li style={{ marginBottom: '0.5rem' }}>📊 Set timing and key flow analysis</li>
             <li style={{ marginBottom: '0.5rem' }}>🎸 Transpose songs within setlists</li>
             <li style={{ marginBottom: '0.5rem' }}>📤 Export and share setlists</li>
           </ul>
         </div>
-        
+
         <button
           onClick={() => window.history.back()}
           style={{
