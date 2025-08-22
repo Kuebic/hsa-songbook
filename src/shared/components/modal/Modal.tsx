@@ -84,10 +84,10 @@ export function Modal({
     backgroundColor: 'var(--color-card)',
     color: 'var(--text-primary)',
     position: 'fixed',
-    top: '50%',
+    top: '5vh', // Position near top of viewport instead of centering
     left: '50%',
-    transform: 'translate(-50%, -50%)',
-    maxHeight: 'calc(100vh - 80px)', // Increased spacing from viewport edges
+    transform: 'translateX(-50%)', // Only center horizontally
+    maxHeight: '90vh', // Use most of viewport height
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
@@ -105,22 +105,22 @@ export function Modal({
         @keyframes modalFadeIn {
           from {
             opacity: 0;
-            transform: translate(-50%, -50%) scale(0.95);
+            transform: translateX(-50%) scale(0.95);
           }
           to {
             opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
+            transform: translateX(-50%) scale(1);
           }
         }
         
         @keyframes modalFadeOut {
           from {
             opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
+            transform: translateX(-50%) scale(1);
           }
           to {
             opacity: 0;
-            transform: translate(-50%, -50%) scale(0.95);
+            transform: translateX(-50%) scale(0.95);
           }
         }
         
@@ -227,7 +227,8 @@ export function Modal({
             overflowX: 'hidden',
             padding: designTokens.spacing.lg,
             paddingTop: (title || description) ? designTokens.spacing.lg : '0',
-            overscrollBehavior: 'contain'
+            overscrollBehavior: 'contain',
+            scrollPaddingTop: '20px' // Prevent content from being hidden under fixed elements
           }}>
             {children}
           </div>

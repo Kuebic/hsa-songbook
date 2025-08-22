@@ -33,16 +33,43 @@ Review relevant files in that directory based on the technologies and patterns u
 
 ```
 hsa-songbook/
-├── src/                  # Source code
-│   ├── App.tsx          # Main App component
-│   ├── main.tsx         # Entry point
-│   ├── assets/          # Static assets
-│   └── index.css        # Global styles
-├── public/              # Public static files
-├── vite.config.ts       # Vite configuration
-├── tsconfig.json        # TypeScript configuration
-├── eslint.config.js     # ESLint configuration
-└── package.json         # Dependencies and scripts
+├── src/                      # Source code
+│   ├── app/                  # Application core
+│   │   ├── App.tsx          # Main app component with routing
+│   │   ├── main.tsx         # Application entry point
+│   │   └── pages/           # Route pages (HomePage, SearchPage)
+│   ├── features/            # Feature-based modules
+│   │   ├── arrangements/    # ChordPro editor, viewer, transposition
+│   │   ├── auth/           # Authentication (Clerk integration)
+│   │   ├── monitoring/     # Error boundaries, web vitals
+│   │   ├── multilingual/   # Multi-language lyrics support
+│   │   ├── pwa/           # Progressive web app features
+│   │   ├── responsive/    # Mobile navigation, responsive layouts
+│   │   ├── search/        # Search functionality
+│   │   ├── setlists/      # Setlist management
+│   │   └── songs/         # Song CRUD operations
+│   ├── shared/            # Shared resources
+│   │   ├── components/    # Reusable UI components
+│   │   ├── contexts/      # Global React contexts (Theme)
+│   │   ├── styles/        # Global styles, theme variables
+│   │   ├── test-utils/    # Testing utilities
+│   │   ├── types/         # Common TypeScript types
+│   │   └── validation/    # Zod schemas, validation hooks
+│   └── lib/               # Core utilities
+│       ├── database.types.ts  # Supabase type definitions
+│       ├── supabase.ts        # Supabase client
+│       └── utils.ts           # Utility functions
+├── public/                # Static files & PWA assets
+├── PRPs/                  # Product requirement documents
+│   ├── templates/         # PRP templates
+│   ├── ai_docs/          # Claude Code documentation
+│   └── *.md              # Feature PRPs
+├── claude_md_files/       # Development documentation
+├── song-database/         # Song data files
+├── vite.config.ts        # Vite configuration
+├── tsconfig.json         # TypeScript configuration
+├── eslint.config.js      # ESLint configuration
+└── package.json          # Dependencies and scripts
 ```
 
 ## Development Commands
