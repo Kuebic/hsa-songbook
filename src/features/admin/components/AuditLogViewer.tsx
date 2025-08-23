@@ -147,9 +147,9 @@ export function AuditLogViewer() {
                       <strong>Reason:</strong> {entry.reason}
                     </div>
                   )}
-                  {entry.metadata?.expires_at && (
+                  {entry.metadata && typeof entry.metadata === 'object' && 'expires_at' in entry.metadata && (
                     <div className={styles.metadata}>
-                      <strong>Expires:</strong> {formatDate(entry.metadata.expires_at)}
+                      <strong>Expires:</strong> {formatDate(String(entry.metadata.expires_at))}
                     </div>
                   )}
                 </div>
