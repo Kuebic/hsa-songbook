@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase, getCurrentSession } from '../../../lib/supabase'
-import type { User, AuthState } from '../types'
+import { extractRoleClaims } from '../utils/jwt'
+import type { User, AuthState, UserRole } from '../types'
 
 // Module-level singleton for sync operations to prevent duplicates across multiple hook instances
 const globalSyncState = {
@@ -14,6 +15,11 @@ export function useAuth() {
     session: null,
     isLoaded: false,
     isSignedIn: false
+  })
+  const [userRole, setUserRole] = useState<UserRole>('user')
+  const [permissions, setPermissions] = useState({
+    canModerate: false,
+    canAdmin: false
   })
 
   // Sync user data to the users table with retry logic
@@ -115,11 +121,23 @@ export function useAuth() {
         const session = await getCurrentSession()
         const user = session?.user || null
         
+        // Extract role claims if session exists
+        let roleInfo = { role: 'user' as UserRole, canModerate: false, canAdmin: false }
+        if (session?.access_token) {
+          roleInfo = extractRoleClaims(session.access_token)
+        }
+        
         setAuthState({
           user,
           session,
           isLoaded: true,
           isSignedIn: !!user
+        })
+        
+        setUserRole(roleInfo.role)
+        setPermissions({
+          canModerate: roleInfo.canModerate,
+          canAdmin: roleInfo.canAdmin
         })
         
         // Sync user data on initial load if user is already signed in
@@ -134,6 +152,8 @@ export function useAuth() {
           isLoaded: true,
           isSignedIn: false
         })
+        setUserRole('user')
+        setPermissions({ canModerate: false, canAdmin: false })
       }
     }
 
@@ -143,6 +163,19 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         const user = session?.user || null
+        
+        // Extract role claims if session exists
+        if (session?.access_token) {
+          const roleInfo = extractRoleClaims(session.access_token)
+          setUserRole(roleInfo.role)
+          setPermissions({
+            canModerate: roleInfo.canModerate,
+            canAdmin: roleInfo.canAdmin
+          })
+        } else {
+          setUserRole('user')
+          setPermissions({ canModerate: false, canAdmin: false })
+        }
         
         setAuthState({
           user,
@@ -175,9 +208,8 @@ export function useAuth() {
     return authState.session.access_token
   }, [authState.session])
 
-  // Check if user has admin role
-  const isAdmin = authState.user?.email?.includes('@admin.hsa-songbook.com') || 
-                  authState.user?.user_metadata?.role === 'admin'
+  // Check if user has admin role (now based on JWT claim)
+  const isAdmin = permissions.canAdmin
   
 
   // Sign in with OAuth provider
@@ -267,6 +299,11 @@ export function useAuth() {
     isSignedIn: authState.isSignedIn,
     isAdmin,
     getToken,
+    
+    // RBAC properties
+    userRole,
+    isModerator: permissions.canModerate,
+    permissions,
     
     // Helper methods (Clerk-compatible)
     getUserEmail: () => authState.user?.email,
