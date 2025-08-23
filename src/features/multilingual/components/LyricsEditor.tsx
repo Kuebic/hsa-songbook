@@ -108,8 +108,8 @@ export function LyricsEditor({
     }
   }, [lyrics, onChange, errors]);
 
-  // Validate lyrics content
-  const validateLyrics = useCallback(() => {
+  // Validate lyrics content - run only when lyrics or maxLength change
+  useEffect(() => {
     const newErrors: Record<LanguageCode, string> = {};
     
     for (const [language, content] of Object.entries(lyrics)) {
@@ -126,14 +126,7 @@ export function LyricsEditor({
     setErrors(newErrors);
     const isValid = Object.keys(newErrors).length === 0;
     onValidationChange?.(isValid, newErrors);
-    
-    return isValid;
   }, [lyrics, maxLength, onValidationChange]);
-
-  // Run validation when lyrics change
-  useEffect(() => {
-    validateLyrics();
-  }, [validateLyrics]);
 
   // Auto-resize textarea
   const adjustTextareaHeight = useCallback((textarea: HTMLTextAreaElement) => {

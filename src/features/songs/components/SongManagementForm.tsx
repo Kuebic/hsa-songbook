@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useCreateSong } from '../hooks/mutations/useCreateSong'
 import { useUpdateSong } from '../hooks/mutations/useUpdateSong'
@@ -179,7 +179,7 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
     handleFieldChange('lyrics', lyrics)
   }
 
-  const handleLyricsValidationChange = (isValid: boolean, errors: Record<LanguageCode, string>) => {
+  const handleLyricsValidationChange = useCallback((isValid: boolean, errors: Record<LanguageCode, string>) => {
     setLyricsValid(isValid)
     setLyricsErrors(errors)
     
@@ -195,7 +195,7 @@ export function SongManagementForm({ song, onSuccess, onCancel, isModal = false 
         return rest
       })
     }
-  }
+  }, [])
 
   const handleOriginalLanguageChange = (language: LanguageCode) => {
     handleFieldChange('originalLanguage', language)
