@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -13,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       arrangements: {
@@ -50,6 +24,10 @@ export type Database = {
           id: string
           is_public: boolean | null
           key: string | null
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_note: string | null
+          moderation_status: string | null
           name: string
           rating_average: number | null
           rating_count: number | null
@@ -70,6 +48,10 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           key?: string | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_note?: string | null
+          moderation_status?: string | null
           name: string
           rating_average?: number | null
           rating_count?: number | null
@@ -90,6 +72,10 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           key?: string | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_note?: string | null
+          moderation_status?: string | null
           name?: string
           rating_average?: number | null
           rating_count?: number | null
@@ -138,6 +124,87 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      content_reports: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string | null
+          description: string | null
+          id: string
+          reason: string
+          reported_by: string | null
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string | null
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          reason: string
+          reported_by?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          reason?: string
+          reported_by?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      moderation_log: {
+        Row: {
+          action: string
+          content_id: string
+          content_type: string
+          id: string
+          metadata: Json | null
+          new_status: string | null
+          note: string | null
+          performed_at: string | null
+          performed_by: string | null
+          previous_status: string | null
+        }
+        Insert: {
+          action: string
+          content_id: string
+          content_type: string
+          id?: string
+          metadata?: Json | null
+          new_status?: string | null
+          note?: string | null
+          performed_at?: string | null
+          performed_by?: string | null
+          previous_status?: string | null
+        }
+        Update: {
+          action?: string
+          content_id?: string
+          content_type?: string
+          id?: string
+          metadata?: Json | null
+          new_status?: string | null
+          note?: string | null
+          performed_at?: string | null
+          performed_by?: string | null
+          previous_status?: string | null
+        }
+        Relationships: []
       }
       reviews: {
         Row: {
@@ -204,6 +271,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      role_audit_log: {
+        Row: {
+          action: string
+          id: string
+          metadata: Json | null
+          performed_at: string | null
+          performed_by: string | null
+          reason: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          id?: string
+          metadata?: Json | null
+          performed_at?: string | null
+          performed_by?: string | null
+          reason?: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          id?: string
+          metadata?: Json | null
+          performed_at?: string | null
+          performed_by?: string | null
+          reason?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string | null
+        }
+        Relationships: []
       }
       setlist_items: {
         Row: {
@@ -317,6 +417,10 @@ export type Database = {
           lyrics: Json | null
           lyrics_source: string | null
           lyrics_verified: boolean | null
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_note: string | null
+          moderation_status: string | null
           notes: string | null
           original_language: string | null
           primary_ccli_id: string | null
@@ -344,6 +448,10 @@ export type Database = {
           lyrics?: Json | null
           lyrics_source?: string | null
           lyrics_verified?: boolean | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_note?: string | null
+          moderation_status?: string | null
           notes?: string | null
           original_language?: string | null
           primary_ccli_id?: string | null
@@ -371,6 +479,10 @@ export type Database = {
           lyrics?: Json | null
           lyrics_source?: string | null
           lyrics_verified?: boolean | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_note?: string | null
+          moderation_status?: string | null
           notes?: string | null
           original_language?: string | null
           primary_ccli_id?: string | null
@@ -406,6 +518,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_roles: {
+        Row: {
+          expires_at: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          is_active: boolean | null
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string | null
+        }
+        Insert: {
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string | null
+        }
+        Update: {
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string | null
+        }
+        Relationships: []
       }
       users: {
         Row: {
@@ -591,6 +733,14 @@ export type Database = {
       }
     }
     Functions: {
+      check_admin_role: {
+        Args: { user_id_param?: string }
+        Returns: boolean
+      }
+      custom_access_token_hook: {
+        Args: { event: Json }
+        Returns: Json
+      }
       daitch_mokotoff: {
         Args: { "": string }
         Returns: string[]
@@ -639,6 +789,29 @@ export type Database = {
           total_songs: number
         }[]
       }
+      get_moderation_queue: {
+        Args: { filter_status?: string; filter_type?: string }
+        Returns: {
+          content_id: string
+          content_type: string
+          created_at: string
+          creator_email: string
+          creator_id: string
+          id: string
+          last_modified: string
+          report_count: number
+          status: string
+          title: string
+        }[]
+      }
+      grant_user_role: {
+        Args: {
+          grant_reason?: string
+          new_role: Database["public"]["Enums"]["user_role"]
+          target_user_id: string
+        }
+        Returns: boolean
+      }
       gtrgm_compress: {
         Args: { "": unknown }
         Returns: unknown
@@ -658,6 +831,10 @@ export type Database = {
       gtrgm_out: {
         Args: { "": unknown }
         Returns: unknown
+      }
+      revoke_user_role: {
+        Args: { revoke_reason?: string; target_user_id: string }
+        Returns: boolean
       }
       set_limit: {
         Args: { "": number }
@@ -685,7 +862,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -811,10 +988,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "moderator", "user"],
+    },
   },
 } as const

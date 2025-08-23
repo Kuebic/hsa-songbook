@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useSongMutations } from '@features/songs/hooks/mutations/useSongMutations'
 import { useNotification } from '@shared/components/notifications'
+import { ReportButton } from '@features/moderation/components/ReportButton'
 import type { Song } from '@features/songs/types/song.types'
 
 interface SongActionsProps {
@@ -20,8 +21,7 @@ export function SongActions({ song, onDelete }: SongActionsProps) {
   // Check permissions
   const isOwner = user?.id === song.metadata.createdBy
   const canDelete = isSignedIn && (isOwner || isAdmin)
-  
-  if (!canDelete) return null
+  const canReport = isSignedIn && !isOwner // Users can't report their own content
   
   const handleDelete = async () => {
     setIsDeleting(true)
@@ -83,25 +83,46 @@ export function SongActions({ song, onDelete }: SongActionsProps) {
     zIndex: 999
   }
   
+
+  if (!canDelete && !canReport) return null
+
   return (
-    <>
-      <button
-        onClick={() => setShowDeleteConfirm(true)}
-        style={deleteButtonStyles}
-        onMouseEnter={e => {
-          e.currentTarget.style.backgroundColor = '#fef2f2'
-          e.currentTarget.style.borderColor = '#ef4444'
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.backgroundColor = 'transparent'
-          e.currentTarget.style.borderColor = '#e2e8f0'
-        }}
-        aria-label={`Delete ${song.title}`}
-        disabled={isDeleting}
-      >
-        <span>🗑️</span>
-        <span>Delete</span>
-      </button>
+    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+      {canReport && (
+        <ReportButton
+          contentId={song.id}
+          contentType="song"
+          buttonText="Report"
+          className="text-red-600 hover:text-red-800 text-sm font-medium"
+          onReportSubmitted={() => {
+            addNotification({
+              type: 'success',
+              title: 'Report submitted',
+              message: 'Thank you for helping maintain quality content'
+            })
+          }}
+        />
+      )}
+      
+      {canDelete && (
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          style={deleteButtonStyles}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = '#fef2f2'
+            e.currentTarget.style.borderColor = '#ef4444'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.borderColor = '#e2e8f0'
+          }}
+          aria-label={`Delete ${song.title}`}
+          disabled={isDeleting}
+        >
+          <span>🗑️</span>
+          <span>Delete</span>
+        </button>
+      )}
       
       {showDeleteConfirm && (
         <>
@@ -145,6 +166,6 @@ export function SongActions({ song, onDelete }: SongActionsProps) {
           </div>
         </>
       )}
-    </>
+    </div>
   )
 }

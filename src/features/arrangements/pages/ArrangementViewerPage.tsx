@@ -220,6 +220,7 @@ export function ArrangementViewerPage() {
             >
               <ViewerToolbar
                 onPrint={handlePrint}
+                arrangementId={arrangement.id}
                 transposition={transpositionState}
               />
             </CollapsibleToolbar>
@@ -237,6 +238,7 @@ export function ArrangementViewerPage() {
             >
               <ViewerToolbar
                 onPrint={handlePrint}
+                arrangementId={arrangement.id}
                 transposition={transpositionState}
               />
             </CollapsibleToolbar>
