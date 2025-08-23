@@ -18,7 +18,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation()
-  const { isSignedIn, isLoaded } = useAuth()
+  const { isSignedIn, isLoaded, isAdmin } = useAuth()
   const viewport = useViewport()
   const nav = useResponsiveNav()
   
@@ -26,12 +26,21 @@ export function Layout({ children }: LayoutProps) {
                        location.pathname.includes('/arrangements/') ||
                        location.pathname.includes('/edit')
 
-  const navItems = useMemo(() => [
-    { to: '/', label: 'Home' },
-    { to: '/songs', label: 'Songs' },
-    { to: '/search', label: 'Search' },
-    { to: '/setlists', label: 'Setlists' }
-  ], [])
+  const navItems = useMemo(() => {
+    const baseItems = [
+      { to: '/', label: 'Home' },
+      { to: '/songs', label: 'Songs' },
+      { to: '/search', label: 'Search' },
+      { to: '/setlists', label: 'Setlists' }
+    ]
+    
+    // Add Admin link if user has admin permissions
+    if (isAdmin) {
+      baseItems.push({ to: '/admin', label: 'Admin' })
+    }
+    
+    return baseItems
+  }, [isAdmin])
 
   // Add class to root element for CSS targeting
   useEffect(() => {

@@ -15,7 +15,7 @@ export class APIError extends Error {
   }
 }
 
-// Cache implementation (reuse pattern from songs service)
+// Cache implementation
 interface CacheEntry<T = unknown> {
   data: T
   timestamp: number
@@ -41,74 +41,6 @@ function clearCache(): void {
   requestCache.clear()
 }
 
-// Helper function to map database users to UserWithRole type
-interface DatabaseUser {
-  id: string
-  email: string
-  full_name?: string | null
-  avatar_url?: string | null
-  created_at: string
-  last_sign_in_at?: string | null
-  user_roles?: Array<{
-    role: UserRole
-    granted_by?: string | null
-    granted_at?: string | null
-    expires_at?: string | null
-    is_active?: boolean
-  }>
-}
-
-function mapUsersWithRoles(data: DatabaseUser[]): UserWithRole[] {
-  return data.map(item => ({
-    id: item.id,
-    email: item.email,
-    fullName: item.full_name || null,
-    avatarUrl: item.avatar_url || null,
-    createdAt: item.created_at,
-    lastSignIn: item.last_sign_in_at || null,
-    role: (item.user_roles?.[0]?.role || 'user') as UserRole,
-    roleGrantedBy: item.user_roles?.[0]?.granted_by || null,
-    roleGrantedAt: item.user_roles?.[0]?.granted_at || null,
-    roleExpiresAt: item.user_roles?.[0]?.expires_at || null,
-    isRoleActive: item.user_roles?.[0]?.is_active || false
-  }))
-}
-
-// Helper function to map audit log entries
-interface DatabaseAuditEntry {
-  id: string
-  user_id: string
-  role: UserRole
-  action: 'grant' | 'revoke' | 'expire'
-  performed_by: string
-  performed_at: string
-  reason?: string | null
-  metadata?: Record<string, unknown> | null
-  user?: {
-    email: string
-    full_name?: string | null
-  }
-  performer?: {
-    email: string
-    full_name?: string | null
-  }
-}
-
-function mapAuditEntries(data: DatabaseAuditEntry[]): AuditLogEntry[] {
-  return data.map(item => ({
-    id: item.id,
-    userId: item.user_id,
-    userEmail: item.user?.email || 'Unknown',
-    role: item.role as UserRole,
-    action: item.action,
-    performedBy: item.performed_by,
-    performedByEmail: item.performer?.email || 'Unknown',
-    performedAt: item.performed_at,
-    reason: item.reason,
-    metadata: item.metadata
-  }))
-}
-
 export const adminService = {
   async getUsers(filter?: UserFilter): Promise<{ users: UserWithRole[]; total: number }> {
     try {
@@ -116,53 +48,78 @@ export const adminService = {
       const cached = getCachedResult<{ users: UserWithRole[]; total: number }>(cacheKey)
       if (cached) return cached
 
-      // Fetch users from the users table
-      let query = supabase
+      // First, get users from the users table
+      let userQuery = supabase
         .from('users')
         .select('*', { count: 'exact' })
 
-      // Apply filters
+      // Apply search filter
       if (filter?.search) {
-        query = query.or(`email.ilike.%${filter.search}%,full_name.ilike.%${filter.search}%`)
+        userQuery = userQuery.or(`email.ilike.%${filter.search}%,full_name.ilike.%${filter.search}%`)
       }
 
-      // Sorting (adjust for available columns)
-      const sortColumn = filter?.sortBy === 'last_sign_in' ? 'updated_at' : 
-                        filter?.sortBy === 'role' ? 'created_at' : 
-                        filter?.sortBy || 'created_at'
-      query = query.order(sortColumn, { ascending: filter?.sortOrder !== 'desc' })
+      // Sorting
+      const sortColumn = filter?.sortBy === 'last_sign_in' ? 'updated_at' : filter?.sortBy || 'created_at'
+      userQuery = userQuery.order(sortColumn, { ascending: filter?.sortOrder !== 'desc' })
 
       // Pagination
       const limit = filter?.limit || 20
       const offset = ((filter?.page || 1) - 1) * limit
-      query = query.range(offset, offset + limit - 1)
+      userQuery = userQuery.range(offset, offset + limit - 1)
 
-      const { data, error, count } = await query
+      const { data: userData, error: userError, count } = await userQuery
 
-      if (error) throw new APIError(error.message, 500)
+      if (userError) throw new APIError(userError.message, 500)
 
-      // Map users with default roles (since user_roles table is not available in types)
-      const users: UserWithRole[] = (data || []).map(user => ({
-        id: user.id,
-        email: user.email,
-        fullName: user.full_name || null,
-        avatarUrl: user.avatar_url || null,
-        createdAt: user.created_at || new Date().toISOString(),
-        lastSignIn: user.updated_at || null,
-        role: 'user' as UserRole, // Default role
-        roleGrantedBy: null,
-        roleGrantedAt: null,
-        roleExpiresAt: null,
-        isRoleActive: true
-      }))
-
-      // Filter by role if specified (mock filter)
-      const filteredUsers = filter?.role && filter.role !== 'all' 
-        ? users.filter(u => u.role === filter.role)
-        : users
-
-      const result = { users: filteredUsers, total: count || 0 }
+      // Get roles for these users
+      const userIds = userData?.map(u => u.id) || []
+      let roleData: any[] = []
       
+      if (userIds.length > 0) {
+        const { data: roles, error: roleError } = await supabase
+          .from('user_roles')
+          .select('*')
+          .in('user_id', userIds)
+          .eq('is_active', true)
+
+        if (roleError) {
+          console.warn('Error fetching roles:', roleError)
+          // Continue without roles rather than failing
+        } else {
+          roleData = roles || []
+        }
+      }
+
+      // Create role lookup map
+      const roleMap = new Map<string, any>()
+      roleData.forEach(role => {
+        roleMap.set(role.user_id, role)
+      })
+
+      // Map to UserWithRole type
+      let users: UserWithRole[] = (userData || []).map((user: any) => {
+        const userRole = roleMap.get(user.id)
+        return {
+          id: user.id,
+          email: user.email,
+          fullName: user.full_name || null,
+          avatarUrl: user.avatar_url || null,
+          createdAt: user.created_at || new Date().toISOString(),
+          lastSignIn: user.updated_at || null,
+          role: (userRole?.role || 'user') as UserRole,
+          roleGrantedBy: userRole?.granted_by || null,
+          roleGrantedAt: userRole?.granted_at || null,
+          roleExpiresAt: userRole?.expires_at || null,
+          isRoleActive: userRole?.is_active || false
+        }
+      })
+
+      // Apply role filter after mapping
+      if (filter?.role && filter.role !== 'all') {
+        users = users.filter(user => user.role === filter.role)
+      }
+
+      const result = { users, total: count || 0 }
       setCachedResult(cacheKey, result)
       return result
     } catch (error) {
@@ -178,20 +135,38 @@ export const adminService = {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new APIError('Authentication required', 401)
 
-      // Mock implementation - log the assignment
-      console.log('Role assignment (mock):', {
-        userId: assignment.userId,
-        role: assignment.role,
-        grantedBy: user.id,
-        expiresAt: assignment.expiresAt,
-        reason: assignment.reason
-      })
+      // Upsert role assignment
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .upsert({
+          user_id: assignment.userId,
+          role: assignment.role,
+          granted_by: user.id,
+          granted_at: new Date().toISOString(),
+          expires_at: assignment.expiresAt,
+          is_active: true
+        }, {
+          onConflict: 'user_id'
+        })
 
-      // Simulate a small delay
-      await new Promise(resolve => setTimeout(resolve, 500))
+      if (roleError) throw new APIError(roleError.message, 400)
 
-      // Note: In production, this would update the user_roles table
-      // and create an audit log entry
+      // Log to audit
+      const { error: auditError } = await supabase
+        .from('role_audit_log')
+        .insert({
+          user_id: assignment.userId,
+          role: assignment.role,
+          action: 'grant',
+          performed_by: user.id,
+          reason: assignment.reason,
+          metadata: { expires_at: assignment.expiresAt }
+        })
+
+      if (auditError) {
+        console.error('Audit log error:', auditError)
+        // Don't throw - audit failure shouldn't block operation
+      }
     } catch (error) {
       console.error('Error assigning role:', error)
       throw error
@@ -214,14 +189,14 @@ export const adminService = {
 
       if (!currentRole) throw new APIError('User role not found', 404)
 
-      // Remove role (set to user)
+      // Update role to 'user' and deactivate
       const { error: roleError } = await supabase
         .from('user_roles')
         .update({
           role: 'user',
           is_active: false,
-          revoked_by: user.id,
-          revoked_at: new Date().toISOString()
+          granted_by: user.id,
+          granted_at: new Date().toISOString()
         })
         .eq('user_id', userId)
 
@@ -251,16 +226,13 @@ export const adminService = {
   async getAuditLog(userId?: string): Promise<AuditLogEntry[]> {
     try {
       const cacheKey = `audit:${userId || 'all'}`
-      const cached = getCachedResult(cacheKey)
+      const cached = getCachedResult<AuditLogEntry[]>(cacheKey)
       if (cached) return cached
 
+      // First, get the audit log data without joins
       let query = supabase
         .from('role_audit_log')
-        .select(`
-          *,
-          user:users!role_audit_log_user_id_fkey(email, full_name),
-          performer:users!role_audit_log_performed_by_fkey(email, full_name)
-        `)
+        .select('*')
         .order('performed_at', { ascending: false })
         .limit(100)
 
@@ -268,11 +240,60 @@ export const adminService = {
         query = query.eq('user_id', userId)
       }
 
-      const { data, error } = await query
+      const { data: auditData, error: auditError } = await query
 
-      if (error) throw new APIError(error.message, 500)
+      if (auditError) throw new APIError(auditError.message, 500)
 
-      const entries = mapAuditEntries(data || [])
+      if (!auditData || auditData.length === 0) {
+        return []
+      }
+
+      // Get unique user IDs for batch lookup
+      const userIds = Array.from(new Set([
+        ...auditData.map(item => item.user_id),
+        ...auditData.map(item => item.performed_by)
+      ].filter(Boolean) as string[]))
+
+      // Get user information from the users table (if it exists)
+      let userMap = new Map<string, any>()
+      
+      if (userIds.length > 0) {
+        // Try to get from public.users first, fallback to minimal data
+        try {
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('id, email, full_name')
+            .in('id', userIds)
+          
+          if (!userError && userData) {
+            userData.forEach(user => {
+              userMap.set(user.id, user)
+            })
+          }
+        } catch (error) {
+          console.warn('Could not fetch user details, using minimal data:', error)
+        }
+      }
+
+      // Map to AuditLogEntry type
+      const entries: AuditLogEntry[] = auditData.map((item: any) => {
+        const user = userMap.get(item.user_id)
+        const performer = userMap.get(item.performed_by)
+        
+        return {
+          id: item.id,
+          userId: item.user_id,
+          userEmail: user?.email || 'Unknown User',
+          role: item.role as UserRole,
+          action: item.action,
+          performedBy: item.performed_by,
+          performedByEmail: performer?.email || 'Unknown User',
+          performedAt: item.performed_at,
+          reason: item.reason,
+          metadata: item.metadata
+        }
+      })
+
       setCachedResult(cacheKey, entries)
       return entries
     } catch (error) {
@@ -283,54 +304,82 @@ export const adminService = {
 
   async getAdminStats(): Promise<AdminStats> {
     try {
-      const cached = getCachedResult('admin-stats')
+      const cached = getCachedResult<AdminStats>('admin-stats')
       if (cached) return cached
 
-      // Get user counts by role
-      const { data: roleCounts, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role', { count: 'exact' })
-        .eq('is_active', true)
-
-      if (roleError) throw new APIError(roleError.message, 500)
-
       // Get total users
-      const { count: totalUsers, error: totalError } = await supabase
+      const { count: totalUsers, error: userCountError } = await supabase
         .from('users')
         .select('*', { count: 'exact', head: true })
 
-      if (totalError) throw new APIError(totalError.message, 500)
+      if (userCountError) {
+        console.warn('Error fetching user count:', userCountError)
+      }
 
-      // Get recent role changes (last 7 days)
+      // Get user counts by role (handle potential errors gracefully)
+      let roleCounts: any[] = []
+      try {
+        const { data, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('is_active', true)
+        
+        if (roleError) {
+          console.warn('Error fetching role counts:', roleError)
+        } else {
+          roleCounts = data || []
+        }
+      } catch (error) {
+        console.warn('Error fetching role counts:', error)
+      }
+
+      // Get recent role changes (last 7 days) - handle potential errors gracefully
       const sevenDaysAgo = new Date()
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
       
-      const { count: recentChanges, error: recentError } = await supabase
-        .from('role_audit_log')
-        .select('*', { count: 'exact', head: true })
-        .gte('performed_at', sevenDaysAgo.toISOString())
-
-      if (recentError) throw new APIError(recentError.message, 500)
+      let recentChanges = 0
+      try {
+        const { count, error: auditError } = await supabase
+          .from('role_audit_log')
+          .select('*', { count: 'exact', head: true })
+          .gte('performed_at', sevenDaysAgo.toISOString())
+        
+        if (auditError) {
+          console.warn('Error fetching recent changes:', auditError)
+        } else {
+          recentChanges = count || 0
+        }
+      } catch (error) {
+        console.warn('Error fetching recent changes:', error)
+      }
 
       // Calculate counts by role
       const roleCountMap = new Map<string, number>()
-      roleCounts?.forEach(item => {
-        roleCountMap.set(item.role, item.count || 0)
+      roleCounts.forEach((item: any) => {
+        const role = item.role as string
+        roleCountMap.set(role, (roleCountMap.get(role) || 0) + 1)
       })
 
       const stats: AdminStats = {
         totalUsers: totalUsers || 0,
         adminCount: roleCountMap.get('admin') || 0,
         moderatorCount: roleCountMap.get('moderator') || 0,
-        regularUserCount: roleCountMap.get('user') || 0,
-        recentRoleChanges: recentChanges || 0
+        regularUserCount: Math.max(0, (totalUsers || 0) - (roleCountMap.get('admin') || 0) - (roleCountMap.get('moderator') || 0)),
+        recentRoleChanges: recentChanges
       }
 
       setCachedResult('admin-stats', stats)
       return stats
     } catch (error) {
       console.error('Error fetching admin stats:', error)
-      throw error
+      // Return fallback stats rather than throwing
+      return {
+        totalUsers: 0,
+        adminCount: 0,
+        moderatorCount: 0,
+        regularUserCount: 0,
+        recentRoleChanges: 0
+      }
     }
   }
 }

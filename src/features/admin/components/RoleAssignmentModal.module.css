@@ -4,7 +4,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13,13 +14,22 @@
 }
 
 .modal {
-  background: var(--bg-primary);
+  background: var(--color-card);
   border-radius: 0.5rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
   max-width: 500px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  border: 1px solid var(--color-border);
+  box-sizing: border-box;
+}
+
+/* Ensure proper box sizing for all modal elements */
+.modal *,
+.modal *::before,
+.modal *::after {
+  box-sizing: border-box;
 }
 
 .header {
@@ -27,7 +37,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .header h3 {
@@ -54,14 +64,14 @@
 }
 
 .closeBtn:hover {
-  background: var(--bg-hover);
+  background: var(--color-card-hover);
   color: var(--text-primary);
 }
 
 .userInfo {
   padding: 1.5rem;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-default);
+  background: var(--color-muted);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .userDetail {
@@ -109,6 +119,11 @@
   padding: 1.5rem;
 }
 
+/* Ensure all form elements respect padding */
+.form * {
+  box-sizing: border-box;
+}
+
 .formGroup {
   margin-bottom: 1.5rem;
 }
@@ -130,20 +145,35 @@
 .textarea {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--color-border);
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  background: var(--bg-primary);
+  background: var(--color-card);
   color: var(--text-primary);
   transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+/* Specific styling for datetime-local input to match theme */
+.input[type="datetime-local"] {
+  color-scheme: light dark;
+}
+
+/* Dark theme specific datetime picker styling */
+[data-theme="dark"] .input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+[data-theme="stage"] .input[type="datetime-local"] {
+  color-scheme: dark;
 }
 
 .select:focus,
 .input:focus,
 .textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
 }
 
 .select:disabled,
@@ -151,7 +181,7 @@
 .textarea:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: var(--bg-secondary);
+  background: var(--color-muted);
 }
 
 .textarea {
@@ -208,22 +238,22 @@
 }
 
 .cancelBtn {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-default);
+  background: var(--color-secondary);
+  color: var(--color-secondary-foreground);
+  border: 1px solid var(--color-border);
 }
 
 .cancelBtn:hover:not(:disabled) {
-  background: var(--bg-hover);
+  background: var(--color-card-hover);
 }
 
 .submitBtn {
-  background: var(--primary-color);
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
 }
 
 .submitBtn:hover:not(:disabled) {
-  background: var(--primary-color-hover);
+  opacity: 0.9;
 }
 
 .cancelBtn:disabled,

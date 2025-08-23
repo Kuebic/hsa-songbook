@@ -33,38 +33,40 @@
   flex: 1;
   min-width: 200px;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--color-border);
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  background: var(--bg-primary);
+  background: var(--color-card);
   color: var(--text-primary);
+  box-sizing: border-box;
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
 }
 
 .roleFilter {
   padding: 0.5rem 1rem;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--color-border);
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  background: var(--bg-primary);
+  background: var(--color-card);
   color: var(--text-primary);
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .roleFilter:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
 }
 
 .tableContainer {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-default);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   overflow: hidden;
   margin-bottom: 1.5rem;
@@ -76,8 +78,8 @@
 }
 
 .table thead {
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-default);
+  background: var(--color-muted);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .table th {
@@ -100,12 +102,12 @@
 }
 
 .table tbody tr {
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--color-border);
   transition: background-color 0.2s;
 }
 
 .table tbody tr:hover {
-  background: var(--bg-hover);
+  background: var(--color-card-hover);
 }
 
 .table tbody tr:last-child {
@@ -164,18 +166,19 @@
 
 .changeRoleBtn {
   padding: 0.375rem 0.75rem;
-  background: var(--primary-color);
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
   border: none;
   border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
 .changeRoleBtn:hover {
-  background: var(--primary-color-hover);
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .changeRoleBtn:disabled {
@@ -192,9 +195,9 @@
 
 .pageBtn {
   padding: 0.5rem 1rem;
-  background: var(--bg-primary);
+  background: var(--color-card);
   color: var(--text-primary);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--color-border);
   border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -203,8 +206,8 @@
 }
 
 .pageBtn:hover:not(:disabled) {
-  background: var(--bg-hover);
-  border-color: var(--primary-color);
+  background: var(--color-card-hover);
+  border-color: var(--color-primary);
 }
 
 .pageBtn:disabled {
