@@ -654,6 +654,12 @@ describe('ArrangementManagementForm', () => {
         isLoaded: true,
         isSignedIn: true,
         isAdmin: true,
+        userRole: 'admin' as const,
+        isModerator: true,
+        permissions: {
+          canModerate: true,
+          canAdmin: true
+        },
         getToken: vi.fn().mockResolvedValue('mock-token'),
         getUserEmail: vi.fn().mockReturnValue('admin@example.com'),
         getUserName: vi.fn().mockReturnValue('Admin User'),

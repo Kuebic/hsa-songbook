@@ -20,6 +20,12 @@ const createAuthMock = (overrides: Partial<ReturnType<typeof useAuth>> = {}) => 
   isSignedIn: false,
   isAdmin: false,
   isAnonymous: false,
+  userRole: 'user' as const,
+  isModerator: false,
+  permissions: {
+    canModerate: false,
+    canAdmin: false
+  },
   getToken: vi.fn().mockResolvedValue(null),
   getUserEmail: vi.fn().mockReturnValue(undefined),
   getUserName: vi.fn().mockReturnValue('User'),
