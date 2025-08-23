@@ -22,6 +22,7 @@ const SongDetailPage = lazy(() => import('@features/songs').then(module => ({ de
 const SetlistsPage = lazy(() => import('@features/setlists').then(module => ({ default: module.SetlistsPage })))
 const ArrangementViewerPage = lazy(() => import('@features/arrangements/pages/ArrangementViewerPage').then(module => ({ default: module.ArrangementViewerPage })))
 const ChordEditingPage = lazy(() => import('@features/arrangements/pages/ChordEditingPage').then(module => ({ default: module.ChordEditingPage })))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then(module => ({ default: module.AdminDashboard })))
 
 function App() {
   // Initialize web vitals monitoring
@@ -145,6 +146,18 @@ function App() {
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Setlist Playback">
                     <SetlistsPage />
+                  </LazyRouteWrapper>
+                </ErrorBoundary>
+              } 
+            />
+            <Route 
+              path="/admin" 
+              element={
+                <ErrorBoundary level="page">
+                  <LazyRouteWrapper pageName="Admin Dashboard">
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 
