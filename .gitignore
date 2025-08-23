@@ -37,3 +37,9 @@ server/mongodb-binaries/
 server/dist/
 coverage/
 dev-dist/
+
+# Backup and temporary files
+*.production
+*.backup
+*.tmp
+supabase/.temp/
