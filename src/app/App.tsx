@@ -10,7 +10,7 @@ import { NotificationProvider } from '@shared/components/notifications'
 import { ThemeProvider } from '@shared/contexts/ThemeContext'
 import { SongModalProvider } from '@features/songs/contexts/SongModalContext'
 import { GlobalSongModal } from '@features/songs/components/GlobalSongModal'
-import { ProtectedRoute } from '@features/auth'
+import { ProtectedRoute, AuthProvider } from '@features/auth'
 
 // Eagerly load the home page
 import { HomePage } from './pages/HomePage'
@@ -38,9 +38,10 @@ function App() {
   return (
     <ErrorBoundary level="app">
       <ThemeProvider>
-        <NotificationProvider>
-          <SongModalProvider>
-            <BrowserRouter>
+        <AuthProvider>
+          <NotificationProvider>
+            <SongModalProvider>
+              <BrowserRouter>
           <Layout>
             <Routes>
             <Route path="/" element={
@@ -200,6 +201,7 @@ function App() {
             </BrowserRouter>
           </SongModalProvider>
         </NotificationProvider>
+      </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
   )

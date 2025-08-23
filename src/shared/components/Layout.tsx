@@ -108,7 +108,17 @@ export function Layout({ children }: LayoutProps) {
             <div className="nav-actions">
               <ThemeToggle />
               <AddSongButton />
-              {isLoaded && (
+              {!isLoaded ? (
+                // Show loading spinner while auth is loading
+                <div style={{ 
+                  width: '2rem', 
+                  height: '2rem', 
+                  borderRadius: '50%',
+                  border: '2px solid #e5e7eb',
+                  borderTopColor: '#3b82f6',
+                  animation: 'spin 1s linear infinite'
+                }} />
+              ) : (
                 <>
                   {!isSignedIn && <AuthButtons />}
                   {isSignedIn && <UserMenu />}

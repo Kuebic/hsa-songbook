@@ -89,6 +89,16 @@
   gap: 1rem;
 }
 
+/* Loading spinner animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Main Content */
 .main-content {
   flex: 1;

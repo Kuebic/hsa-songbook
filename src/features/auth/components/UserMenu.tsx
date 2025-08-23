@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 
 export function UserMenu() {
-  const { user, getUserName, getUserAvatar, signOut } = useAuth()
+  const { user, session, getUserName, getUserAvatar, signOut } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -30,11 +30,24 @@ export function UserMenu() {
     }
   }
 
-  if (!user) {
+  // Use session.user as fallback if user is null
+  const currentUser = user || session?.user
+  
+  // Debug logging
+  console.log('[UserMenu] Auth state:', {
+    hasUser: !!user,
+    hasSession: !!session,
+    hasSessionUser: !!session?.user,
+    currentUser: !!currentUser,
+    userEmail: currentUser?.email
+  })
+  
+  if (!currentUser) {
+    console.warn('[UserMenu] No user found in auth state')
     return null
   }
 
-  const userName = getUserName()
+  const userName = getUserName() || currentUser.email?.split('@')[0] || 'User'
   const userAvatar = getUserAvatar()
 
 
@@ -89,7 +102,7 @@ export function UserMenu() {
               {userName}
             </div>
             <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-              {user.email}
+              {currentUser.email}
             </div>
           </div>
 
