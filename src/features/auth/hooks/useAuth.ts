@@ -21,6 +21,8 @@ export function useAuth() {
     canModerate: false,
     canAdmin: false
   })
+  const [customRoles, setCustomRoles] = useState<string[]>([])
+  const [permissionGroups, setPermissionGroups] = useState<string[]>([])
 
   // Sync user data to the users table with retry logic
   const syncUserData = useCallback(async (user: User, retryCount = 0): Promise<void> => {
@@ -122,7 +124,7 @@ export function useAuth() {
         const user = session?.user || null
         
         // Extract role claims if session exists
-        let roleInfo = { role: 'user' as UserRole, canModerate: false, canAdmin: false }
+        let roleInfo = { role: 'user' as UserRole, canModerate: false, canAdmin: false, customRoles: [] as string[], permissionGroups: [] as string[] }
         if (session?.access_token) {
           roleInfo = extractRoleClaims(session.access_token)
         }
@@ -139,6 +141,8 @@ export function useAuth() {
           canModerate: roleInfo.canModerate,
           canAdmin: roleInfo.canAdmin
         })
+        setCustomRoles(roleInfo.customRoles || [])
+        setPermissionGroups(roleInfo.permissionGroups || [])
         
         // Sync user data on initial load if user is already signed in
         if (user) {
@@ -172,9 +176,13 @@ export function useAuth() {
             canModerate: roleInfo.canModerate,
             canAdmin: roleInfo.canAdmin
           })
+          setCustomRoles(roleInfo.customRoles || [])
+          setPermissionGroups(roleInfo.permissionGroups || [])
         } else {
           setUserRole('user')
           setPermissions({ canModerate: false, canAdmin: false })
+          setCustomRoles([])
+          setPermissionGroups([])
         }
         
         setAuthState({
@@ -304,6 +312,8 @@ export function useAuth() {
     userRole,
     isModerator: permissions.canModerate,
     permissions,
+    customRoles,
+    permissionGroups,
     
     // Helper methods (Clerk-compatible)
     getUserEmail: () => authState.user?.email,

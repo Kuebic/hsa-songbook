@@ -1,0 +1,5 @@
+export { PermissionMatrix } from './PermissionMatrix'
+export { RoleBuilder } from './RoleBuilder'
+export { ResourcePermissions } from './ResourcePermissions'
+export { PermissionInheritance } from './PermissionInheritance'
+export { PermissionTester } from './PermissionTester'

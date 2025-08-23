@@ -31,6 +31,8 @@ export interface JWTClaims {
   user_role?: UserRole
   can_moderate?: boolean
   can_admin?: boolean
+  custom_roles?: string[]
+  permission_groups?: string[]
   exp?: number
   iat?: number
   iss?: string

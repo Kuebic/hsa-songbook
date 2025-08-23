@@ -24,6 +24,7 @@ const ArrangementViewerPage = lazy(() => import('@features/arrangements/pages/Ar
 const ChordEditingPage = lazy(() => import('@features/arrangements/pages/ChordEditingPage').then(module => ({ default: module.ChordEditingPage })))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then(module => ({ default: module.AdminDashboard })))
 const ModerationDashboard = lazy(() => import('./pages/ModerationDashboard').then(module => ({ default: module.ModerationDashboard })))
+const PermissionManagement = lazy(() => import('./pages/PermissionManagement').then(module => ({ default: module.PermissionManagement })))
 
 function App() {
   // Initialize web vitals monitoring
@@ -170,6 +171,18 @@ function App() {
                   <LazyRouteWrapper pageName="Admin Dashboard">
                     <ProtectedRoute requireAdmin={true}>
                       <AdminDashboard />
+                    </ProtectedRoute>
+                  </LazyRouteWrapper>
+                </ErrorBoundary>
+              } 
+            />
+            <Route 
+              path="/admin/permissions" 
+              element={
+                <ErrorBoundary level="page">
+                  <LazyRouteWrapper pageName="Permission Management">
+                    <ProtectedRoute requireAdmin={true}>
+                      <PermissionManagement />
                     </ProtectedRoute>
                   </LazyRouteWrapper>
                 </ErrorBoundary>

@@ -18,19 +18,23 @@ export function decodeJWT(token: string): JWTClaims | null {
 /**
  * Extract role-related claims from a JWT token
  * @param token - The JWT token to extract claims from
- * @returns Object containing role, canModerate, and canAdmin flags
+ * @returns Object containing role, canModerate, canAdmin flags, and custom roles/groups
  */
 export function extractRoleClaims(token: string): {
   role: UserRole
   canModerate: boolean
   canAdmin: boolean
+  customRoles?: string[]
+  permissionGroups?: string[]
 } {
   const claims = decodeJWT(token)
   
   return {
     role: (claims?.user_role as UserRole) || 'user',
     canModerate: claims?.can_moderate || false,
-    canAdmin: claims?.can_admin || false
+    canAdmin: claims?.can_admin || false,
+    customRoles: claims?.custom_roles as string[] || undefined,
+    permissionGroups: claims?.permission_groups as string[] || undefined
   }
 }
 
