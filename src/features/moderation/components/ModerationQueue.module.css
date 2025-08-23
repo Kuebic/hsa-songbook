@@ -10,19 +10,19 @@
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid var(--border-color, #e2e8f0);
+  border-bottom: 2px solid var(--color-border);
 }
 
 .headerLeft h2 {
   margin: 0 0 8px 0;
   font-size: 24px;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--text-primary);
 }
 
 .itemCount {
   font-size: 14px;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
 }
 
 .headerRight {
@@ -36,7 +36,7 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: var(--text-primary, #1f2937);
+  color: var(--text-primary);
   cursor: pointer;
   user-select: none;
 }
@@ -44,13 +44,13 @@
 .selectAllLabel input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: var(--primary-color, #3b82f6);
+  accent-color: var(--color-primary);
 }
 
 .refreshBtn {
-  background: var(--background-color, #ffffff);
-  border: 1px solid var(--border-color, #e2e8f0);
-  color: var(--text-secondary, #6b7280);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  color: var(--text-secondary);
   padding: 8px 12px;
   border-radius: 6px;
   font-size: 14px;
@@ -62,9 +62,9 @@
 }
 
 .refreshBtn:hover:not(:disabled) {
-  background: var(--background-hover, #f1f5f9);
-  border-color: var(--border-hover-color, #cbd5e1);
-  color: var(--text-primary, #1f2937);
+  background: var(--color-card-hover);
+  border-color: var(--color-border);
+  color: var(--text-primary);
 }
 
 .refreshBtn:disabled {
@@ -82,14 +82,14 @@
   align-items: center;
   justify-content: center;
   padding: 48px 24px;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
 }
 
 .spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid var(--border-light-color, #f1f5f9);
-  border-top: 3px solid var(--primary-color, #3b82f6);
+  border: 3px solid var(--color-muted);
+  border-top: 3px solid var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -103,14 +103,14 @@
 .emptyState {
   text-align: center;
   padding: 48px 24px;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
 }
 
 .emptyState h3 {
   margin: 0 0 8px 0;
   font-size: 18px;
   font-weight: 500;
-  color: var(--text-primary, #1f2937);
+  color: var(--text-primary);
 }
 
 .emptyState p {
@@ -122,39 +122,57 @@
 .error {
   text-align: center;
   padding: 48px 24px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--color-card);
+  border: 1px solid var(--status-error);
   border-radius: 8px;
   margin-bottom: 24px;
+  position: relative;
+}
+
+.error::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--status-error);
+  opacity: 0.05;
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .error h3 {
   margin: 0 0 8px 0;
-  color: #991b1b;
+  color: var(--status-error);
   font-size: 18px;
   font-weight: 500;
+  position: relative;
 }
 
 .error p {
   margin: 0 0 16px 0;
-  color: #dc2626;
+  color: var(--status-error);
   font-size: 14px;
+  position: relative;
 }
 
 .retryBtn {
-  background: #dc2626;
-  color: white;
+  background: var(--color-destructive);
+  color: var(--color-destructive-foreground);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  position: relative;
 }
 
 .retryBtn:hover {
-  background: #b91c1c;
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 /* Responsive design */

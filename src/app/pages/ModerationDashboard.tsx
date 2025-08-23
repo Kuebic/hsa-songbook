@@ -27,10 +27,10 @@ export function ModerationDashboard() {
       fallback={
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <h2 className="text-xl font-semibold text-foreground mb-2">
               Access Denied
             </h2>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               You don't have permission to access the moderation dashboard.
             </p>
           </div>
@@ -39,10 +39,10 @@ export function ModerationDashboard() {
     >
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Content Moderation
           </h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Review and moderate user-submitted content to maintain quality standards.
           </p>
         </div>
@@ -51,22 +51,22 @@ export function ModerationDashboard() {
         <ModerationStats />
 
         {/* Filter Controls */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-background border border-border rounded-lg p-6 mb-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4">
             Filter Options
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {/* Status Filter */}
             <div>
-              <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="status-filter" className="block text-sm font-medium text-foreground mb-2">
                 Status
               </label>
               <select
                 id="status-filter"
                 value={filter.status || 'all'}
                 onChange={(e) => handleFilterChange({ status: e.target.value as ModerationFilter['status'] })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-background text-foreground border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
@@ -78,14 +78,14 @@ export function ModerationDashboard() {
             
             {/* Content Type Filter */}
             <div>
-              <label htmlFor="type-filter" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="type-filter" className="block text-sm font-medium text-foreground mb-2">
                 Content Type
               </label>
               <select
                 id="type-filter"
                 value={filter.contentType || 'all'}
                 onChange={(e) => handleFilterChange({ contentType: e.target.value as ModerationFilter['contentType'] })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-background text-foreground border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="all">All Types</option>
                 <option value="song">Songs</option>
@@ -95,7 +95,7 @@ export function ModerationDashboard() {
             
             {/* Reported Only Toggle */}
             <div>
-              <label htmlFor="reported-filter" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="reported-filter" className="block text-sm font-medium text-foreground mb-2">
                 Show Only
               </label>
               <label className="flex items-center">
@@ -104,15 +104,15 @@ export function ModerationDashboard() {
                   type="checkbox"
                   checked={filter.reportedOnly || false}
                   onChange={(e) => handleFilterChange({ reportedOnly: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-input text-primary focus:ring-ring"
                 />
-                <span className="ml-2 text-sm text-gray-700">Reported content only</span>
+                <span className="ml-2 text-sm text-foreground">Reported content only</span>
               </label>
             </div>
 
             {/* Search Filter */}
             <div>
-              <label htmlFor="search-filter" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="search-filter" className="block text-sm font-medium text-foreground mb-2">
                 Search
               </label>
               <input
@@ -121,7 +121,7 @@ export function ModerationDashboard() {
                 placeholder="Search titles or creators..."
                 value={filter.search || ''}
                 onChange={(e) => handleFilterChange({ search: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-background text-foreground border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
           </div>

@@ -1,7 +1,7 @@
 /* ModerationStats.module.css */
 .container {
-  background: var(--background-color, #ffffff);
-  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 24px;
   margin-bottom: 24px;
@@ -11,7 +11,7 @@
   margin: 0 0 20px 0;
   font-size: 18px;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--text-primary);
 }
 
 .loading {
@@ -20,14 +20,14 @@
   justify-content: center;
   gap: 12px;
   padding: 32px;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
 }
 
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid var(--border-light-color, #f1f5f9);
-  border-top: 2px solid var(--primary-color, #3b82f6);
+  border: 2px solid var(--color-muted);
+  border-top: 2px solid var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -40,9 +40,10 @@
 .error {
   padding: 32px;
   text-align: center;
-  color: #dc2626;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  color: var(--status-error);
+  background: var(--color-destructive);
+  opacity: 0.1;
+  border: 1px solid var(--color-destructive);
   border-radius: 6px;
   font-size: 14px;
 }
@@ -86,33 +87,89 @@
   line-height: 1.3;
 }
 
-/* Stat card variants */
+/* Stat card variants - theme aware */
 .pending {
-  background: #fef3c7;
-  border-color: #fde68a;
-  color: #92400e;
+  background: var(--color-accent);
+  border-color: var(--status-warning);
+  color: var(--status-warning);
+  position: relative;
+}
+
+.pending::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--status-warning);
+  opacity: 0.1;
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .flagged {
-  background: #fee2e2;
-  border-color: #fecaca;
-  color: #991b1b;
+  background: var(--color-accent);
+  border-color: var(--status-error);
+  color: var(--status-error);
+  position: relative;
+}
+
+.flagged::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--status-error);
+  opacity: 0.1;
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .approved {
-  background: #dcfce7;
-  border-color: #bbf7d0;
-  color: #166534;
+  background: var(--color-accent);
+  border-color: var(--status-success);
+  color: var(--status-success);
+  position: relative;
+}
+
+.approved::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--status-success);
+  opacity: 0.1;
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .rejected {
-  background: #fde2e7;
-  border-color: #fbb6ce;
-  color: #be185d;
+  background: var(--color-accent);
+  border-color: var(--color-destructive);
+  color: var(--color-destructive);
+  position: relative;
+}
+
+.rejected::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-destructive);
+  opacity: 0.1;
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .summary {
-  border-top: 1px solid var(--border-light-color, #f1f5f9);
+  border-top: 1px solid var(--color-border);
   padding-top: 20px;
 }
 
@@ -130,13 +187,13 @@
 
 .summaryLabel {
   font-size: 14px;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .summaryValue {
   font-size: 14px;
-  color: var(--text-primary, #1f2937);
+  color: var(--text-primary);
   font-weight: 600;
 }
 
