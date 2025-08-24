@@ -18,7 +18,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation()
-  const { isSignedIn, isLoaded, isAdmin } = useAuth()
+  const { isSignedIn, isLoaded, isAdmin, isModerator } = useAuth()
   const viewport = useViewport()
   const nav = useResponsiveNav()
   
@@ -34,13 +34,18 @@ export function Layout({ children }: LayoutProps) {
       { to: '/setlists', label: 'Setlists' }
     ]
     
+    // Add Moderation link if user has moderation permissions (moderator or admin)
+    if (isModerator || isAdmin) {
+      baseItems.push({ to: '/moderation', label: 'Moderation' })
+    }
+    
     // Add Admin link if user has admin permissions
     if (isAdmin) {
       baseItems.push({ to: '/admin', label: 'Admin' })
     }
     
     return baseItems
-  }, [isAdmin])
+  }, [isAdmin, isModerator])
 
   // Add class to root element for CSS targeting
   useEffect(() => {
