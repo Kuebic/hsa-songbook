@@ -27,6 +27,7 @@ export function ContentReviewCard({ item, selected, onSelect, onModerate }: Cont
       onModerate()
     } catch (error) {
       console.error('Failed to approve content:', error)
+      alert(`Failed to approve content: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -38,6 +39,7 @@ export function ContentReviewCard({ item, selected, onSelect, onModerate }: Cont
         onModerate()
       } catch (error) {
         console.error('Failed to reject content:', error)
+        alert(`Failed to reject content: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }
   }
@@ -48,6 +50,7 @@ export function ContentReviewCard({ item, selected, onSelect, onModerate }: Cont
       onModerate()
     } catch (error) {
       console.error('Failed to flag content:', error)
+      alert(`Failed to flag content: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 

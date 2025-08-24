@@ -118,15 +118,32 @@ export const moderationService = {
 
       // Process each content item
       for (const contentId of action.contentIds) {
-        // Determine table based on content type by checking both tables
-        const { data: songCheck } = await supabase
+        // First check if it's a song
+        const { data: songCheck, error: songError } = await supabase
           .from('songs')
           .select('id')
           .eq('id', contentId)
           .single()
 
-        const table = songCheck ? 'songs' : 'arrangements'
-        const contentType = songCheck ? 'song' : 'arrangement'
+        // If not found in songs or error, check arrangements
+        let table = 'songs'
+        let contentType = 'song'
+        
+        if (!songCheck || songError) {
+          const { data: arrangementCheck, error: arrangementError } = await supabase
+            .from('arrangements')
+            .select('id')
+            .eq('id', contentId)
+            .single()
+          
+          if (arrangementCheck && !arrangementError) {
+            table = 'arrangements'
+            contentType = 'arrangement'
+          } else {
+            console.error(`Content ID ${contentId} not found in songs or arrangements`)
+            continue // Skip this item if not found in either table
+          }
+        }
 
         // Get current status for logging
         const { data: currentItem } = await supabase
@@ -167,7 +184,11 @@ export const moderationService = {
             note: action.note
           })
 
-        if (logError) console.error('Failed to log moderation action:', logError)
+        if (logError) {
+          console.error('Failed to log moderation action:', logError)
+          // Don't throw here to allow the moderation to complete even if logging fails
+          // but we should track this for monitoring
+        }
 
         // Resolve related reports if approving/rejecting
         if (action.action === 'approve' || action.action === 'reject') {
