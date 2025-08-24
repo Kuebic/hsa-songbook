@@ -168,7 +168,7 @@ export function ContentReviewCard({ item, selected, onSelect, onModerate }: Cont
           Flag
         </button>
         <a
-          href={`/${item.contentType}s/${item.contentId}`}
+          href={`/${item.contentType}s/${item.content.slug || item.contentId}`}
           target="_blank"
           rel="noopener noreferrer"
           className={`${styles.actionBtn} ${styles.viewBtn}`}
