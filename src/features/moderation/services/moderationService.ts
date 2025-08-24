@@ -48,23 +48,51 @@ export const moderationService = {
           filter_type: filter?.contentType === 'all' ? undefined : filter?.contentType
         })
 
+      // If RPC function doesn't exist, fall back to direct queries
+      if (error && (error.code === '42883' || error.message?.includes('function') || error.message?.includes('NetworkError'))) {
+        console.warn('get_moderation_queue RPC not found, falling back to direct queries')
+        return this.getQueueFallback(filter)
+      }
+
       if (error) throw error
 
       // Map and enrich with full content data
       const items = await Promise.all(
         data.map(async (item) => {
           // Fetch full content based on type
-          const contentQuery = item.content_type === 'song'
-            ? supabase.from('songs').select('*').eq('id', item.content_id).single()
-            : supabase.from('arrangements').select('*').eq('id', item.content_id).single()
-
-          const { data: content } = await contentQuery
+          let title = item.title
+          let content = {}
+          
+          if (item.content_type === 'song') {
+            const { data: songData } = await supabase
+              .from('songs')
+              .select('*')
+              .eq('id', item.content_id)
+              .single()
+            
+            content = songData || {}
+          } else {
+            // For arrangements, fetch with the song data to get song name
+            const { data: arrangementData } = await supabase
+              .from('arrangements')
+              .select('*, song:songs!arrangements_song_id_fkey(*)')
+              .eq('id', item.content_id)
+              .single()
+            
+            if (arrangementData) {
+              content = arrangementData
+              // Format title as "Song Name - Arrangement Name"
+              if (arrangementData.song && arrangementData.song.title) {
+                title = `${arrangementData.song.title} - ${arrangementData.name || item.title}`
+              }
+            }
+          }
 
           return {
             id: item.id,
             contentId: item.content_id,
             contentType: item.content_type as 'song' | 'arrangement',
-            title: item.title,
+            title: title,
             creator: {
               id: item.creator_id,
               email: item.creator_email,
@@ -74,7 +102,7 @@ export const moderationService = {
             reportCount: item.report_count,
             createdAt: item.created_at,
             lastModifiedAt: item.last_modified,
-            content: content || {}
+            content: content
           } as ModerationItem
         })
       )
@@ -147,7 +175,7 @@ export const moderationService = {
 
         // Get current status for logging
         const { data: currentItem } = await supabase
-          .from(table)
+          .from(table as 'songs' | 'arrangements')
           .select('moderation_status')
           .eq('id', contentId)
           .single()
@@ -160,7 +188,7 @@ export const moderationService = {
                          action.action === 'flag' ? 'flagged' : 'pending'
 
         const { error: updateError } = await supabase
-          .from(table)
+          .from(table as 'songs' | 'arrangements')
           .update({
             moderation_status: newStatus,
             moderated_by: user.id,
@@ -247,7 +275,7 @@ export const moderationService = {
         // Auto-flag content with 3+ reports
         const table = report.contentType === 'song' ? 'songs' : 'arrangements'
         await supabase
-          .from(table)
+          .from(table as 'songs' | 'arrangements')
           .update({ moderation_status: 'flagged' })
           .eq('id', report.contentId)
       }
@@ -344,6 +372,143 @@ export const moderationService = {
       return stats
     } catch (error) {
       console.error('Error fetching moderation stats:', error)
+      throw error
+    }
+  },
+
+  async getQueueFallback(filter?: ModerationFilter): Promise<ModerationItem[]> {
+    try {
+      // Fetch songs and arrangements separately
+      const [songsResult, arrangementsResult] = await Promise.all([
+        // Fetch songs with their creators
+        supabase
+          .from('songs')
+          .select(`
+            *,
+            creator:users!songs_created_by_fkey(id, email)
+          `)
+          .order('created_at', { ascending: false }),
+        // Fetch arrangements with their songs and creators
+        supabase
+          .from('arrangements')
+          .select(`
+            *,
+            song:songs!arrangements_song_id_fkey(*),
+            creator:users!arrangements_created_by_fkey(id, email)
+          `)
+          .order('created_at', { ascending: false })
+      ])
+
+      if (songsResult.error) throw songsResult.error
+      if (arrangementsResult.error) throw arrangementsResult.error
+
+      // Get report counts
+      const { data: reports } = await supabase
+        .from('content_reports')
+        .select('content_id, content_type')
+        .eq('status', 'open')
+
+      const reportCounts = new Map<string, number>()
+      if (reports) {
+        reports.forEach(report => {
+          const count = reportCounts.get(report.content_id) || 0
+          reportCounts.set(report.content_id, count + 1)
+        })
+      }
+
+      // Process songs
+      const songItems: ModerationItem[] = (songsResult.data || [])
+        .filter(song => {
+          if (filter?.contentType && filter.contentType !== 'all' && filter.contentType !== 'song') {
+            return false
+          }
+          if (filter?.status && filter.status !== 'all' && song.moderation_status !== filter.status) {
+            return false
+          }
+          return true
+        })
+        .map(song => ({
+          id: song.id,
+          contentId: song.id,
+          contentType: 'song' as const,
+          title: song.title,
+          creator: {
+            id: song.created_by || '',
+            email: song.creator?.email || 'Unknown',
+            name: null
+          },
+          status: (song.moderation_status || 'pending') as ModerationItem['status'],
+          reportCount: reportCounts.get(song.id) || 0,
+          createdAt: song.created_at || new Date().toISOString(),
+          lastModifiedAt: song.updated_at || song.created_at || new Date().toISOString(),
+          content: song
+        }))
+
+      // Process arrangements
+      const arrangementItems: ModerationItem[] = (arrangementsResult.data || [])
+        .filter(arrangement => {
+          if (filter?.contentType && filter.contentType !== 'all' && filter.contentType !== 'arrangement') {
+            return false
+          }
+          if (filter?.status && filter.status !== 'all' && arrangement.moderation_status !== filter.status) {
+            return false
+          }
+          return true
+        })
+        .map(arrangement => {
+          // Format title as "Song Name - Arrangement Name"
+          let title = arrangement.name
+          if (arrangement.song && arrangement.song.title) {
+            title = `${arrangement.song.title} - ${arrangement.name}`
+          }
+
+          return {
+            id: arrangement.id,
+            contentId: arrangement.id,
+            contentType: 'arrangement' as const,
+            title: title,
+            creator: {
+              id: arrangement.created_by || '',
+              email: arrangement.creator?.email || 'Unknown',
+              name: null
+            },
+            status: (arrangement.moderation_status || 'pending') as ModerationItem['status'],
+            reportCount: reportCounts.get(arrangement.id) || 0,
+            createdAt: arrangement.created_at || new Date().toISOString(),
+            lastModifiedAt: arrangement.updated_at || arrangement.created_at || new Date().toISOString(),
+            content: arrangement
+          }
+        })
+
+      // Combine and sort by created date
+      let items = [...songItems, ...arrangementItems].sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+
+      // Apply search filter
+      if (filter?.search) {
+        const searchTerm = filter.search.toLowerCase()
+        items = items.filter(item =>
+          item.title.toLowerCase().includes(searchTerm) ||
+          item.creator.email.toLowerCase().includes(searchTerm)
+        )
+      }
+
+      // Apply reported only filter
+      if (filter?.reportedOnly) {
+        items = items.filter(item => item.reportCount > 0)
+      }
+
+      // Apply pagination
+      if (filter?.page && filter?.limit) {
+        const start = (filter.page - 1) * filter.limit
+        const end = start + filter.limit
+        items = items.slice(start, end)
+      }
+
+      return items
+    } catch (error) {
+      console.error('Error in getQueueFallback:', error)
       throw error
     }
   }
