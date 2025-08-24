@@ -7,7 +7,26 @@ export function useSongs(filter?: SongFilter) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchSongs = useCallback(async () => {
+  useEffect(() => {
+    const fetchSongs = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const data = filter 
+          ? await songService.searchSongs(filter)
+          : await songService.getAllSongs()
+        setSongs(data || [])
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch songs')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSongs()
+  }, [filter])
+
+  const refreshSongs = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -21,14 +40,6 @@ export function useSongs(filter?: SongFilter) {
       setLoading(false)
     }
   }, [filter])
-
-  useEffect(() => {
-    fetchSongs()
-  }, [filter, fetchSongs])
-
-  const refreshSongs = () => {
-    fetchSongs()
-  }
 
   return { songs, loading, error, refreshSongs }
 }
