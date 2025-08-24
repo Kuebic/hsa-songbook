@@ -14,7 +14,17 @@ export const supabase = createClient<Database>(supabaseUrl, supabasePublishableK
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    debug: import.meta.env.DEV // Enable debug logging in development
+  },
+  global: {
+    fetch: (url, options) => {
+      // Log Supabase requests in development
+      if (import.meta.env.DEV) {
+        console.log('[Supabase Request]', url.toString())
+      }
+      return fetch(url, options)
+    }
   },
   realtime: {
     params: {

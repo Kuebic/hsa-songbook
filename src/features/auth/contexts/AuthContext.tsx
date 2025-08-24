@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 import { supabase, getCurrentSession } from '../../../lib/supabase'
 import { extractRoleClaims } from '../utils/jwt'
 import type { User, AuthState, UserRole } from '../types'
@@ -307,14 +307,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signOut = useCallback(async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) {
-      console.error('Error signing out:', error)
-      throw error
+    // Create a timeout promise (5 seconds)
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Sign out timed out after 5 seconds')), 5000)
+    })
+    
+    try {
+      // Race between signOut and timeout
+      await Promise.race([
+        supabase.auth.signOut(),
+        timeoutPromise
+      ])
+      
+      console.log('Supabase sign out succeeded')
+      
+      // Clear local auth state as confirmation
+      setAuthState({
+        user: null,
+        session: null,
+        isLoaded: true,
+        isSignedIn: false
+      })
+    } catch (error) {
+      console.error('Error or timeout during sign out:', error)
+      
+      // Force clear local state even if Supabase fails
+      setAuthState({
+        user: null,
+        session: null,
+        isLoaded: true,
+        isSignedIn: false
+      })
+      
+      // Clear any stored session data
+      if (typeof window !== 'undefined') {
+        // Clear Supabase-specific storage
+        const keysToRemove = Object.keys(localStorage).filter(key => 
+          key.startsWith('supabase.auth.') || key.startsWith('sb-')
+        )
+        keysToRemove.forEach(key => localStorage.removeItem(key))
+        
+        // Also clear session storage
+        sessionStorage.clear()
+      }
+      
+      console.log('Local auth state cleared despite Supabase error')
+      // Don't throw - we've cleared local state, that's enough
     }
   }, [])
 
-  const value: AuthContextValue = {
+  const getUserEmail = useCallback(() => authState.user?.email, [authState.user])
+  
+  const getUserName = useCallback(() => 
+    authState.user?.user_metadata?.full_name || 
+    authState.user?.user_metadata?.name || 
+    authState.user?.email?.split('@')[0] || 
+    'User', 
+    [authState.user]
+  )
+  
+  const getUserAvatar = useCallback(() => authState.user?.user_metadata?.avatar_url, [authState.user])
+
+  const value: AuthContextValue = useMemo(() => ({
     user: authState.user,
     userId: authState.user?.id,
     sessionId: authState.session?.access_token,
@@ -329,12 +383,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     customRoles,
     permissionGroups,
     
-    getUserEmail: () => authState.user?.email,
-    getUserName: () => authState.user?.user_metadata?.full_name || 
-                       authState.user?.user_metadata?.name || 
-                       authState.user?.email?.split('@')[0] || 
-                       'User',
-    getUserAvatar: () => authState.user?.user_metadata?.avatar_url,
+    getUserEmail,
+    getUserName,
+    getUserAvatar,
     
     session: authState.session,
     signInWithProvider,
@@ -342,7 +393,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signUpWithEmail,
     resetPassword,
     signOut
-  }
+  }), [
+    authState.user,
+    authState.session,
+    authState.isLoaded,
+    authState.isSignedIn,
+    isAdmin,
+    getToken,
+    userRole,
+    permissions,
+    customRoles,
+    permissionGroups,
+    getUserEmail,
+    getUserName,
+    getUserAvatar,
+    signInWithProvider,
+    signInWithEmail,
+    signUpWithEmail,
+    resetPassword,
+    signOut
+  ])
 
   return (
     <AuthContext.Provider value={value}>

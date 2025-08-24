@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import styles from './UserMenu.module.css'
 
 export function UserMenu() {
   const { user, session, getUserName, getUserAvatar, signOut } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -21,115 +24,68 @@ export function UserMenu() {
 
   const handleSignOut = async () => {
     try {
+      console.log('Attempting to sign out...')
+      setIsOpen(false) // Close menu immediately for better UX
+      
+      // Call signOut with built-in timeout protection
       await signOut()
-      setIsOpen(false)
-      // Redirect to home page after sign out
-      window.location.href = '/'
+      
+      console.log('Sign out completed, navigating to home...')
+      
+      // Navigate to home
+      navigate('/')
+      
+      // Force reload to ensure complete state reset
+      // This is a fallback to ensure all cached state is cleared
+      setTimeout(() => {
+        window.location.reload()
+      }, 100)
     } catch (error) {
-      console.error('Error signing out:', error)
+      console.error('Error during sign out:', error)
+      
+      // Even on error, still navigate and reload
+      // The AuthContext will have cleared local state
+      navigate('/')
+      setTimeout(() => {
+        window.location.reload()
+      }, 100)
     }
   }
 
   // Use session.user as fallback if user is null
   const currentUser = user || session?.user
   
-  // Debug logging
-  console.log('[UserMenu] Auth state:', {
-    hasUser: !!user,
-    hasSession: !!session,
-    hasSessionUser: !!session?.user,
-    currentUser: !!currentUser,
-    userEmail: currentUser?.email
-  })
-  
   if (!currentUser) {
-    console.warn('[UserMenu] No user found in auth state')
     return null
   }
 
   const userName = getUserName() || currentUser.email?.split('@')[0] || 'User'
   const userAvatar = getUserAvatar()
 
-
   return (
-    <div ref={menuRef} style={{ position: 'relative' }}>
+    <div ref={menuRef} className={styles.container}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        style={{
-          width: '2rem',
-          height: '2rem',
-          borderRadius: '50%',
-          border: '2px solid #e5e7eb',
-          background: userAvatar ? `url(${userAvatar})` : '#6b7280',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontSize: '0.875rem',
-          fontWeight: '600'
-        }}
+        className={styles.avatarButton}
+        style={userAvatar ? { backgroundImage: `url(${userAvatar})` } : undefined}
       >
         {!userAvatar && userName.charAt(0).toUpperCase()}
       </button>
 
       {isOpen && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            right: 0,
-            marginTop: '0.5rem',
-            backgroundColor: 'white',
-            border: '1px solid #e5e7eb',
-            borderRadius: '0.5rem',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            zIndex: 50,
-            minWidth: '200px',
-            overflow: 'hidden'
-          }}
-        >
-          <div
-            style={{
-              padding: '0.75rem 1rem',
-              borderBottom: '1px solid #e5e7eb',
-              backgroundColor: '#f9fafb'
-            }}
-          >
-            <div style={{ fontWeight: '600', color: '#111827' }}>
-              {userName}
-            </div>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-              {currentUser.email}
-            </div>
+        <div className={styles.dropdown}>
+          <div className={styles.userInfo}>
+            <div className={styles.userName}>{userName}</div>
+            <div className={styles.userEmail}>{currentUser.email}</div>
           </div>
 
-          <div style={{ padding: '0.5rem 0' }}>
+          <div className={styles.menuItems}>
             <button
               onClick={() => {
                 setIsOpen(false)
-                // You could navigate to a profile page here
                 console.log('Profile clicked')
               }}
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                padding: '0.5rem 1rem',
-                fontSize: '0.875rem',
-                color: '#374151',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f3f4f6'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }}
+              className={styles.menuButton}
             >
               Profile
             </button>
@@ -137,51 +93,18 @@ export function UserMenu() {
             <button
               onClick={() => {
                 setIsOpen(false)
-                // You could navigate to settings here
                 console.log('Settings clicked')
               }}
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                padding: '0.5rem 1rem',
-                fontSize: '0.875rem',
-                color: '#374151',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f3f4f6'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }}
+              className={styles.menuButton}
             >
               Settings
             </button>
 
-            <div style={{ height: '1px', backgroundColor: '#e5e7eb', margin: '0.5rem 0' }} />
+            <div className={styles.divider} />
 
             <button
               onClick={handleSignOut}
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                padding: '0.5rem 1rem',
-                fontSize: '0.875rem',
-                color: '#dc2626',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#fef2f2'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }}
+              className={styles.signOutButton}
             >
               Sign out
             </button>
