@@ -1,5 +1,5 @@
 import React from 'react';
-import { LanguageProvider, type LanguageProviderProps } from '../contexts/LanguageContext';
+import { LanguageProvider, type LanguageProviderProps } from '../contexts/LanguageContext.tsx';
 
 /**
  * HOC to wrap components with LanguageProvider

@@ -1,10 +1,8 @@
-import { createContext, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { 
   LanguageCode, 
-  MultilingualText, 
-  LanguageContextState, 
-  LanguageContextActions 
+  MultilingualText
 } from '../types/multilingual.types';
 import { 
   DEFAULT_LANGUAGE, 
@@ -12,16 +10,7 @@ import {
   LANGUAGE_STORAGE_KEYS,
   isValidLanguageCode 
 } from '../types/multilingual.types';
-
-/**
- * Combined context type for language state and actions
- */
-export interface LanguageContextType extends LanguageContextState, LanguageContextActions {}
-
-/**
- * Language context for managing multilingual state
- */
-export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+import { LanguageContext, type LanguageContextType } from './LanguageContext';
 
 // Hook moved to ../hooks/useLanguage.ts
 

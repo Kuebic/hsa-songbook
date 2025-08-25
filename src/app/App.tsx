@@ -6,7 +6,7 @@ import { setupOfflineHandlers } from '@features/pwa/utils/offline'
 import { ErrorBoundary, useWebVitals } from '@features/monitoring'
 import { NotificationProvider } from '@shared/components/notifications'
 import { ThemeProvider } from '@shared/contexts/ThemeContext'
-import { SongModalProvider } from '@features/songs/contexts/SongModalContext'
+import { SongModalProvider } from '@features/songs/contexts/SongModalContext.tsx'
 import { GlobalSongModal } from '@features/songs/components/GlobalSongModal'
 import { ProtectedRoute, AuthProvider } from '@features/auth'
 

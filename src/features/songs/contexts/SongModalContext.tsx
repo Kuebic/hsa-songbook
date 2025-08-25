@@ -1,15 +1,6 @@
-import { createContext, useState, useCallback, type ReactNode } from 'react'
+import { useState, useCallback, type ReactNode } from 'react'
 import type { Song } from '../types/song.types'
-
-export interface SongModalContextType {
-  isOpen: boolean
-  selectedSong: Song | undefined
-  openCreateModal: () => void
-  openEditModal: (song: Song) => void
-  closeModal: () => void
-}
-
-export const SongModalContext = createContext<SongModalContextType | null>(null)
+import { SongModalContext, type SongModalContextType } from './SongModalContext'
 
 interface SongModalProviderProps {
   children: ReactNode
