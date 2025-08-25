@@ -51,7 +51,9 @@ A modern, responsive web application for searching, viewing, and managing worshi
 - **Performance**: < 3s initial load, < 100ms route changes
 
 ### Backend
-- Supabase
+- **Database**: Supabase (PostgreSQL)
+- **Migrations**: Version-controlled SQL migrations
+- **Type Safety**: Auto-generated TypeScript types from schema
 
 ## Getting Started
 
@@ -97,6 +99,51 @@ npm run test:ui       # Open Vitest UI
 npm run test:coverage # Generate test coverage report
 ```
 
+## Database Migrations
+
+The project uses Supabase for the backend with version-controlled database migrations.
+
+### Migration Commands
+
+```bash
+# Database operations
+npm run db:reset      # Reset database to fresh state with all migrations
+npm run db:migrate    # Apply pending migrations
+npm run db:diff       # Generate migration from schema changes
+npm run db:push       # Push migrations to remote database
+
+# Type generation
+npm run types:generate # Generate TypeScript types from database schema
+
+# Migration helpers
+npm run migrate:up    # Apply migrations with type generation
+npm run migrate:down  # Create rollback migration
+npm run migrate:test  # Test all migrations on fresh database
+```
+
+### Working with Migrations
+
+1. **Create a new migration:**
+```bash
+supabase migration new your_feature_name
+# Edit the created file in supabase/migrations/
+```
+
+2. **Test locally:**
+```bash
+npm run db:reset       # Apply all migrations including new one
+npm run types:generate # Update TypeScript types
+```
+
+3. **Rollback if needed:**
+```bash
+npm run migrate:down 20250121000000_your_migration.sql
+# Edit the generated rollback file
+npm run db:reset
+```
+
+For detailed migration documentation, see [supabase/migrations/README.md](supabase/migrations/README.md).
+
 ## Project Structure
 
 ```
@@ -121,6 +168,11 @@ hsa-songbook/
 │   │   └── validation/   # Zod schemas
 │   └── lib/              # Utility functions
 ├── public/               # Static assets and PWA icons
+├── supabase/             # Supabase configuration
+│   ├── migrations/       # Database migration files
+│   ├── functions/        # Edge functions
+│   └── seed.sql          # Development seed data
+├── scripts/              # Build and utility scripts
 ├── PRPs/                 # Project requirement documents
 └── claude_md_files/      # Development documentation
 ```

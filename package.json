@@ -14,7 +14,20 @@
     "test:watch": "vitest --watch",
     "test:ci": "vitest run --coverage",
     "analyze": "npm run build && open dist/stats.html",
-    "analyze:ci": "npm run build && npx vite-bundle-visualizer --format json > bundle-stats.json"
+    "analyze:ci": "npm run build && npx vite-bundle-visualizer --format json > bundle-stats.json",
+    "supabase:start": "DOCKER_HOST=unix:///run/user/1000/podman/podman.sock supabase start --ignore-health-check",
+    "supabase:stop": "DOCKER_HOST=unix:///run/user/1000/podman/podman.sock supabase stop",
+    "supabase:status": "DOCKER_HOST=unix:///run/user/1000/podman/podman.sock supabase status",
+    "supabase:reset": "DOCKER_HOST=unix:///run/user/1000/podman/podman.sock supabase db reset",
+    "dev:local": "DOCKER_HOST=unix:///run/user/1000/podman/podman.sock supabase start --ignore-health-check && npm run dev",
+    "db:migrate": "supabase migration up --local",
+    "db:reset": "supabase db reset",
+    "db:diff": "supabase db diff --schema public",
+    "types:generate": "supabase gen types typescript --local > src/lib/database.types.ts",
+    "db:push": "supabase db push",
+    "migrate:up": "./scripts/migrate-up.sh",
+    "migrate:down": "./scripts/migrate-down.sh",
+    "migrate:test": "./scripts/test-migrations.sh"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.18.6",

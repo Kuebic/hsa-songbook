@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -8,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
-  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -129,6 +123,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "arrangements_moderated_by_fkey"
+            columns: ["moderated_by"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "arrangements_moderated_by_fkey"
+            columns: ["moderated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "arrangements_song_id_fkey"
             columns: ["song_id"]
             isOneToOne: false
@@ -191,7 +199,36 @@ export type Database = {
           resolved_by?: string | null
           status?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "content_reports_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_reports_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_reports_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_reports_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       moderation_log: {
         Row: {
@@ -230,7 +267,22 @@ export type Database = {
           performed_by?: string | null
           previous_status?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "moderation_log_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_log_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -329,7 +381,36 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"]
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "role_audit_log_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_audit_log_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_audit_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_audit_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       setlist_items: {
         Row: {
@@ -523,13 +604,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_songs_default_arrangement"
-            columns: ["default_arrangement_id"]
-            isOneToOne: false
-            referencedRelation: "arrangements"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "songs_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -539,6 +613,27 @@ export type Database = {
           {
             foreignKeyName: "songs_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "songs_default_arrangement_id_fkey"
+            columns: ["default_arrangement_id"]
+            isOneToOne: false
+            referencedRelation: "arrangements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "songs_moderated_by_fkey"
+            columns: ["moderated_by"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "songs_moderated_by_fkey"
+            columns: ["moderated_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -561,7 +656,7 @@ export type Database = {
           granted_by?: string | null
           id?: string
           is_active?: boolean | null
-          role?: Database["public"]["Enums"]["user_role"]
+          role: Database["public"]["Enums"]["user_role"]
           user_id?: string | null
         }
         Update: {
@@ -573,7 +668,36 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"]
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {
@@ -649,6 +773,10 @@ export type Database = {
           lyrics: Json | null
           lyrics_source: string | null
           lyrics_verified: boolean | null
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_note: string | null
+          moderation_status: string | null
           notes: string | null
           original_language: string | null
           primary_ccli_id: string | null
@@ -679,6 +807,10 @@ export type Database = {
           lyrics?: Json | null
           lyrics_source?: string | null
           lyrics_verified?: boolean | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_note?: string | null
+          moderation_status?: string | null
           notes?: string | null
           original_language?: string | null
           primary_ccli_id?: string | null
@@ -709,6 +841,10 @@ export type Database = {
           lyrics?: Json | null
           lyrics_source?: string | null
           lyrics_verified?: boolean | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_note?: string | null
+          moderation_status?: string | null
           notes?: string | null
           original_language?: string | null
           primary_ccli_id?: string | null
@@ -723,13 +859,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_songs_default_arrangement"
-            columns: ["default_arrangement_id"]
-            isOneToOne: false
-            referencedRelation: "arrangements"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "songs_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -739,6 +868,27 @@ export type Database = {
           {
             foreignKeyName: "songs_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "songs_default_arrangement_id_fkey"
+            columns: ["default_arrangement_id"]
+            isOneToOne: false
+            referencedRelation: "arrangements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "songs_moderated_by_fkey"
+            columns: ["moderated_by"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "songs_moderated_by_fkey"
+            columns: ["moderated_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -760,12 +910,8 @@ export type Database = {
     }
     Functions: {
       check_admin_role: {
-        Args: { user_id_param?: string }
+        Args: { user_id_param: string }
         Returns: boolean
-      }
-      custom_access_token_hook: {
-        Args: { event: Json }
-        Returns: Json
       }
       daitch_mokotoff: {
         Args: { "": string }
@@ -786,9 +932,8 @@ export type Database = {
           similarity_threshold?: number
         }
         Returns: {
-          ccli_mapping_id: string
-          ccli_number: string
-          levenshtein_distance: number
+          ccli: string
+          id: string
           similarity_score: number
           title: string
         }[]
@@ -796,39 +941,6 @@ export type Database = {
       generate_share_id: {
         Args: Record<PropertyKey, never>
         Returns: string
-      }
-      generate_title_fingerprint: {
-        Args: { input_title: string }
-        Returns: string
-      }
-      get_all_song_titles: {
-        Args: { alt_titles: string[]; main_title: string }
-        Returns: string[]
-      }
-      get_alternative_titles_stats: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          avg_alt_titles_per_song: number
-          max_alt_titles: number
-          songs_with_alt_titles: number
-          total_alt_titles: number
-          total_songs: number
-        }[]
-      }
-      get_moderation_queue: {
-        Args: { filter_status?: string; filter_type?: string }
-        Returns: {
-          content_id: string
-          content_type: string
-          created_at: string
-          creator_email: string
-          creator_id: string
-          id: string
-          last_modified: string
-          report_count: number
-          status: string
-          title: string
-        }[]
       }
       grant_user_role: {
         Args: {
@@ -874,10 +986,6 @@ export type Database = {
         Args: { "": string }
         Returns: string[]
       }
-      song_has_alternative_title: {
-        Args: { alt_titles: string[]; search_title: string }
-        Returns: boolean
-      }
       soundex: {
         Args: { "": string }
         Returns: string
@@ -889,6 +997,310 @@ export type Database = {
     }
     Enums: {
       user_role: "admin" | "moderator" | "user"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  storage: {
+    Tables: {
+      buckets: {
+        Row: {
+          allowed_mime_types: string[] | null
+          avif_autodetection: boolean | null
+          created_at: string | null
+          file_size_limit: number | null
+          id: string
+          name: string
+          owner: string | null
+          owner_id: string | null
+          public: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          allowed_mime_types?: string[] | null
+          avif_autodetection?: boolean | null
+          created_at?: string | null
+          file_size_limit?: number | null
+          id: string
+          name: string
+          owner?: string | null
+          owner_id?: string | null
+          public?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          allowed_mime_types?: string[] | null
+          avif_autodetection?: boolean | null
+          created_at?: string | null
+          file_size_limit?: number | null
+          id?: string
+          name?: string
+          owner?: string | null
+          owner_id?: string | null
+          public?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      migrations: {
+        Row: {
+          executed_at: string | null
+          hash: string
+          id: number
+          name: string
+        }
+        Insert: {
+          executed_at?: string | null
+          hash: string
+          id: number
+          name: string
+        }
+        Update: {
+          executed_at?: string | null
+          hash?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      objects: {
+        Row: {
+          bucket_id: string | null
+          created_at: string | null
+          id: string
+          last_accessed_at: string | null
+          metadata: Json | null
+          name: string | null
+          owner: string | null
+          owner_id: string | null
+          path_tokens: string[] | null
+          updated_at: string | null
+          user_metadata: Json | null
+          version: string | null
+        }
+        Insert: {
+          bucket_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          metadata?: Json | null
+          name?: string | null
+          owner?: string | null
+          owner_id?: string | null
+          path_tokens?: string[] | null
+          updated_at?: string | null
+          user_metadata?: Json | null
+          version?: string | null
+        }
+        Update: {
+          bucket_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          metadata?: Json | null
+          name?: string | null
+          owner?: string | null
+          owner_id?: string | null
+          path_tokens?: string[] | null
+          updated_at?: string | null
+          user_metadata?: Json | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objects_bucketId_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      s3_multipart_uploads: {
+        Row: {
+          bucket_id: string
+          created_at: string
+          id: string
+          in_progress_size: number
+          key: string
+          owner_id: string | null
+          upload_signature: string
+          user_metadata: Json | null
+          version: string
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string
+          id: string
+          in_progress_size?: number
+          key: string
+          owner_id?: string | null
+          upload_signature: string
+          user_metadata?: Json | null
+          version: string
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string
+          id?: string
+          in_progress_size?: number
+          key?: string
+          owner_id?: string | null
+          upload_signature?: string
+          user_metadata?: Json | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "s3_multipart_uploads_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      s3_multipart_uploads_parts: {
+        Row: {
+          bucket_id: string
+          created_at: string
+          etag: string
+          id: string
+          key: string
+          owner_id: string | null
+          part_number: number
+          size: number
+          upload_id: string
+          version: string
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string
+          etag: string
+          id?: string
+          key: string
+          owner_id?: string | null
+          part_number: number
+          size?: number
+          upload_id: string
+          version: string
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string
+          etag?: string
+          id?: string
+          key?: string
+          owner_id?: string | null
+          part_number?: number
+          size?: number
+          upload_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "s3_multipart_uploads_parts_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "s3_multipart_uploads_parts_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "s3_multipart_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      can_insert_object: {
+        Args: { bucketid: string; metadata: Json; name: string; owner: string }
+        Returns: undefined
+      }
+      extension: {
+        Args: { name: string }
+        Returns: string
+      }
+      filename: {
+        Args: { name: string }
+        Returns: string
+      }
+      foldername: {
+        Args: { name: string }
+        Returns: string[]
+      }
+      get_size_by_bucket: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          bucket_id: string
+          size: number
+        }[]
+      }
+      list_multipart_uploads_with_delimiter: {
+        Args: {
+          bucket_id: string
+          delimiter_param: string
+          max_keys?: number
+          next_key_token?: string
+          next_upload_token?: string
+          prefix_param: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          key: string
+        }[]
+      }
+      list_objects_with_delimiter: {
+        Args: {
+          bucket_id: string
+          delimiter_param: string
+          max_keys?: number
+          next_token?: string
+          prefix_param: string
+          start_after?: string
+        }
+        Returns: {
+          id: string
+          metadata: Json
+          name: string
+          updated_at: string
+        }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      search: {
+        Args: {
+          bucketname: string
+          levels?: number
+          limits?: number
+          offsets?: number
+          prefix: string
+          search?: string
+          sortcolumn?: string
+          sortorder?: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          last_accessed_at: string
+          metadata: Json
+          name: string
+          updated_at: string
+        }[]
+      }
+    }
+    Enums: {
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1022,4 +1434,8 @@ export const Constants = {
       user_role: ["admin", "moderator", "user"],
     },
   },
+  storage: {
+    Enums: {},
+  },
 } as const
+
