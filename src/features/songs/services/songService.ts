@@ -3,6 +3,7 @@ import type { Song, Arrangement, SongFilter } from '../types/song.types'
 import type { Database } from '../../../lib/database.types'
 import type { MultilingualText, LanguageCode, LyricsSource } from '../../multilingual/types/multilingual.types'
 import { isValidLanguageCode, DEFAULT_LANGUAGE } from '../../multilingual/types/multilingual.types'
+import { extractRoleClaims } from '../../auth/utils/jwt'
 
 // Custom error classes for API operations (kept for compatibility)
 export class APIError extends Error {
@@ -38,6 +39,24 @@ export class NotFoundError extends APIError {
 // Type mapping from Supabase to application types
 type SupabaseSong = Database['public']['Tables']['songs']['Row']
 type SupabaseArrangement = Database['public']['Tables']['arrangements']['Row']
+
+// Check if user is moderator or admin
+async function checkUserPermissions(): Promise<{ canModerate: boolean; userId: string | null }> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      return { canModerate: false, userId: null }
+    }
+    
+    const roleClaims = extractRoleClaims(session.access_token)
+    return { 
+      canModerate: roleClaims.canModerate || roleClaims.canAdmin,
+      userId: session.user?.id || null
+    }
+  } catch {
+    return { canModerate: false, userId: null }
+  }
+}
 
 // Helper function to safely parse JSONB lyrics
 function parseSupabaseLyrics(lyricsJson: unknown): MultilingualText {
@@ -88,12 +107,14 @@ function mapSupabaseSongToSong(supabaseSong: SupabaseSong): Song {
     autoConversionEnabled: supabaseSong.auto_conversion_enabled || false,
     metadata: {
       createdBy: supabaseSong.created_by || undefined,
-      isPublic: supabaseSong.is_public,
+      isPublic: supabaseSong.is_public !== false, // Default to true if null
       ratings: {
-        average: Number(supabaseSong.rating_average),
-        count: supabaseSong.rating_count
+        average: Number(supabaseSong.rating_average || 0),
+        count: supabaseSong.rating_count || 0
       },
-      views: supabaseSong.views
+      views: supabaseSong.views || 0,
+      moderationStatus: supabaseSong.moderation_status as 'pending' | 'approved' | 'rejected' | 'flagged' | null,
+      moderationNote: supabaseSong.moderation_note || undefined
     }
   }
 }
@@ -155,8 +176,11 @@ function clearCache() {
 export const songService = {
   async getAllSongs(filter?: SongFilter): Promise<Song[]> {
     try {
+      // Check user permissions
+      const { canModerate, userId } = await checkUserPermissions()
+      
       // Check cache first
-      const cacheKey = `getAllSongs:${JSON.stringify(filter || {})}`
+      const cacheKey = `getAllSongs:${JSON.stringify(filter || {})}:${canModerate}:${userId}`
       const cachedResult = getCachedResult<Song[]>(cacheKey)
       if (cachedResult) {
         return cachedResult
@@ -168,8 +192,18 @@ export const songService = {
           *,
           arrangements!arrangements_song_id_fkey (*)
         `)
-        .eq('is_public', true)
-        .order('title')
+      
+      // Apply visibility filters
+      if (!canModerate && userId) {
+        // Regular users with authentication: show public content AND their own content
+        query = query.or(`and(is_public.neq.false,moderation_status.neq.rejected),created_by.eq.${userId}`)
+      } else if (!canModerate) {
+        // Unauthenticated users: show only public approved content
+        query = query.and('is_public.neq.false', 'moderation_status.neq.rejected')
+      }
+      // Moderators/admins see everything
+      
+      query = query.order('title')
 
       // Apply filters
       if (filter) {
@@ -218,8 +252,11 @@ export const songService = {
 
   async getSongById(id: string): Promise<Song> {
     try {
+      // Check user permissions
+      const { canModerate, userId } = await checkUserPermissions()
+      
       // Check cache first
-      const cacheKey = `getSongById:${id}`
+      const cacheKey = `getSongById:${id}:${canModerate}:${userId}`
       const cachedResult = getCachedResult<Song>(cacheKey)
       if (cachedResult) {
         return cachedResult
@@ -241,6 +278,17 @@ export const songService = {
         throw new APIError(error.message, 500, 'SUPABASE_ERROR')
       }
 
+      // Check visibility permissions
+      if (!data) {
+        throw new NotFoundError(`Song with id ${id}`)
+      }
+      if (!canModerate && data.moderation_status === 'rejected' && data.created_by !== userId) {
+        throw new NotFoundError(`Song with id ${id}`)
+      }
+      if (!canModerate && data.is_public === false && data.created_by !== userId) {
+        throw new NotFoundError(`Song with id ${id}`)
+      }
+
       const song = mapSupabaseSongToSong(data)
       
       // Cache the result
@@ -257,8 +305,11 @@ export const songService = {
 
   async getSongBySlug(slug: string): Promise<Song> {
     try {
+      // Check user permissions
+      const { canModerate, userId } = await checkUserPermissions()
+      
       // Check cache first
-      const cacheKey = `getSongBySlug:${slug}`
+      const cacheKey = `getSongBySlug:${slug}:${canModerate}:${userId}`
       const cachedResult = getCachedResult<Song>(cacheKey)
       if (cachedResult) {
         return cachedResult
@@ -278,6 +329,17 @@ export const songService = {
           throw new NotFoundError(`Song with slug ${slug}`)
         }
         throw new APIError(error.message, 500, 'SUPABASE_ERROR')
+      }
+
+      // Check visibility permissions
+      if (!data) {
+        throw new NotFoundError(`Song with slug ${slug}`)
+      }
+      if (!canModerate && data.moderation_status === 'rejected' && data.created_by !== userId) {
+        throw new NotFoundError(`Song with slug ${slug}`)
+      }
+      if (!canModerate && data.is_public === false && data.created_by !== userId) {
+        throw new NotFoundError(`Song with slug ${slug}`)
       }
 
       const song = mapSupabaseSongToSong(data)

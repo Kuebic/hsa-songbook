@@ -2,6 +2,7 @@ import { supabase } from '../../../lib/supabase'
 import type { Arrangement } from '../types/song.types'
 import type { Database } from '../../../lib/database.types'
 import { generateUniqueSlug, type SlugOptions } from '../validation/utils/slugGeneration'
+import { extractRoleClaims } from '../../auth/utils/jwt'
 
 // Re-export error classes from songService for consistency
 export { APIError, NetworkError, NotFoundError } from './songService'
@@ -9,6 +10,24 @@ import { APIError, NetworkError, NotFoundError } from './songService'
 
 // Type mapping from Supabase to application types
 type SupabaseArrangement = Database['public']['Tables']['arrangements']['Row']
+
+// Check if user is moderator or admin
+async function checkUserPermissions(): Promise<{ canModerate: boolean; userId: string | null }> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      return { canModerate: false, userId: null }
+    }
+    
+    const roleClaims = extractRoleClaims(session.access_token)
+    return { 
+      canModerate: roleClaims.canModerate || roleClaims.canAdmin,
+      userId: session.user?.id || null
+    }
+  } catch {
+    return { canModerate: false, userId: null }
+  }
+}
 
 // Convert Supabase arrangement to application Arrangement type
 export function mapSupabaseArrangementToArrangement(supabaseArrangement: SupabaseArrangement): Arrangement {
@@ -26,11 +45,13 @@ export function mapSupabaseArrangementToArrangement(supabaseArrangement: Supabas
     description: supabaseArrangement.description || undefined,
     createdBy: supabaseArrangement.created_by || '',
     metadata: {
-      isPublic: true, // Default for now
-      views: 0 // Default for now
+      isPublic: supabaseArrangement.is_public !== false, // Default to true if null
+      views: supabaseArrangement.views || 0,
+      moderationStatus: supabaseArrangement.moderation_status as 'pending' | 'approved' | 'rejected' | 'flagged' | null,
+      moderationNote: supabaseArrangement.moderation_note || undefined
     },
-    createdAt: supabaseArrangement.created_at,
-    updatedAt: supabaseArrangement.updated_at
+    createdAt: supabaseArrangement.created_at || undefined,
+    updatedAt: supabaseArrangement.updated_at || undefined
   }
 }
 
@@ -106,20 +127,34 @@ async function getExistingArrangementSlugs(): Promise<string[]> {
 export const arrangementService = {
   async getAllArrangements(): Promise<Arrangement[]> {
     try {
-      // Check cache first
-      const cacheKey = 'getAllArrangements'
+      // Check user permissions
+      const { canModerate, userId } = await checkUserPermissions()
+      
+      // Check cache first (include permissions in cache key)
+      const cacheKey = `getAllArrangements:${canModerate}:${userId}`
       const cachedResult = getCachedResult<Arrangement[]>(cacheKey)
       if (cachedResult) {
         return cachedResult
       }
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('arrangements')
         .select(`
           *,
           songs!arrangements_song_id_fkey (title)
         `)
-        .order('name')
+
+      // Apply visibility filters
+      if (!canModerate && userId) {
+        // Regular users with authentication: show public content AND their own content
+        query = query.or(`and(is_public.neq.false,moderation_status.neq.rejected),created_by.eq.${userId}`)
+      } else if (!canModerate) {
+        // Unauthenticated users: show only public approved content
+        query = query.and('is_public.neq.false', 'moderation_status.neq.rejected')
+      }
+      // Moderators/admins see everything
+
+      const { data, error } = await query.order('name')
 
       if (error) {
         console.error('Supabase error in getAllArrangements:', error)
@@ -142,8 +177,11 @@ export const arrangementService = {
 
   async getArrangementById(id: string): Promise<Arrangement> {
     try {
+      // Check user permissions
+      const { canModerate, userId } = await checkUserPermissions()
+      
       // Check cache first
-      const cacheKey = `getArrangementById:${id}`
+      const cacheKey = `getArrangementById:${id}:${canModerate}:${userId}`
       const cachedResult = getCachedResult<Arrangement>(cacheKey)
       if (cachedResult) {
         return cachedResult
@@ -165,6 +203,17 @@ export const arrangementService = {
         throw new APIError(error.message, 500, 'SUPABASE_ERROR')
       }
 
+      // Check visibility permissions
+      if (!data) {
+        throw new NotFoundError(`Arrangement with id ${id}`)
+      }
+      if (!canModerate && data.moderation_status === 'rejected' && data.created_by !== userId) {
+        throw new NotFoundError(`Arrangement with id ${id}`)
+      }
+      if (!canModerate && data.is_public === false && data.created_by !== userId) {
+        throw new NotFoundError(`Arrangement with id ${id}`)
+      }
+
       const arrangement = mapSupabaseArrangementToArrangement(data)
       
       // Cache the result
@@ -181,8 +230,11 @@ export const arrangementService = {
 
   async getArrangementBySlug(slug: string): Promise<Arrangement> {
     try {
+      // Check user permissions
+      const { canModerate, userId } = await checkUserPermissions()
+      
       // Check cache first
-      const cacheKey = `getArrangementBySlug:${slug}`
+      const cacheKey = `getArrangementBySlug:${slug}:${canModerate}:${userId}`
       const cachedResult = getCachedResult<Arrangement>(cacheKey)
       if (cachedResult) {
         return cachedResult
@@ -204,6 +256,17 @@ export const arrangementService = {
         throw new APIError(error.message, 500, 'SUPABASE_ERROR')
       }
 
+      // Check visibility permissions
+      if (!data) {
+        throw new NotFoundError(`Arrangement with slug ${slug}`)
+      }
+      if (!canModerate && data.moderation_status === 'rejected' && data.created_by !== userId) {
+        throw new NotFoundError(`Arrangement with slug ${slug}`)
+      }
+      if (!canModerate && data.is_public === false && data.created_by !== userId) {
+        throw new NotFoundError(`Arrangement with slug ${slug}`)
+      }
+
       const arrangement = mapSupabaseArrangementToArrangement(data)
       
       // Cache the result
@@ -220,21 +283,35 @@ export const arrangementService = {
 
   async getArrangementsBySongId(songId: string): Promise<Arrangement[]> {
     try {
+      // Check user permissions
+      const { canModerate, userId } = await checkUserPermissions()
+      
       // Check cache first
-      const cacheKey = `getArrangementsBySongId:${songId}`
+      const cacheKey = `getArrangementsBySongId:${songId}:${canModerate}:${userId}`
       const cachedResult = getCachedResult<Arrangement[]>(cacheKey)
       if (cachedResult) {
         return cachedResult
       }
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('arrangements')
         .select(`
           *,
           songs!arrangements_song_id_fkey (title)
         `)
         .eq('song_id', songId)
-        .order('name')
+
+      // Apply visibility filters
+      if (!canModerate && userId) {
+        // Regular users with authentication: show public content AND their own content
+        query = query.or(`and(is_public.neq.false,moderation_status.neq.rejected),created_by.eq.${userId}`)
+      } else if (!canModerate) {
+        // Unauthenticated users: show only public approved content
+        query = query.and('is_public.neq.false', 'moderation_status.neq.rejected')
+      }
+      // Moderators/admins see everything
+
+      const { data, error } = await query.order('name')
 
       if (error) {
         throw new APIError(error.message, 500, 'SUPABASE_ERROR')
