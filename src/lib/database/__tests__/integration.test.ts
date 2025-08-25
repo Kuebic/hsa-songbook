@@ -161,7 +161,7 @@ describe('QueryBuilder Integration', () => {
     const query = new QueryBuilder(supabase, 'songs')
     
     const result = await query
-      .insert({ title: 'New Song', artist: 'Test Artist' })
+      .insert({ title: 'New Song', artist: 'Test Artist', slug: 'new-song' })
       .select()
       .single()
       .execute()
