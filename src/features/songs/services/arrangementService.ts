@@ -5,7 +5,6 @@ import type { Database } from '../../../lib/database.types'
 import { generateUniqueSlug, type SlugOptions } from '../validation/utils/slugGeneration'
 import { extractRoleClaims } from '../../auth/utils/jwt'
 import { 
-  withMigration, 
   buildUserPermissions,
   createQueryBuilder 
 } from '../../../lib/database/migrationHelper'
@@ -113,430 +112,168 @@ async function generateArrangementSlug(
 
 // Get all existing arrangement slugs (for uniqueness checking)
 async function getExistingArrangementSlugs(): Promise<string[]> {
-  return withMigration(
-    'arrangementService.getExistingArrangementSlugs',
-    // Legacy implementation
-    async () => {
-      try {
-        const { data, error } = await supabase
-          .from('arrangements')
-          .select('slug')
-
-        if (error) {
-          console.warn('Failed to fetch existing arrangement slugs:', error)
-          return []
-        }
-
-        return (data || []).map(item => item.slug)
-      } catch (error) {
-        console.warn('Error fetching existing arrangement slugs:', error)
-        return []
-      }
-    },
-    // QueryBuilder implementation
-    async () => {
-      try {
-        const result = await createQueryBuilder(supabase, 'arrangements')
-          .select('slug')
-          .execute()
-        
-        if (result.error) {
-          console.warn('Failed to fetch existing arrangement slugs:', result.error)
-          return []
-        }
-        
-        return (Array.isArray(result.data) ? result.data : []).map(item => item.slug)
-      } catch (error) {
-        console.warn('Error fetching existing arrangement slugs:', error)
-        return []
-      }
+  try {
+    const result = await createQueryBuilder(supabase, 'arrangements')
+      .select('slug')
+      .execute()
+    
+    if (result.error) {
+      console.warn('Failed to fetch existing arrangement slugs:', result.error)
+      return []
     }
-  )
+    
+    return (Array.isArray(result.data) ? result.data : []).map(item => item.slug)
+  } catch (error) {
+    console.warn('Error fetching existing arrangement slugs:', error)
+    return []
+  }
 }
 
 export const arrangementService = {
   async getAllArrangements(): Promise<Arrangement[]> {
-    return withMigration(
-      'arrangementService.getAllArrangements',
-      // Legacy implementation
-      async () => {
-        try {
-          // Check user permissions
-          const { canModerate, userId } = await checkUserPermissions()
-          
-          // Check cache first (include permissions in cache key)
-          const cacheKey = `getAllArrangements:${canModerate}:${userId}`
-          const cachedResult = getCachedResult<Arrangement[]>(cacheKey)
-          if (cachedResult) {
-            return cachedResult
-          }
-
-          let query = supabase
-            .from('arrangements')
-            .select(`
-              *,
-              songs!arrangements_song_id_fkey (title)
-            `)
-
-          // Apply visibility filters
-          if (!canModerate && userId) {
-            // Regular users with authentication: show public content AND their own content
-            // Include records where moderation_status is null, 'approved', 'pending', or 'flagged' (exclude only 'rejected')
-            query = query.or(`and(is_public.neq.false,or(moderation_status.is.null,moderation_status.in.(approved,pending,flagged))),created_by.eq.${userId}`)
-          } else if (!canModerate) {
-            // Unauthenticated users: show only public content that is not rejected
-            // Include records where moderation_status is null, 'approved', 'pending', or 'flagged'
-            query = query
-              .eq('is_public', true)
-              .or('moderation_status.is.null,moderation_status.in.(approved,pending,flagged)')
-          }
-          // Moderators/admins see everything
-
-          const { data, error } = await query.order('name')
-
-          if (error) {
-            console.error('Supabase error in getAllArrangements:', error)
-            throw new APIError(error.message, 500, 'SUPABASE_ERROR')
-          }
-
-          const arrangements = (data || []).map(mapSupabaseArrangementToArrangement)
-          
-          // Cache the result
-          setCachedResult(cacheKey, arrangements)
-          
-          return arrangements
-        } catch (error) {
-          if (error instanceof APIError) {
-            throw error
-          }
-          throw new NetworkError('Failed to fetch arrangements')
-        }
-      },
-      // QueryBuilder implementation
-      async () => {
-        try {
-          // Check user permissions
-          const { canModerate, userId } = await checkUserPermissions()
-          
-          // Check cache first (include permissions in cache key)
-          const cacheKey = `getAllArrangements:${canModerate}:${userId}`
-          const cachedResult = getCachedResult<Arrangement[]>(cacheKey)
-          if (cachedResult) {
-            return cachedResult
-          }
-
-          const permissions = buildUserPermissions({ userId, canModerate })
-          
-          const result = await createQueryBuilder(supabase, 'arrangements')
-            .select(`
-              *,
-              songs!arrangements_song_id_fkey (title)
-            `)
-            .withVisibility(permissions)
-            .orderBy('name', { ascending: true })
-            .execute()
-
-          if (result.error) {
-            console.error('QueryBuilder error in getAllArrangements:', result.error)
-            throw new APIError(result.error.message, 500, 'QUERY_ERROR')
-          }
-
-          const arrangements = (Array.isArray(result.data) ? result.data : []).map(mapSupabaseArrangementToArrangement)
-          
-          // Cache the result
-          setCachedResult(cacheKey, arrangements)
-          
-          return arrangements
-        } catch (error) {
-          if (error instanceof APIError) {
-            throw error
-          }
-          throw new NetworkError('Failed to fetch arrangements')
-        }
+    try {
+      // Check user permissions
+      const { canModerate, userId } = await checkUserPermissions()
+      
+      // Check cache first (include permissions in cache key)
+      const cacheKey = `getAllArrangements:${canModerate}:${userId}`
+      const cachedResult = getCachedResult<Arrangement[]>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
       }
-    )
+
+      const permissions = buildUserPermissions({ userId, canModerate })
+      
+      const result = await createQueryBuilder(supabase, 'arrangements')
+        .select(`
+          *,
+          songs!arrangements_song_id_fkey (title)
+        `)
+        .withVisibility(permissions)
+        .orderBy('name', { ascending: true })
+        .execute()
+
+      if (result.error) {
+        console.error('QueryBuilder error in getAllArrangements:', result.error)
+        throw new APIError(result.error.message, 500, 'QUERY_ERROR')
+      }
+
+      const arrangements = (Array.isArray(result.data) ? result.data : []).map(mapSupabaseArrangementToArrangement)
+      
+      // Cache the result
+      setCachedResult(cacheKey, arrangements)
+      
+      return arrangements
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+      throw new NetworkError('Failed to fetch arrangements')
+    }
   },
 
   async getArrangementById(id: string): Promise<Arrangement> {
-    return withMigration(
-      'arrangementService.getArrangementById',
-      // Legacy implementation
-      async () => {
-        try {
-          // Check user permissions
-          const { canModerate, userId } = await checkUserPermissions()
-          
-          // Check cache first
-          const cacheKey = `getArrangementById:${id}:${canModerate}:${userId}`
-          const cachedResult = getCachedResult<Arrangement>(cacheKey)
-          if (cachedResult) {
-            return cachedResult
-          }
-
-          const { data, error } = await supabase
-            .from('arrangements')
-            .select(`
-              *,
-              songs!arrangements_song_id_fkey (title)
-            `)
-            .eq('id', id)
-            .single()
-
-          if (error) {
-            if (error.code === 'PGRST116') {
-              throw new NotFoundError(`Arrangement with id ${id}`)
-            }
-            throw new APIError(error.message, 500, 'SUPABASE_ERROR')
-          }
-
-          // Check visibility permissions
-          if (!data) {
-            throw new NotFoundError(`Arrangement with id ${id}`)
-          }
-          if (!canModerate && data.moderation_status === 'rejected' && data.created_by !== userId) {
-            throw new NotFoundError(`Arrangement with id ${id}`)
-          }
-          if (!canModerate && data.is_public === false && data.created_by !== userId) {
-            throw new NotFoundError(`Arrangement with id ${id}`)
-          }
-
-          const arrangement = mapSupabaseArrangementToArrangement(data)
-          
-          // Cache the result
-          setCachedResult(cacheKey, arrangement)
-          
-          return arrangement
-        } catch (error) {
-          if (error instanceof APIError) {
-            throw error
-          }
-          throw new NetworkError('Failed to fetch arrangement')
-        }
-      },
-      // QueryBuilder implementation
-      async () => {
-        try {
-          const { canModerate, userId } = await checkUserPermissions()
-          const cacheKey = `getArrangementById:${id}:${canModerate}:${userId}`
-          const cachedResult = getCachedResult<Arrangement>(cacheKey)
-          if (cachedResult) {
-            return cachedResult
-          }
-          
-          const permissions = buildUserPermissions({ userId, canModerate })
-          const result = await createQueryBuilder(supabase, 'arrangements')
-            .select(`*, songs!arrangements_song_id_fkey (title)`)
-            .eq('id', id)
-            .withVisibility(permissions)
-            .single()
-            .execute()
-          
-          if (result.error) {
-            if (result.error.code === 'NOT_FOUND') {
-              throw new NotFoundError(`Arrangement with id ${id}`)
-            }
-            throw new APIError(result.error.message, 500, 'QUERY_ERROR')
-          }
-          
-          if (!result.data) {
-            throw new NotFoundError(`Arrangement with id ${id}`)
-          }
-          
-          const arrangement = mapSupabaseArrangementToArrangement(result.data as SupabaseArrangement)
-          setCachedResult(cacheKey, arrangement)
-          return arrangement
-        } catch (error) {
-          if (error instanceof APIError) throw error
-          throw new NetworkError('Failed to fetch arrangement')
-        }
+    try {
+      const { canModerate, userId } = await checkUserPermissions()
+      const cacheKey = `getArrangementById:${id}:${canModerate}:${userId}`
+      const cachedResult = getCachedResult<Arrangement>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
       }
-    )
+      
+      const permissions = buildUserPermissions({ userId, canModerate })
+      const result = await createQueryBuilder(supabase, 'arrangements')
+        .select(`*, songs!arrangements_song_id_fkey (title)`)
+        .eq('id', id)
+        .withVisibility(permissions)
+        .single()
+        .execute()
+      
+      if (result.error) {
+        if (result.error.code === 'NOT_FOUND') {
+          throw new NotFoundError(`Arrangement with id ${id}`)
+        }
+        throw new APIError(result.error.message, 500, 'QUERY_ERROR')
+      }
+      
+      if (!result.data) {
+        throw new NotFoundError(`Arrangement with id ${id}`)
+      }
+      
+      const arrangement = mapSupabaseArrangementToArrangement(result.data as SupabaseArrangement)
+      setCachedResult(cacheKey, arrangement)
+      return arrangement
+    } catch (error) {
+      if (error instanceof APIError) throw error
+      throw new NetworkError('Failed to fetch arrangement')
+    }
   },
 
   async getArrangementBySlug(slug: string): Promise<Arrangement> {
-    return withMigration(
-      'arrangementService.getArrangementBySlug',
-      // Legacy implementation
-      async () => {
-        try {
-          // Check user permissions
-          const { canModerate, userId } = await checkUserPermissions()
-          
-          // Check cache first
-          const cacheKey = `getArrangementBySlug:${slug}:${canModerate}:${userId}`
-          const cachedResult = getCachedResult<Arrangement>(cacheKey)
-          if (cachedResult) {
-            return cachedResult
-          }
-
-          const { data, error } = await supabase
-            .from('arrangements')
-            .select(`
-              *,
-              songs!arrangements_song_id_fkey (title)
-            `)
-            .eq('slug', slug)
-            .single()
-
-          if (error) {
-            if (error.code === 'PGRST116') {
-              throw new NotFoundError(`Arrangement with slug ${slug}`)
-            }
-            throw new APIError(error.message, 500, 'SUPABASE_ERROR')
-          }
-
-          // Check visibility permissions
-          if (!data) {
-            throw new NotFoundError(`Arrangement with slug ${slug}`)
-          }
-          if (!canModerate && data.moderation_status === 'rejected' && data.created_by !== userId) {
-            throw new NotFoundError(`Arrangement with slug ${slug}`)
-          }
-          if (!canModerate && data.is_public === false && data.created_by !== userId) {
-            throw new NotFoundError(`Arrangement with slug ${slug}`)
-          }
-
-          const arrangement = mapSupabaseArrangementToArrangement(data)
-          
-          // Cache the result
-          setCachedResult(cacheKey, arrangement)
-          
-          return arrangement
-        } catch (error) {
-          if (error instanceof APIError) {
-            throw error
-          }
-          throw new NetworkError('Failed to fetch arrangement')
-        }
-      },
-      // QueryBuilder implementation
-      async () => {
-        try {
-          const { canModerate, userId } = await checkUserPermissions()
-          const cacheKey = `getArrangementBySlug:${slug}:${canModerate}:${userId}`
-          const cachedResult = getCachedResult<Arrangement>(cacheKey)
-          if (cachedResult) {
-            return cachedResult
-          }
-          
-          const permissions = buildUserPermissions({ userId, canModerate })
-          const result = await createQueryBuilder(supabase, 'arrangements')
-            .select(`*, songs!arrangements_song_id_fkey (title)`)
-            .eq('slug', slug)
-            .withVisibility(permissions)
-            .single()
-            .execute()
-          
-          if (result.error) {
-            if (result.error.code === 'NOT_FOUND') {
-              throw new NotFoundError(`Arrangement with slug ${slug}`)
-            }
-            throw new APIError(result.error.message, 500, 'QUERY_ERROR')
-          }
-          
-          if (!result.data) {
-            throw new NotFoundError(`Arrangement with slug ${slug}`)
-          }
-          
-          const arrangement = mapSupabaseArrangementToArrangement(result.data as SupabaseArrangement)
-          setCachedResult(cacheKey, arrangement)
-          return arrangement
-        } catch (error) {
-          if (error instanceof APIError) throw error
-          throw new NetworkError('Failed to fetch arrangement')
-        }
+    try {
+      const { canModerate, userId } = await checkUserPermissions()
+      const cacheKey = `getArrangementBySlug:${slug}:${canModerate}:${userId}`
+      const cachedResult = getCachedResult<Arrangement>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
       }
-    )
+      
+      const permissions = buildUserPermissions({ userId, canModerate })
+      const result = await createQueryBuilder(supabase, 'arrangements')
+        .select(`*, songs!arrangements_song_id_fkey (title)`)
+        .eq('slug', slug)
+        .withVisibility(permissions)
+        .single()
+        .execute()
+      
+      if (result.error) {
+        if (result.error.code === 'NOT_FOUND') {
+          throw new NotFoundError(`Arrangement with slug ${slug}`)
+        }
+        throw new APIError(result.error.message, 500, 'QUERY_ERROR')
+      }
+      
+      if (!result.data) {
+        throw new NotFoundError(`Arrangement with slug ${slug}`)
+      }
+      
+      const arrangement = mapSupabaseArrangementToArrangement(result.data as SupabaseArrangement)
+      setCachedResult(cacheKey, arrangement)
+      return arrangement
+    } catch (error) {
+      if (error instanceof APIError) throw error
+      throw new NetworkError('Failed to fetch arrangement')
+    }
   },
 
   async getArrangementsBySongId(songId: string): Promise<Arrangement[]> {
-    return withMigration(
-      'arrangementService.getArrangementsBySongId',
-      // Legacy implementation
-      async () => {
-        try {
-          // Check user permissions
-          const { canModerate, userId } = await checkUserPermissions()
-          
-          // Check cache first
-          const cacheKey = `getArrangementsBySongId:${songId}:${canModerate}:${userId}`
-          const cachedResult = getCachedResult<Arrangement[]>(cacheKey)
-          if (cachedResult) {
-            return cachedResult
-          }
-
-          let query = supabase
-            .from('arrangements')
-            .select(`
-              *,
-              songs!arrangements_song_id_fkey (title)
-            `)
-            .eq('song_id', songId)
-
-          // Apply visibility filters
-          if (!canModerate && userId) {
-            // Regular users with authentication: show public content AND their own content
-            // Include records where moderation_status is null, 'approved', 'pending', or 'flagged' (exclude only 'rejected')
-            query = query.or(`and(is_public.neq.false,or(moderation_status.is.null,moderation_status.in.(approved,pending,flagged))),created_by.eq.${userId}`)
-          } else if (!canModerate) {
-            // Unauthenticated users: show only public content that is not rejected
-            // Include records where moderation_status is null, 'approved', 'pending', or 'flagged'
-            query = query
-              .eq('is_public', true)
-              .or('moderation_status.is.null,moderation_status.in.(approved,pending,flagged)')
-          }
-          // Moderators/admins see everything
-
-          const { data, error } = await query.order('name')
-
-          if (error) {
-            throw new APIError(error.message, 500, 'SUPABASE_ERROR')
-          }
-
-          const arrangements = (data || []).map(mapSupabaseArrangementToArrangement)
-          
-          // Cache the result
-          setCachedResult(cacheKey, arrangements)
-          
-          return arrangements
-        } catch (error) {
-          if (error instanceof APIError) {
-            throw error
-          }
-          throw new NetworkError('Failed to fetch arrangements')
-        }
-      },
-      // QueryBuilder implementation
-      async () => {
-        try {
-          const { canModerate, userId } = await checkUserPermissions()
-          const cacheKey = `getArrangementsBySongId:${songId}:${canModerate}:${userId}`
-          const cachedResult = getCachedResult<Arrangement[]>(cacheKey)
-          if (cachedResult) {
-            return cachedResult
-          }
-          
-          const permissions = buildUserPermissions({ userId, canModerate })
-          const result = await createQueryBuilder(supabase, 'arrangements')
-            .select(`*, songs!arrangements_song_id_fkey (title)`)
-            .eq('song_id', songId)
-            .withVisibility(permissions)
-            .orderBy('name', { ascending: true })
-            .execute()
-          
-          if (result.error) {
-            throw new APIError(result.error.message, 500, 'QUERY_ERROR')
-          }
-          
-          const arrangements = (Array.isArray(result.data) ? result.data : []).map(mapSupabaseArrangementToArrangement)
-          setCachedResult(cacheKey, arrangements)
-          return arrangements
-        } catch (error) {
-          if (error instanceof APIError) throw error
-          throw new NetworkError('Failed to fetch arrangements')
-        }
+    try {
+      const { canModerate, userId } = await checkUserPermissions()
+      const cacheKey = `getArrangementsBySongId:${songId}:${canModerate}:${userId}`
+      const cachedResult = getCachedResult<Arrangement[]>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
       }
-    )
+      
+      const permissions = buildUserPermissions({ userId, canModerate })
+      const result = await createQueryBuilder(supabase, 'arrangements')
+        .select(`*, songs!arrangements_song_id_fkey (title)`)
+        .eq('song_id', songId)
+        .withVisibility(permissions)
+        .orderBy('name', { ascending: true })
+        .execute()
+      
+      if (result.error) {
+        throw new APIError(result.error.message, 500, 'QUERY_ERROR')
+      }
+      
+      const arrangements = (Array.isArray(result.data) ? result.data : []).map(mapSupabaseArrangementToArrangement)
+      setCachedResult(cacheKey, arrangements)
+      return arrangements
+    } catch (error) {
+      if (error instanceof APIError) throw error
+      throw new NetworkError('Failed to fetch arrangements')
+    }
   },
 
   async searchArrangements(params: {
@@ -546,535 +283,243 @@ export const arrangementService = {
     difficulty?: Arrangement['difficulty']
     tags?: string[]
   }): Promise<Arrangement[]> {
-    return withMigration(
-      'arrangementService.searchArrangements',
-      // Legacy implementation
-      async () => {
-        try {
-          // Check cache first
-          const cacheKey = `searchArrangements:${JSON.stringify(params)}`
-          const cachedResult = getCachedResult<Arrangement[]>(cacheKey)
-          if (cachedResult) {
-            return cachedResult
-          }
-
-          let query = supabase
-            .from('arrangements')
-            .select(`
-              *,
-              songs!arrangements_song_id_fkey (title, artist)
-            `)
-            .order('name')
-
-          // Apply filters
-          if (params.searchQuery) {
-            // Search in arrangement name and description
-            query = query.or(`name.ilike.%${params.searchQuery}%,description.ilike.%${params.searchQuery}%`)
-          }
-
-          if (params.songId) {
-            query = query.eq('song_id', params.songId)
-          }
-
-          if (params.key) {
-            query = query.eq('key', params.key)
-          }
-
-          if (params.difficulty) {
-            query = query.eq('difficulty', params.difficulty)
-          }
-
-          if (params.tags && params.tags.length > 0) {
-            query = query.overlaps('tags', params.tags)
-          }
-
-          const { data, error } = await query
-
-          if (error) {
-            console.error('Supabase error in searchArrangements:', error)
-            throw new APIError(error.message, 500, 'SUPABASE_ERROR')
-          }
-
-          const arrangements = (data || []).map(mapSupabaseArrangementToArrangement)
-          
-          // Cache the result
-          setCachedResult(cacheKey, arrangements)
-          
-          return arrangements
-        } catch (error) {
-          if (error instanceof APIError) {
-            throw error
-          }
-          throw new NetworkError('Failed to search arrangements')
-        }
-      },
-      // QueryBuilder implementation
-      async () => {
-        try {
-          const cacheKey = `searchArrangements:${JSON.stringify(params)}`
-          const cachedResult = getCachedResult<Arrangement[]>(cacheKey)
-          if (cachedResult) {
-            return cachedResult
-          }
-          
-          let query = createQueryBuilder(supabase, 'arrangements')
-            .select(`*, songs!arrangements_song_id_fkey (title, artist)`)
-          
-          // Apply filters
-          if (params.searchQuery) {
-            query = query.or(`name.ilike.%${params.searchQuery}%,description.ilike.%${params.searchQuery}%`)
-          }
-          if (params.songId) {
-            query = query.eq('song_id', params.songId)
-          }
-          if (params.key) {
-            query = query.eq('key', params.key)
-          }
-          if (params.difficulty) {
-            query = query.eq('difficulty', params.difficulty)
-          }
-          if (params.tags && params.tags.length > 0) {
-            query = query.contains('tags', params.tags)
-          }
-          
-          const result = await query.orderBy('name', { ascending: true }).execute()
-          
-          if (result.error) {
-            console.error('QueryBuilder error in searchArrangements:', result.error)
-            throw new APIError(result.error.message, 500, 'QUERY_ERROR')
-          }
-          
-          const arrangements = (Array.isArray(result.data) ? result.data : []).map(mapSupabaseArrangementToArrangement)
-          setCachedResult(cacheKey, arrangements)
-          return arrangements
-        } catch (error) {
-          if (error instanceof APIError) throw error
-          throw new NetworkError('Failed to search arrangements')
-        }
+    try {
+      const cacheKey = `searchArrangements:${JSON.stringify(params)}`
+      const cachedResult = getCachedResult<Arrangement[]>(cacheKey)
+      if (cachedResult) {
+        return cachedResult
       }
-    )
+      
+      let query = createQueryBuilder(supabase, 'arrangements')
+        .select(`*, songs!arrangements_song_id_fkey (title, artist)`)
+      
+      // Apply filters
+      if (params.searchQuery) {
+        query = query.or(`name.ilike.%${params.searchQuery}%,description.ilike.%${params.searchQuery}%`)
+      }
+      if (params.songId) {
+        query = query.eq('song_id', params.songId)
+      }
+      if (params.key) {
+        query = query.eq('key', params.key)
+      }
+      if (params.difficulty) {
+        query = query.eq('difficulty', params.difficulty)
+      }
+      if (params.tags && params.tags.length > 0) {
+        query = query.contains('tags', params.tags)
+      }
+      
+      const result = await query.orderBy('name', { ascending: true }).execute()
+      
+      if (result.error) {
+        console.error('QueryBuilder error in searchArrangements:', result.error)
+        throw new APIError(result.error.message, 500, 'QUERY_ERROR')
+      }
+      
+      const arrangements = (Array.isArray(result.data) ? result.data : []).map(mapSupabaseArrangementToArrangement)
+      setCachedResult(cacheKey, arrangements)
+      return arrangements
+    } catch (error) {
+      if (error instanceof APIError) throw error
+      throw new NetworkError('Failed to search arrangements')
+    }
   },
 
   async createArrangement(arrangementData: Partial<Arrangement>): Promise<Arrangement> {
-    return withMigration(
-      'arrangementService.createArrangement',
-      // Legacy implementation
-      async () => {
-        try {
-          clearArrangementCache() // Clear cache after mutation
-
-          // Get current user ID (Supabase handles this automatically via RLS)
-          const { data: { user } } = await supabase.auth.getUser()
-          if (!user) {
-            throw new APIError('Authentication required', 401, 'UNAUTHORIZED')
-          }
-
-          // Validate required fields
-          if (!arrangementData.name) {
-            throw new APIError('Arrangement name is required', 400, 'VALIDATION_ERROR')
-          }
-
-          if (!arrangementData.songIds || arrangementData.songIds.length === 0) {
-            throw new APIError('Song ID is required', 400, 'VALIDATION_ERROR')
-          }
-
-          // ChordPro data is optional - can be added later in the editor
-          // if (!arrangementData.chordData) {
-          //   throw new APIError('Chord data is required', 400, 'VALIDATION_ERROR')
-          // }
-
-          const songId = arrangementData.songIds[0] // Take first song ID
-
-          // Get song title for auto-generated slug
-          const { data: songData, error: songError } = await supabase
-            .from('songs')
-            .select('title')
-            .eq('id', songId)
-            .single()
-
-          if (songError || !songData) {
-            throw new APIError('Invalid song ID', 400, 'VALIDATION_ERROR')
-          }
-
-          // Generate unique slug
-          const existingSlugs = await getExistingArrangementSlugs()
-          const slug = await generateArrangementSlug(
-            arrangementData.name,
-            songData.title,
-            existingSlugs
-          )
-
-          // Map application Arrangement type to Supabase insert type
-          const insertData: Database['public']['Tables']['arrangements']['Insert'] = {
-            name: arrangementData.name,
-            song_id: songId,
-            slug,
-            chord_data: arrangementData.chordData || '', // Default to empty string if not provided
-            key: arrangementData.key || null,
-            tempo: arrangementData.tempo || null,
-            time_signature: arrangementData.timeSignature || '4/4',
-            difficulty: arrangementData.difficulty || 'beginner',
-            description: arrangementData.description || null,
-            tags: arrangementData.tags || [],
-            created_by: user.id
-          }
-
-          const { data, error } = await supabase
-            .from('arrangements')
-            .insert(insertData)
-            .select(`
-              *,
-              songs!arrangements_song_id_fkey (title)
-            `)
-            .single()
-
-          if (error) {
-            // Handle unique constraint violations
-            if (error.code === '23505') {
-              throw new APIError('An arrangement with this slug already exists', 400, 'DUPLICATE_SLUG')
-            }
-            throw new APIError(error.message, 400, 'SUPABASE_ERROR')
-          }
-
-          return mapSupabaseArrangementToArrangement(data)
-        } catch (error) {
-          if (error instanceof APIError) {
-            throw error
-          }
-          throw new NetworkError('Failed to create arrangement')
-        }
-      },
-      // QueryBuilder implementation
-      async () => {
-        try {
-          clearArrangementCache() // Clear cache after mutation
-          
-          // Get current user ID (Supabase handles this automatically via RLS)
-          const { data: { user } } = await supabase.auth.getUser()
-          if (!user) {
-            throw new APIError('Authentication required', 401, 'UNAUTHORIZED')
-          }
-          
-          // Validate required fields (keep same validation logic)
-          if (!arrangementData.name) {
-            throw new APIError('Arrangement name is required', 400, 'VALIDATION_ERROR')
-          }
-          if (!arrangementData.songIds || arrangementData.songIds.length === 0) {
-            throw new APIError('Song ID is required', 400, 'VALIDATION_ERROR')
-          }
-          
-          const songId = arrangementData.songIds[0]
-          
-          // Get song title for auto-generated slug (keep same logic)
-          const { data: songData, error: songError } = await supabase
-            .from('songs')
-            .select('title')
-            .eq('id', songId)
-            .single()
-          
-          if (songError || !songData) {
-            throw new APIError('Invalid song ID', 400, 'VALIDATION_ERROR')
-          }
-          
-          // Generate unique slug (keep same logic)
-          const existingSlugs = await getExistingArrangementSlugs()
-          const slug = await generateArrangementSlug(
-            arrangementData.name,
-            songData.title,
-            existingSlugs
-          )
-          
-          // Map to insert data (keep same mapping)
-          const insertData: Database['public']['Tables']['arrangements']['Insert'] = {
-            name: arrangementData.name,
-            song_id: songId,
-            slug,
-            chord_data: arrangementData.chordData || '',
-            key: arrangementData.key || null,
-            tempo: arrangementData.tempo || null,
-            time_signature: arrangementData.timeSignature || '4/4',
-            difficulty: arrangementData.difficulty || 'beginner',
-            description: arrangementData.description || null,
-            tags: arrangementData.tags || [],
-            created_by: user.id
-          }
-          
-          // Use QueryBuilder for insert
-          const result = await createQueryBuilder(supabase, 'arrangements')
-            .insert(insertData)
-            .select('*, songs!arrangements_song_id_fkey (title)')
-            .single()
-            .execute()
-          
-          if (result.error) {
-            // Handle unique constraint violations
-            if (result.error.code === '23505') {
-              throw new APIError('An arrangement with this slug already exists', 400, 'DUPLICATE_SLUG')
-            }
-            throw new APIError(result.error.message, 400, 'QUERY_ERROR')
-          }
-          
-          if (!result.data) {
-            throw new APIError('Failed to create arrangement', 500, 'QUERY_ERROR')
-          }
-          
-          return mapSupabaseArrangementToArrangement(result.data as SupabaseArrangement)
-        } catch (error) {
-          if (error instanceof APIError) throw error
-          throw new NetworkError('Failed to create arrangement')
-        }
+    try {
+      clearArrangementCache() // Clear cache after mutation
+      
+      // Get current user ID (Supabase handles this automatically via RLS)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new APIError('Authentication required', 401, 'UNAUTHORIZED')
       }
-    )
+      
+      // Validate required fields
+      if (!arrangementData.name) {
+        throw new APIError('Arrangement name is required', 400, 'VALIDATION_ERROR')
+      }
+      if (!arrangementData.songIds || arrangementData.songIds.length === 0) {
+        throw new APIError('Song ID is required', 400, 'VALIDATION_ERROR')
+      }
+      
+      const songId = arrangementData.songIds[0]
+      
+      // Get song title for auto-generated slug
+      const { data: songData, error: songError } = await supabase
+        .from('songs')
+        .select('title')
+        .eq('id', songId)
+        .single()
+      
+      if (songError || !songData) {
+        throw new APIError('Invalid song ID', 400, 'VALIDATION_ERROR')
+      }
+      
+      // Generate unique slug
+      const existingSlugs = await getExistingArrangementSlugs()
+      const slug = await generateArrangementSlug(
+        arrangementData.name,
+        songData.title,
+        existingSlugs
+      )
+      
+      // Map to insert data
+      const insertData: Database['public']['Tables']['arrangements']['Insert'] = {
+        name: arrangementData.name,
+        song_id: songId,
+        slug,
+        chord_data: arrangementData.chordData || '',
+        key: arrangementData.key || null,
+        tempo: arrangementData.tempo || null,
+        time_signature: arrangementData.timeSignature || '4/4',
+        difficulty: arrangementData.difficulty || 'beginner',
+        description: arrangementData.description || null,
+        tags: arrangementData.tags || [],
+        created_by: user.id
+      }
+      
+      // Use QueryBuilder for insert
+      const result = await createQueryBuilder(supabase, 'arrangements')
+        .insert(insertData)
+        .select('*, songs!arrangements_song_id_fkey (title)')
+        .single()
+        .execute()
+      
+      if (result.error) {
+        // Handle unique constraint violations
+        if (result.error.code === '23505') {
+          throw new APIError('An arrangement with this slug already exists', 400, 'DUPLICATE_SLUG')
+        }
+        throw new APIError(result.error.message, 400, 'QUERY_ERROR')
+      }
+      
+      if (!result.data) {
+        throw new APIError('Failed to create arrangement', 500, 'QUERY_ERROR')
+      }
+      
+      return mapSupabaseArrangementToArrangement(result.data as SupabaseArrangement)
+    } catch (error) {
+      if (error instanceof APIError) throw error
+      throw new NetworkError('Failed to create arrangement')
+    }
   },
 
   async updateArrangement(id: string, arrangementData: Partial<Arrangement>): Promise<Arrangement> {
-    return withMigration(
-      'arrangementService.updateArrangement',
-      // Legacy implementation
-      async () => {
-        try {
-          clearArrangementCache() // Clear cache after mutation
+    try {
+      clearArrangementCache() // Clear cache after mutation
+      
+      // Map application Arrangement type to Supabase update type
+      const updateData: Partial<Database['public']['Tables']['arrangements']['Update']> = {}
+      
+      if (arrangementData.name !== undefined) updateData.name = arrangementData.name
+      if (arrangementData.chordData !== undefined) updateData.chord_data = arrangementData.chordData
+      if (arrangementData.key !== undefined) updateData.key = arrangementData.key
+      if (arrangementData.tempo !== undefined) updateData.tempo = arrangementData.tempo
+      if (arrangementData.timeSignature !== undefined) updateData.time_signature = arrangementData.timeSignature
+      if (arrangementData.difficulty !== undefined) updateData.difficulty = arrangementData.difficulty
+      if (arrangementData.description !== undefined) updateData.description = arrangementData.description
+      if (arrangementData.tags !== undefined) updateData.tags = arrangementData.tags
+      
+      // If name is being updated, regenerate slug
+      if (arrangementData.name !== undefined) {
+        const currentResult = await createQueryBuilder(supabase, 'arrangements')
+          .select('slug, songs!arrangements_song_id_fkey (title)')
+          .eq('id', id)
+          .single()
+          .execute()
 
-          // Map application Arrangement type to Supabase update type
-          const updateData: Partial<Database['public']['Tables']['arrangements']['Update']> = {}
-          
-          if (arrangementData.name !== undefined) updateData.name = arrangementData.name
-          if (arrangementData.chordData !== undefined) updateData.chord_data = arrangementData.chordData
-          if (arrangementData.key !== undefined) updateData.key = arrangementData.key
-          if (arrangementData.tempo !== undefined) updateData.tempo = arrangementData.tempo
-          if (arrangementData.timeSignature !== undefined) updateData.time_signature = arrangementData.timeSignature
-          if (arrangementData.difficulty !== undefined) updateData.difficulty = arrangementData.difficulty
-          if (arrangementData.description !== undefined) updateData.description = arrangementData.description
-          if (arrangementData.tags !== undefined) updateData.tags = arrangementData.tags
-
-          // If name is being updated, regenerate slug
-          if (arrangementData.name !== undefined) {
-            const { data: currentData, error: fetchError } = await supabase
-              .from('arrangements')
-              .select(`
-                slug,
-                songs!arrangements_song_id_fkey (title)
-              `)
-              .eq('id', id)
-              .single()
-
-            if (fetchError) {
-              throw new APIError(fetchError.message, 500, 'SUPABASE_ERROR')
-            }
-
-            const existingSlugs = await getExistingArrangementSlugs()
-            // Remove current slug from check list
-            const filteredSlugs = existingSlugs.filter(slug => slug !== currentData.slug)
-            
-            const songTitle = Array.isArray(currentData.songs) 
-              ? currentData.songs[0]?.title 
-              : (currentData.songs as { title: string })?.title
-            
-            const newSlug = await generateArrangementSlug(
-              arrangementData.name,
-              songTitle || '',
-              filteredSlugs
-            )
-            
-            updateData.slug = newSlug
-          }
-
-          const { data, error } = await supabase
-            .from('arrangements')
-            .update(updateData)
-            .eq('id', id)
-            .select(`
-              *,
-              songs!arrangements_song_id_fkey (title)
-            `)
-            .single()
-
-          if (error) {
-            if (error.code === 'PGRST116') {
-              throw new NotFoundError(`Arrangement with id ${id}`)
-            }
-            // Handle unique constraint violations
-            if (error.code === '23505') {
-              throw new APIError('An arrangement with this slug already exists', 400, 'DUPLICATE_SLUG')
-            }
-            throw new APIError(error.message, 400, 'SUPABASE_ERROR')
-          }
-
-          return mapSupabaseArrangementToArrangement(data)
-        } catch (error) {
-          if (error instanceof APIError) {
-            throw error
-          }
-          throw new NetworkError('Failed to update arrangement')
+        if (currentResult.error) {
+          throw new APIError(currentResult.error.message, 500, 'QUERY_ERROR')
         }
-      },
-      // QueryBuilder implementation
-      async () => {
-        try {
-          clearArrangementCache() // Clear cache after mutation
-          
-          // Map application Arrangement type to Supabase update type
-          const updateData: Partial<Database['public']['Tables']['arrangements']['Update']> = {}
-          
-          if (arrangementData.name !== undefined) updateData.name = arrangementData.name
-          if (arrangementData.chordData !== undefined) updateData.chord_data = arrangementData.chordData
-          if (arrangementData.key !== undefined) updateData.key = arrangementData.key
-          if (arrangementData.tempo !== undefined) updateData.tempo = arrangementData.tempo
-          if (arrangementData.timeSignature !== undefined) updateData.time_signature = arrangementData.timeSignature
-          if (arrangementData.difficulty !== undefined) updateData.difficulty = arrangementData.difficulty
-          if (arrangementData.description !== undefined) updateData.description = arrangementData.description
-          if (arrangementData.tags !== undefined) updateData.tags = arrangementData.tags
-          
-          // If name is being updated, regenerate slug
-          if (arrangementData.name !== undefined) {
-            const currentResult = await createQueryBuilder(supabase, 'arrangements')
-              .select('slug, songs!arrangements_song_id_fkey (title)')
-              .eq('id', id)
-              .single()
-              .execute()
 
-            if (currentResult.error) {
-              throw new APIError(currentResult.error.message, 500, 'QUERY_ERROR')
-            }
-
-            if (!currentResult.data) {
-              throw new NotFoundError(`Arrangement with id ${id}`)
-            }
-
-            const currentData = currentResult.data
-            const existingSlugs = await getExistingArrangementSlugs()
-            // Remove current slug from check list
-            const filteredSlugs = existingSlugs.filter(slug => slug !== (currentData as any).slug)
-            
-            const songTitle = Array.isArray((currentData as any).songs) 
-              ? (currentData as any).songs[0]?.title 
-              : ((currentData as any).songs as { title: string })?.title
-            
-            const newSlug = await generateArrangementSlug(
-              arrangementData.name,
-              songTitle || '',
-              filteredSlugs
-            )
-            
-            updateData.slug = newSlug
-          }
-
-          // Use QueryBuilder for update
-          const result = await createQueryBuilder(supabase, 'arrangements')
-            .update(updateData)
-            .eq('id', id)
-            .select('*, songs!arrangements_song_id_fkey (title)')
-            .single()
-            .execute()
-          
-          if (result.error) {
-            if (result.error.code === 'NOT_FOUND') {
-              throw new NotFoundError(`Arrangement with id ${id}`)
-            }
-            if (result.error.code === '23505') {
-              throw new APIError('An arrangement with this slug already exists', 400, 'DUPLICATE_SLUG')
-            }
-            throw new APIError(result.error.message, 400, 'QUERY_ERROR')
-          }
-          
-          if (!result.data) {
-            throw new NotFoundError(`Arrangement with id ${id}`)
-          }
-          
-          return mapSupabaseArrangementToArrangement(result.data as any)
-        } catch (error) {
-          if (error instanceof APIError) throw error
-          throw new NetworkError('Failed to update arrangement')
+        if (!currentResult.data) {
+          throw new NotFoundError(`Arrangement with id ${id}`)
         }
+
+        const currentData = currentResult.data
+        const existingSlugs = await getExistingArrangementSlugs()
+        // Remove current slug from check list
+        const filteredSlugs = existingSlugs.filter(slug => slug !== (currentData as any).slug)
+        
+        const songTitle = Array.isArray((currentData as any).songs) 
+          ? (currentData as any).songs[0]?.title 
+          : ((currentData as any).songs as { title: string })?.title
+        
+        const newSlug = await generateArrangementSlug(
+          arrangementData.name,
+          songTitle || '',
+          filteredSlugs
+        )
+        
+        updateData.slug = newSlug
       }
-    )
+
+      // Use QueryBuilder for update
+      const result = await createQueryBuilder(supabase, 'arrangements')
+        .update(updateData)
+        .eq('id', id)
+        .select('*, songs!arrangements_song_id_fkey (title)')
+        .single()
+        .execute()
+      
+      if (result.error) {
+        if (result.error.code === 'NOT_FOUND') {
+          throw new NotFoundError(`Arrangement with id ${id}`)
+        }
+        if (result.error.code === '23505') {
+          throw new APIError('An arrangement with this slug already exists', 400, 'DUPLICATE_SLUG')
+        }
+        throw new APIError(result.error.message, 400, 'QUERY_ERROR')
+      }
+      
+      if (!result.data) {
+        throw new NotFoundError(`Arrangement with id ${id}`)
+      }
+      
+      return mapSupabaseArrangementToArrangement(result.data as any)
+    } catch (error) {
+      if (error instanceof APIError) throw error
+      throw new NetworkError('Failed to update arrangement')
+    }
   },
 
   async deleteArrangement(id: string): Promise<void> {
-    return withMigration(
-      'arrangementService.deleteArrangement',
-      // Legacy implementation
-      async () => {
-        try {
-          clearArrangementCache() // Clear cache after mutation
-
-          const { error } = await supabase
-            .from('arrangements')
-            .delete()
-            .eq('id', id)
-
-          if (error) {
-            throw new APIError(error.message, 400, 'SUPABASE_ERROR')
-          }
-        } catch (error) {
-          if (error instanceof APIError) {
-            throw error
-          }
-          throw new NetworkError('Failed to delete arrangement')
-        }
-      },
-      // QueryBuilder implementation
-      async () => {
-        try {
-          clearArrangementCache() // Clear cache after mutation
-          
-          const result = await createQueryBuilder(supabase, 'arrangements')
-            .delete()
-            .eq('id', id)
-            .execute()
-          
-          if (result.error) {
-            throw new APIError(result.error.message, 400, 'QUERY_ERROR')
-          }
-        } catch (error) {
-          if (error instanceof APIError) throw error
-          throw new NetworkError('Failed to delete arrangement')
-        }
+    try {
+      clearArrangementCache() // Clear cache after mutation
+      
+      const result = await createQueryBuilder(supabase, 'arrangements')
+        .delete()
+        .eq('id', id)
+        .execute()
+      
+      if (result.error) {
+        throw new APIError(result.error.message, 400, 'QUERY_ERROR')
       }
-    )
+    } catch (error) {
+      if (error instanceof APIError) throw error
+      throw new NetworkError('Failed to delete arrangement')
+    }
   },
 
   // Utility functions
   async getArrangementTitlePreview(arrangementName: string, songId: string): Promise<string> {
-    return withMigration(
-      'arrangementService.getArrangementTitlePreview',
-      // Legacy implementation
-      async () => {
-        try {
-          const { data, error } = await supabase
-            .from('songs')
-            .select('title')
-            .eq('id', songId)
-            .single()
-
-          if (error || !data) {
-            return `${arrangementName} - Unknown Song`
-          }
-
-          return `${data.title} - ${arrangementName}`
-        } catch (_error) {
-          return `${arrangementName} - Unknown Song`
-        }
-      },
-      // QueryBuilder implementation
-      async () => {
-        try {
-          const result = await createQueryBuilder(supabase, 'songs')
-            .select('title')
-            .eq('id', songId)
-            .single()
-            .execute()
-          
-          if (result.error || !result.data) {
-            return `${arrangementName} - Unknown Song`
-          }
-          
-          return `${(result.data as { title: string }).title} - ${arrangementName}`
-        } catch (_error) {
-          return `${arrangementName} - Unknown Song`
-        }
+    try {
+      const result = await createQueryBuilder(supabase, 'songs')
+        .select('title')
+        .eq('id', songId)
+        .single()
+        .execute()
+      
+      if (result.error || !result.data) {
+        return `${arrangementName} - Unknown Song`
       }
-    )
+      
+      return `${(result.data as { title: string }).title} - ${arrangementName}`
+    } catch (_error) {
+      return `${arrangementName} - Unknown Song`
+    }
   },
 
   // Cache management
