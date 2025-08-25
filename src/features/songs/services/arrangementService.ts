@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase'
+import { nullToUndefined } from '@shared/utils/typeHelpers'
 import type { Arrangement } from '../types/song.types'
 import type { Database } from '../../../lib/database.types'
 import { generateUniqueSlug, type SlugOptions } from '../validation/utils/slugGeneration'
@@ -38,7 +39,7 @@ export function mapSupabaseArrangementToArrangement(supabaseArrangement: Supabas
     songIds: [supabaseArrangement.song_id], // Note: single song ID in array for compatibility
     key: supabaseArrangement.key || '',
     tempo: supabaseArrangement.tempo || undefined,
-    timeSignature: supabaseArrangement.time_signature,
+    timeSignature: nullToUndefined(supabaseArrangement.time_signature),
     difficulty: (supabaseArrangement.difficulty as 'beginner' | 'intermediate' | 'advanced') || 'beginner',
     tags: supabaseArrangement.tags || [],
     chordData: supabaseArrangement.chord_data,
@@ -50,8 +51,8 @@ export function mapSupabaseArrangementToArrangement(supabaseArrangement: Supabas
       moderationStatus: supabaseArrangement.moderation_status as 'pending' | 'approved' | 'rejected' | 'flagged' | null,
       moderationNote: supabaseArrangement.moderation_note || undefined
     },
-    createdAt: supabaseArrangement.created_at || undefined,
-    updatedAt: supabaseArrangement.updated_at || undefined
+    createdAt: nullToUndefined(supabaseArrangement.created_at),
+    updatedAt: nullToUndefined(supabaseArrangement.updated_at)
   }
 }
 
@@ -150,7 +151,7 @@ export const arrangementService = {
         query = query.or(`and(is_public.neq.false,moderation_status.neq.rejected),created_by.eq.${userId}`)
       } else if (!canModerate) {
         // Unauthenticated users: show only public approved content
-        query = query.and('is_public.neq.false', 'moderation_status.neq.rejected')
+        query = query.eq('is_public', true).neq('moderation_status', 'rejected')
       }
       // Moderators/admins see everything
 
@@ -307,7 +308,7 @@ export const arrangementService = {
         query = query.or(`and(is_public.neq.false,moderation_status.neq.rejected),created_by.eq.${userId}`)
       } else if (!canModerate) {
         // Unauthenticated users: show only public approved content
-        query = query.and('is_public.neq.false', 'moderation_status.neq.rejected')
+        query = query.eq('is_public', true).neq('moderation_status', 'rejected')
       }
       // Moderators/admins see everything
 

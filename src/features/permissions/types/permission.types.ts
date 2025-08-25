@@ -46,7 +46,7 @@ export interface PermissionAssignment {
 export interface PermissionCondition {
   field: string  // e.g., 'created_by', 'status', 'category'
   operator: 'eq' | 'neq' | 'in' | 'contains' | 'gt' | 'lt'
-  value: any
+  value: unknown
 }
 
 export interface UserPermissionSet {
@@ -191,7 +191,7 @@ export interface DBRolePermission {
   role_id: string
   permission_id: string
   effect: string
-  conditions: any | null
+  conditions: PermissionCondition[] | null
   resource_id: string | null
   expires_at: string | null
   created_at: string
@@ -202,7 +202,7 @@ export interface DBUserPermission {
   user_id: string
   permission_id: string
   effect: string
-  conditions: any | null
+  conditions: PermissionCondition[] | null
   resource_id: string | null
   granted_by: string | null
   granted_at: string

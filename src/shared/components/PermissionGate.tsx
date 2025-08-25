@@ -44,8 +44,8 @@ export function PermissionGate({
     if (userRole === 'admin') return true
     
     // Check specific role requirements
-    if (requiredRole === 'admin') return userRole === 'admin'
-    if (requiredRole === 'moderator') return userRole === 'moderator' || userRole === 'admin'
+    if (requiredRole === 'admin') return false // Already checked above
+    if (requiredRole === 'moderator') return userRole === 'moderator'
     
     // Everyone is at least a user
     return true

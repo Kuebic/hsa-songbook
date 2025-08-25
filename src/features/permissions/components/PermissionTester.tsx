@@ -152,8 +152,7 @@ export function PermissionTester({
       // TODO: Replace with proper checkPermission when available
       const result: PermissionCheckResult = {
         allowed: hasPermission(testData.resource, testData.action, testData.resourceId),
-        reason: 'Permission check performed',
-        source: 'role' as const
+        reason: 'Permission check performed'
       }
       const endTime = performance.now()
 
@@ -212,7 +211,7 @@ export function PermissionTester({
       // Test all combinations of resource types and actions
       for (const resource of Object.keys(MOCK_RESOURCES) as ResourceType[]) {
         for (const action of PERMISSION_ACTIONS) {
-          const _originalFormData = { ...formData }
+          const originalFormData = { ...formData }
           
           setFormData(prev => ({ ...prev, resource, action, resourceId: '' }))
           
@@ -223,16 +222,16 @@ export function PermissionTester({
 
           // Small delay to prevent overwhelming the system
           await new Promise(resolve => setTimeout(resolve, 50))
+          
+          // Restore original form data for next iteration
+          setFormData(prev => ({ 
+            ...prev, 
+            resource: originalFormData.resource, 
+            action: originalFormData.action,
+            resourceId: originalFormData.resourceId
+          }))
         }
       }
-
-      // Restore original form data
-      setFormData(prev => ({ 
-        ...prev, 
-        resource: _originalFormData.resource, 
-        action: _originalFormData.action,
-        resourceId: _originalFormData.resourceId
-      }))
 
       setBatchResults(batchTests)
       
@@ -424,7 +423,7 @@ export function PermissionTester({
         <div className={styles.testActions}>
           <Button 
             onClick={handleSingleTest} 
-            variant="primary"
+            variant="default"
             disabled={isLoading}
           >
             {isLoading ? 'Testing...' : 'Test Permission'}
@@ -443,10 +442,7 @@ export function PermissionTester({
         <div className={styles.userInfo}>
           <h4>User Context: {selectedUser.name}</h4>
           <div className={styles.userStats}>
-            <span>Roles: {userPermissions.roles.length + userPermissions.customRoles.length}</span>
-            <span>Groups: {userPermissions.groups.length}</span>
-            <span>Direct Permissions: {userPermissions.directPermissions.length}</span>
-            <span>Effective Permissions: {userPermissions.effectivePermissions.length}</span>
+            <span>Mock user stats (not implemented)</span>
           </div>
         </div>
       )}

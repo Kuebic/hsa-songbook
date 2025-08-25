@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { permissionService } from '../services/permissionService'
-import { useNotification } from '@/shared/components/notifications'
+import { useNotification } from '../../../shared/components/notifications'
 import type {
   Permission,
   CustomRole,
@@ -50,7 +50,7 @@ const QUERY_KEYS = {
 
 export function usePermissionMatrix(): UsePermissionMatrixReturn {
   const queryClient = useQueryClient()
-  const { showNotification } = useNotification()
+  const { addNotification } = useNotification()
   
   // State for pending changes
   const [pendingChanges, setPendingChanges] = useState<PermissionChange[]>([])
@@ -156,7 +156,7 @@ export function usePermissionMatrix(): UsePermissionMatrixReturn {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.customRoles })
       queryClient.invalidateQueries({ queryKey: ['permissions'] })
       
-      showNotification({
+      addNotification({
         type: 'success',
         title: 'Changes Saved',
         message: `${changeCount} permission ${changeCount === 1 ? 'change' : 'changes'} saved successfully.`
@@ -164,7 +164,7 @@ export function usePermissionMatrix(): UsePermissionMatrixReturn {
     },
     onError: (error: Error) => {
       console.error('Failed to save permission changes:', error)
-      showNotification({
+      addNotification({
         type: 'error',
         title: 'Save Failed',
         message: error.message || 'Failed to save permission changes. Please try again.'
@@ -173,9 +173,9 @@ export function usePermissionMatrix(): UsePermissionMatrixReturn {
   })
 
   // Save all pending changes
-  const saveChanges = useCallback(async () => {
+  const saveChanges = useCallback(async (): Promise<void> => {
     if (pendingChanges.length === 0) {
-      showNotification({
+      addNotification({
         type: 'info',
         title: 'No Changes',
         message: 'There are no pending changes to save.'
@@ -183,7 +183,8 @@ export function usePermissionMatrix(): UsePermissionMatrixReturn {
       return
     }
     
-    return saveChangesMutation.mutateAsync()
+    await saveChangesMutation.mutateAsync()
+    return
   }, [pendingChanges, saveChangesMutation])
 
   // Discard all pending changes
@@ -191,12 +192,12 @@ export function usePermissionMatrix(): UsePermissionMatrixReturn {
     if (pendingChanges.length === 0) return
     
     setPendingChanges([])
-    showNotification({
+    addNotification({
       type: 'info',
       title: 'Changes Discarded',
       message: 'All pending changes have been discarded.'
     })
-  }, [pendingChanges, showNotification])
+  }, [pendingChanges, addNotification])
 
   // Reset matrix (clear pending changes and refetch data)
   const resetMatrix = useCallback(() => {
@@ -281,4 +282,5 @@ function getOriginalEffectFromMatrix(
   return rolePermissions.get(permissionId) || null
 }
 
+export type { UsePermissionMatrixReturn }
 export default usePermissionMatrix

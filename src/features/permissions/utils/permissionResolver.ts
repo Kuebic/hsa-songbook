@@ -1,5 +1,4 @@
 import type {
-  UserPermissionSet,
   ResolvedPermission,
   PermissionAssignment,
   PermissionCondition,
@@ -7,22 +6,16 @@ import type {
   ResourceType,
   PermissionAction,
   PermissionScope,
-  PermissionEffect,
   CustomRole,
   PermissionGroup
 } from '../types/permission.types'
 
 interface PermissionContext {
   userId: string
-  resource?: any
+  resource?: Record<string, unknown>
   timestamp?: string
 }
 
-interface PermissionSource {
-  type: 'direct' | 'role' | 'inherited' | 'group'
-  sourceId?: string
-  priority: number
-}
 
 /**
  * PermissionResolver handles the complex logic of merging permissions from different sources
@@ -253,7 +246,7 @@ export class PermissionResolver {
   /**
    * Evaluate a single condition
    */
-  private static evaluateCondition(condition: PermissionCondition, contextValue: any): boolean {
+  private static evaluateCondition(condition: PermissionCondition, contextValue: unknown): boolean {
     const { operator, value } = condition
 
     switch (operator) {
@@ -289,14 +282,14 @@ export class PermissionResolver {
   /**
    * Get context value for condition evaluation
    */
-  private static getContextValue(field: string, context: PermissionContext): any {
+  private static getContextValue(field: string, context: PermissionContext): unknown {
     // Handle nested field access (e.g., 'resource.status')
     const parts = field.split('.')
-    let value: any = context
+    let value: unknown = context
 
     for (const part of parts) {
       if (value && typeof value === 'object') {
-        value = value[part]
+        value = (value as Record<string, unknown>)[part]
       } else {
         return undefined
       }
@@ -346,11 +339,11 @@ export class PermissionResolver {
    */
   private static processGroupPermissions(
     groups: PermissionGroup[],
-    context: PermissionContext
+    _context: PermissionContext
   ): ResolvedPermission[] {
     const permissions: ResolvedPermission[] = []
 
-    for (const group of groups.filter(g => g.isActive)) {
+    for (const _group of groups.filter(g => g.isActive)) {
       // Group permissions come from roles assigned to the group
       // This would need to be expanded based on your group permission model
       // For now, we'll return empty array as the implementation depends on
@@ -364,8 +357,8 @@ export class PermissionResolver {
    * Process inherited permissions from parent roles
    */
   private static processInheritedPermissions(
-    roles: CustomRole[],
-    context: PermissionContext
+    _roles: CustomRole[],
+    _context: PermissionContext
   ): ResolvedPermission[] {
     const permissions: ResolvedPermission[] = []
 
@@ -393,7 +386,7 @@ export class PermissionResolver {
     assignment: PermissionAssignment,
     source: ResolvedPermission['source'],
     priority: number,
-    sourceId?: string
+    _sourceId?: string
   ): ResolvedPermission {
     // This is a simplified version - in a real implementation,
     // you'd need to resolve the permission details from the permissionId

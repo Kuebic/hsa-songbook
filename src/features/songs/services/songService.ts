@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase'
+import { nullToUndefined } from '@shared/utils/typeHelpers'
 import type { Song, Arrangement, SongFilter } from '../types/song.types'
 import type { Database } from '../../../lib/database.types'
 import type { MultilingualText, LanguageCode, LyricsSource } from '../../multilingual/types/multilingual.types'
@@ -128,7 +129,7 @@ function mapSupabaseArrangementToArrangement(supabaseArrangement: SupabaseArrang
     songIds: [supabaseArrangement.song_id], // Note: single song ID in array for compatibility
     key: supabaseArrangement.key || '',
     tempo: supabaseArrangement.tempo || undefined,
-    timeSignature: supabaseArrangement.time_signature,
+    timeSignature: nullToUndefined(supabaseArrangement.time_signature),
     difficulty: (supabaseArrangement.difficulty as 'beginner' | 'intermediate' | 'advanced') || 'beginner',
     tags: supabaseArrangement.tags || [],
     chordData: supabaseArrangement.chord_data,
@@ -138,8 +139,8 @@ function mapSupabaseArrangementToArrangement(supabaseArrangement: SupabaseArrang
       isPublic: true, // Default for now
       views: 0
     },
-    createdAt: supabaseArrangement.created_at,
-    updatedAt: supabaseArrangement.updated_at
+    createdAt: nullToUndefined(supabaseArrangement.created_at),
+    updatedAt: nullToUndefined(supabaseArrangement.updated_at)
   }
 }
 
@@ -199,7 +200,7 @@ export const songService = {
         query = query.or(`and(is_public.neq.false,moderation_status.neq.rejected),created_by.eq.${userId}`)
       } else if (!canModerate) {
         // Unauthenticated users: show only public approved content
-        query = query.and('is_public.neq.false', 'moderation_status.neq.rejected')
+        query = query.eq('is_public', true).neq('moderation_status', 'rejected')
       }
       // Moderators/admins see everything
       

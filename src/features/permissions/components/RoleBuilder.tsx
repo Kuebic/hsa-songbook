@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useCustomRoles } from '../hooks/useCustomRoles'
 import { usePermissions } from '../hooks/usePermissions'
-import { Button } from '@/shared/components/ui'
+import { Button } from '../../../shared/components/ui'
 import { createCustomRoleSchema } from '../validation/permissionSchemas'
 import { validateNoCircularInheritance } from '../validation/permissionSchemas'
 import type { 
@@ -39,19 +39,19 @@ export function RoleBuilder({ initialData, onComplete, onCancel }: RoleBuilderPr
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const { 
-    data: existingRoles = [], 
+    roles: existingRoles = [], 
     createRole, 
     isCreating 
   } = useCustomRoles()
   
   const { 
-    data: allPermissions = [], 
+    allPermissions = [], 
     isLoading: permissionsLoading 
   } = usePermissions()
 
   // Group permissions by resource type
   const groupedPermissions = useMemo(() => {
-    return allPermissions.reduce((groups, permission) => {
+    return allPermissions.reduce((groups: Record<string, Permission[]>, permission: Permission) => {
       const group = permission.resource
       if (!groups[group]) {
         groups[group] = []
@@ -66,10 +66,10 @@ export function RoleBuilder({ initialData, onComplete, onCancel }: RoleBuilderPr
     const inherited = new Set<string>()
     
     // Collect inherited permissions
-    formData.inheritsFrom.forEach(roleId => {
-      const parentRole = existingRoles.find(r => r.id === roleId)
+    formData.inheritsFrom.forEach((roleId: string) => {
+      const parentRole = existingRoles.find((r: CustomRole) => r.id === roleId)
       if (parentRole) {
-        parentRole.permissions.forEach(p => {
+        parentRole.permissions.forEach((p: PermissionAssignment) => {
           if (p.effect === 'allow') {
             inherited.add(p.permissionId)
           }
@@ -99,7 +99,7 @@ export function RoleBuilder({ initialData, onComplete, onCancel }: RoleBuilderPr
           newErrors.name = 'Role name must be less than 50 characters'
         } else if (!/^[a-zA-Z0-9_-]+$/.test(formData.name)) {
           newErrors.name = 'Role name can only contain letters, numbers, underscores, and hyphens'
-        } else if (existingRoles.some(role => role.name.toLowerCase() === formData.name.toLowerCase())) {
+        } else if (existingRoles.some((role: CustomRole) => role.name.toLowerCase() === formData.name.toLowerCase())) {
           newErrors.name = 'A role with this name already exists'
         }
 
@@ -118,7 +118,7 @@ export function RoleBuilder({ initialData, onComplete, onCancel }: RoleBuilderPr
         // Check for circular inheritance
         if (formData.inheritsFrom.length > 0) {
           const allRoleInheritance = new Map<string, string[]>()
-          existingRoles.forEach(role => {
+          existingRoles.forEach((role: CustomRole) => {
             allRoleInheritance.set(role.id, role.inheritsFrom || [])
           })
 
@@ -179,8 +179,8 @@ export function RoleBuilder({ initialData, onComplete, onCancel }: RoleBuilderPr
       // Validate the complete form data
       const validatedData = createCustomRoleSchema.parse(formData)
       
-      const roleId = await createRole(validatedData)
-      onComplete?.(roleId)
+      const role = await createRole(validatedData)
+      onComplete?.(role.id)
     } catch (error) {
       console.error('Failed to create role:', error)
       setErrors({ submit: 'Failed to create role. Please try again.' })
@@ -228,11 +228,11 @@ export function RoleBuilder({ initialData, onComplete, onCancel }: RoleBuilderPr
         <div className={styles.loading}>Loading permissions...</div>
       ) : (
         <div className={styles.permissionGroups}>
-          {Object.entries(groupedPermissions).map(([resource, permissions]) => (
+          {Object.entries(groupedPermissions).map(([resource, permissions]: [string, Permission[]]) => (
             <div key={resource} className={styles.permissionGroup}>
               <h4>{resource} ({permissions.length})</h4>
               <div className={styles.permissionList}>
-                {permissions.map(permission => {
+                {permissions.map((permission: Permission) => {
                   const directAssignment = formData.permissions.find(p => p.permissionId === permission.id)
                   const isInherited = effectivePermissions.inherited.has(permission.id)
                   const currentEffect = directAssignment?.effect || (isInherited ? 'allow' : null)
@@ -301,7 +301,7 @@ export function RoleBuilder({ initialData, onComplete, onCancel }: RoleBuilderPr
       </p>
 
       <div className={styles.inheritanceList}>
-        {existingRoles.filter(role => !role.isSystem && role.isActive).map(role => {
+        {existingRoles.filter((role: CustomRole) => !role.isSystem && role.isActive).map((role: CustomRole) => {
           const isSelected = formData.inheritsFrom.includes(role.id)
           
           return (
@@ -354,8 +354,8 @@ export function RoleBuilder({ initialData, onComplete, onCancel }: RoleBuilderPr
         {formData.inheritsFrom.length > 0 && (
           <div className={styles.previewSection}>
             <h4>Inherits From ({formData.inheritsFrom.length})</h4>
-            {formData.inheritsFrom.map(roleId => {
-              const parentRole = existingRoles.find(r => r.id === roleId)
+            {formData.inheritsFrom.map((roleId: string) => {
+              const parentRole = existingRoles.find((r: CustomRole) => r.id === roleId)
               return parentRole ? (
                 <div key={roleId} className={styles.previewItem}>
                   {parentRole.name}
@@ -368,8 +368,8 @@ export function RoleBuilder({ initialData, onComplete, onCancel }: RoleBuilderPr
         <div className={styles.previewSection}>
           <h4>Direct Permissions ({formData.permissions.length})</h4>
           {formData.permissions.length > 0 ? (
-            formData.permissions.map(assignment => {
-              const permission = allPermissions.find(p => p.id === assignment.permissionId)
+            formData.permissions.map((assignment: PermissionAssignment) => {
+              const permission = allPermissions.find((p: Permission) => p.id === assignment.permissionId)
               return permission ? (
                 <div key={assignment.permissionId} className={styles.previewItem}>
                   <span className={`${styles.effectBadge} ${styles[assignment.effect]}`}>
@@ -457,13 +457,13 @@ export function RoleBuilder({ initialData, onComplete, onCancel }: RoleBuilderPr
             </Button>
           )}
           {currentStepIndex < steps.length - 1 ? (
-            <Button onClick={handleNext} variant="primary">
+            <Button onClick={handleNext} variant="default">
               Next
             </Button>
           ) : (
             <Button 
               onClick={handleSubmit} 
-              variant="primary" 
+              variant="default" 
               disabled={isCreating}
             >
               {isCreating ? 'Creating Role...' : 'Create Role'}

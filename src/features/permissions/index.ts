@@ -14,7 +14,6 @@ export type {
   UserPermissionSet,
   ResolvedPermission,
   PermissionGroup,
-  PermissionMatrix,
   RoleAssignment,
   PermissionCheckResult,
   PermissionFilter,

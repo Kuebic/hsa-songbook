@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useAuth } from '@/features/auth'
+import { useAuth } from '../../auth'
 import { PermissionResolver, PermissionCache } from '../utils'
 import { permissionService } from '../services/permissionService'
 import type {
   UserPermissionSet,
+  Permission,
   PermissionAction,
   ResourceType
 } from '../types/permission.types'
@@ -14,6 +15,7 @@ const BACKGROUND_REFRESH_INTERVAL = 30 * 60 * 1000 // 30 minutes
 export interface UsePermissionsReturn {
   // State
   permissions: UserPermissionSet | null
+  allPermissions: Permission[]
   isLoading: boolean
   error: string | null
   
@@ -33,22 +35,15 @@ export function usePermissions(): UsePermissionsReturn {
   const { userId, userRole, isSignedIn, isLoaded } = useAuth()
   
   const [permissions, setPermissions] = useState<UserPermissionSet | null>(null)
+  const [allPermissions, setAllPermissions] = useState<Permission[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  const permissionResolver = useRef<PermissionResolver | null>(null)
-  const permissionCache = useRef<PermissionCache | null>(null)
+  // Note: PermissionResolver and PermissionCache are now static classes
+  // No need for refs since we use static methods
   const backgroundRefreshTimer = useRef<NodeJS.Timeout | null>(null)
 
-  // Initialize resolver and cache
-  useEffect(() => {
-    if (!permissionResolver.current) {
-      permissionResolver.current = new PermissionResolver()
-    }
-    if (!permissionCache.current) {
-      permissionCache.current = new PermissionCache()
-    }
-  }, [])
+  // No initialization needed for static classes
 
   // Load permissions
   const loadPermissions = useCallback(async (useCache = true) => {
@@ -63,10 +58,20 @@ export function usePermissions(): UsePermissionsReturn {
       setError(null)
 
       // Try to get from cache first if requested
-      if (useCache && permissionCache.current) {
-        const cachedPermissions = permissionCache.current.getUserPermissions(userId)
+      if (useCache) {
+        const cachedPermissions = await PermissionCache.get(userId)
         if (cachedPermissions) {
-          setPermissions(cachedPermissions)
+          // Convert cached resolved permissions back to UserPermissionSet format
+          const userPermissionSet = {
+            userId,
+            roles: [],
+            customRoles: [],
+            groups: [],
+            directPermissions: [],
+            effectivePermissions: cachedPermissions,
+            evaluatedAt: new Date().toISOString()
+          }
+          setPermissions(userPermissionSet)
           setIsLoading(false)
           return
         }
@@ -75,23 +80,24 @@ export function usePermissions(): UsePermissionsReturn {
       // Fetch from service
       const userPermissions = await permissionService.getUserPermissions(userId)
       
-      // Get all available permissions for resolution
-      const allPermissions = await permissionService.getAllPermissions()
+      // Get all available permissions for resolution and component use
+      const availablePermissions = await permissionService.getAllPermissions()
+      setAllPermissions(availablePermissions)
       
-      // Resolve effective permissions
-      if (permissionResolver.current) {
-        const resolvedPermissions = await permissionResolver.current.resolvePermissions(
-          userPermissions,
-          allPermissions
-        )
-        
-        userPermissions.effectivePermissions = resolvedPermissions
-      }
+      // Resolve effective permissions using static method
+      // Note: CustomRoles and Groups are currently string[], but resolver expects CustomRole[] and PermissionGroup[]
+      // For now, pass empty arrays since database tables don't exist yet
+      const resolvedPermissions = PermissionResolver.resolvePermissions(
+        userId,
+        userPermissions.directPermissions,
+        [], // TODO: Fetch actual CustomRole objects when database tables exist
+        []  // TODO: Fetch actual PermissionGroup objects when database tables exist
+      )
       
-      // Cache the result
-      if (permissionCache.current) {
-        permissionCache.current.setUserPermissions(userId, userPermissions)
-      }
+      userPermissions.effectivePermissions = resolvedPermissions
+      
+      // Cache the resolved permissions
+      await PermissionCache.set(userId, userPermissions.effectivePermissions)
       
       setPermissions(userPermissions)
     } catch (err) {
@@ -153,9 +159,9 @@ export function usePermissions(): UsePermissionsReturn {
   }, [loadPermissions])
 
   // Clear cache
-  const clearCache = useCallback(() => {
-    if (permissionCache.current && userId) {
-      permissionCache.current.clearUserCache(userId)
+  const clearCache = useCallback(async () => {
+    if (userId) {
+      await PermissionCache.clear(userId)
     }
   }, [userId])
 
@@ -165,16 +171,17 @@ export function usePermissions(): UsePermissionsReturn {
     action: PermissionAction, 
     resourceId?: string
   ): boolean => {
-    if (!permissions || !permissionResolver.current) {
+    if (!permissions) {
       // Fall back to basic role-based checks
       return hasBasicPermission(userRole, resource, action)
     }
 
     try {
-      const result = permissionResolver.current.checkPermission(
+      const result = PermissionResolver.checkPermission(
         permissions.effectivePermissions,
         resource,
         action,
+        { userId: userId || '' },
         resourceId
       )
       return result.allowed
@@ -206,6 +213,7 @@ export function usePermissions(): UsePermissionsReturn {
 
   return {
     permissions,
+    allPermissions,
     isLoading,
     error,
     hasPermission,

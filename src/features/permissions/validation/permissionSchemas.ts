@@ -1,10 +1,4 @@
 import { z } from 'zod'
-import type { 
-  PermissionAction, 
-  ResourceType, 
-  PermissionEffect, 
-  PermissionScope 
-} from '../types/permission.types'
 
 // Enums for validation
 const permissionActionSchema = z.enum([
@@ -156,7 +150,7 @@ export const permissionCheckSchema = z.object({
   resource: resourceTypeSchema,
   action: permissionActionSchema,
   resourceId: z.string().uuid().optional(),
-  context: z.record(z.any()).optional()
+  context: z.record(z.string(), z.any()).optional()
 })
 
 // Role inheritance validation

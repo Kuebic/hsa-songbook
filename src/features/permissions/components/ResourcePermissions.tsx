@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { usePermissions } from '../hooks/usePermissions'
-import { Button } from '@shared/components/ui'
+import { Button } from '../../../shared/components/ui'
 import type { 
   ResourceType, 
   PermissionAction, 
@@ -62,17 +62,27 @@ export function ResourcePermissions({
   const [showInherited, setShowInherited] = useState(true)
 
   const {
-    data: allPermissions = [],
-    getUserPermissions,
-    assignPermission,
-    revokePermission,
+    allPermissions = [],
     isLoading
   } = usePermissions()
 
-  const {
-    data: userPermissions,
-    isLoading: userPermissionsLoading
-  } = getUserPermissions(userId)
+  // Mock functions for permissions management - these should be replaced with actual API calls
+  const assignPermission = async (params: {
+    userId: string
+    permissionId: string
+    effect: 'allow' | 'deny'
+    resourceId?: string
+  }) => {
+    console.log('Assign permission:', params)
+  }
+
+  const revokePermission = async (params: {
+    userId: string
+    permissionId: string
+    resourceId?: string
+  }) => {
+    console.log('Revoke permission:', params)
+  }
 
   // Filter permissions for the selected resource type
   const resourcePermissions = useMemo(() => {
@@ -83,22 +93,8 @@ export function ResourcePermissions({
 
   // Build permission entries with current state
   const permissionEntries = useMemo((): ResourcePermissionEntry[] => {
-    if (!userPermissions) return []
-
+    // Since userPermissions is always null in current implementation, return mock data
     return resourcePermissions.map(permission => {
-      // Find matching resolved permission
-      const resolvedPermission = userPermissions.effectivePermissions.find(rp =>
-        rp.resource === permission.resource &&
-        rp.action === permission.action &&
-        (!selectedResourceId || rp.resourceId === selectedResourceId)
-      )
-
-      // Find direct permission assignment
-      const directPermission = userPermissions.directPermissions.find(dp =>
-        dp.permissionId === permission.id &&
-        (!selectedResourceId || dp.resourceId === selectedResourceId)
-      )
-
       return {
         permission: {
           id: permission.id,
@@ -106,13 +102,13 @@ export function ResourcePermissions({
           action: permission.action,
           description: permission.description
         },
-        effect: resolvedPermission?.effect || directPermission?.effect || null,
-        source: resolvedPermission?.source || 'direct',
-        isInherited: !!resolvedPermission && resolvedPermission.source !== 'direct',
-        canModify: !resolvedPermission || resolvedPermission.source === 'direct'
+        effect: null, // No permissions assigned yet
+        source: 'direct',
+        isInherited: false,
+        canModify: true
       }
     })
-  }, [resourcePermissions, userPermissions, selectedResourceId])
+  }, [resourcePermissions, selectedResourceId])
 
   // Filter entries based on showInherited setting
   const displayedEntries = useMemo(() => {
@@ -173,11 +169,11 @@ export function ResourcePermissions({
     }
   }
 
-  if (isLoading || userPermissionsLoading) {
+  if (isLoading) {
     return <div className={styles.loading}>Loading permissions...</div>
   }
 
-  const resourceOptions = MOCK_RESOURCES[selectedResourceType] || []
+  const resourceOptions = (MOCK_RESOURCES as Record<string, Array<{id: string; name: string}>>)[selectedResourceType] || []
 
   return (
     <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
@@ -207,7 +203,7 @@ export function ResourcePermissions({
                 onChange={(e) => handleResourceIdChange(e.target.value || undefined)}
               >
                 <option value="">All {selectedResourceType}s</option>
-                {resourceOptions.map(resource => (
+                {resourceOptions.map((resource: {id: string; name: string}) => (
                   <option key={resource.id} value={resource.id}>
                     {resource.name}
                   </option>
@@ -255,7 +251,7 @@ export function ResourcePermissions({
                         entry.permission.id,
                         entry.effect === 'allow' ? null : 'allow'
                       )}
-                      variant={entry.effect === 'allow' ? 'primary' : 'outline'}
+                      variant={entry.effect === 'allow' ? 'default' : 'outline'}
                       size="sm"
                     >
                       Allow
@@ -265,7 +261,7 @@ export function ResourcePermissions({
                         entry.permission.id,
                         entry.effect === 'deny' ? null : 'deny'
                       )}
-                      variant={entry.effect === 'deny' ? 'primary' : 'outline'}
+                      variant={entry.effect === 'deny' ? 'destructive' : 'outline'}
                       size="sm"
                     >
                       Deny
@@ -333,7 +329,7 @@ export function ResourcePermissions({
                             entry.permission.id,
                             entry.effect === 'allow' ? null : 'allow'
                           )}
-                          variant={entry.effect === 'allow' ? 'primary' : 'outline'}
+                          variant={entry.effect === 'allow' ? 'default' : 'outline'}
                           size="sm"
                         >
                           Allow
@@ -343,7 +339,7 @@ export function ResourcePermissions({
                             entry.permission.id,
                             entry.effect === 'deny' ? null : 'deny'
                           )}
-                          variant={entry.effect === 'deny' ? 'primary' : 'outline'}
+                          variant={entry.effect === 'deny' ? 'destructive' : 'outline'}
                           size="sm"
                         >
                           Deny

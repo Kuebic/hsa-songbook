@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { permissionService } from '../services/permissionService'
-import { useNotification } from '@/shared/components/notifications'
+import { useNotification } from '../../../shared/components/notifications'
 import type {
   CustomRole,
   CreateCustomRoleInput,
@@ -39,13 +39,13 @@ export interface UseCustomRolesReturn {
   permissionError: Error | null
   
   // Actions
-  refetch: () => Promise<any>
+  refetch: () => Promise<unknown>
   invalidateRoles: () => void
 }
 
 export function useCustomRoles(): UseCustomRolesReturn {
   const queryClient = useQueryClient()
-  const { showNotification } = useNotification()
+  const { addNotification } = useNotification()
 
   // Query for all custom roles
   const {
@@ -78,7 +78,7 @@ export function useCustomRoles(): UseCustomRolesReturn {
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ['permissions'] })
       
-      showNotification({
+      addNotification({
         type: 'success',
         title: 'Role Created',
         message: `Custom role "${newRole.name}" has been created successfully.`
@@ -86,7 +86,7 @@ export function useCustomRoles(): UseCustomRolesReturn {
     },
     onError: (error: Error) => {
       console.error('Failed to create custom role:', error)
-      showNotification({
+      addNotification({
         type: 'error',
         title: 'Creation Failed',
         message: error.message || 'Failed to create custom role. Please try again.'
@@ -132,7 +132,7 @@ export function useCustomRoles(): UseCustomRolesReturn {
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ['permissions'] })
       
-      showNotification({
+      addNotification({
         type: 'success',
         title: 'Role Updated',
         message: `Custom role "${updatedRole.name}" has been updated successfully.`
@@ -145,7 +145,7 @@ export function useCustomRoles(): UseCustomRolesReturn {
       }
       
       console.error('Failed to update custom role:', error)
-      showNotification({
+      addNotification({
         type: 'error',
         title: 'Update Failed',
         message: error.message || 'Failed to update custom role. Please try again.'
@@ -180,7 +180,7 @@ export function useCustomRoles(): UseCustomRolesReturn {
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ['permissions'] })
       
-      showNotification({
+      addNotification({
         type: 'success',
         title: 'Role Deleted',
         message: 'Custom role has been deleted successfully.'
@@ -193,7 +193,7 @@ export function useCustomRoles(): UseCustomRolesReturn {
       }
       
       console.error('Failed to delete custom role:', error)
-      showNotification({
+      addNotification({
         type: 'error',
         title: 'Deletion Failed',
         message: error.message || 'Failed to delete custom role. Please try again.'
@@ -250,7 +250,7 @@ export function useCustomRoles(): UseCustomRolesReturn {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.customRoles })
       queryClient.invalidateQueries({ queryKey: ['permissions'] })
       
-      showNotification({
+      addNotification({
         type: 'success',
         title: 'Permission Updated',
         message: 'Role permission has been updated successfully.'
@@ -263,7 +263,7 @@ export function useCustomRoles(): UseCustomRolesReturn {
       }
       
       console.error('Failed to update role permission:', error)
-      showNotification({
+      addNotification({
         type: 'error',
         title: 'Update Failed',
         message: error.message || 'Failed to update role permission. Please try again.'
@@ -284,7 +284,7 @@ export function useCustomRoles(): UseCustomRolesReturn {
     
     // Mutations
     createRole: createRoleMutation.mutateAsync,
-    updateRole: ({ roleId, input }: { roleId: string; input: UpdateCustomRoleInput }) => 
+    updateRole: (roleId: string, input: UpdateCustomRoleInput) => 
       updateRoleMutation.mutateAsync({ roleId, input }),
     deleteRole: deleteRoleMutation.mutateAsync,
     updateRolePermission: (roleId: string, permissionId: string, effect: PermissionEffect | null) =>

@@ -195,7 +195,7 @@ export function PermissionMatrix({
             <Button 
               onClick={saveChanges} 
               disabled={isSaving}
-              variant="primary"
+              variant="default"
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
             </Button>

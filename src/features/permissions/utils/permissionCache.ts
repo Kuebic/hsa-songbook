@@ -1,5 +1,5 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
-import type { UserPermissionSet, ResolvedPermission } from '../types/permission.types'
+import type { ResolvedPermission } from '../types/permission.types'
 
 interface PermissionCacheEntry {
   userId: string
@@ -86,8 +86,7 @@ export class PermissionCache {
    * Get cached permissions for a user
    */
   public static async get(
-    userId: string,
-    ttlMs: number = this.DEFAULT_TTL_MS
+    userId: string
   ): Promise<ResolvedPermission[] | null> {
     try {
       const db = await this.getDB()
