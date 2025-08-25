@@ -217,6 +217,8 @@ export default defineConfig(() => ({
       '@features': path.resolve(__dirname, './src/features'),
       '@shared': path.resolve(__dirname, './src/shared'),
       '@assets': path.resolve(__dirname, './src/assets'),
+      '@lib/database': path.resolve(__dirname, './src/lib/database'),
+      '@lib': path.resolve(__dirname, './src/lib'),
     },
   },
   build: {

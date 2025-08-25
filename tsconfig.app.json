@@ -30,7 +30,9 @@
       "@app/*": ["src/app/*"],
       "@features/*": ["src/features/*"],
       "@shared/*": ["src/shared/*"],
-      "@assets/*": ["src/assets/*"]
+      "@assets/*": ["src/assets/*"],
+      "@lib/database": ["src/lib/database/index.ts"],
+      "@lib/database/*": ["src/lib/database/*"]
     }
   },
   "include": ["src"]
