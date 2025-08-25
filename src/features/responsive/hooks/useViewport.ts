@@ -3,7 +3,7 @@
  * Extends the existing useResponsiveLayout hook with dvh/svh/lvh support
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { debounce } from '../utils/debounce'
 import { getDeviceType, hasSafeArea } from '../utils/breakpoints'
 import type { ViewportData } from '../types'
@@ -11,73 +11,76 @@ import type { ViewportData } from '../types'
 /**
  * Enhanced viewport hook that provides viewport data with modern units support
  */
-export function useViewport(): ViewportData {
-  const [viewport, setViewport] = useState<ViewportData>(calculateViewport)
-
-  function calculateViewport(): ViewportData {
-    // SSR safety
-    if (typeof window === 'undefined') {
-      return {
-        width: 1024,
-        height: 768,
-        dvh: 768,
-        svh: 768,
-        lvh: 768,
-        isMobile: false,
-        isTablet: true,
-        isDesktop: false,
-        orientation: 'landscape',
-        hasNotch: false
-      }
-    }
-
-    const width = window.innerWidth
-    const height = window.innerHeight
-    
-    // Set CSS custom properties for viewport units fallback
-    // This helps with browsers that don't support dvh/svh/lvh
-    const vh = height * 0.01
-    document.documentElement.style.setProperty('--vh', `${vh}px`)
-    document.documentElement.style.setProperty('--vw', `${width * 0.01}px`)
-
-    // Calculate viewport units
-    // In modern browsers, these should match the CSS values
-    const dvh = height // Dynamic viewport height (changes with browser UI)
-    const svh = height // Small viewport height (browser UI visible)
-    const lvh = height // Large viewport height (browser UI hidden)
-
-    // For more accurate values, we could use the Visual Viewport API
-    let actualDvh = dvh
-    const actualSvh = svh
-    const actualLvh = lvh
-
-    if (window.visualViewport) {
-      actualDvh = window.visualViewport.height
-      // SVH and LVH would need additional detection logic
-      // For now, we'll use the standard values
-    }
-
-    const deviceType = getDeviceType(width)
-
+function calculateViewportData(): ViewportData {
+  // SSR safety
+  if (typeof window === 'undefined') {
     return {
-      width,
-      height,
-      dvh: actualDvh,
-      svh: actualSvh,
-      lvh: actualLvh,
-      isMobile: deviceType === 'mobile',
-      isTablet: deviceType === 'tablet',
-      isDesktop: deviceType === 'desktop',
-      orientation: width > height ? 'landscape' : 'portrait',
-      hasNotch: hasSafeArea()
+      width: 1024,
+      height: 768,
+      dvh: 768,
+      svh: 768,
+      lvh: 768,
+      isMobile: false,
+      isTablet: true,
+      isDesktop: false,
+      orientation: 'landscape',
+      hasNotch: false
     }
   }
 
+  const width = window.innerWidth
+  const height = window.innerHeight
+  
+  // Set CSS custom properties for viewport units fallback
+  // This helps with browsers that don't support dvh/svh/lvh
+  const vh = height * 0.01
+  document.documentElement.style.setProperty('--vh', `${vh}px`)
+  document.documentElement.style.setProperty('--vw', `${width * 0.01}px`)
+
+  // Calculate viewport units
+  // In modern browsers, these should match the CSS values
+  const dvh = height // Dynamic viewport height (changes with browser UI)
+  const svh = height // Small viewport height (browser UI visible)
+  const lvh = height // Large viewport height (browser UI hidden)
+
+  // For more accurate values, we could use the Visual Viewport API
+  let actualDvh = dvh
+  const actualSvh = svh
+  const actualLvh = lvh
+
+  if (window.visualViewport) {
+    actualDvh = window.visualViewport.height
+    // SVH and LVH would need additional detection logic
+    // For now, we'll use the standard values
+  }
+
+  const deviceType = getDeviceType(width)
+
+  return {
+    width,
+    height,
+    dvh: actualDvh,
+    svh: actualSvh,
+    lvh: actualLvh,
+    isMobile: deviceType === 'mobile',
+    isTablet: deviceType === 'tablet',
+    isDesktop: deviceType === 'desktop',
+    orientation: width > height ? 'landscape' : 'portrait',
+    hasNotch: hasSafeArea()
+  }
+}
+
+export function useViewport(): ViewportData {
+  const [viewport, setViewport] = useState<ViewportData>(calculateViewportData)
+
   const handleResize = useCallback(() => {
-    setViewport(calculateViewport())
+    setViewport(calculateViewportData())
   }, [])
 
-  const debouncedHandleResize = debounce(handleResize, 100)
+  const debouncedHandleResize = useMemo(
+    () => debounce(handleResize, 100),
+    [handleResize]
+  )
 
   useEffect(() => {
     // Standard resize events
@@ -89,9 +92,6 @@ export function useViewport(): ViewportData {
       window.visualViewport.addEventListener('resize', debouncedHandleResize)
       window.visualViewport.addEventListener('scroll', debouncedHandleResize)
     }
-
-    // Initial calculation
-    setViewport(calculateViewport())
 
     return () => {
       window.removeEventListener('resize', debouncedHandleResize)

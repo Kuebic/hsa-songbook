@@ -10,12 +10,15 @@ if (!supabaseUrl || !supabasePublishableKey) {
   )
 }
 
+// Note: Supabase will check auth state multiple times on initial load.
+// This is normal behavior as each component verifies auth independently.
+// Set debug: true below to see detailed auth flow logging.
 export const supabase = createClient<Database>(supabaseUrl, supabasePublishableKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    debug: import.meta.env.DEV // Enable debug logging in development
+    debug: false // Set to true for verbose auth logging (many lock acquire/release messages)
   },
   global: {
     fetch: (url, options) => {

@@ -3,24 +3,28 @@
  * Useful for auto-hiding toolbars and other scroll-responsive components
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { rafThrottle } from '../utils/debounce'
 import type { ScrollDirectionData } from '../types'
 
 export function useScrollDirection(threshold = 10): ScrollDirectionData {
-  const [scrollData, setScrollData] = useState<ScrollDirectionData>({
-    scrollDirection: null,
-    isScrolling: false,
-    scrollY: 0,
-    previousScrollY: 0
+  const [scrollData, setScrollData] = useState<ScrollDirectionData>(() => {
+    const initialScrollY = typeof window !== 'undefined' ? window.scrollY : 0
+    return {
+      scrollDirection: null,
+      isScrolling: false,
+      scrollY: initialScrollY,
+      previousScrollY: initialScrollY
+    }
   })
 
   const ticking = useRef(false)
   const scrollTimer = useRef<NodeJS.Timeout | null>(null)
+  const previousScrollYRef = useRef(scrollData.scrollY)
 
   const updateScrollDirection = useCallback(() => {
     const scrollY = window.scrollY
-    const previousScrollY = scrollData.previousScrollY
+    const previousScrollY = previousScrollYRef.current
 
     if (Math.abs(scrollY - previousScrollY) < threshold) {
       ticking.current = false
@@ -29,12 +33,14 @@ export function useScrollDirection(threshold = 10): ScrollDirectionData {
 
     const direction = scrollY > previousScrollY ? 'down' : 'up'
     
-    setScrollData(prev => ({
+    previousScrollYRef.current = scrollY
+    
+    setScrollData({
       scrollDirection: direction,
       isScrolling: true,
       scrollY,
-      previousScrollY: prev.scrollY
-    }))
+      previousScrollY: scrollY
+    })
 
     ticking.current = false
 
@@ -50,9 +56,12 @@ export function useScrollDirection(threshold = 10): ScrollDirectionData {
         isScrolling: false
       }))
     }, 150)
-  }, [threshold, scrollData.previousScrollY])
+  }, [threshold])
 
-  const throttledUpdateScrollDirection = rafThrottle(updateScrollDirection)
+  const throttledUpdateScrollDirection = useMemo(
+    () => rafThrottle(updateScrollDirection),
+    [updateScrollDirection]
+  )
 
   const onScroll = useCallback(() => {
     if (!ticking.current) {
@@ -62,13 +71,6 @@ export function useScrollDirection(threshold = 10): ScrollDirectionData {
   }, [throttledUpdateScrollDirection])
 
   useEffect(() => {
-    // Set initial scroll position
-    setScrollData(prev => ({
-      ...prev,
-      scrollY: window.scrollY,
-      previousScrollY: window.scrollY
-    }))
-
     window.addEventListener('scroll', onScroll, { passive: true })
     
     return () => {
@@ -129,7 +131,10 @@ export function useScrollAnimation() {
     setIsAtBottom(progress > 0.95)
   }, [])
 
-  const throttledUpdateScrollProgress = rafThrottle(updateScrollProgress)
+  const throttledUpdateScrollProgress = useMemo(
+    () => rafThrottle(updateScrollProgress),
+    [updateScrollProgress]
+  )
 
   useEffect(() => {
     updateScrollProgress()
@@ -190,7 +195,10 @@ export function useScrollToElement() {
     setVisibleElements(newVisibleElements)
   }, [])
 
-  const throttledCheckVisibility = rafThrottle(checkVisibility)
+  const throttledCheckVisibility = useMemo(
+    () => rafThrottle(checkVisibility),
+    [checkVisibility]
+  )
 
   useEffect(() => {
     checkVisibility()
