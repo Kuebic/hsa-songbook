@@ -87,6 +87,67 @@ npm run dev
 
 The app will be available at `http://localhost:5173`
 
+## 🚀 Local Development
+
+### Quick Setup
+
+Get started with local Supabase development in minutes:
+
+```bash
+# One-time setup (installs Supabase CLI and starts services)
+./scripts/setup-local.sh
+
+# Daily development
+npm run dev:local
+```
+
+This starts both the Vite dev server and local Supabase services. See [QUICKSTART.md](docs/QUICKSTART.md) for detailed setup instructions.
+
+### Environment Configuration
+
+The project uses different environment files for different stages:
+
+| File | Purpose | Git Tracked |
+|------|---------|-------------|
+| `.env.example` | Template with all variables | ✅ Yes |
+| `.env.local` | Local development | ❌ No |
+| `.env.staging` | Staging environment | ❌ No |
+| `.env.production` | Production environment | ❌ No |
+
+### Quick Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev:local` | Start app with local Supabase |
+| `npm run supabase:status` | Check Supabase service status |
+| `npm run supabase:stop` | Stop Supabase services |
+| `npm run db:reset` | Reset database with seed data |
+| `npm run db:migrate` | Apply pending migrations |
+| `npm run types:generate` | Update TypeScript types from schema |
+
+### Local Supabase Services
+
+When running locally, you have access to:
+
+- **PostgreSQL Database**: Port 54322
+- **Supabase Studio** (Database GUI): http://localhost:54323
+- **Supabase API**: Port 54321
+- **Email Testing** (Inbucket): http://localhost:54324
+- **S3-compatible Storage**: Port 54320
+
+All data is stored in Docker volumes and persists between sessions.
+
+### Database Management
+
+We use Supabase for our backend with version-controlled migrations:
+
+- **Migrations**: Stored in `supabase/migrations/`
+- **Seed Data**: Automatically loaded on reset
+- **Type Safety**: Auto-generated TypeScript types
+- **Studio Access**: Visual database management at http://localhost:54323
+
+See [Database Workflows](docs/WORKFLOWS.md#database) for detailed procedures.
+
 ### Available Scripts
 
 ```bash

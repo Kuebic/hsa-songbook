@@ -1,0 +1,65 @@
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#f3f4f6', 'primaryTextColor':'#1f2937', 'primaryBorderColor':'#9ca3af', 'lineColor':'#6b7280', 'secondaryColor':'#e5e7eb', 'tertiaryColor':'#ddd6fe'}}}%%
+graph TB
+    subgraph Browser["Browser Environment"]
+        App[React App<br/>localhost:5173]
+        PWA[PWA Service Worker<br/>Offline Support]
+        IDB[IndexedDB<br/>Local Storage]
+    end
+    
+    subgraph Vite["Vite Dev Server"]
+        ViteServer[Vite HMR Server<br/>localhost:5173]
+        ViteProxy[API Proxy<br/>Configuration]
+    end
+    
+    subgraph Supabase["Local Supabase Stack"]
+        Kong[Kong API Gateway<br/>localhost:54321]
+        
+        subgraph Services["Core Services"]
+            Auth[Auth Service<br/>JWT & Sessions]
+            Realtime[Realtime<br/>WebSockets]
+            Storage[Storage API<br/>localhost:54320]
+        end
+        
+        subgraph Database["Database Layer"]
+            PG[PostgreSQL<br/>localhost:54322]
+            Migrations[Migrations<br/>Version Control]
+            RLS[Row Level Security<br/>Policies]
+        end
+        
+        subgraph Tools["Development Tools"]
+            Studio[Supabase Studio<br/>localhost:54323]
+            Inbucket[Email Testing<br/>localhost:54324]
+            Logs[Service Logs<br/>Docker Containers]
+        end
+    end
+    
+    subgraph Docker["Docker Environment"]
+        Volumes[Docker Volumes<br/>Persistent Data]
+        Network[Docker Network<br/>Service Communication]
+    end
+    
+    App --> ViteServer
+    App -.->|Offline| IDB
+    ViteServer --> ViteProxy
+    ViteProxy --> Kong
+    
+    Kong --> Auth
+    Kong --> Realtime
+    Kong --> Storage
+    Auth --> PG
+    Realtime --> PG
+    Storage --> PG
+    
+    PG --> Migrations
+    PG --> RLS
+    
+    Studio --> PG
+    Inbucket --> Auth
+    
+    PG --> Volumes
+    Services --> Network
+    
+    style App fill:#10b981,stroke:#059669,color:#fff
+    style Kong fill:#3b82f6,stroke:#2563eb,color:#fff
+    style PG fill:#f59e0b,stroke:#d97706,color:#fff
+    style Studio fill:#8b5cf6,stroke:#7c3aed,color:#fff

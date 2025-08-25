@@ -136,6 +136,8 @@ hsa-songbook/
 
 ### Environment Setup
 
+#### Option A: Full Local Development (Recommended)
+
 1. **Clone the repository**
    ```bash
    git clone https://github.com/Kuebic/hsa-songbook.git
@@ -147,7 +149,25 @@ hsa-songbook/
    npm install
    ```
 
-3. **Configure environment variables**
+3. **Setup local Supabase**
+   ```bash
+   # One-time setup (installs Supabase CLI and starts services)
+   ./scripts/setup-local.sh
+   ```
+
+4. **Start development with local Supabase**
+   ```bash
+   npm run dev:local
+   ```
+   
+   Your environment is ready at:
+   - App: `http://localhost:5173`
+   - Supabase Studio: `http://localhost:54323`
+   - Email Testing: `http://localhost:54324`
+
+#### Option B: Remote Supabase Development
+
+1. **Configure environment variables**
    ```bash
    cp .env.example .env
    ```
@@ -158,14 +178,12 @@ hsa-songbook/
    VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key-here
    ```
 
-   > **Note**: You can run the app without Supabase for UI development, but API features won't work.
-
-4. **Start the development server**
+2. **Start the development server**
    ```bash
    npm run dev
    ```
    
-   The app will be available at `http://localhost:5173`
+   > **Note**: You can run the app without Supabase for UI development, but API features won't work.
 
 ### Available Scripts
 
@@ -447,7 +465,226 @@ npm run build && npm run preview
 6. **Add tests**
 7. **Update routing** if needed
 
-## 8. Potential Gotchas
+## 8. Supabase Local Development
+
+### Architecture Overview
+
+The local Supabase stack provides a complete backend environment:
+
+```
+┌─────────────────────────────────────────┐
+│           Your Application              │
+│         (localhost:5173)                │
+└────────────┬────────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────────┐
+│        Supabase API Gateway             │
+│         (localhost:54321)                │
+├─────────────────────────────────────────┤
+│  - Authentication                       │
+│  - Row Level Security                   │
+│  - Realtime subscriptions               │
+│  - REST API                             │
+└────────────┬────────────────────────────┘
+             │
+    ┌────────┴────────┬──────────┬─────────┐
+    ▼                 ▼          ▼         ▼
+┌─────────┐    ┌──────────┐  ┌──────┐  ┌────────┐
+│PostgreSQL│    │  Storage │  │Email │  │  Auth  │
+│  :54322  │    │  :54320  │  │:54324│  │Service │
+└─────────┘    └──────────┘  └──────┘  └────────┘
+```
+
+### Database Workflow
+
+#### Creating a New Feature with Database Changes
+
+1. **Plan your schema changes**
+   ```sql
+   -- Example: Adding a favorites feature
+   CREATE TABLE user_favorites (
+     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+     user_id UUID REFERENCES auth.users(id),
+     song_id UUID REFERENCES songs(id),
+     created_at TIMESTAMPTZ DEFAULT NOW(),
+     UNIQUE(user_id, song_id)
+   );
+   ```
+
+2. **Create a migration**
+   ```bash
+   supabase migration new add_favorites
+   # Edit supabase/migrations/[timestamp]_add_favorites.sql
+   ```
+
+3. **Test locally**
+   ```bash
+   npm run db:reset  # Applies all migrations including new one
+   ```
+
+4. **Generate TypeScript types**
+   ```bash
+   npm run types:generate
+   ```
+
+5. **Implement the feature**
+   - Create service functions in `src/features/favorites/`
+   - Add React Query hooks
+   - Build UI components
+
+### Migration Management
+
+#### Migration Best Practices
+
+1. **Never edit committed migrations**
+   - Once pushed, migrations are immutable
+   - Create new migrations to fix issues
+
+2. **Test migrations thoroughly**
+   ```bash
+   # Test on fresh database
+   npm run db:reset
+   
+   # Verify data integrity
+   npm run supabase:status
+   ```
+
+3. **Write rollback migrations**
+   ```bash
+   # Generate rollback for a migration
+   npm run migrate:down 20250121000000_feature.sql
+   ```
+
+4. **Use transactions for data safety**
+   ```sql
+   BEGIN;
+     -- Your migration changes
+     ALTER TABLE songs ADD COLUMN rating INTEGER;
+     -- Verify before committing
+   COMMIT;
+   ```
+
+#### Common Migration Tasks
+
+```bash
+# Apply all migrations
+npm run db:migrate
+
+# Reset to fresh state with seeds
+npm run db:reset
+
+# Generate migration from schema diff
+npm run db:diff
+
+# Push migrations to production
+npm run db:push
+```
+
+### Testing with Local Data
+
+#### Seed Data Management
+
+1. **Development seeds** (`supabase/seed.sql`)
+   - Comprehensive test data
+   - Edge cases for testing
+   - Performance testing data
+
+2. **Custom seed files**
+   ```bash
+   # Import specific seed file
+   npm run seed:custom -- supabase/seeds/large-dataset.sql
+   
+   # Import edge cases
+   npm run seed:edge-cases
+   
+   # Import performance test data
+   npm run seed:performance
+   ```
+
+3. **Generate dynamic seed data**
+   ```bash
+   npm run seed:generate  # Creates randomized test data
+   npm run seed:import    # Import songs from JSON
+   ```
+
+#### Testing Strategies
+
+1. **Unit Testing Database Functions**
+   ```typescript
+   // src/features/songs/__tests__/songService.test.ts
+   describe('songService', () => {
+     beforeEach(async () => {
+       await supabase.from('songs').delete().neq('id', '');
+       await seedTestSongs();
+     });
+     
+     test('creates song with arrangements', async () => {
+       const song = await createSong(testSongData);
+       expect(song.arrangements).toHaveLength(1);
+     });
+   });
+   ```
+
+2. **Integration Testing with Local Supabase**
+   ```typescript
+   // Use local Supabase for integration tests
+   const testClient = createClient(
+     'http://localhost:54321',
+     'your-local-anon-key'
+   );
+   ```
+
+3. **E2E Testing with Seeded Data**
+   ```typescript
+   // Reset to known state before E2E tests
+   beforeAll(async () => {
+     execSync('npm run db:reset');
+   });
+   ```
+
+### Debugging Database Issues
+
+#### Using Supabase Studio
+
+1. **Access Studio**: http://localhost:54323
+2. **Features**:
+   - Visual table editor
+   - SQL query editor
+   - Real-time log viewer
+   - API documentation
+
+#### Common Debugging Commands
+
+```bash
+# Check service health
+npm run supabase:status
+
+# View migration history
+supabase migration list
+
+# Inspect database logs
+docker logs supabase_db_hsa-songbook
+
+# Connect with psql
+psql postgresql://postgres:postgres@localhost:54322/postgres
+```
+
+#### Troubleshooting RLS Policies
+
+```sql
+-- Test RLS policies in Studio
+SET ROLE authenticated;
+SET request.jwt.claim.sub = 'user-uuid-here';
+
+-- Check policy effectiveness
+SELECT * FROM songs;  -- Should respect RLS
+
+-- Debug policy issues
+ALTER TABLE songs DISABLE ROW LEVEL SECURITY;  -- Temporary for debugging
+```
+
+## 9. Potential Gotchas
 
 ### Environment Variables
 - **Issue**: App crashes with "Missing Supabase environment variables"

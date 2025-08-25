@@ -1,0 +1,51 @@
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#f3f4f6', 'primaryTextColor':'#1f2937', 'primaryBorderColor':'#9ca3af', 'lineColor':'#6b7280', 'secondaryColor':'#e5e7eb', 'tertiaryColor':'#ddd6fe'}}}%%
+graph LR
+    Start([New Feature<br/>Requirement]) --> Plan[Plan Schema<br/>Changes]
+    
+    Plan --> Create[Create Migration<br/><code>supabase migration new</code>]
+    
+    Create --> Write[Write SQL<br/>Migration File]
+    
+    Write --> Test[Test Locally<br/><code>npm run db:reset</code>]
+    
+    Test --> Verify{Migration<br/>Works?}
+    
+    Verify -->|No| Fix[Fix Migration<br/>SQL]
+    Fix --> Test
+    
+    Verify -->|Yes| GenTypes[Generate Types<br/><code>npm run types:generate</code>]
+    
+    GenTypes --> Implement[Implement<br/>Feature Code]
+    
+    Implement --> TestFeature[Test Feature<br/>with Local DB]
+    
+    TestFeature --> Works{Feature<br/>Works?}
+    
+    Works -->|No| Debug[Debug &<br/>Fix Issues]
+    Debug --> TestFeature
+    
+    Works -->|Yes| Commit[Commit Changes]
+    
+    Commit --> PR[Create<br/>Pull Request]
+    
+    PR --> Review{Code<br/>Review}
+    
+    Review -->|Changes Needed| UpdateCode[Update Code]
+    UpdateCode --> TestFeature
+    
+    Review -->|Approved| Merge[Merge to Main]
+    
+    Merge --> Deploy[Deploy to<br/>Production]
+    
+    Deploy --> Push[Push Migration<br/><code>npm run db:push</code>]
+    
+    Push --> Complete([Feature<br/>Deployed])
+    
+    style Start fill:#10b981,stroke:#059669,color:#fff
+    style Complete fill:#10b981,stroke:#059669,color:#fff
+    style Verify fill:#fef3c7,stroke:#f59e0b
+    style Works fill:#fef3c7,stroke:#f59e0b
+    style Review fill:#fef3c7,stroke:#f59e0b
+    style Create fill:#dbeafe,stroke:#3b82f6,color:#1e40af
+    style GenTypes fill:#dbeafe,stroke:#3b82f6,color:#1e40af
+    style Push fill:#dbeafe,stroke:#3b82f6,color:#1e40af

@@ -1,0 +1,42 @@
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#f3f4f6', 'primaryTextColor':'#1f2937', 'primaryBorderColor':'#9ca3af', 'lineColor':'#6b7280', 'secondaryColor':'#e5e7eb', 'tertiaryColor':'#ddd6fe'}}}%%
+graph TB
+    Start([Start Setup]) --> CheckDocker{Docker<br/>Installed?}
+    
+    CheckDocker -->|No| InstallDocker[Install Docker Desktop]
+    CheckDocker -->|Yes| CheckNode{Node.js 18+<br/>Installed?}
+    
+    InstallDocker --> CheckNode
+    
+    CheckNode -->|No| InstallNode[Install Node.js]
+    CheckNode -->|Yes| CloneRepo[Clone Repository<br/><code>git clone ...</code>]
+    
+    InstallNode --> CloneRepo
+    
+    CloneRepo --> InstallDeps[Install Dependencies<br/><code>npm install</code>]
+    
+    InstallDeps --> RunSetup[Run Setup Script<br/><code>./scripts/setup-local.sh</code>]
+    
+    RunSetup --> InstallSupabase{Supabase CLI<br/>Installed?}
+    
+    InstallSupabase -->|No| AutoInstall[Script Installs<br/>Supabase CLI]
+    InstallSupabase -->|Yes| StartServices[Start Docker<br/>Containers]
+    
+    AutoInstall --> StartServices
+    
+    StartServices --> InitDB[Initialize<br/>Database]
+    
+    InitDB --> LoadSeeds[Load Seed<br/>Data]
+    
+    LoadSeeds --> GenTypes[Generate<br/>TypeScript Types]
+    
+    GenTypes --> StartDev[Start Development<br/><code>npm run dev:local</code>]
+    
+    StartDev --> Ready([Ready!<br/>App: localhost:5173<br/>Studio: localhost:54323])
+    
+    style Start fill:#10b981,stroke:#059669,color:#fff
+    style Ready fill:#10b981,stroke:#059669,color:#fff
+    style CheckDocker fill:#fef3c7,stroke:#f59e0b
+    style CheckNode fill:#fef3c7,stroke:#f59e0b
+    style InstallSupabase fill:#fef3c7,stroke:#f59e0b
+    style RunSetup fill:#dbeafe,stroke:#3b82f6,color:#1e40af
+    style StartDev fill:#dbeafe,stroke:#3b82f6,color:#1e40af

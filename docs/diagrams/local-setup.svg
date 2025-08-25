@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900">
+  <defs>
+    <style>
+      .box { fill: #f3f4f6; stroke: #6b7280; stroke-width: 2; }
+      .start { fill: #10b981; stroke: #059669; }
+      .decision { fill: #fef3c7; stroke: #f59e0b; }
+      .action { fill: #dbeafe; stroke: #3b82f6; }
+      .text { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; text-anchor: middle; }
+      .white { fill: white; }
+      .dark { fill: #1f2937; }
+      .arrow { stroke: #6b7280; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
+    </marker>
+  </defs>
+  
+  <!-- Start -->
+  <rect class="box start" x="350" y="20" width="100" height="40" rx="20"/>
+  <text class="text white" x="400" y="45">Start Setup</text>
+  
+  <!-- Check Docker -->
+  <path class="box decision" d="M 400 100 L 450 130 L 400 160 L 350 130 Z"/>
+  <text class="text dark" x="400" y="130">Docker</text>
+  <text class="text dark" x="400" y="145">Installed?</text>
+  
+  <!-- Install Docker -->
+  <rect class="box" x="200" y="110" width="120" height="40" rx="5"/>
+  <text class="text dark" x="260" y="135">Install Docker</text>
+  
+  <!-- Check Node -->
+  <path class="box decision" d="M 400 200 L 450 230 L 400 260 L 350 230 Z"/>
+  <text class="text dark" x="400" y="230">Node.js 18+</text>
+  <text class="text dark" x="400" y="245">Installed?</text>
+  
+  <!-- Install Node -->
+  <rect class="box" x="200" y="210" width="120" height="40" rx="5"/>
+  <text class="text dark" x="260" y="235">Install Node.js</text>
+  
+  <!-- Clone Repo -->
+  <rect class="box" x="340" y="300" width="120" height="40" rx="5"/>
+  <text class="text dark" x="400" y="320">Clone Repo</text>
+  
+  <!-- Install Dependencies -->
+  <rect class="box" x="340" y="370" width="120" height="40" rx="5"/>
+  <text class="text dark" x="400" y="390">npm install</text>
+  
+  <!-- Run Setup Script -->
+  <rect class="box action" x="320" y="440" width="160" height="40" rx="5"/>
+  <text class="text dark" x="400" y="460">./scripts/setup-local.sh</text>
+  
+  <!-- Start Services -->
+  <rect class="box" x="340" y="510" width="120" height="40" rx="5"/>
+  <text class="text dark" x="400" y="530">Start Services</text>
+  
+  <!-- Initialize DB -->
+  <rect class="box" x="340" y="580" width="120" height="40" rx="5"/>
+  <text class="text dark" x="400" y="600">Initialize DB</text>
+  
+  <!-- Load Seeds -->
+  <rect class="box" x="340" y="650" width="120" height="40" rx="5"/>
+  <text class="text dark" x="400" y="670">Load Seeds</text>
+  
+  <!-- Start Dev -->
+  <rect class="box action" x="320" y="720" width="160" height="40" rx="5"/>
+  <text class="text dark" x="400" y="740">npm run dev:local</text>
+  
+  <!-- Ready -->
+  <rect class="box start" x="300" y="800" width="200" height="60" rx="20"/>
+  <text class="text white" x="400" y="820">Ready!</text>
+  <text class="text white" x="400" y="840">localhost:5173</text>
+  
+  <!-- Arrows -->
+  <path class="arrow" d="M 400 60 L 400 100"/>
+  <path class="arrow" d="M 350 130 L 320 130"/>
+  <path class="arrow" d="M 260 150 L 260 230 L 350 230"/>
+  <path class="arrow" d="M 400 160 L 400 200"/>
+  <path class="arrow" d="M 350 230 L 320 230"/>
+  <path class="arrow" d="M 260 250 L 260 320 L 340 320"/>
+  <path class="arrow" d="M 400 260 L 400 300"/>
+  <path class="arrow" d="M 400 340 L 400 370"/>
+  <path class="arrow" d="M 400 410 L 400 440"/>
+  <path class="arrow" d="M 400 480 L 400 510"/>
+  <path class="arrow" d="M 400 550 L 400 580"/>
+  <path class="arrow" d="M 400 620 L 400 650"/>
+  <path class="arrow" d="M 400 690 L 400 720"/>
+  <path class="arrow" d="M 400 760 L 400 800"/>
+</svg>
