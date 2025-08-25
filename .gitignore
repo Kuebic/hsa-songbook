@@ -15,6 +15,9 @@ dist-ssr
 PRPs/code_reviews
 .env
 .env.server
+.env.local
+.env.staging
+.env.production
 .claude/settings.local.json
 
 # Process files
@@ -43,3 +46,4 @@ dev-dist/
 *.backup
 *.tmp
 supabase/.temp/
+supabase/.branches/
