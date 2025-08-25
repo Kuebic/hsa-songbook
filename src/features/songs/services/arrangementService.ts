@@ -148,10 +148,14 @@ export const arrangementService = {
       // Apply visibility filters
       if (!canModerate && userId) {
         // Regular users with authentication: show public content AND their own content
-        query = query.or(`and(is_public.neq.false,moderation_status.neq.rejected),created_by.eq.${userId}`)
+        // Include records where moderation_status is null, 'approved', 'pending', or 'flagged' (exclude only 'rejected')
+        query = query.or(`and(is_public.neq.false,or(moderation_status.is.null,moderation_status.in.(approved,pending,flagged))),created_by.eq.${userId}`)
       } else if (!canModerate) {
-        // Unauthenticated users: show only public approved content
-        query = query.eq('is_public', true).neq('moderation_status', 'rejected')
+        // Unauthenticated users: show only public content that is not rejected
+        // Include records where moderation_status is null, 'approved', 'pending', or 'flagged'
+        query = query
+          .eq('is_public', true)
+          .or('moderation_status.is.null,moderation_status.in.(approved,pending,flagged)')
       }
       // Moderators/admins see everything
 
@@ -305,10 +309,14 @@ export const arrangementService = {
       // Apply visibility filters
       if (!canModerate && userId) {
         // Regular users with authentication: show public content AND their own content
-        query = query.or(`and(is_public.neq.false,moderation_status.neq.rejected),created_by.eq.${userId}`)
+        // Include records where moderation_status is null, 'approved', 'pending', or 'flagged' (exclude only 'rejected')
+        query = query.or(`and(is_public.neq.false,or(moderation_status.is.null,moderation_status.in.(approved,pending,flagged))),created_by.eq.${userId}`)
       } else if (!canModerate) {
-        // Unauthenticated users: show only public approved content
-        query = query.eq('is_public', true).neq('moderation_status', 'rejected')
+        // Unauthenticated users: show only public content that is not rejected
+        // Include records where moderation_status is null, 'approved', 'pending', or 'flagged'
+        query = query
+          .eq('is_public', true)
+          .or('moderation_status.is.null,moderation_status.in.(approved,pending,flagged)')
       }
       // Moderators/admins see everything
 
