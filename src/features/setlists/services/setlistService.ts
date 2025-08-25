@@ -18,6 +18,7 @@ type SetlistUpdate = Database['public']['Tables']['setlists']['Update']
 interface SetlistMetadata {
   song_ids?: string[]
   share_token?: string
+  [key: string]: any // Allow additional properties for Json compatibility
 }
 
 export interface Setlist {

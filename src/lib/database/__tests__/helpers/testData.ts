@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
-import type { Database } from '@lib/database.types'
-import { supabase } from '@lib/supabase'
+import type { Database } from '../../../database.types'
+import { supabase } from '../../../supabase'
 
 // Type aliases for better readability
 type Song = Database['public']['Tables']['songs']['Insert']
@@ -57,7 +57,7 @@ export function generateChordData(complexity: 'simple' | 'medium' | 'complex' = 
 // Generate test users with different roles
 export function generateUsers(count: number = 10): User[] {
   const users: User[] = []
-  const roles = ['user', 'moderator', 'admin']
+  // const roles = ['user', 'moderator', 'admin'] // Unused for now
   
   for (let i = 0; i < count; i++) {
     const firstName = faker.person.firstName()
