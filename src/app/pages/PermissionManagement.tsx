@@ -8,6 +8,7 @@ import {
   PermissionTester
 } from '@features/permissions/components'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@shared/components/ui/tabs'
+import { ENABLE_ADVANCED_PERMISSIONS } from '@shared/config/features'
 import styles from './AdminDashboard.module.css'
 
 type TabValue = 'matrix' | 'roles' | 'resources' | 'groups' | 'testing'
@@ -25,6 +26,30 @@ export function PermissionManagement() {
       <div className={styles.container}>
         <div className={styles.error}>
           You do not have permission to access this page.
+        </div>
+      </div>
+    )
+  }
+
+  // Show "Coming Soon" message if advanced permissions are disabled
+  if (!ENABLE_ADVANCED_PERMISSIONS) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1>Permission Management</h1>
+        </div>
+        <div className={styles.content}>
+          <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+              Coming Soon
+            </h2>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '1.1rem' }}>
+              Advanced permission management features are currently under development.
+            </p>
+            <p style={{ color: 'var(--muted-foreground)', marginTop: '0.5rem' }}>
+              Check back later for role management, permission matrices, and more.
+            </p>
+          </div>
         </div>
       </div>
     )

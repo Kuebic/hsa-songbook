@@ -90,8 +90,8 @@ export function usePermissions(): UsePermissionsReturn {
       const resolvedPermissions = PermissionResolver.resolvePermissions(
         userId,
         userPermissions.directPermissions,
-        [], // TODO: Fetch actual CustomRole objects when database tables exist
-        []  // TODO: Fetch actual PermissionGroup objects when database tables exist
+        [], // Custom roles not yet implemented - requires database tables
+        []  // Permission groups not yet implemented - requires database tables
       )
       
       userPermissions.effectivePermissions = resolvedPermissions
@@ -189,7 +189,7 @@ export function usePermissions(): UsePermissionsReturn {
       console.warn('Permission check failed, falling back to role-based:', err)
       return hasBasicPermission(userRole, resource, action)
     }
-  }, [permissions, userRole])
+  }, [permissions, userRole, userId])
 
   const canEdit = useCallback((resource: ResourceType, resourceId?: string): boolean => {
     return hasPermission(resource, 'update', resourceId)

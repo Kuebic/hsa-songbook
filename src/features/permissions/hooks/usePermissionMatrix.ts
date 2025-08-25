@@ -185,7 +185,7 @@ export function usePermissionMatrix(): UsePermissionMatrixReturn {
     
     await saveChangesMutation.mutateAsync()
     return
-  }, [pendingChanges, saveChangesMutation])
+  }, [pendingChanges, saveChangesMutation, addNotification])
 
   // Discard all pending changes
   const discardChanges = useCallback(() => {

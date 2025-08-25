@@ -108,7 +108,7 @@ export function ResourcePermissions({
         canModify: true
       }
     })
-  }, [resourcePermissions, selectedResourceId])
+  }, [resourcePermissions])
 
   // Filter entries based on showInherited setting
   const displayedEntries = useMemo(() => {
