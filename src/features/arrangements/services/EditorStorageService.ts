@@ -251,9 +251,14 @@ export class EditorStorageService {
         return null;
       }
       
+      // Handle null updated_at by using current time as fallback
+      const timestamp = data.updated_at 
+        ? new Date(data.updated_at).getTime()
+        : Date.now();
+      
       return {
         content: data.chord_data,
-        timestamp: new Date(data.updated_at).getTime(),
+        timestamp,
         version: this.DRAFT_VERSION
       };
     } catch (error) {

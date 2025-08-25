@@ -1,11 +1,10 @@
 import { useState, useMemo } from 'react'
 import { usePermissions } from '../hooks/usePermissions'
-import { Button } from '@/shared/components/ui'
+import { Button } from '@shared/components/ui'
 import type { 
   ResourceType, 
   PermissionAction, 
-  PermissionEffect,
-  ResolvedPermission
+  PermissionEffect
 } from '../types/permission.types'
 import styles from './ResourcePermissions.module.css'
 

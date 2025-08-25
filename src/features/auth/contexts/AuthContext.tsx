@@ -1,7 +1,9 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 import { supabase, getCurrentSession } from '../../../lib/supabase'
+import { logger } from '../../../lib/logger'
 import { extractRoleClaims } from '../utils/jwt'
 import type { User, AuthState, UserRole } from '../types'
+import type { Session } from '@supabase/supabase-js'
 
 interface AuthContextValue {
   // State
@@ -29,10 +31,10 @@ interface AuthContextValue {
   getUserAvatar: () => string | undefined
   
   // Supabase-specific methods
-  session: any
+  session: Session | null
   signInWithProvider: (provider: 'google' | 'github') => Promise<void>
   signInWithEmail: (email: string, password: string, captchaToken?: string) => Promise<void>
-  signUpWithEmail: (email: string, password: string, captchaToken?: string) => Promise<any>
+  signUpWithEmail: (email: string, password: string, captchaToken?: string) => Promise<{ user: User | null; session: Session | null }>
   resetPassword: (email: string, captchaToken?: string) => Promise<void>
   signOut: () => Promise<void>
 }
@@ -69,14 +71,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const now = Date.now()
     
     if (globalSyncState.syncPromise && globalSyncState.lastSync?.userId === user.id) {
-      console.log('Returning existing sync promise for user:', user.id)
+      logger.info('Returning existing sync promise for user:', user.id)
       return globalSyncState.syncPromise
     }
     
     if (globalSyncState.lastSync?.userId === user.id && 
         globalSyncState.lastSync.timestamp && 
         (now - globalSyncState.lastSync.timestamp) < SYNC_COOLDOWN) {
-      console.log(`User ${user.id} was synced recently, skipping (cooldown: ${SYNC_COOLDOWN}ms)`)
+      logger.info(`User ${user.id} was synced recently, skipping (cooldown: ${SYNC_COOLDOWN}ms)`)
       return
     }
     
@@ -94,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updated_at: new Date().toISOString()
         }
 
-        console.log('Syncing user data:', { userId: user.id, email: user.email })
+        logger.info('Syncing user data:', { userId: user.id, email: user.email })
 
         const { data, error } = await supabase
           .from('users')
@@ -107,13 +109,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (error) {
           if (error.code === '42501' && retryCount < MAX_RETRIES) {
-            console.warn(`RLS policy error, retrying (${retryCount + 1}/${MAX_RETRIES})...`, error)
+            logger.warn(`RLS policy error, retrying (${retryCount + 1}/${MAX_RETRIES})`, error)
             await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
             globalSyncState.syncPromise = null
             return await syncUserData(user, retryCount + 1)
           }
           
-          console.error('Error syncing user data:', {
+          logger.error('Error syncing user data:', {
             code: error.code,
             message: error.message,
             details: error.details,
@@ -121,10 +123,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             retryCount
           })
         } else {
-          console.log('User data synced successfully:', data)
+          logger.info('User data synced successfully:', data)
         }
       } catch (error) {
-        console.error('Unexpected error syncing user data:', error)
+        logger.error('Unexpected error syncing user data:', error)
       } finally {
         globalSyncState.syncPromise = null
         globalSyncState.lastSync = { userId: user.id, timestamp: Date.now() }
@@ -142,7 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const session = await getCurrentSession()
         const user = session?.user || null
         
-        console.log('[AuthContext] Initializing auth state:', {
+        logger.info('[AuthContext] Initializing auth state:', {
           hasSession: !!session,
           hasUser: !!user,
           userEmail: user?.email
@@ -167,14 +169,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           canModerate: roleInfo.canModerate,
           canAdmin: roleInfo.canAdmin
         })
-        setCustomRoles(roleInfo.customRoles || [])
-        setPermissionGroups(roleInfo.permissionGroups || [])
+        setCustomRoles(roleInfo.customRoles)
+        setPermissionGroups(roleInfo.permissionGroups)
         
         if (user) {
           await syncUserData(user)
         }
       } catch (error) {
-        console.error('Error initializing auth:', error)
+        logger.error('Error initializing auth:', error)
         setAuthState({
           user: null,
           session: null,
@@ -192,7 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (event, session) => {
         const user = session?.user || null
         
-        console.log('[AuthContext] Auth state changed:', {
+        logger.info('[AuthContext] Auth state changed:', {
           event,
           hasSession: !!session,
           hasUser: !!user,
@@ -254,7 +256,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
     
     if (error) {
-      console.error('Error signing in:', error)
+      logger.error('Error signing in:', error)
       throw error
     }
   }, [])
@@ -267,7 +269,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
     
     if (error) {
-      console.error('Error signing in with email:', error)
+      logger.error('Error signing in with email:', error)
       throw error
     }
   }, [])
@@ -283,12 +285,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
     
     if (error) {
-      console.error('Error signing up:', error)
+      logger.error('Error signing up:', error)
       throw error
     }
 
     if (data?.user && !data.session) {
-      console.log('Email confirmation required')
+      logger.info('Email confirmation required')
     }
     
     return data
@@ -301,7 +303,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
     
     if (error) {
-      console.error('Error resetting password:', error)
+      logger.error('Error resetting password:', error)
       throw error
     }
   }, [])
@@ -319,7 +321,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         timeoutPromise
       ])
       
-      console.log('Supabase sign out succeeded')
+      logger.info('Supabase sign out succeeded')
       
       // Clear local auth state as confirmation
       setAuthState({
@@ -329,7 +331,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isSignedIn: false
       })
     } catch (error) {
-      console.error('Error or timeout during sign out:', error)
+      logger.error('Error or timeout during sign out:', error)
       
       // Force clear local state even if Supabase fails
       setAuthState({
@@ -351,7 +353,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sessionStorage.clear()
       }
       
-      console.log('Local auth state cleared despite Supabase error')
+      logger.info('Local auth state cleared despite Supabase error')
       // Don't throw - we've cleared local state, that's enough
     }
   }, [])

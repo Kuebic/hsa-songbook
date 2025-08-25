@@ -14,7 +14,8 @@ type TabValue = 'matrix' | 'roles' | 'resources' | 'groups' | 'testing'
 
 export function PermissionManagement() {
   const [activeTab, setActiveTab] = useState<TabValue>('matrix')
-  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null)
+  const [selectedRoleId, setSelectedRoleId] = useState<string | undefined>(undefined)
+  const [selectedUserId, setSelectedUserId] = useState<string>('current-user') // Default to current user
   const [showRoleBuilder, setShowRoleBuilder] = useState(false)
   const { canAdmin } = usePermissions()
 
@@ -114,7 +115,7 @@ export function PermissionManagement() {
                   <div className={styles.roleDetails}>
                     <h3>Role Permissions</h3>
                     <ResourcePermissions
-                      roleId={selectedRoleId}
+                      userId={selectedUserId}
                       compact={false}
                     />
                   </div>
@@ -127,7 +128,7 @@ export function PermissionManagement() {
                 <h2>Resource-Specific Permissions</h2>
                 <p>Manage permissions for individual resources</p>
               </div>
-              <ResourcePermissions />
+              <ResourcePermissions userId={selectedUserId} />
             </TabsContent>
 
             <TabsContent value="groups">
@@ -137,7 +138,6 @@ export function PermissionManagement() {
               </div>
               <PermissionInheritance
                 showDragDrop={true}
-                showFilters={true}
               />
             </TabsContent>
 

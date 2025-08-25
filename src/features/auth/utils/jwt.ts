@@ -24,8 +24,8 @@ export function extractRoleClaims(token: string): {
   role: UserRole
   canModerate: boolean
   canAdmin: boolean
-  customRoles?: string[]
-  permissionGroups?: string[]
+  customRoles: string[]
+  permissionGroups: string[]
 } {
   const claims = decodeJWT(token)
   
@@ -33,8 +33,8 @@ export function extractRoleClaims(token: string): {
     role: (claims?.user_role as UserRole) || 'user',
     canModerate: claims?.can_moderate || false,
     canAdmin: claims?.can_admin || false,
-    customRoles: claims?.custom_roles as string[] || undefined,
-    permissionGroups: claims?.permission_groups as string[] || undefined
+    customRoles: (claims?.custom_roles as string[]) || [],
+    permissionGroups: (claims?.permission_groups as string[]) || []
   }
 }
 

@@ -25,6 +25,8 @@ const createAuthMock = (overrides: Partial<ReturnType<typeof useAuth>> = {}) => 
     canModerate: false,
     canAdmin: false
   },
+  customRoles: [],  // Fix: Make this always an empty array instead of undefined
+  permissionGroups: [],  // Fix: Add missing permissionGroups
   getToken: vi.fn().mockResolvedValue(null),
   getUserEmail: vi.fn().mockReturnValue(undefined),
   getUserName: vi.fn().mockReturnValue('User'),

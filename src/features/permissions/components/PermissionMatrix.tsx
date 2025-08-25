@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { usePermissionMatrix } from '../hooks/usePermissionMatrix'
-import { Button } from '@/shared/components/ui'
-import type { CustomRole, Permission, PermissionEffect } from '../types/permission.types'
+import { Button } from '@shared/components/ui'
+import type { Permission, PermissionEffect } from '../types/permission.types'
 import styles from './PermissionMatrix.module.css'
 
 interface PermissionMatrixProps {

@@ -1,6 +1,6 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { useCustomRoles } from '../hooks/useCustomRoles'
-import { Button } from '@/shared/components/ui'
+import { Button } from '@shared/components/ui'
 import { validateNoCircularInheritance } from '../validation/permissionSchemas'
 import type { CustomRole } from '../types/permission.types'
 import styles from './PermissionInheritance.module.css'
@@ -35,7 +35,7 @@ export function PermissionInheritance({
   const [showSystemRoles, setShowSystemRoles] = useState(true)
   const [showInactiveRoles, setShowInactiveRoles] = useState(false)
 
-  const { data: roles = [], updateRole } = useCustomRoles()
+  const { roles = [], updateRole } = useCustomRoles()
 
   // Build inheritance tree structure
   const treeData = useMemo(() => {

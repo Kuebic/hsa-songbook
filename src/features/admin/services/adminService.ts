@@ -1,6 +1,7 @@
 import { supabase } from '../../../lib/supabase'
 import type { UserWithRole, RoleAssignment, AuditLogEntry, UserFilter, AdminStats } from '../types/admin.types'
 import type { UserRole } from '../../auth/types'
+import type { UserRoleRow } from '../types/database.types'
 
 // Custom error classes (following songService pattern)
 export class APIError extends Error {
@@ -73,7 +74,7 @@ export const adminService = {
 
       // Get roles for these users
       const userIds = userData?.map(u => u.id) || []
-      let roleData: any[] = []
+      let roleData: UserRoleRow[] = []
       
       if (userIds.length > 0) {
         const { data: roles, error: roleError } = await supabase
@@ -91,13 +92,13 @@ export const adminService = {
       }
 
       // Create role lookup map
-      const roleMap = new Map<string, any>()
+      const roleMap = new Map<string, UserRoleRow>()
       roleData.forEach(role => {
         roleMap.set(role.user_id, role)
       })
 
       // Map to UserWithRole type
-      let users: UserWithRole[] = (userData || []).map((user: any) => {
+      let users: UserWithRole[] = (userData || []).map((user) => {
         const userRole = roleMap.get(user.id)
         return {
           id: user.id,
@@ -255,7 +256,7 @@ export const adminService = {
       ].filter(Boolean) as string[]))
 
       // Get user information from the users table (if it exists)
-      let userMap = new Map<string, any>()
+      const userMap = new Map<string, UserWithRole>()
       
       if (userIds.length > 0) {
         // Try to get from public.users first, fallback to minimal data
@@ -276,7 +277,7 @@ export const adminService = {
       }
 
       // Map to AuditLogEntry type
-      const entries: AuditLogEntry[] = auditData.map((item: any) => {
+      const entries: AuditLogEntry[] = auditData.map((item) => {
         const user = userMap.get(item.user_id)
         const performer = userMap.get(item.performed_by)
         
@@ -317,7 +318,11 @@ export const adminService = {
       }
 
       // Get user counts by role (handle potential errors gracefully)
-      let roleCounts: any[] = []
+      interface RoleCount {
+        role: UserRole
+        count: number
+      }
+      let roleCounts: RoleCount[] = []
       try {
         const { data, error: roleError } = await supabase
           .from('user_roles')
@@ -355,7 +360,7 @@ export const adminService = {
 
       // Calculate counts by role
       const roleCountMap = new Map<string, number>()
-      roleCounts.forEach((item: any) => {
+      roleCounts.forEach((item) => {
         const role = item.role as string
         roleCountMap.set(role, (roleCountMap.get(role) || 0) + 1)
       })

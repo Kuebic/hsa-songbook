@@ -4,13 +4,11 @@ import { PermissionResolver, PermissionCache } from '../utils'
 import { permissionService } from '../services/permissionService'
 import type {
   UserPermissionSet,
-  Permission,
   PermissionAction,
-  ResourceType,
-  PermissionCheckResult
+  ResourceType
 } from '../types/permission.types'
 
-const REFRESH_INTERVAL = 5 * 60 * 1000 // 5 minutes
+// const REFRESH_INTERVAL = 5 * 60 * 1000 // 5 minutes - unused for now
 const BACKGROUND_REFRESH_INTERVAL = 30 * 60 * 1000 // 30 minutes
 
 export interface UsePermissionsReturn {
