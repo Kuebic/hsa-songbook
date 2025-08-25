@@ -109,6 +109,12 @@ export interface ArrangementViewerData {
   chordProText: string
   createdBy?: string
   tags: string[]
+  metadata?: {
+    isPublic: boolean
+    views: number
+    moderationStatus?: 'pending' | 'approved' | 'rejected' | 'flagged' | null
+    moderationNote?: string
+  }
 }
 
 export interface ChordSheetSettings {

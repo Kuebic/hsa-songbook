@@ -31,6 +31,8 @@ export interface SongMetadata {
     count: number
   }
   views: number
+  moderationStatus?: 'pending' | 'approved' | 'rejected' | 'flagged' | null
+  moderationNote?: string
 }
 
 export interface Arrangement {
@@ -62,6 +64,8 @@ export interface Arrangement {
       count: number
     }
     views: number
+    moderationStatus?: 'pending' | 'approved' | 'rejected' | 'flagged' | null
+    moderationNote?: string
   }
   createdAt?: string
   updatedAt?: string

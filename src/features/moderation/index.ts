@@ -5,6 +5,7 @@ export { ContentReviewCard } from './components/ContentReviewCard'
 export { BulkActions } from './components/BulkActions'
 export { ModerationQueue } from './components/ModerationQueue'
 export { ModerationStats } from './components/ModerationStats'
+export { ModerationBadge } from './components/ModerationBadge'
 
 export { useReporting } from './hooks/useReporting'
 export { useModerationQueue } from './hooks/useModerationQueue'
