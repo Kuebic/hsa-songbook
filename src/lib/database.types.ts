@@ -230,6 +230,57 @@ export type Database = {
           },
         ]
       }
+      custom_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          display_name: string
+          id: string
+          is_system: boolean | null
+          name: string
+          permissions: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name: string
+          id?: string
+          is_system?: boolean | null
+          name: string
+          permissions?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name?: string
+          id?: string
+          is_system?: boolean | null
+          name?: string
+          permissions?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_roles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_roles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       moderation_log: {
         Row: {
           action: string
@@ -283,6 +334,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      permission_groups: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          permissions: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          permissions?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          permissions?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      permissions: {
+        Row: {
+          action: string
+          created_at: string | null
+          description: string | null
+          id: string
+          resource: string
+          updated_at: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          resource: string
+          updated_at?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          resource?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       reviews: {
         Row: {
@@ -640,6 +745,69 @@ export type Database = {
           },
         ]
       }
+      user_permissions: {
+        Row: {
+          expires_at: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          permission_id: string
+          user_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          permission_id: string
+          user_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          permission_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permissions_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_permissions_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           expires_at: string | null
@@ -913,6 +1081,14 @@ export type Database = {
         Args: { user_id_param: string }
         Returns: boolean
       }
+      check_user_permission: {
+        Args: { p_action: string; p_resource: string; p_user_id: string }
+        Returns: boolean
+      }
+      cleanup_expired_permissions: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       daitch_mokotoff: {
         Args: { "": string }
         Returns: string[]
@@ -942,6 +1118,40 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_moderation_queue: {
+        Args: { filter_status?: string; filter_type?: string }
+        Returns: {
+          content_id: string
+          content_type: string
+          created_at: string
+          creator_email: string
+          creator_id: string
+          id: string
+          last_modified: string
+          report_count: number
+          status: string
+          title: string
+        }[]
+      }
+      get_moderation_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          approved_today: number
+          flagged_content: number
+          pending_arrangements: number
+          pending_reports: number
+          pending_songs: number
+          rejected_today: number
+        }[]
+      }
+      get_user_permissions: {
+        Args: { p_user_id: string }
+        Returns: {
+          action: string
+          resource: string
+          source: string
+        }[]
+      }
       grant_user_role: {
         Args: {
           grant_reason?: string
@@ -970,9 +1180,29 @@ export type Database = {
         Args: { "": unknown }
         Returns: unknown
       }
+      perform_moderation_action: {
+        Args: {
+          p_action: string
+          p_content_id: string
+          p_content_type: string
+          p_note?: string
+        }
+        Returns: boolean
+      }
       revoke_user_role: {
         Args: { revoke_reason?: string; target_user_id: string }
         Returns: boolean
+      }
+      search_songs: {
+        Args: { limit_count?: number; search_query: string }
+        Returns: {
+          artist: string
+          id: string
+          rank: number
+          slug: string
+          themes: string[]
+          title: string
+        }[]
       }
       set_limit: {
         Args: { "": number }
