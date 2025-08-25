@@ -28,7 +28,14 @@ describe('Layout - Moderation Link Visibility', () => {
       isLoaded: true,
       isAdmin: false,
       isModerator: true,
-      user: { id: 'mod-user', email: 'mod@test.com' },
+      user: { 
+        id: 'mod-user', 
+        email: 'mod@test.com',
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated',
+        created_at: '2024-01-01T00:00:00Z'
+      },
       userId: 'mod-user',
       sessionId: 'session-123',
       getToken: vi.fn(),
@@ -45,7 +52,7 @@ describe('Layout - Moderation Link Visibility', () => {
       signUpWithEmail: vi.fn(),
       resetPassword: vi.fn(),
       signOut: vi.fn()
-    } as any)
+    } as ReturnType<typeof useAuth>)
 
     render(
       <BrowserRouter>
@@ -69,7 +76,14 @@ describe('Layout - Moderation Link Visibility', () => {
       isLoaded: true,
       isAdmin: true,
       isModerator: false, // Admins might not have isModerator=true but should still see moderation
-      user: { id: 'admin-user', email: 'admin@test.com' },
+      user: { 
+        id: 'admin-user', 
+        email: 'admin@test.com',
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated',
+        created_at: '2024-01-01T00:00:00Z'
+      },
       userId: 'admin-user',
       sessionId: 'session-456',
       getToken: vi.fn(),
@@ -86,7 +100,7 @@ describe('Layout - Moderation Link Visibility', () => {
       signUpWithEmail: vi.fn(),
       resetPassword: vi.fn(),
       signOut: vi.fn()
-    } as any)
+    } as ReturnType<typeof useAuth>)
 
     render(
       <BrowserRouter>
@@ -108,7 +122,14 @@ describe('Layout - Moderation Link Visibility', () => {
       isLoaded: true,
       isAdmin: false,
       isModerator: false,
-      user: { id: 'regular-user', email: 'user@test.com' },
+      user: { 
+        id: 'regular-user', 
+        email: 'user@test.com',
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated',
+        created_at: '2024-01-01T00:00:00Z'
+      },
       userId: 'regular-user',
       sessionId: 'session-789',
       getToken: vi.fn(),
@@ -125,7 +146,7 @@ describe('Layout - Moderation Link Visibility', () => {
       signUpWithEmail: vi.fn(),
       resetPassword: vi.fn(),
       signOut: vi.fn()
-    } as any)
+    } as ReturnType<typeof useAuth>)
 
     render(
       <BrowserRouter>
@@ -164,7 +185,7 @@ describe('Layout - Moderation Link Visibility', () => {
       signUpWithEmail: vi.fn(),
       resetPassword: vi.fn(),
       signOut: vi.fn()
-    } as any)
+    } as ReturnType<typeof useAuth>)
 
     render(
       <BrowserRouter>

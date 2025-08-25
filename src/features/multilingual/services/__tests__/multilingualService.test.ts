@@ -28,8 +28,8 @@ describe('multilingualService', () => {
 
     it('should return empty string for invalid input', () => {
       expect(multilingualService.getText({}, 'en')).toBe('')
-      expect(multilingualService.getText(null as any, 'en')).toBe('')
-      expect(multilingualService.getText(undefined as any, 'en')).toBe('')
+      expect(multilingualService.getText(null as unknown as MultilingualText, 'en')).toBe('')
+      expect(multilingualService.getText(undefined as unknown as MultilingualText, 'en')).toBe('')
     })
 
     it('should handle empty/whitespace-only text values', () => {
@@ -67,7 +67,7 @@ describe('multilingualService', () => {
 
     it('should return empty array for invalid input', () => {
       expect(multilingualService.getAvailableLanguages({})).toEqual([])
-      expect(multilingualService.getAvailableLanguages(null as any)).toEqual([])
+      expect(multilingualService.getAvailableLanguages(null as unknown as MultilingualText)).toEqual([])
     })
   })
 
@@ -92,8 +92,8 @@ describe('multilingualService', () => {
     })
 
     it('should handle invalid input', () => {
-      expect(multilingualService.hasLanguage(null as any, 'en')).toBe(false)
-      expect(multilingualService.hasLanguage(undefined as any, 'en')).toBe(false)
+      expect(multilingualService.hasLanguage(null as unknown as MultilingualText, 'en')).toBe(false)
+      expect(multilingualService.hasLanguage(undefined as unknown as MultilingualText, 'en')).toBe(false)
     })
   })
 
@@ -171,7 +171,7 @@ describe('multilingualService', () => {
         'ko': '   ',
         'ja-romaji': 'konnichiwa',
         'invalid': 'should be removed'
-      } as any
+      } as Record<string, string>
 
       const result = multilingualService.cleanupText(text)
       expect(result).toEqual({
@@ -347,21 +347,21 @@ describe('multilingualService', () => {
     })
 
     it('should reject invalid structure', () => {
-      const result = multilingualService.validateMultilingualText(null as any)
+      const result = multilingualService.validateMultilingualText(null as unknown as MultilingualText)
       expect(result.isValid).toBe(false)
       expect(result.errors).toContain('Invalid multilingual text structure')
     })
 
     it('should reject invalid language codes', () => {
-      const text = { 'invalid': 'text' } as any
-      const result = multilingualService.validateMultilingualText(text)
+      const text = { 'invalid': 'text' } as Record<string, string>
+      const result = multilingualService.validateMultilingualText(text as MultilingualText)
       expect(result.isValid).toBe(false)
       expect(result.errors).toContain('Invalid language code: invalid')
     })
 
     it('should reject non-string content', () => {
-      const text = { 'en': 123 } as any
-      const result = multilingualService.validateMultilingualText(text)
+      const text = { 'en': 123 } as Record<string, unknown>
+      const result = multilingualService.validateMultilingualText(text as MultilingualText)
       expect(result.isValid).toBe(false)
       expect(result.errors).toContain('Content for language en must be a string')
     })

@@ -5,7 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 // Type definition for the auth hook payload
 interface AuthHookPayload {
   user_id: string;
-  claims: Record<string, any>;
+  claims: Record<string, unknown>;
 }
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -28,7 +28,7 @@ Deno.serve(async (req: Request) => {
     })
     
     // Get user's role from database
-    const { data: roleData, error } = await supabase
+    const { data: roleData } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', user_id)
@@ -75,7 +75,7 @@ Deno.serve(async (req: Request) => {
           status: 200 
         }
       )
-    } catch (fallbackError) {
+    } catch (_fallbackError) {
       // If we can't even parse the request, return a minimal valid response
       return new Response(
         JSON.stringify({ claims: {} }),

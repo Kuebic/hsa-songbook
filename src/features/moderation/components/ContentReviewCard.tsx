@@ -110,8 +110,8 @@ export function ContentReviewCard({ item, selected, onSelect, onModerate }: Cont
                     : 'None'
                 }</p>
                 {item.content.lyrics && typeof item.content.lyrics === 'object' && 
-                  item.content.lyrics && 'en' in item.content.lyrics && 
-                  typeof (item.content.lyrics as Record<string, unknown>).en === 'string' && (
+                  'en' in item.content.lyrics && 
+                  typeof (item.content.lyrics as Record<string, unknown>).en === 'string' ? (
                   <div>
                     <strong>Lyrics:</strong>
                     <pre className={styles.lyricsPreview}>
@@ -119,14 +119,14 @@ export function ContentReviewCard({ item, selected, onSelect, onModerate }: Cont
                       {((item.content.lyrics as Record<string, unknown>).en as string).length > 500 && '...'}
                     </pre>
                   </div>
-                )}
+                ) : null}
               </div>
             ) : (
               <div>
                 <p><strong>Key:</strong> {(item.content.key as string) || 'Unknown'}</p>
                 <p><strong>Tempo:</strong> {(item.content.tempo as string) || 'Unknown'}</p>
                 <p><strong>Difficulty:</strong> {(item.content.difficulty as string) || 'Unknown'}</p>
-                {item.content.chord_data && typeof item.content.chord_data === 'string' && (
+                {item.content.chord_data ? (
                   <div>
                     <strong>Chord Data:</strong>
                     <pre className={styles.chordPreview}>
@@ -134,7 +134,7 @@ export function ContentReviewCard({ item, selected, onSelect, onModerate }: Cont
                       {String(item.content.chord_data).length > 300 && '...'}
                     </pre>
                   </div>
-                )}
+                ) : null}
               </div>
             )}
             

@@ -61,7 +61,7 @@ describe('LanguageSelector', () => {
 
     it('should show all languages when availableLanguages not provided', () => {
       const propsWithoutAvailable = { ...defaultProps }
-      delete (propsWithoutAvailable as any).availableLanguages
+      delete (propsWithoutAvailable as Record<string, unknown>).availableLanguages
 
       render(<LanguageSelector {...propsWithoutAvailable} />)
       

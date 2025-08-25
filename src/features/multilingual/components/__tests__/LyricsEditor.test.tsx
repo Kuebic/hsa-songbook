@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { LyricsEditor } from '../LyricsEditor'
 import type { MultilingualText, LanguageCode } from '../../types/multilingual.types'
+import { textProcessingUtils } from '../../utils/textProcessing'
+import { multilingualService } from '../../services/multilingualService'
 
 // Mock the text processing utilities
 vi.mock('../../utils/textProcessing', () => ({
@@ -41,9 +43,9 @@ describe('LyricsEditor', () => {
   }
 
   const defaultProps = {
-    value: mockLyrics,
+    lyrics: mockLyrics,
     onChange: vi.fn(),
-    supportedLanguages: ['en', 'ja', 'ja-romaji', 'ko', 'ko-romaji'] as LanguageCode[]
+    availableLanguages: ['en', 'ja', 'ja-romaji', 'ko', 'ko-romaji'] as LanguageCode[]
   }
 
   beforeEach(() => {
@@ -67,7 +69,7 @@ describe('LyricsEditor', () => {
     })
 
     it('should show add language button when fewer than max languages', () => {
-      render(<LyricsEditor {...defaultProps} maxLanguages={5} />)
+      render(<LyricsEditor {...defaultProps} />)
       
       expect(screen.getByText('+ Add Language')).toBeInTheDocument()
     })
@@ -84,8 +86,7 @@ describe('LyricsEditor', () => {
       render(
         <LyricsEditor 
           {...defaultProps} 
-          value={fullLyrics}
-          maxLanguages={5}
+          lyrics={fullLyrics}
         />
       )
       
@@ -122,7 +123,7 @@ describe('LyricsEditor', () => {
     })
 
     it('should show remove button for non-required languages', () => {
-      render(<LyricsEditor {...defaultProps} requiredLanguages={['en']} />)
+      render(<LyricsEditor {...defaultProps} />)
       
       // Should show remove button for Japanese (not required)
       fireEvent.click(screen.getByText('Japanese'))
@@ -146,7 +147,7 @@ describe('LyricsEditor', () => {
     })
 
     it('should show character count', () => {
-      render(<LyricsEditor {...defaultProps} showStats />)
+      render(<LyricsEditor {...defaultProps} showCharacterCount />)
       
       // Should show stats for current tab
       expect(screen.getByText(/characters/)).toBeInTheDocument()
@@ -154,8 +155,7 @@ describe('LyricsEditor', () => {
     })
 
     it('should show validation warnings', () => {
-      const { textProcessingUtils } = require('../../utils/textProcessing')
-      textProcessingUtils.validateTextForLanguage.mockReturnValue({
+      vi.mocked(textProcessingUtils.validateTextForLanguage).mockReturnValue({
         isValid: false,
         warnings: ['Text is too long'],
         suggestions: ['Consider shortening the text']
@@ -188,7 +188,6 @@ describe('LyricsEditor', () => {
         <LyricsEditor 
           {...defaultProps} 
           onChange={mockOnChange}
-          requiredLanguages={['en']}
         />
       )
       
@@ -203,7 +202,6 @@ describe('LyricsEditor', () => {
       render(
         <LyricsEditor 
           {...defaultProps} 
-          requiredLanguages={['en', 'ja']}
         />
       )
       
@@ -230,7 +228,7 @@ describe('LyricsEditor', () => {
       render(
         <LyricsEditor 
           {...defaultProps} 
-          value={emptyLyrics}
+          lyrics={emptyLyrics}
           placeholder="Enter lyrics here..."
         />
       )
@@ -283,8 +281,7 @@ describe('LyricsEditor', () => {
 
   describe('validation and error handling', () => {
     it('should show validation errors', () => {
-      const { multilingualService } = require('../../services/multilingualService')
-      multilingualService.validateMultilingualText.mockReturnValue({
+      vi.mocked(multilingualService.validateMultilingualText).mockReturnValue({
         isValid: false,
         errors: ['Invalid content format']
       })
@@ -295,8 +292,7 @@ describe('LyricsEditor', () => {
     })
 
     it('should disable submit when validation fails', () => {
-      const { multilingualService } = require('../../services/multilingualService')
-      multilingualService.validateMultilingualText.mockReturnValue({
+      vi.mocked(multilingualService.validateMultilingualText).mockReturnValue({
         isValid: false,
         errors: ['Invalid content']
       })

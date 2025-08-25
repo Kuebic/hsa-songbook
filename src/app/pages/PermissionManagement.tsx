@@ -15,7 +15,7 @@ type TabValue = 'matrix' | 'roles' | 'resources' | 'groups' | 'testing'
 export function PermissionManagement() {
   const [activeTab, setActiveTab] = useState<TabValue>('matrix')
   const [selectedRoleId, setSelectedRoleId] = useState<string | undefined>(undefined)
-  const [selectedUserId, setSelectedUserId] = useState<string>('current-user') // Default to current user
+  const [_selectedUserId, _setSelectedUserId] = useState<string>('current-user') // Default to current user
   const [showRoleBuilder, setShowRoleBuilder] = useState(false)
   const { canAdmin } = usePermissions()
 
@@ -88,7 +88,7 @@ export function PermissionManagement() {
               <PermissionMatrix
                 selectedRoleIds={selectedRoleId ? [selectedRoleId] : undefined}
                 onRoleSelectionChange={(roleIds) => 
-                  setSelectedRoleId(roleIds[0] || null)
+                  setSelectedRoleId(roleIds[0] || undefined)
                 }
               />
             </TabsContent>
@@ -107,7 +107,7 @@ export function PermissionManagement() {
                 <div className={styles.roleList}>
                   <PermissionInheritance
                     selectedRoleId={selectedRoleId}
-                    onRoleSelect={setSelectedRoleId}
+                    onRoleSelect={(roleId) => setSelectedRoleId(roleId ?? undefined)}
                     showDragDrop={true}
                   />
                 </div>
@@ -115,7 +115,7 @@ export function PermissionManagement() {
                   <div className={styles.roleDetails}>
                     <h3>Role Permissions</h3>
                     <ResourcePermissions
-                      userId={selectedUserId}
+                      userId={_selectedUserId}
                       compact={false}
                     />
                   </div>
@@ -128,7 +128,7 @@ export function PermissionManagement() {
                 <h2>Resource-Specific Permissions</h2>
                 <p>Manage permissions for individual resources</p>
               </div>
-              <ResourcePermissions userId={selectedUserId} />
+              <ResourcePermissions userId={_selectedUserId} />
             </TabsContent>
 
             <TabsContent value="groups">

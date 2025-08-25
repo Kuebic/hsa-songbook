@@ -45,7 +45,7 @@ describe('textProcessingUtils', () => {
 
     it('should handle empty input', () => {
       expect(textProcessingUtils.normalizeText('', 'en')).toBe('')
-      expect(textProcessingUtils.normalizeText(null as any, 'en')).toBe('')
+      expect(textProcessingUtils.normalizeText(null as unknown as string, 'en')).toBe('')
     })
   })
 
@@ -168,13 +168,13 @@ describe('textProcessingUtils', () => {
       const lines = result.split('\n')
       expect(lines[0]).toBe('Short line')
       expect(lines[1]).toHaveLength(1003) // 1000 + '...'
-      expect(lines[1]).toEndWith('...')
+      expect(lines[1].endsWith('...')).toBe(true)
       expect(lines[2]).toBe('Another short line')
     })
 
     it('should handle empty input', () => {
       expect(textProcessingUtils.sanitizeText('')).toBe('')
-      expect(textProcessingUtils.sanitizeText(null as any)).toBe('')
+      expect(textProcessingUtils.sanitizeText(null as unknown as string)).toBe('')
     })
   })
 
@@ -208,7 +208,7 @@ describe('textProcessingUtils', () => {
 
     it('should handle empty input', () => {
       expect(textProcessingUtils.splitIntoSections('')).toEqual([])
-      expect(textProcessingUtils.splitIntoSections(null as any)).toEqual([])
+      expect(textProcessingUtils.splitIntoSections(null as unknown as string)).toEqual([])
     })
   })
 
@@ -326,7 +326,7 @@ describe('textProcessingUtils', () => {
 
     it('should handle empty input', () => {
       expect(textProcessingUtils.formatForDisplay('', 'preview')).toBe('')
-      expect(textProcessingUtils.formatForDisplay(null as any, 'preview')).toBe('')
+      expect(textProcessingUtils.formatForDisplay(null as unknown as string, 'preview')).toBe('')
     })
   })
 })

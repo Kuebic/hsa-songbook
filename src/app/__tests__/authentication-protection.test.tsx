@@ -3,42 +3,13 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from '@features/auth'
 import { useAuth } from '@features/auth/hooks/useAuth'
+import { createAuthMock } from '@shared/test-utils/authMocks'
 import type { User } from '@features/auth/types'
 
 // Mock the useAuth hook
 vi.mock('@features/auth/hooks/useAuth', () => ({
   useAuth: vi.fn()
 }))
-
-// Helper to create complete auth mock
-const createAuthMock = (overrides: Partial<ReturnType<typeof useAuth>> = {}) => ({
-  user: null,
-  userId: undefined,
-  sessionId: undefined,
-  isLoaded: false,
-  isSignedIn: false,
-  isAdmin: false,
-  isAnonymous: false,
-  userRole: 'user' as const,
-  isModerator: false,
-  permissions: {
-    canModerate: false,
-    canAdmin: false
-  },
-  customRoles: [],  // Fix: Make this always an empty array instead of undefined
-  permissionGroups: [],  // Fix: Add missing permissionGroups
-  getToken: vi.fn().mockResolvedValue(null),
-  getUserEmail: vi.fn().mockReturnValue(undefined),
-  getUserName: vi.fn().mockReturnValue('User'),
-  getUserAvatar: vi.fn().mockReturnValue(undefined),
-  session: null,
-  signInWithProvider: vi.fn(),
-  signInWithEmail: vi.fn(),
-  signUpWithEmail: vi.fn(),
-  resetPassword: vi.fn(),
-  signOut: vi.fn(),
-  ...overrides
-})
 
 describe('Authentication Protection for Chord Editor', () => {
   beforeEach(() => {

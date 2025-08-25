@@ -94,7 +94,9 @@ export const adminService = {
       // Create role lookup map
       const roleMap = new Map<string, UserRoleRow>()
       roleData.forEach(role => {
-        roleMap.set(role.user_id, role)
+        if (role.user_id) {
+          roleMap.set(role.user_id, role)
+        }
       })
 
       // Map to UserWithRole type
@@ -111,7 +113,7 @@ export const adminService = {
           roleGrantedBy: userRole?.granted_by || null,
           roleGrantedAt: userRole?.granted_at || null,
           roleExpiresAt: userRole?.expires_at || null,
-          isRoleActive: userRole?.is_active || false
+          isRoleActive: userRole?.is_active ?? false
         }
       })
 
@@ -268,7 +270,19 @@ export const adminService = {
           
           if (!userError && userData) {
             userData.forEach(user => {
-              userMap.set(user.id, user)
+              userMap.set(user.id, {
+                id: user.id,
+                email: user.email,
+                fullName: user.full_name || null,
+                avatarUrl: null,
+                createdAt: new Date().toISOString(),
+                lastSignIn: null,
+                role: 'user' as UserRole,
+                roleGrantedBy: null,
+                roleGrantedAt: null,
+                roleExpiresAt: null,
+                isRoleActive: false
+              })
             })
           }
         } catch (error) {
@@ -278,20 +292,20 @@ export const adminService = {
 
       // Map to AuditLogEntry type
       const entries: AuditLogEntry[] = auditData.map((item) => {
-        const user = userMap.get(item.user_id)
-        const performer = userMap.get(item.performed_by)
+        const user = item.user_id ? userMap.get(item.user_id) : undefined
+        const performer = item.performed_by ? userMap.get(item.performed_by) : undefined
         
         return {
           id: item.id,
-          userId: item.user_id,
+          userId: item.user_id || 'unknown',
           userEmail: user?.email || 'Unknown User',
           role: item.role as UserRole,
-          action: item.action,
-          performedBy: item.performed_by,
-          performedByEmail: performer?.email || 'Unknown User',
-          performedAt: item.performed_at,
+          action: item.action as 'grant' | 'revoke' | 'expire',
+          performedBy: item.performed_by || 'system',
+          performedByEmail: performer?.email || 'System',
+          performedAt: item.performed_at || new Date().toISOString(),
           reason: item.reason,
-          metadata: item.metadata
+          metadata: item.metadata as Record<string, unknown> | null
         }
       })
 
@@ -331,8 +345,18 @@ export const adminService = {
         
         if (roleError) {
           console.warn('Error fetching role counts:', roleError)
-        } else {
-          roleCounts = data || []
+        } else if (data) {
+          // Convert raw data to RoleCount format
+          const roleGroups = data.reduce((acc, item) => {
+            const role = item.role as UserRole
+            acc[role] = (acc[role] || 0) + 1
+            return acc
+          }, {} as Record<UserRole, number>)
+          
+          roleCounts = Object.entries(roleGroups).map(([role, count]) => ({
+            role: role as UserRole,
+            count: count as number
+          }))
         }
       } catch (error) {
         console.warn('Error fetching role counts:', error)
@@ -358,11 +382,10 @@ export const adminService = {
         console.warn('Error fetching recent changes:', error)
       }
 
-      // Calculate counts by role
+      // Calculate counts by role (data is already aggregated)
       const roleCountMap = new Map<string, number>()
       roleCounts.forEach((item) => {
-        const role = item.role as string
-        roleCountMap.set(role, (roleCountMap.get(role) || 0) + 1)
+        roleCountMap.set(item.role, item.count)
       })
 
       const stats: AdminStats = {

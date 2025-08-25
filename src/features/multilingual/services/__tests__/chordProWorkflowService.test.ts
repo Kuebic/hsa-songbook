@@ -415,7 +415,7 @@ describe('chordProWorkflowService', () => {
     })
 
     it('should require song', () => {
-      const invalidContext = { ...mockContext, song: null as any }
+      const invalidContext = { ...mockContext, song: null as unknown as Song }
       const result = chordProWorkflowService.validateWorkflowPrerequisites(invalidContext)
       
       expect(result.isValid).toBe(false)

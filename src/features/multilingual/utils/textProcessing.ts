@@ -183,7 +183,7 @@ export const textProcessingUtils = {
 
     return text
       // Remove control characters except newlines and tabs
-      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
+      .replace(/[^\S\n\t]|\p{C}/gu, '')
       // Normalize Unicode
       .normalize('NFC')
       // Limit line length to prevent extremely long lines

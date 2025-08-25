@@ -4,7 +4,7 @@ import type { Arrangement } from '../../types/song.types'
 
 // Create mock chain helper
 const createMockQuery = () => {
-  const mockQuery: Record<string, any> = {
+  const mockQuery = {
     select: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),

@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { ArrangementList } from '../ArrangementList'
 import { useAuth } from '@features/auth'
+import { createAuthMock } from '@shared/test-utils/authMocks'
 import type { Arrangement } from '@features/songs/types/song.types'
 import type { User } from '@features/auth/types'
 
@@ -11,36 +12,8 @@ vi.mock('@features/auth', () => ({
   useAuth: vi.fn()
 }))
 
-// Helper to create complete auth mock
-const createAuthMock = (overrides: Partial<ReturnType<typeof useAuth>> = {}) => ({
-  user: null,
-  userId: undefined,
-  sessionId: undefined,
-  isLoaded: true,
-  isSignedIn: false,
-  isAdmin: false,
-  isAnonymous: false,
-  userRole: 'user' as const,
-  isModerator: false,
-  permissions: {
-    canModerate: false,
-    canAdmin: false
-  },
-  getToken: vi.fn().mockResolvedValue(null),
-  getUserEmail: vi.fn().mockReturnValue(undefined),
-  getUserName: vi.fn().mockReturnValue('User'),
-  getUserAvatar: vi.fn().mockReturnValue(undefined),
-  session: null,
-  signInWithProvider: vi.fn(),
-  signInWithEmail: vi.fn(),
-  signUpWithEmail: vi.fn(),
-  resetPassword: vi.fn(),
-  signInAnonymously: vi.fn(),
-  linkEmailToAnonymousUser: vi.fn(),
-  linkOAuthToAnonymousUser: vi.fn(),
-  signOut: vi.fn(),
-  ...overrides
-})
+// Removed local createAuthMock - using the one from authMocks.ts
+// This ensures all required properties are present
 
 // Mock notification hook
 vi.mock('@shared/components/notifications', () => ({

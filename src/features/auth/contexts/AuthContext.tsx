@@ -5,7 +5,7 @@ import { extractRoleClaims } from '../utils/jwt'
 import type { User, AuthState, UserRole } from '../types'
 import type { Session } from '@supabase/supabase-js'
 
-interface AuthContextValue {
+export interface AuthContextValue {
   // State
   user: User | null
   userId: string | undefined
