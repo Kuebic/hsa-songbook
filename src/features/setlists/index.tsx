@@ -94,19 +94,4 @@ export function SetlistsPage() {
   )
 }
 
-// Export placeholder functions for any required APIs
-export function useSetlists() {
-  return {
-    setlists: [],
-    isLoading: false,
-    error: null
-  }
-}
-
-export function useSetlist(_id: string) {
-  return {
-    setlist: null,
-    isLoading: false,
-    error: null
-  }
-}
+// Hooks moved to ./hooks/useSetlists.ts

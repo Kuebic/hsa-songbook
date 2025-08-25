@@ -18,49 +18,48 @@ export function useScrollDirection(threshold = 10): ScrollDirectionData {
   const ticking = useRef(false)
   const scrollTimer = useRef<NodeJS.Timeout | null>(null)
 
-  const updateScrollDirection = useCallback(
-    rafThrottle(() => {
-      const scrollY = window.scrollY
-      const previousScrollY = scrollData.previousScrollY
+  const updateScrollDirection = useCallback(() => {
+    const scrollY = window.scrollY
+    const previousScrollY = scrollData.previousScrollY
 
-      if (Math.abs(scrollY - previousScrollY) < threshold) {
-        ticking.current = false
-        return
-      }
-
-      const direction = scrollY > previousScrollY ? 'down' : 'up'
-      
-      setScrollData(prev => ({
-        scrollDirection: direction,
-        isScrolling: true,
-        scrollY,
-        previousScrollY: prev.scrollY
-      }))
-
+    if (Math.abs(scrollY - previousScrollY) < threshold) {
       ticking.current = false
+      return
+    }
 
-      // Clear existing timer
-      if (scrollTimer.current) {
-        clearTimeout(scrollTimer.current)
-      }
+    const direction = scrollY > previousScrollY ? 'down' : 'up'
+    
+    setScrollData(prev => ({
+      scrollDirection: direction,
+      isScrolling: true,
+      scrollY,
+      previousScrollY: prev.scrollY
+    }))
 
-      // Set scroll end timer
-      scrollTimer.current = setTimeout(() => {
-        setScrollData(prev => ({
-          ...prev,
-          isScrolling: false
-        }))
-      }, 150)
-    }),
-    [threshold, scrollData.previousScrollY]
-  )
+    ticking.current = false
+
+    // Clear existing timer
+    if (scrollTimer.current) {
+      clearTimeout(scrollTimer.current)
+    }
+
+    // Set scroll end timer
+    scrollTimer.current = setTimeout(() => {
+      setScrollData(prev => ({
+        ...prev,
+        isScrolling: false
+      }))
+    }, 150)
+  }, [threshold, scrollData.previousScrollY])
+
+  const throttledUpdateScrollDirection = rafThrottle(updateScrollDirection)
 
   const onScroll = useCallback(() => {
     if (!ticking.current) {
-      updateScrollDirection()
+      throttledUpdateScrollDirection()
       ticking.current = true
     }
-  }, [updateScrollDirection])
+  }, [throttledUpdateScrollDirection])
 
   useEffect(() => {
     // Set initial scroll position
@@ -120,29 +119,28 @@ export function useScrollAnimation() {
   const [isAtTop, setIsAtTop] = useState(true)
   const [isAtBottom, setIsAtBottom] = useState(false)
 
-  const updateScrollProgress = useCallback(
-    rafThrottle(() => {
-      const scrollTop = window.scrollY
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight
-      const progress = docHeight > 0 ? scrollTop / docHeight : 0
+  const updateScrollProgress = useCallback(() => {
+    const scrollTop = window.scrollY
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight
+    const progress = docHeight > 0 ? scrollTop / docHeight : 0
 
-      setScrollProgress(Math.min(1, Math.max(0, progress)))
-      setIsAtTop(scrollTop <= 10)
-      setIsAtBottom(progress > 0.95)
-    }),
-    []
-  )
+    setScrollProgress(Math.min(1, Math.max(0, progress)))
+    setIsAtTop(scrollTop <= 10)
+    setIsAtBottom(progress > 0.95)
+  }, [])
+
+  const throttledUpdateScrollProgress = rafThrottle(updateScrollProgress)
 
   useEffect(() => {
     updateScrollProgress()
-    window.addEventListener('scroll', updateScrollProgress, { passive: true })
-    window.addEventListener('resize', updateScrollProgress, { passive: true })
+    window.addEventListener('scroll', throttledUpdateScrollProgress, { passive: true })
+    window.addEventListener('resize', throttledUpdateScrollProgress, { passive: true })
 
     return () => {
-      window.removeEventListener('scroll', updateScrollProgress)
-      window.removeEventListener('resize', updateScrollProgress)
+      window.removeEventListener('scroll', throttledUpdateScrollProgress)
+      window.removeEventListener('resize', throttledUpdateScrollProgress)
     }
-  }, [updateScrollProgress])
+  }, [updateScrollProgress, throttledUpdateScrollProgress])
 
   return {
     scrollProgress,
@@ -172,39 +170,38 @@ export function useScrollToElement() {
     })
   }, [])
 
-  const checkVisibility = useCallback(
-    rafThrottle(() => {
-      const newVisibleElements = new Set<string>()
+  const checkVisibility = useCallback(() => {
+    const newVisibleElements = new Set<string>()
 
-      elementsRef.current.forEach((element, id) => {
-        const rect = element.getBoundingClientRect()
-        const isVisible = (
-          rect.top >= 0 &&
-          rect.left >= 0 &&
-          rect.bottom <= window.innerHeight &&
-          rect.right <= window.innerWidth
-        )
+    elementsRef.current.forEach((element, id) => {
+      const rect = element.getBoundingClientRect()
+      const isVisible = (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= window.innerHeight &&
+        rect.right <= window.innerWidth
+      )
 
-        if (isVisible) {
-          newVisibleElements.add(id)
-        }
-      })
+      if (isVisible) {
+        newVisibleElements.add(id)
+      }
+    })
 
-      setVisibleElements(newVisibleElements)
-    }),
-    []
-  )
+    setVisibleElements(newVisibleElements)
+  }, [])
+
+  const throttledCheckVisibility = rafThrottle(checkVisibility)
 
   useEffect(() => {
     checkVisibility()
-    window.addEventListener('scroll', checkVisibility, { passive: true })
-    window.addEventListener('resize', checkVisibility, { passive: true })
+    window.addEventListener('scroll', throttledCheckVisibility, { passive: true })
+    window.addEventListener('resize', throttledCheckVisibility, { passive: true })
 
     return () => {
-      window.removeEventListener('scroll', checkVisibility)
-      window.removeEventListener('resize', checkVisibility)
+      window.removeEventListener('scroll', throttledCheckVisibility)
+      window.removeEventListener('resize', throttledCheckVisibility)
     }
-  }, [checkVisibility])
+  }, [checkVisibility, throttledCheckVisibility])
 
   return {
     visibleElements,

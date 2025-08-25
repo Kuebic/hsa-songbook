@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SongManagementModal } from './SongManagementModal'
-import { useSongModal } from '../contexts/SongModalContext'
+import { useSongModal } from '../hooks/useSongModal'
 import { useNotification } from '@shared/components/notifications'
 import type { Song } from '../types/song.types'
 

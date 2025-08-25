@@ -12,7 +12,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import { useExitSave } from '../../hooks/useExitSave';
 import { useAuth } from '@features/auth';
-import { useTheme } from '@shared/contexts/ThemeContext';
+import { useTheme } from '@shared/contexts/useTheme';
 import { useResponsiveLayout } from './hooks/useResponsiveLayout';
 import { useVirtualKeyboard } from './hooks/useVirtualKeyboard';
 import { useMobileAutocomplete } from './hooks/useMobileAutocomplete';

@@ -107,7 +107,7 @@ export function CollapsibleToolbar({
     toolbar.isPinned,
     toolbar.isUserHidden,
     toolbar
-  ]) // eslint-disable-line react-hooks/exhaustive-deps
+  ])
 
   // Apply scroll behavior settings
   useEffect(() => {

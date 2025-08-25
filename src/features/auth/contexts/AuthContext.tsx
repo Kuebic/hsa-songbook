@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
+import { createContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 import { supabase, getCurrentSession } from '../../../lib/supabase'
 import { logger } from '../../../lib/logger'
 import { extractRoleClaims } from '../utils/jwt'
@@ -39,7 +39,7 @@ export interface AuthContextValue {
   signOut: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined)
+export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 // Module-level singleton for sync operations
 const globalSyncState = {
@@ -423,10 +423,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
-}
+// Hook moved to ../hooks/useAuth.ts

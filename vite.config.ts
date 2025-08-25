@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // PWA temporarily disabled - set to true to re-enable offline functionality
-const ENABLE_PWA = false
+const ENABLE_PWA = true
 
 // https://vite.dev/config/
 export default defineConfig(() => ({

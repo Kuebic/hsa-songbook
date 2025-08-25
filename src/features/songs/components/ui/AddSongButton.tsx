@@ -1,5 +1,5 @@
 import { useAuth } from '@features/auth/hooks/useAuth'
-import { useSongModal } from '../../contexts/SongModalContext'
+import { useSongModal } from '../../hooks/useSongModal'
 
 export function AddSongButton() {
   const { isSignedIn, isLoaded } = useAuth()

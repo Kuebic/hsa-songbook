@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { useTheme } from '@shared/contexts/ThemeContext'
-import type { Theme } from '@shared/contexts/ThemeContext'
+import { useTheme } from '@shared/contexts/useTheme'
+import type { Theme } from '@shared/contexts/theme-types'
 
 // Re-export type for backward compatibility
 export type EditorTheme = Theme

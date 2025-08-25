@@ -50,7 +50,7 @@ export function useArrangementManager(options: UseArrangementManagerOptions = {}
       }
       throw error
     }
-  }, [mutationResult.createArrangement, autoRefresh, queryResult.refreshArrangements])
+  }, [mutationResult, queryResult, autoRefresh])
   
   const updateArrangementWithRefresh = useCallback(async (
     id: string, 
@@ -68,7 +68,7 @@ export function useArrangementManager(options: UseArrangementManagerOptions = {}
       }
       throw error
     }
-  }, [mutationResult.updateArrangement, autoRefresh, queryResult.refreshArrangements])
+  }, [mutationResult, queryResult, autoRefresh])
   
   const deleteArrangementWithRefresh = useCallback(async (id: string) => {
     try {
@@ -82,7 +82,7 @@ export function useArrangementManager(options: UseArrangementManagerOptions = {}
       }
       throw error
     }
-  }, [mutationResult.deleteArrangement, autoRefresh, queryResult.refreshArrangements])
+  }, [mutationResult, queryResult, autoRefresh])
   
   const rateArrangementWithRefresh = useCallback(async (id: string, rating: number) => {
     try {
@@ -96,12 +96,12 @@ export function useArrangementManager(options: UseArrangementManagerOptions = {}
       }
       throw error
     }
-  }, [mutationResult.rateArrangement, autoRefresh, queryResult.refreshArrangements])
+  }, [mutationResult, queryResult, autoRefresh])
   
   const clearAllErrors = useCallback(() => {
     queryResult.clearError()
     mutationResult.clearError()
-  }, [queryResult.clearError, mutationResult.clearError])
+  }, [queryResult, mutationResult])
   
   return {
     // Query state and methods

@@ -73,37 +73,36 @@ export function useViewport(): ViewportData {
     }
   }
 
-  const handleResize = useCallback(
-    debounce(() => {
-      setViewport(calculateViewport())
-    }, 100),
-    []
-  )
+  const handleResize = useCallback(() => {
+    setViewport(calculateViewport())
+  }, [])
+
+  const debouncedHandleResize = debounce(handleResize, 100)
 
   useEffect(() => {
     // Standard resize events
-    window.addEventListener('resize', handleResize)
-    window.addEventListener('orientationchange', handleResize)
+    window.addEventListener('resize', debouncedHandleResize)
+    window.addEventListener('orientationchange', debouncedHandleResize)
     
     // Visual Viewport API for better mobile support
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleResize)
-      window.visualViewport.addEventListener('scroll', handleResize)
+      window.visualViewport.addEventListener('resize', debouncedHandleResize)
+      window.visualViewport.addEventListener('scroll', debouncedHandleResize)
     }
 
     // Initial calculation
     setViewport(calculateViewport())
 
     return () => {
-      window.removeEventListener('resize', handleResize)
-      window.removeEventListener('orientationchange', handleResize)
+      window.removeEventListener('resize', debouncedHandleResize)
+      window.removeEventListener('orientationchange', debouncedHandleResize)
       
       if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', handleResize)
-        window.visualViewport.removeEventListener('scroll', handleResize)
+        window.visualViewport.removeEventListener('resize', debouncedHandleResize)
+        window.visualViewport.removeEventListener('scroll', debouncedHandleResize)
       }
     }
-  }, [handleResize])
+  }, [debouncedHandleResize])
 
   return viewport
 }
@@ -119,7 +118,9 @@ export function useViewportChange(
 
   useEffect(() => {
     callback(viewport)
-  }, deps.map(dep => viewport[dep]))
+    // Note: Using computed dependencies - ESLint warning is expected for dynamic deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [callback, viewport, ...deps.map(dep => viewport[dep])])
 }
 
 /**

@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { useTheme } from '@shared/contexts/ThemeContext'
+import { useTheme } from '@shared/contexts/useTheme'
 
 export interface ArrangementStagePreferences {
   arrangementId: string

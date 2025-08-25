@@ -11,7 +11,7 @@ import { chordPreferencesService } from '../services/chordPreferencesService';
 import { ChordSheetFormatterFactory } from '../formatters/ChordSheetFormatterFactory';
 import { chordRenderCache } from '../services/ChordRenderCacheService';
 import { PerformanceMonitor } from '../components/ChordProEditor/utils/performance';
-import { useTheme } from '@shared/contexts/ThemeContext';
+import { useTheme } from '@shared/contexts/useTheme';
 import type { ChordDisplayPreferences, RenderOptions } from '../types/preferences.types';
 
 export interface UseUnifiedChordRendererReturn {

@@ -197,7 +197,8 @@ export function useRealtimeSubscription<T extends Record<string, unknown> = Reco
         subscriptionIdRef.current = null
       }
     }
-  }, [table, filter?.column, filter?.value, ...dependencies])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table, filter, listener, ...dependencies])
   
   // Cleanup on unmount
   useEffect(() => {

@@ -5,7 +5,6 @@ import { ThemeContext } from './theme-context';
 
 // Re-export types for backward compatibility
 export type { Theme, ThemeContextType } from './theme-types';
-export { useTheme } from './useTheme';
 
 const getInitialTheme = (): Theme => {
   if (typeof window !== 'undefined') {

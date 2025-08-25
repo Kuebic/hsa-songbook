@@ -1,9 +1,9 @@
 import { render as rtlRender, type RenderOptions } from '@testing-library/react'
-import type { ReactElement, ReactNode } from 'react'
-import { MemoryRouter, type MemoryRouterProps } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from '@shared/contexts/ThemeContext'
+import type { ReactElement } from 'react'
+import type { MemoryRouterProps } from 'react-router-dom'
+import type { QueryClient } from '@tanstack/react-query'
 import type { Theme } from '@shared/contexts/theme-types'
+import { AllTheProviders } from './TestProviders'
 
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   initialTheme?: Theme
@@ -11,49 +11,7 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   queryClient?: QueryClient
 }
 
-function createTestQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        gcTime: 0,
-        staleTime: 0,
-      },
-      mutations: {
-        retry: false,
-      },
-    },
-  })
-}
-
-interface AllTheProvidersProps {
-  children: ReactNode
-  initialTheme?: Theme
-  routerProps?: MemoryRouterProps
-  queryClient?: QueryClient
-}
-
-function AllTheProviders({ 
-  children, 
-  initialTheme = 'dark',
-  routerProps = {},
-  queryClient = createTestQueryClient()
-}: AllTheProvidersProps) {
-  // Mock localStorage for theme persistence
-  if (initialTheme) {
-    localStorage.setItem('app-theme', initialTheme)
-  }
-  
-  return (
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter {...routerProps}>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
-      </MemoryRouter>
-    </QueryClientProvider>
-  )
-}
+// Component and utility moved to TestProviders.tsx
 
 function customRender(
   ui: ReactElement,
@@ -84,4 +42,4 @@ function customRender(
 // eslint-disable-next-line react-refresh/only-export-components
 export * from '@testing-library/react'
  
-export { customRender as render, createTestQueryClient }
+export { customRender as render }

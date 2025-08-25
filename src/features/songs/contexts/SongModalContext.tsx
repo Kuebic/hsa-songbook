@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useState, useCallback, type ReactNode } from 'react'
 import type { Song } from '../types/song.types'
 
-interface SongModalContextType {
+export interface SongModalContextType {
   isOpen: boolean
   selectedSong: Song | undefined
   openCreateModal: () => void
@@ -50,10 +50,4 @@ export function SongModalProvider({ children }: SongModalProviderProps) {
   )
 }
 
-export function useSongModal(): SongModalContextType {
-  const context = useContext(SongModalContext)
-  if (!context) {
-    throw new Error('useSongModal must be used within a SongModalProvider')
-  }
-  return context
-}
+// Hook moved to ../hooks/useSongModal.ts

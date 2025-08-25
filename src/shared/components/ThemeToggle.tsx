@@ -1,4 +1,4 @@
-import { useTheme } from '@shared/contexts/ThemeContext';
+import { useTheme } from '@shared/contexts/useTheme';
 import type { Theme } from '@shared/contexts/ThemeContext';
 
 const themeIcons: Record<Theme, string> = {

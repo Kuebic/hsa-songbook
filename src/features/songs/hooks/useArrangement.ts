@@ -10,7 +10,7 @@ export interface UseArrangementOptions {
 }
 
 export function useArrangement(id: string, options: UseArrangementOptions = {}) {
-  const { enabled = true, includeChordData = true } = options
+  const { enabled = true } = options
   const [arrangement, setArrangement] = useState<Arrangement | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -32,7 +32,7 @@ export function useArrangement(id: string, options: UseArrangementOptions = {}) 
     } finally {
       setLoading(false)
     }
-  }, [id, includeChordData, enabled])
+  }, [id, enabled])
 
   const refreshArrangement = useCallback(() => {
     fetchArrangement()
@@ -59,7 +59,7 @@ export function useArrangement(id: string, options: UseArrangementOptions = {}) 
 }
 
 export function useArrangementBySlug(slug: string, options: UseArrangementOptions = {}) {
-  const { enabled = true, includeChordData = true } = options
+  const { enabled = true } = options
   const [arrangement, setArrangement] = useState<Arrangement | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -81,7 +81,7 @@ export function useArrangementBySlug(slug: string, options: UseArrangementOption
     } finally {
       setLoading(false)
     }
-  }, [slug, includeChordData, enabled])
+  }, [slug, enabled])
 
   const refreshArrangement = useCallback(() => {
     fetchArrangement()

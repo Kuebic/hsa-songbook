@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { 
   LanguageCode, 
@@ -21,19 +21,9 @@ export interface LanguageContextType extends LanguageContextState, LanguageConte
 /**
  * Language context for managing multilingual state
  */
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-/**
- * Hook to use the language context
- * @throws {Error} If used outside of LanguageProvider
- */
-export function useLanguage(): LanguageContextType {
-  const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
-  }
-  return context;
-}
+// Hook moved to ../hooks/useLanguage.ts
 
 /**
  * Get initial language preference from localStorage
@@ -68,7 +58,7 @@ const saveLanguagePreference = (key: string, language: LanguageCode): void => {
 /**
  * Language provider component props
  */
-interface LanguageProviderProps {
+export interface LanguageProviderProps {
   children: ReactNode;
   initialLanguage?: LanguageCode;
   enablePersistence?: boolean;
@@ -237,21 +227,7 @@ export function LanguageProvider({
   );
 }
 
-/**
- * HOC to wrap components with LanguageProvider
- */
-export function withLanguageProvider<P extends object>(
-  Component: React.ComponentType<P>,
-  providerProps?: Omit<LanguageProviderProps, 'children'>
-) {
-  return function WrappedComponent(props: P) {
-    return (
-      <LanguageProvider {...providerProps}>
-        <Component {...props} />
-      </LanguageProvider>
-    );
-  };
-}
+// HOC moved to ../utils/withLanguageProvider.tsx
 
 // Re-export types for convenience
 export type { LanguageCode, MultilingualText } from '../types/multilingual.types';
