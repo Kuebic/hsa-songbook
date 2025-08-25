@@ -1,0 +1,454 @@
+# HSA Songbook Monitoring Configuration
+# This configuration defines metrics, alerts, and dashboards for the data layer
+
+version: '1.0'
+
+# Metrics to collect
+metrics:
+  # Query performance metrics
+  query_performance:
+    - name: query_execution_time
+      type: histogram
+      description: Time taken to execute database queries
+      unit: milliseconds
+      buckets: [10, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+      labels:
+        - table
+        - operation
+        - cache_hit
+      targets:
+        p50: < 200ms
+        p95: < 500ms
+        p99: < 1000ms
+    
+    - name: query_count
+      type: counter
+      description: Total number of queries executed
+      labels:
+        - table
+        - operation
+        - status
+    
+    - name: slow_query_count
+      type: counter
+      description: Number of queries exceeding threshold
+      labels:
+        - table
+        - threshold
+    
+  # Cache metrics
+  cache_performance:
+    - name: cache_hit_rate
+      type: gauge
+      description: Percentage of queries served from cache
+      unit: percentage
+      target: > 60%
+    
+    - name: cache_size
+      type: gauge
+      description: Number of entries in cache
+      max: 500
+    
+    - name: cache_memory_usage
+      type: gauge
+      description: Memory used by cache
+      unit: bytes
+      max: 104857600  # 100MB
+    
+    - name: cache_evictions
+      type: counter
+      description: Number of cache evictions
+      labels:
+        - reason  # ttl, lru, memory
+    
+  # Error metrics
+  error_tracking:
+    - name: error_rate
+      type: gauge
+      description: Percentage of failed queries
+      unit: percentage
+      target: < 0.1%
+      critical: > 1%
+    
+    - name: error_count
+      type: counter
+      description: Total number of errors
+      labels:
+        - error_type
+        - table
+        - operation
+    
+  # Connection metrics
+  connection_pool:
+    - name: active_connections
+      type: gauge
+      description: Currently active database connections
+      max: 100
+      warning: 80
+      critical: 95
+    
+    - name: connection_wait_time
+      type: histogram
+      description: Time waiting for connection
+      unit: milliseconds
+      buckets: [0, 10, 50, 100, 500, 1000]
+      targets:
+        p95: < 100ms
+    
+    - name: connection_pool_utilization
+      type: gauge
+      description: Percentage of connection pool in use
+      unit: percentage
+      warning: > 70%
+      critical: > 90%
+    
+  # Resource metrics
+  resource_usage:
+    - name: database_cpu_usage
+      type: gauge
+      description: Database CPU utilization
+      unit: percentage
+      warning: > 70%
+      critical: > 90%
+    
+    - name: database_memory_usage
+      type: gauge
+      description: Database memory utilization
+      unit: percentage
+      warning: > 80%
+      critical: > 95%
+    
+    - name: database_disk_io
+      type: gauge
+      description: Database disk I/O operations
+      unit: ops/sec
+      warning: > 1000
+    
+  # Business metrics
+  business_metrics:
+    - name: active_users
+      type: gauge
+      description: Number of active users
+      window: 5m
+    
+    - name: content_created
+      type: counter
+      description: New content created
+      labels:
+        - content_type  # song, arrangement, setlist
+    
+    - name: search_queries
+      type: counter
+      description: Number of search queries
+      labels:
+        - search_type  # text, filter, combined
+
+# Alert definitions
+alerts:
+  # Performance alerts
+  performance:
+    - name: slow_query_warning
+      condition: query_execution_time.p95 > 1000
+      window: 5m
+      severity: warning
+      description: "95th percentile query time exceeds 1 second"
+      action:
+        - log
+        - slack_notification
+    
+    - name: critical_query_time
+      condition: query_execution_time.p99 > 5000
+      window: 1m
+      severity: critical
+      description: "99th percentile query time exceeds 5 seconds"
+      action:
+        - log
+        - page_on_call
+        - create_incident
+    
+    - name: degraded_cache_performance
+      condition: cache_hit_rate < 40
+      window: 10m
+      severity: warning
+      description: "Cache hit rate below 40%"
+      action:
+        - log
+        - investigate_cache
+    
+  # Error alerts
+  errors:
+    - name: high_error_rate
+      condition: error_rate > 1
+      window: 5m
+      severity: warning
+      description: "Error rate exceeds 1%"
+      action:
+        - log
+        - slack_notification
+        - analyze_errors
+    
+    - name: critical_error_spike
+      condition: error_rate > 5
+      window: 1m
+      severity: critical
+      description: "Error rate exceeds 5%"
+      action:
+        - log
+        - page_on_call
+        - enable_circuit_breaker
+    
+  # Resource alerts
+  resources:
+    - name: connection_pool_exhaustion
+      condition: connection_pool_utilization > 90
+      window: 1m
+      severity: critical
+      description: "Connection pool near exhaustion"
+      action:
+        - log
+        - scale_connections
+        - page_on_call
+    
+    - name: high_memory_usage
+      condition: database_memory_usage > 90
+      window: 5m
+      severity: warning
+      description: "Database memory usage above 90%"
+      action:
+        - log
+        - analyze_memory
+        - consider_scaling
+    
+    - name: disk_io_spike
+      condition: database_disk_io > 2000
+      window: 5m
+      severity: warning
+      description: "High disk I/O detected"
+      action:
+        - log
+        - analyze_queries
+        - check_indexes
+    
+  # Business alerts
+  business:
+    - name: unusual_traffic_spike
+      condition: active_users > historical_p99 * 2
+      window: 5m
+      severity: info
+      description: "Unusual traffic spike detected"
+      action:
+        - log
+        - monitor_closely
+        - prepare_scaling
+    
+    - name: search_degradation
+      condition: search_queries.error_rate > 5
+      window: 5m
+      severity: warning
+      description: "High search failure rate"
+      action:
+        - log
+        - check_search_index
+        - notify_team
+
+# Dashboard panels
+dashboards:
+  - name: overview
+    title: "Data Layer Overview"
+    refresh: 30s
+    panels:
+      - title: "Request Rate"
+        type: line_chart
+        metric: query_count
+        aggregation: rate
+        period: 1m
+        
+      - title: "Response Time"
+        type: line_chart
+        metrics:
+          - query_execution_time.p50
+          - query_execution_time.p95
+          - query_execution_time.p99
+        period: 1m
+        
+      - title: "Error Rate"
+        type: line_chart
+        metric: error_rate
+        period: 1m
+        threshold_lines:
+          - value: 1
+            color: yellow
+            label: "Warning"
+          - value: 5
+            color: red
+            label: "Critical"
+        
+      - title: "Cache Hit Rate"
+        type: gauge
+        metric: cache_hit_rate
+        min: 0
+        max: 100
+        thresholds:
+          - value: 60
+            color: green
+          - value: 40
+            color: yellow
+          - value: 20
+            color: red
+    
+  - name: performance
+    title: "Performance Details"
+    refresh: 60s
+    panels:
+      - title: "Query Latency Distribution"
+        type: heatmap
+        metric: query_execution_time
+        group_by: table
+        
+      - title: "Slow Queries"
+        type: table
+        query: |
+          SELECT 
+            timestamp,
+            table,
+            operation,
+            duration,
+            query
+          FROM slow_queries
+          WHERE timestamp > NOW() - INTERVAL '1 hour'
+          ORDER BY duration DESC
+          LIMIT 20
+        
+      - title: "Operations by Table"
+        type: bar_chart
+        metric: query_count
+        group_by: 
+          - table
+          - operation
+        
+      - title: "Cache Performance"
+        type: multi_line
+        metrics:
+          - cache_size
+          - cache_evictions
+          - cache_memory_usage
+    
+  - name: health
+    title: "System Health"
+    refresh: 10s
+    panels:
+      - title: "Connection Pool"
+        type: gauge
+        metric: connection_pool_utilization
+        min: 0
+        max: 100
+        
+      - title: "Database Resources"
+        type: stacked_area
+        metrics:
+          - database_cpu_usage
+          - database_memory_usage
+        
+      - title: "Error Distribution"
+        type: pie_chart
+        metric: error_count
+        group_by: error_type
+        
+      - title: "Health Score"
+        type: single_stat
+        calculation: |
+          100 - (
+            (error_rate * 10) +
+            (slow_query_rate * 5) +
+            ((100 - cache_hit_rate) * 0.5)
+          )
+
+# Notification channels
+notifications:
+  slack:
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channel: "#hsa-songbook-alerts"
+    username: "HSA Monitor"
+    icon_emoji: ":chart_with_upwards_trend:"
+    
+  pagerduty:
+    integration_key: "${PAGERDUTY_KEY}"
+    
+  email:
+    smtp_host: "${SMTP_HOST}"
+    smtp_port: 587
+    from: "monitoring@hsa-songbook.com"
+    to:
+      - "dev-team@hsa-songbook.com"
+      - "ops-team@hsa-songbook.com"
+
+# Logging configuration
+logging:
+  level: INFO
+  slow_query_threshold: 1000ms
+  format: json
+  outputs:
+    - type: console
+      level: INFO
+    - type: file
+      path: /var/log/hsa-songbook/queries.log
+      level: DEBUG
+      rotation:
+        size: 100MB
+        keep: 7
+    - type: elasticsearch
+      url: "${ELASTICSEARCH_URL}"
+      index: "hsa-songbook-queries"
+      level: INFO
+
+# Health check endpoints
+health_checks:
+  - name: database_connectivity
+    endpoint: /health/db
+    interval: 30s
+    timeout: 5s
+    
+  - name: cache_health
+    endpoint: /health/cache
+    interval: 60s
+    timeout: 2s
+    
+  - name: query_performance
+    endpoint: /health/performance
+    interval: 60s
+    timeout: 10s
+    
+# Retention policies
+retention:
+  metrics:
+    raw: 7d
+    hourly: 30d
+    daily: 90d
+    
+  logs:
+    debug: 1d
+    info: 7d
+    warning: 30d
+    error: 90d
+    
+  slow_queries: 30d
+  
+# Auto-scaling rules
+autoscaling:
+  database_connections:
+    min: 10
+    max: 100
+    target_utilization: 70
+    scale_up_threshold: 80
+    scale_down_threshold: 30
+    
+  cache_size:
+    min: 50
+    max: 500
+    target_hit_rate: 60
+    
+  read_replicas:
+    min: 1
+    max: 3
+    target_cpu: 60
+    target_lag: 100ms
