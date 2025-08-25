@@ -1,3 +1,8 @@
+.moderationBadgeContainer {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
 .songCard {
   padding: 1rem;
   border: 1px solid var(--color-border);

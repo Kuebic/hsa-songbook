@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@features/auth'
+import { useRoles } from '@features/auth/hooks/useRoles'
+import { ModerationBadge } from '@features/moderation'
 import { useNotification } from '@shared/components/notifications'
 import { getArrangementDisplayName } from '../../utils/arrangementNaming'
 import type { Arrangement } from '@features/songs/types/song.types'
@@ -28,7 +30,8 @@ export function ArrangementList({
   songTitle,
   songSlug
 }: ArrangementListProps) {
-  const { isSignedIn, isAdmin, userId } = useAuth()
+  const { isSignedIn, userId } = useAuth()
+  const { isModerator, isAdmin } = useRoles()
   const { addNotification } = useNotification()
   const navigate = useNavigate()
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -255,6 +258,16 @@ export function ArrangementList({
               >
                 {getArrangementDisplayName(arrangement, 'song', songTitle)}
               </div>
+              
+              {/* Show moderation badge for moderators */}
+              {(isModerator || isAdmin) && arrangement.metadata && (
+                <div style={{ marginTop: '4px', marginBottom: '4px' }}>
+                  <ModerationBadge 
+                    moderationStatus={arrangement.metadata.moderationStatus}
+                    isPrivate={!arrangement.metadata.isPublic}
+                  />
+                </div>
+              )}
               
               <div style={metaStyles}>
                 {arrangement.key && <span>Key: {arrangement.key}</span>}

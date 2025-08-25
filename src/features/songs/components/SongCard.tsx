@@ -1,6 +1,8 @@
 import { memo, useCallback } from 'react'
 import type { Song } from '../types/song.types'
 import { SongActions } from './ui/SongActions'
+import { ModerationBadge } from '@features/moderation'
+import { useRoles } from '@features/auth/hooks/useRoles'
 import styles from './SongCard.module.css'
 
 interface SongCardProps {
@@ -10,6 +12,7 @@ interface SongCardProps {
 }
 
 export const SongCard = memo(function SongCard({ song, onClick, onDelete }: SongCardProps) {
+  const { isModerator, isAdmin } = useRoles()
   const handleClick = useCallback(() => {
     onClick?.(song)
   }, [onClick, song])
@@ -29,6 +32,15 @@ export const SongCard = memo(function SongCard({ song, onClick, onDelete }: Song
       <p className={styles.artist}>
         {song.artist} {song.compositionYear && `(${song.compositionYear})`}
       </p>
+      {/* Show moderation badge for moderators */}
+      {(isModerator || isAdmin) && song.metadata && (
+        <div className={styles.moderationBadgeContainer}>
+          <ModerationBadge 
+            moderationStatus={song.metadata.moderationStatus}
+            isPrivate={!song.metadata.isPublic}
+          />
+        </div>
+      )}
       <div className={styles.themesContainer}>
         {song.themes?.map(theme => (
           <span 
