@@ -21,7 +21,7 @@ The HSA Songbook moderation system is designed to maintain content quality and c
 
 ### Key Components
 
-1. **Moderation Dashboard** (`/moderation`) - Central interface for content review
+1. **Moderation Dashboard** (`/moderation`) - Central interface for content reviewT
 2. **Content Queue** - Prioritized list of items requiring review
 3. **Reporting System** - Community-driven flagging mechanism
 4. **Audit Log** - Complete history of all moderation actions
