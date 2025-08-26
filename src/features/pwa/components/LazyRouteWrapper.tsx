@@ -1,4 +1,4 @@
-import React, { Component, Suspense } from 'react'
+import * as React from 'react'
 import type { ReactNode } from 'react'
 import { OfflineFallback } from './OfflineFallback'
 
@@ -12,7 +12,7 @@ interface State {
   error: Error | null
 }
 
-class LazyRouteErrorBoundary extends Component<Props, State> {
+class LazyRouteErrorBoundary extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = { hasError: false, error: null }
@@ -109,9 +109,9 @@ interface LazyRouteWrapperProps {
 export function LazyRouteWrapper({ children, pageName }: LazyRouteWrapperProps) {
   return (
     <LazyRouteErrorBoundary pageName={pageName}>
-      <Suspense fallback={<RouteLoader />}>
+      <React.Suspense fallback={<RouteLoader />}>
         {children}
-      </Suspense>
+      </React.Suspense>
     </LazyRouteErrorBoundary>
   )
 }
