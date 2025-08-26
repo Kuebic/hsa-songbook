@@ -279,7 +279,7 @@ INSERT INTO public.arrangements (
         'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c11',
         'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b11',
         'Original Key',
-        'original',
+        'arr-xk9f2',
         '{title:Amazing Grace}
 {key:G}
 {tempo:72}
@@ -322,7 +322,7 @@ Than [Em]when we [D]first be[G]gun',
         'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c12',
         'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b11',
         'Capo 5 (Key of C)',
-        'capo-5',
+        'arr-m3n7q',
         '{title:Amazing Grace}
 {key:C}
 {capo:5}
@@ -351,7 +351,7 @@ Was [Em]blind but [D]now I [G]see',
         'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c13',
         'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b12',
         'Original Key',
-        'original',
+        'arr-p8v2w',
         '{title:How Great Thou Art}
 {key:A}
 {tempo:68}
@@ -400,7 +400,7 @@ He bled and [A]died to [E]take away my [A]sin
         'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c14',
         'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b14',
         'Original Key',
-        'original',
+        'arr-t5k9j',
         '{title:In Christ Alone}
 {key:D}
 {tempo:76}
@@ -441,7 +441,7 @@ For [D]every [G]sin on [D]Him was [A]laid
         'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c15',
         'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b15',
         'Original Key',
-        'original',
+        'arr-b2m4x',
         '{title:10,000 Reasons (Bless the Lord)}
 {key:C}
 {tempo:73}
@@ -484,7 +484,7 @@ For [C]all Your [G]goodness, I will [D]keep on [Em]singing
         'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c16',
         'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b17',
         'Traditional',
-        'traditional',
+        'arr-h6j2r',
         '{title:Silent Night}
 {key:C}
 {tempo:60}
@@ -529,7 +529,7 @@ Jesus, [G]Lord, at thy [C]birth',
         'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c17',
         'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b19',
         'Original Key',
-        'original',
+        'arr-w7n3s',
         '{title:주 하나님 지으신 모든 세계}
 {key:G}
 {tempo:72}
