@@ -1,5 +1,5 @@
 'use client';
-import { Component } from 'react';
+import React from 'react';
 import type { ComponentType, ReactNode, ErrorInfo as ReactErrorInfo } from 'react';
 import { ErrorFallback } from './ErrorFallback';
 import { errorReportingService } from '../services/errorReportingService';
@@ -23,7 +23,7 @@ interface ErrorBoundaryProps {
   maxRetries?: number;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private retryTimeouts: Set<number> = new Set();
   private categorizeError?: (error: Error) => CategorizedError;
 
