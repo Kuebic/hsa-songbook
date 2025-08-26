@@ -1,4 +1,6 @@
-import React, { Component, type ReactNode, type ErrorInfo as ReactErrorInfo } from 'react';
+import React from 'react';
+import { Component } from 'react';
+import type { ReactNode, ErrorInfo as ReactErrorInfo } from 'react';
 import { ErrorFallback } from './ErrorFallback';
 import { errorReportingService } from '../services/errorReportingService';
 import type { 
