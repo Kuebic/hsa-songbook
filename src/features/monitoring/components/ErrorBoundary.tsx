@@ -1,6 +1,8 @@
 'use client';
-import React from 'react';
-import type { ComponentType, ReactNode, ErrorInfo as ReactErrorInfo } from 'react';
+// WORKAROUND for React 19 + Vite production build issue  
+// Using namespace import (*) which is more reliable for CommonJS interop in production
+import * as React from 'react';
+import type { ComponentType, ReactNode, ErrorInfo } from 'react';
 import { ErrorFallback } from './ErrorFallback';
 import { errorReportingService } from '../services/errorReportingService';
 import type { 
@@ -14,7 +16,7 @@ import type {
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ComponentType<ErrorFallbackProps>;
-  onError?: (error: Error, errorInfo: ReactErrorInfo) => void;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
   level?: ErrorLevel;
   resetKeys?: Array<string | number>;
   resetOnPropsChange?: boolean;
@@ -23,6 +25,7 @@ interface ErrorBoundaryProps {
   maxRetries?: number;
 }
 
+// Use React.Component from namespace import which is more reliable in production builds
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private retryTimeouts: Set<number> = new Set();
   private categorizeError?: (error: Error) => CategorizedError;
@@ -54,7 +57,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     }
   }
 
-  componentDidCatch(error: Error, errorInfo: ReactErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const { onError, level = 'component', enableAutoRecovery = true, maxRetries = 3 } = this.props;
     
     // Log to console in development

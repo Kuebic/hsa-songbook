@@ -258,7 +258,9 @@ export const treeshakeOptions = {
 export const commonjsOptions = {
   transformMixedEsModules: true,
   defaultIsModuleExports: true,
-  strictRequires: true
+  strictRequires: true,
+  // Ensure React is properly transformed
+  esmExternals: true
 }
 
 /**
@@ -305,11 +307,14 @@ export const externalLibraries: string[] = [
 
 /**
  * Vite optimize deps configuration
+ * Ensure React is properly bundled to avoid Component undefined errors
  */
 export const optimizeDeps = {
   include: [
     'react',
     'react-dom',
+    'react/jsx-runtime',
+    'react/jsx-dev-runtime',
     'react-router-dom',
     '@supabase/supabase-js'
   ],
@@ -318,5 +323,7 @@ export const optimizeDeps = {
   ],
   esbuildOptions: {
     target: 'es2020'
-  }
+  },
+  // Force dependency pre-bundling even in build mode
+  force: true
 }
