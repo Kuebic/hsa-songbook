@@ -199,7 +199,7 @@ export type WebVitalsReporter = (metric: Metric) => void;
 
 #### 2.4 Error Boundary Component (components/ErrorBoundary.tsx)
 ```typescript
-import React, { Component, ReactNode, ErrorInfo as ReactErrorInfo } from 'react';
+import React, { type Component, ReactNode, ErrorInfo as ReactErrorInfo } from 'react';
 import { ErrorFallback } from './ErrorFallback';
 import { errorReportingService } from '../services/errorReportingService';
 import type { ErrorBoundaryState, ErrorFallbackProps } from '../types/monitoring.types';
