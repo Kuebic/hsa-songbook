@@ -323,7 +323,5 @@ export const optimizeDeps = {
   ],
   esbuildOptions: {
     target: 'es2020'
-  },
-  // Force dependency pre-bundling even in build mode
-  force: true
+  }
 }
