@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { supabase, getCurrentSession } from '../../../lib/supabase'
 import { logger } from '../../../lib/logger'
 import { extractRoleClaims } from '../utils/jwt'
@@ -12,6 +13,7 @@ const globalSyncState = {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient()
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     session: null,
@@ -287,6 +289,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       logger.info('Supabase sign out succeeded')
       
+      // Clear React Query cache to ensure fresh data for anonymous user
+      queryClient.clear()
+      logger.info('React Query cache cleared')
+      
       // Clear local auth state as confirmation
       setAuthState({
         user: null,
@@ -296,6 +302,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
     } catch (error) {
       logger.error('Error or timeout during sign out:', error)
+      
+      // Clear React Query cache even on error
+      queryClient.clear()
+      logger.info('React Query cache cleared (after error)')
       
       // Force clear local state even if Supabase fails
       setAuthState({
@@ -320,7 +330,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logger.info('Local auth state cleared despite Supabase error')
       // Don't throw - we've cleared local state, that's enough
     }
-  }, [])
+  }, [queryClient])
 
   const getUserEmail = useCallback(() => authState.user?.email, [authState.user])
   

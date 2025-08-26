@@ -27,28 +27,19 @@ export function UserMenu() {
       console.log('Attempting to sign out...')
       setIsOpen(false) // Close menu immediately for better UX
       
-      // Call signOut with built-in timeout protection
+      // Call signOut which now handles cache clearing
       await signOut()
       
       console.log('Sign out completed, navigating to home...')
       
-      // Navigate to home
+      // Navigate to home (no reload needed - cache is properly cleared in AuthContext)
       navigate('/')
-      
-      // Force reload to ensure complete state reset
-      // This is a fallback to ensure all cached state is cleared
-      setTimeout(() => {
-        window.location.reload()
-      }, 100)
     } catch (error) {
       console.error('Error during sign out:', error)
       
-      // Even on error, still navigate and reload
-      // The AuthContext will have cleared local state
+      // Even on error, navigate to home
+      // The AuthContext will have cleared local state and cache
       navigate('/')
-      setTimeout(() => {
-        window.location.reload()
-      }, 100)
     }
   }
 
