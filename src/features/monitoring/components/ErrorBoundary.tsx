@@ -1,7 +1,9 @@
-import { Component } from 'react';
+import * as React from 'react';
 import type { ComponentType, ReactNode, ErrorInfo as ReactErrorInfo } from 'react';
 import { ErrorFallback } from './ErrorFallback';
 import { errorReportingService } from '../services/errorReportingService';
+
+const { Component } = React;
 import type { 
   ErrorLevel,
   CategorizedError,
