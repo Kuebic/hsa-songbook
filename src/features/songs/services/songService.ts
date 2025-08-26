@@ -236,7 +236,7 @@ async function getAllSongs(filter?: SongFilter): Promise<Song[]> {
       throw new APIError(result.error.message, result.error.statusCode || 500, result.error.code)
     }
 
-    const songs = (result.data as any[] || []).map(mapSupabaseSongToSong)
+    const songs = (result.data as SupabaseSong[] || []).map(mapSupabaseSongToSong)
     
     // Cache the result
     setCachedResult(cacheKey, songs)
@@ -366,7 +366,7 @@ async function getArrangementsBySongId(songId: string): Promise<Arrangement[]> {
       throw new APIError(result.error.message, result.error.statusCode || 500, result.error.code)
     }
 
-    const arrangements = (result.data as any[] || []).map(mapSupabaseArrangementToArrangement)
+    const arrangements = (result.data as SupabaseArrangement[] || []).map(mapSupabaseArrangementToArrangement)
     setCachedResult(cacheKey, arrangements)
     return arrangements
   } catch (error) {

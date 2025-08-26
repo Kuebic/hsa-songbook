@@ -1,45 +1,57 @@
-/**
- * Type definitions for test files
- * More permissive typing allowed for test contexts
- */
-
+// Test-specific type definitions
 import type { Mock } from 'vitest';
 
 // Mock function types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type MockedFunction<TArgs extends any[] = any[], TReturn = any> = Mock<(...args: TArgs) => TReturn>;
+export type MockedFunction<T extends (...args: any[]) => any = (...args: any[]) => any> = Mock<T>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type SimpleMock = Mock<(...args: any[]) => any>;
+export type AnyMockedFunction = Mock<(...args: any[]) => any>;
 
-// Test context types
+// Test context and data types
 export type TestContext = Record<string, unknown>;
-export type TestData = Record<string, unknown>;
+export type TestData = unknown;
 export type TestFixture<T = unknown> = T;
 
-// Mock response helpers
-export interface MockResponse<T = unknown> {
-  data?: T;
-  error?: Error | string;
-  loading?: boolean;
+// Test assertion helpers
+export type ExpectedType<T> = T;
+export type ActualType<T> = T;
+
+// Test scenario types
+export interface TestScenario<Input = unknown, Expected = unknown> {
+  name: string;
+  input: Input;
+  expected: Expected;
+  skip?: boolean;
+  only?: boolean;
 }
 
-// Test user types (for render helpers)
-export interface TestUser {
-  id: string;
-  email: string;
-  role?: 'admin' | 'user';
+// Database test types
+export interface TestRecord {
+  id?: string | number;
   [key: string]: unknown;
 }
 
-// Test props for components
-export type TestProps<T = Record<string, unknown>> = T & {
-  testId?: string;
-};
+// API test types  
+export interface MockRequest {
+  body?: unknown;
+  params?: Record<string, string>;
+  query?: Record<string, string>;
+  headers?: Record<string, string>;
+  [key: string]: unknown;
+}
 
-// Helper for typing test scenarios
-export interface TestScenario<T = unknown> {
-  name: string;
-  input: T;
-  expected: unknown;
-  description?: string;
+export interface MockResponse {
+  status?: number;
+  data?: unknown;
+  error?: unknown;
+  [key: string]: unknown;
+}
+
+// Benchmark types for vitest
+export interface BenchmarkOptions {
+  iterations?: number;
+  warmupIterations?: number;
+  warmupTime?: number;
+  time?: number;
+  throws?: boolean;
 }

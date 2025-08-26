@@ -10,8 +10,6 @@ type Setlist = Database['public']['Tables']['setlists']['Insert']
 type SetlistItem = Database['public']['Tables']['setlist_items']['Insert']
 type Permission = Database['public']['Tables']['permissions']['Insert']
 type CustomRole = Database['public']['Tables']['custom_roles']['Insert']
-type UserRole = Database['public']['Tables']['user_roles']['Insert']
-type UserPermission = Database['public']['Tables']['user_permissions']['Insert']
 type Review = Database['public']['Tables']['reviews']['Insert']
 
 // Test data configuration
@@ -57,7 +55,7 @@ export function generateChordData(complexity: 'simple' | 'medium' | 'complex' = 
 // Generate test users with different roles
 export function generateUsers(count: number = 10): User[] {
   const users: User[] = []
-  // const roles = ['user', 'moderator', 'admin'] // Unused for now
+  // const _roles = ['user', 'moderator', 'admin'] // Unused for now
   
   for (let i = 0; i < count; i++) {
     const firstName = faker.person.firstName()
@@ -67,10 +65,9 @@ export function generateUsers(count: number = 10): User[] {
     users.push({
       id: faker.string.uuid(),
       email,
-      name: `${firstName} ${lastName}`,
+      full_name: `${firstName} ${lastName}`,
       created_at: faker.date.past({ years: 2 }).toISOString(),
       updated_at: faker.date.recent({ days: 30 }).toISOString(),
-      last_login_at: faker.date.recent({ days: 7 }).toISOString(),
       avatar_url: faker.image.avatar(),
     })
   }
@@ -90,9 +87,8 @@ export function generateSongs(count: number = 50): Song[] {
       title: faker.lorem.words({ min: 2, max: 5 }),
       artist: faker.person.fullName(),
       themes: faker.helpers.arrayElements(themes, faker.number.int({ min: 1, max: 3 })),
-      copyright: faker.datatype.boolean(0.7) ? `© ${faker.date.past({ years: 5 }).getFullYear()} ${faker.company.name()}` : null,
-      ccli_number: faker.datatype.boolean(0.5) ? faker.number.int({ min: 1000000, max: 9999999 }).toString() : null,
-      language: faker.helpers.arrayElement(languages),
+      ccli: faker.datatype.boolean(0.5) ? faker.number.int({ min: 1000000, max: 9999999 }).toString() : null,
+      original_language: faker.helpers.arrayElement(languages),
       created_at: faker.date.past({ years: 2 }).toISOString(),
       updated_at: faker.date.recent({ days: 30 }).toISOString(),
       created_by: faker.string.uuid(),
@@ -161,12 +157,10 @@ export function generateSetlists(users: User[], count: number = 20): Setlist[] {
       id: faker.string.uuid(),
       name: faker.helpers.arrayElement(occasions) + ' - ' + faker.date.recent({ days: 60 }).toLocaleDateString(),
       description: faker.datatype.boolean(0.6) ? faker.lorem.paragraph() : null,
-      date: faker.date.soon({ days: 30 }).toISOString().split('T')[0],
       created_at: faker.date.past({ years: 1 }).toISOString(),
       updated_at: faker.date.recent({ days: 7 }).toISOString(),
       created_by: user.id!,
       is_public: faker.datatype.boolean(0.5),
-      tags: faker.helpers.arrayElements(['worship', 'contemporary', 'traditional', 'blended', 'special'], faker.number.int({ min: 1, max: 3 })),
     })
   }
   
@@ -188,7 +182,6 @@ export function generateSetlistItems(setlists: Setlist[], arrangements: Arrangem
         arrangement_id: arrangement.id!,
         position: index + 1,
         notes: faker.datatype.boolean(0.3) ? faker.lorem.sentence() : null,
-        key_override: faker.datatype.boolean(0.2) ? faker.helpers.arrayElement(['C', 'G', 'D', 'A', 'E']) : null,
       })
     })
   })
@@ -206,7 +199,7 @@ export function generateReviews(users: User[], arrangements: Arrangement[], coun
     
     reviews.push({
       id: faker.string.uuid(),
-      arrangement_id: arrangement.id!,
+      song_id: arrangement.song_id!,
       user_id: user.id!,
       rating: faker.number.int({ min: 1, max: 5 }),
       comment: faker.datatype.boolean(0.7) ? faker.lorem.paragraph() : null,
@@ -221,51 +214,51 @@ export function generateReviews(users: User[], arrangements: Arrangement[], coun
 // Generate permissions
 export function generatePermissions(): Permission[] {
   return [
-    { id: faker.string.uuid(), name: 'songs.create', description: 'Create new songs' },
-    { id: faker.string.uuid(), name: 'songs.edit', description: 'Edit existing songs' },
-    { id: faker.string.uuid(), name: 'songs.delete', description: 'Delete songs' },
-    { id: faker.string.uuid(), name: 'songs.moderate', description: 'Moderate song submissions' },
-    { id: faker.string.uuid(), name: 'arrangements.create', description: 'Create new arrangements' },
-    { id: faker.string.uuid(), name: 'arrangements.edit', description: 'Edit existing arrangements' },
-    { id: faker.string.uuid(), name: 'arrangements.delete', description: 'Delete arrangements' },
-    { id: faker.string.uuid(), name: 'arrangements.moderate', description: 'Moderate arrangement submissions' },
-    { id: faker.string.uuid(), name: 'setlists.create', description: 'Create new setlists' },
-    { id: faker.string.uuid(), name: 'setlists.edit', description: 'Edit existing setlists' },
-    { id: faker.string.uuid(), name: 'setlists.delete', description: 'Delete setlists' },
-    { id: faker.string.uuid(), name: 'users.manage', description: 'Manage user accounts' },
-    { id: faker.string.uuid(), name: 'roles.manage', description: 'Manage user roles' },
+    { id: faker.string.uuid(), action: 'create', resource: 'songs', description: 'Create new songs' },
+    { id: faker.string.uuid(), action: 'edit', resource: 'songs', description: 'Edit existing songs' },
+    { id: faker.string.uuid(), action: 'delete', resource: 'songs', description: 'Delete songs' },
+    { id: faker.string.uuid(), action: 'moderate', resource: 'songs', description: 'Moderate song submissions' },
+    { id: faker.string.uuid(), action: 'create', resource: 'arrangements', description: 'Create new arrangements' },
+    { id: faker.string.uuid(), action: 'edit', resource: 'arrangements', description: 'Edit existing arrangements' },
+    { id: faker.string.uuid(), action: 'delete', resource: 'arrangements', description: 'Delete arrangements' },
+    { id: faker.string.uuid(), action: 'moderate', resource: 'arrangements', description: 'Moderate arrangement submissions' },
+    { id: faker.string.uuid(), action: 'create', resource: 'setlists', description: 'Create new setlists' },
+    { id: faker.string.uuid(), action: 'edit', resource: 'setlists', description: 'Edit existing setlists' },
+    { id: faker.string.uuid(), action: 'delete', resource: 'setlists', description: 'Delete setlists' },
+    { id: faker.string.uuid(), action: 'manage', resource: 'users', description: 'Manage user accounts' },
+    { id: faker.string.uuid(), action: 'manage', resource: 'roles', description: 'Manage user roles' },
   ]
 }
 
 // Generate custom roles
 export function generateCustomRoles(permissions: Permission[]): CustomRole[] {
   const adminPerms = permissions.map(p => p.id!)
-  const moderatorPerms = permissions.filter(p => p.name?.includes('moderate') || p.name?.includes('edit')).map(p => p.id!)
-  const userPerms = permissions.filter(p => p.name?.includes('create')).map(p => p.id!)
+  const moderatorPerms = permissions.filter(p => p.action?.includes('moderate') || p.action?.includes('edit')).map(p => p.id!)
+  const userPerms = permissions.filter(p => p.action?.includes('create')).map(p => p.id!)
   
   return [
     {
       id: faker.string.uuid(),
       name: 'admin',
+      display_name: 'Administrator',
       description: 'Full system administrator',
       permissions: adminPerms,
-      is_active: true,
       created_at: faker.date.past({ years: 2 }).toISOString(),
     },
     {
       id: faker.string.uuid(),
       name: 'moderator',
+      display_name: 'Moderator',
       description: 'Content moderator',
       permissions: moderatorPerms,
-      is_active: true,
       created_at: faker.date.past({ years: 2 }).toISOString(),
     },
     {
       id: faker.string.uuid(),
       name: 'user',
+      display_name: 'User',
       description: 'Standard user',
       permissions: userPerms,
-      is_active: true,
       created_at: faker.date.past({ years: 2 }).toISOString(),
     },
   ]
@@ -386,7 +379,8 @@ export async function cleanupTestData(tableNames?: string[]): Promise<void> {
   if (supabase) {
     for (const table of tables) {
       try {
-        const { error } = await supabase.from(table).delete().neq('id', '')
+        // Type assertion since we know these are valid table names
+        const { error } = await (supabase.from as any)(table).delete().neq('id', '')
         if (error) {
           console.error(`Error cleaning ${table}:`, error)
         }
@@ -398,7 +392,7 @@ export async function cleanupTestData(tableNames?: string[]): Promise<void> {
 }
 
 // Helper to create a test client with specific user context
-export async function createTestClient(userId?: string, roles?: string[]) {
+export async function createTestClient(_userId?: string, _roles?: string[]) {
   // This would typically create a client with specific auth context
   // For testing, we can mock this or use a test instance
   return supabase

@@ -2,6 +2,7 @@ import { supabase } from '../../../lib/supabase'
 import type { UserWithRole, RoleAssignment, AuditLogEntry, UserFilter, AdminStats } from '../types/admin.types'
 import type { UserRole } from '../../auth/types'
 import type { UserRoleRow } from '../types/database.types'
+import type { UnknownObject } from '../../../shared/types/common'
 import { 
   withMigration, 
   createQueryBuilder 
@@ -74,7 +75,7 @@ async function getUsersWithQueryBuilder(filter?: UserFilter): Promise<{ users: U
   const result = await query.execute()
   if (result.error) throw new APIError(result.error.message, 500)
 
-  const userData = result.data as any[] || []
+  const userData = result.data as UnknownObject[] || []
   const count = result.count || 0
 
   // Get roles for these users
@@ -105,14 +106,14 @@ async function getUsersWithQueryBuilder(filter?: UserFilter): Promise<{ users: U
 
   // Map to UserWithRole type
   let users: UserWithRole[] = userData.map((user) => {
-    const userRole = roleMap.get(user.id)
+    const userRole = roleMap.get(user.id as string)
     return {
-      id: user.id,
-      email: user.email,
-      fullName: user.full_name || null,
-      avatarUrl: user.avatar_url || null,
-      createdAt: user.created_at || new Date().toISOString(),
-      lastSignIn: user.updated_at || null,
+      id: user.id as string,
+      email: user.email as string,
+      fullName: (user.full_name as string) || null,
+      avatarUrl: (user.avatar_url as string) || null,
+      createdAt: (user.created_at as string) || new Date().toISOString(),
+      lastSignIn: (user.updated_at as string) || null,
       role: (userRole?.role || 'user') as UserRole,
       roleGrantedBy: userRole?.granted_by || null,
       roleGrantedAt: userRole?.granted_at || null,
@@ -411,7 +412,7 @@ async function getAuditLogWithQueryBuilder(userId?: string): Promise<AuditLogEnt
   const result = await query.execute()
   if (result.error) throw new APIError(result.error.message, 500)
 
-  const auditData = result.data as any[] || []
+  const auditData = result.data as UnknownObject[] || []
   if (auditData.length === 0) {
     return []
   }
@@ -433,12 +434,12 @@ async function getAuditLogWithQueryBuilder(userId?: string): Promise<AuditLogEnt
       
       const userResult = await userQuery.execute()
       if (!userResult.error && userResult.data) {
-        const userData = userResult.data as any[]
+        const userData = userResult.data as UnknownObject[]
         userData.forEach(user => {
-          userMap.set(user.id, {
-            id: user.id,
-            email: user.email,
-            fullName: user.full_name || null,
+          userMap.set(user.id as string, {
+            id: user.id as string,
+            email: user.email as string,
+            fullName: (user.full_name as string) || null,
             avatarUrl: null,
             createdAt: new Date().toISOString(),
             lastSignIn: null,
@@ -457,19 +458,19 @@ async function getAuditLogWithQueryBuilder(userId?: string): Promise<AuditLogEnt
 
   // Map to AuditLogEntry type
   const entries: AuditLogEntry[] = auditData.map((item) => {
-    const user = item.user_id ? userMap.get(item.user_id) : undefined
-    const performer = item.performed_by ? userMap.get(item.performed_by) : undefined
+    const user = item.user_id ? userMap.get(item.user_id as string) : undefined
+    const performer = item.performed_by ? userMap.get(item.performed_by as string) : undefined
     
     return {
-      id: item.id,
-      userId: item.user_id || 'unknown',
+      id: item.id as string,
+      userId: (item.user_id as string) || 'unknown',
       userEmail: user?.email || 'Unknown User',
       role: item.role as UserRole,
       action: item.action as 'grant' | 'revoke' | 'expire',
-      performedBy: item.performed_by || 'system',
+      performedBy: (item.performed_by as string) || 'system',
       performedByEmail: performer?.email || 'System',
-      performedAt: item.performed_at || new Date().toISOString(),
-      reason: item.reason,
+      performedAt: (item.performed_at as string) || new Date().toISOString(),
+      reason: item.reason as string,
       metadata: item.metadata as Record<string, unknown> | null
     }
   })
@@ -601,11 +602,11 @@ async function getAdminStatsWithQueryBuilder(): Promise<AdminStats> {
     if (roleResult.error) {
       console.warn('Error fetching role counts:', roleResult.error)
     } else if (roleResult.data) {
-      const data = roleResult.data as any[]
+      const data = roleResult.data as UnknownObject[]
       // Convert raw data to RoleCount format
       const roleGroups = data.reduce((acc, item) => {
         const role = item.role as UserRole
-        acc[role] = (acc[role] || 0) + 1
+        acc[role] = ((acc[role] as number) || 0) + 1
         return acc
       }, {} as Record<UserRole, number>)
       
@@ -688,7 +689,7 @@ async function getAdminStatsLegacy(): Promise<AdminStats> {
       // Convert raw data to RoleCount format
       const roleGroups = data.reduce((acc, item) => {
         const role = item.role as UserRole
-        acc[role] = (acc[role] || 0) + 1
+        acc[role] = ((acc[role] as number) || 0) + 1
         return acc
       }, {} as Record<UserRole, number>)
       

@@ -13,8 +13,8 @@ import type { Database } from '../src/lib/database.types';
 type Song = Database['public']['Tables']['songs']['Insert'];
 type Arrangement = Database['public']['Tables']['arrangements']['Insert'];
 type Setlist = Database['public']['Tables']['setlists']['Insert'];
-type SetlistItem = Database['public']['Tables']['setlist_items']['Insert'];
-type User = Database['public']['Tables']['users']['Insert'];
+type _SetlistItem = Database['public']['Tables']['setlist_items']['Insert'];
+type _User = Database['public']['Tables']['users']['Insert'];
 
 // Configuration
 const KEYS = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'Cm', 'Dm', 'Em', 'Fm', 'Gm', 'Am', 'Bm'];
@@ -55,7 +55,6 @@ function generateChordPro(title: string, artist: string, key: string): string {
   const timeSignature = faker.helpers.arrayElement(TIME_SIGNATURES);
   const chords = CHORD_PROGRESSIONS[key] || CHORD_PROGRESSIONS['C'];
   
-  const verses = [];
   const numVerses = faker.number.int({ min: 2, max: 4 });
   
   // Generate header
@@ -177,7 +176,7 @@ function generateSong(index: number): Song {
 /**
  * Generate an arrangement for a song
  */
-function generateArrangement(songId: string, songTitle: string, index: number): Arrangement {
+function generateArrangement(songId: string, songTitle: string, _index: number): Arrangement {
   const key = faker.helpers.arrayElement(KEYS);
   const names = ['Original', 'Acoustic', 'Contemporary', 'Traditional', 'Simplified', 'Capo 2', 'Capo 5', 'Guitar-friendly'];
   const name = faker.helpers.arrayElement(names);
@@ -186,7 +185,7 @@ function generateArrangement(songId: string, songTitle: string, index: number): 
     id: faker.string.uuid(),
     song_id: songId,
     name,
-    slug: `${name.toLowerCase().replace(/\s+/g, '-')}-${index}`,
+    slug: `${name.toLowerCase().replace(/\s+/g, '-')}-${_index}`,
     chord_data: generateChordPro(songTitle, faker.person.fullName(), key),
     description: faker.helpers.maybe(() => faker.lorem.sentence()),
     difficulty: faker.helpers.arrayElement(DIFFICULTIES),
@@ -211,7 +210,7 @@ function generateArrangement(songId: string, songTitle: string, index: number): 
 /**
  * Generate a setlist
  */
-function generateSetlist(index: number): Setlist {
+function generateSetlist(_index: number): Setlist {
   const names = [
     'Sunday Morning Worship',
     'Evening Service',
@@ -408,7 +407,7 @@ async function generateSeedData(count: number = 50) {
   
   // Generate setlist items
   console.log('-- Setlist Items');
-  setlists.forEach((setlistId, index) => {
+  setlists.forEach((setlistId, _index) => {
     const numItems = faker.number.int({ min: 3, max: 8 });
     const selectedArrangements = faker.helpers.arrayElements(arrangements, numItems);
     

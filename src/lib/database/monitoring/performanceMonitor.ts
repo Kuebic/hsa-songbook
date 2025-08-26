@@ -1,4 +1,5 @@
-import type { QueryBuilder } from '../queryBuilder'
+// import type { QueryBuilder } from '../queryBuilder'
+import type { UnknownObject } from '../../../shared/types/common'
 
 // Performance metrics interface
 export interface QueryMetrics {
@@ -93,14 +94,14 @@ export class PerformanceMonitor {
    * Wrap query builder for automatic monitoring
    */
   wrapQueryBuilder(
-    builder: QueryBuilder<any>,
+    builder: any,
     userId?: string
-  ): QueryBuilder<any> {
+  ): any {
     const originalExecute = builder.execute.bind(builder)
     
     builder.execute = async () => {
       const startTime = performance.now()
-      const builderData = builder as any
+      const builderData = builder as unknown as UnknownObject
       
       try {
         const result = await originalExecute()
@@ -109,7 +110,7 @@ export class PerformanceMonitor {
         // Record metrics
         this.recordQuery({
           query: this.buildQueryString(builderData),
-          table: builderData.table,
+          table: builderData.table as string,
           operation: this.detectOperation(builderData),
           duration,
           timestamp: Date.now(),
@@ -127,7 +128,7 @@ export class PerformanceMonitor {
         // Record error metrics
         this.recordQuery({
           query: this.buildQueryString(builderData),
-          table: builderData.table,
+          table: builderData.table as string,
           operation: this.detectOperation(builderData),
           duration,
           timestamp: Date.now(),
@@ -297,19 +298,21 @@ export class PerformanceMonitor {
   /**
    * Build query string for logging
    */
-  private buildQueryString(builderData: any): string {
+  private buildQueryString(builderData: UnknownObject): string {
     const parts = [builderData.operation || 'select', 'from', builderData.table]
     
-    if (builderData.filters && Object.keys(builderData.filters).length > 0) {
-      parts.push('where', JSON.stringify(builderData.filters))
+    const filters = builderData.filters as UnknownObject | undefined
+    if (filters && Object.keys(filters).length > 0) {
+      parts.push('where', JSON.stringify(filters))
     }
     
-    if (builderData.options?.orderBy) {
-      parts.push('order by', builderData.options.orderBy)
+    const options = builderData.options as UnknownObject | undefined
+    if (options?.orderBy) {
+      parts.push('order by', String(options.orderBy))
     }
     
-    if (builderData.options?.limit) {
-      parts.push('limit', builderData.options.limit)
+    if (options?.limit) {
+      parts.push('limit', String(options.limit))
     }
     
     return parts.join(' ')
@@ -318,9 +321,9 @@ export class PerformanceMonitor {
   /**
    * Detect operation type from builder data
    */
-  private detectOperation(builderData: any): QueryMetrics['operation'] {
+  private detectOperation(builderData: UnknownObject): QueryMetrics['operation'] {
     if (builderData.operation) {
-      return builderData.operation
+      return builderData.operation as QueryMetrics['operation']
     }
     
     // Infer from method calls
@@ -443,16 +446,16 @@ export class DatabaseHealthMonitor {
   /**
    * Run health check
    */
-  async checkHealth(client: any): Promise<{
+  async checkHealth(client: UnknownObject): Promise<{
     healthy: boolean
     checks: Record<string, boolean>
-    metrics: any
+    metrics: UnknownObject
   }> {
     const checks: Record<string, boolean> = {}
     
     // Check database connectivity
     try {
-      const { error } = await client.from('songs').select('id').limit(1)
+      const { error } = await (client as any).from('songs').select('id').limit(1)
       checks.connectivity = !error
     } catch {
       checks.connectivity = false
@@ -484,9 +487,9 @@ export class DatabaseHealthMonitor {
    * Start periodic health checks
    */
   startHealthChecks(
-    client: any,
+    client: UnknownObject,
     intervalMs = 60000,  // 1 minute
-    onUnhealthy?: (report: any) => void
+    onUnhealthy?: (report: UnknownObject) => void
   ): NodeJS.Timeout {
     return setInterval(async () => {
       const health = await this.checkHealth(client)

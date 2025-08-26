@@ -8,6 +8,15 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import path from 'node:path'
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import {
+  manualChunks,
+  getChunkFileName,
+  getAssetFileName,
+  terserOptions,
+  treeshakeOptions,
+  commonjsOptions,
+  optimizeDeps
+} from './src/config/buildOptimization'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -225,14 +234,34 @@ export default defineConfig(() => ({
     sourcemap: true, // Enable for accurate bundle analysis
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'monitoring': ['web-vitals', 'react-error-boundary'],
-          'supabase': ['@supabase/supabase-js']
-        }
-      }
-    }
+        manualChunks,
+        // Optimize chunk file names
+        chunkFileNames: getChunkFileName,
+        // Optimize entry file names
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        // Optimize asset file names
+        assetFileNames: getAssetFileName
+      },
+      // Tree-shake unused code
+      treeshake: treeshakeOptions
+    },
+    // Set warning threshold
+    chunkSizeWarningLimit: 200, // 200KB
+    // Enable CSS code splitting
+    cssCodeSplit: true,
+    // Optimize deps
+    commonjsOptions,
+    // Minification
+    minify: 'terser',
+    terserOptions,
+    // Target modern browsers for smaller bundles
+    target: 'es2020',
+    // Inline dynamic imports threshold
+    assetsInlineLimit: 4096, // 4KB
+    // Report compressed size
+    reportCompressedSize: true
   },
+  optimizeDeps,
   server: {
     port: 5173,
     strictPort: false,

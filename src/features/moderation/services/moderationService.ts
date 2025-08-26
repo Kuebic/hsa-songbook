@@ -1,5 +1,6 @@
 import { supabase } from '../../../lib/supabase'
 import type { ModerationItem, ModerationAction, ContentReport, ModerationFilter, ModerationStats } from '../types/moderation.types'
+import type { UnknownObject } from '../../../shared/types/common'
 import { 
   withMigration, 
   createQueryBuilder 
@@ -57,7 +58,7 @@ async function getQueueWithQueryBuilder(filter?: ModerationFilter): Promise<Mode
 
   // Process the data (simplified version)
   const items = await Promise.all(
-    data.map(async (item: any) => ({
+    data.map(async (item: UnknownObject) => ({
       id: item.id,
       contentId: item.content_id,
       contentType: item.content_type as 'song' | 'arrangement',
@@ -98,7 +99,7 @@ async function getQueueLegacy(filter?: ModerationFilter): Promise<ModerationItem
   if (error) throw error
 
   const items = await Promise.all(
-    data.map(async (item: any) => ({
+    data.map(async (item: UnknownObject) => ({
       id: item.id,
       contentId: item.content_id,
       contentType: item.content_type as 'song' | 'arrangement',
@@ -217,19 +218,19 @@ async function getReportsWithQueryBuilder(contentId?: string, contentType?: 'son
   const result = await query.execute()
   if (result.error) throw result.error
 
-  const data = result.data as any[] || []
+  const data = result.data as UnknownObject[] || []
   return data.map(report => ({
-    id: report.id,
-    contentId: report.content_id,
+    id: report.id as string,
+    contentId: report.content_id as string,
     contentType: report.content_type as 'song' | 'arrangement',
-    reportedBy: report.reported_by || '',
+    reportedBy: (report.reported_by as string) || '',
     reason: report.reason as 'inappropriate' | 'copyright' | 'spam' | 'incorrect' | 'other',
-    description: report.description || undefined,
-    createdAt: report.created_at || new Date().toISOString(),
+    description: (report.description as string) || undefined,
+    createdAt: (report.created_at as string) || new Date().toISOString(),
     status: report.status as 'open' | 'reviewed' | 'resolved',
-    resolvedBy: report.resolved_by || undefined,
-    resolvedAt: report.resolved_at || undefined,
-    resolution: report.resolution || undefined
+    resolvedBy: (report.resolved_by as string) || undefined,
+    resolvedAt: (report.resolved_at as string) || undefined,
+    resolution: (report.resolution as string) || undefined
   }))
 }
 

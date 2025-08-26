@@ -1,13 +1,22 @@
-import type { ErrorFallbackProps } from '../types/monitoring.types';
+import type { ErrorFallbackProps } from '../types/errorTypes';
+import { useErrorCategory } from '../hooks/useErrorCategory';
 
-export function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
+export function ErrorFallback({ error, resetError, context, level }: ErrorFallbackProps) {
+  const { getErrorMessage } = useErrorCategory();
+  const resetErrorBoundary = resetError; // For backward compatibility
   return (
     <div role="alert" style={styles.container}>
       <div style={styles.content}>
         <h2 style={styles.title}>Oops! Something went wrong</h2>
         <p style={styles.message}>
-          We're sorry for the inconvenience. The application encountered an unexpected error.
+          {getErrorMessage(error)}
         </p>
+        
+        {context?.retryable && (
+          <p style={styles.retryHint}>
+            This error may be temporary. Please try again.
+          </p>
+        )}
         
         {import.meta.env.DEV && (
           <details style={styles.details}>
@@ -21,9 +30,11 @@ export function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps)
           <button onClick={resetErrorBoundary} style={styles.button}>
             Try Again
           </button>
-          <button onClick={() => window.location.href = '/'} style={styles.buttonSecondary}>
-            Go to Home
-          </button>
+          {level !== 'app' && (
+            <button onClick={() => window.location.href = '/'} style={styles.buttonSecondary}>
+              Go to Home
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -57,6 +68,12 @@ const styles = {
     color: '#6b7280',
     marginBottom: '1.5rem',
     lineHeight: 1.6
+  },
+  retryHint: {
+    color: '#059669',
+    fontSize: '0.875rem',
+    marginBottom: '1rem',
+    fontStyle: 'italic' as const
   },
   details: {
     marginTop: '1rem',

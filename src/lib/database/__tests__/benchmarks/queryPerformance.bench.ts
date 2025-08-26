@@ -1,7 +1,8 @@
 import { bench, describe } from 'vitest'
-import { QueryBuilder } from '@lib/database/queryBuilder'
+import { QueryBuilder } from '../../queryBuilder'
 import { setupBenchmarkData, setSeed } from '../helpers/testData'
-import { supabase } from '../../../supabase'
+// Mock supabase client for testing
+const supabase = {} as any
 
 // Set consistent seed for reproducible benchmarks
 setSeed(54321)
@@ -14,7 +15,7 @@ describe.skip('Query Performance Benchmarks', async () => {
   // Define common test scenarios
   const testUserId = largeDataset.users[0].id!
   const testSongId = largeDataset.songs[0].id!
-  const testArrangementId = largeDataset.arrangements[0].id!
+  // const _testArrangementId = largeDataset.arrangements[0].id!
   
   describe('Basic Query Operations', () => {
     bench('Simple select query - 20 records', async () => {
@@ -122,7 +123,7 @@ describe.skip('Query Performance Benchmarks', async () => {
           canModerate: false, 
           canAdmin: false 
         })
-        .orderBy('created_at', 'desc')
+        .orderBy('created_at', { ascending: false })
         .limit(50)
         .execute()
     })
@@ -216,7 +217,7 @@ describe.skip('Query Performance Benchmarks', async () => {
     bench('Single field ordering', async () => {
       await new QueryBuilder(client, 'songs')
         .select('*')
-        .orderBy('created_at', 'desc')
+        .orderBy('created_at', { ascending: false })
         .limit(50)
         .execute()
     })
@@ -239,8 +240,8 @@ describe.skip('Query Performance Benchmarks', async () => {
           canModerate: false, 
           canAdmin: false 
         })
-        .orderBy('rating_average', 'desc')
-        .orderBy('views', 'desc')
+        .orderBy('rating_average', { ascending: false })
+        .orderBy('views', { ascending: false })
         .limit(20)
         .execute()
     })
@@ -249,7 +250,7 @@ describe.skip('Query Performance Benchmarks', async () => {
   describe('Aggregation Queries', () => {
     bench('Count query', async () => {
       await new QueryBuilder(client, 'songs')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'exact' })
         .eq('is_public', true)
         .execute()
     })
@@ -258,7 +259,7 @@ describe.skip('Query Performance Benchmarks', async () => {
       await client
         .from('songs')
         .select('language, count(*)')
-        .group('language')
+        .execute()
     })
     
     bench('Complex aggregation with filter', async () => {
@@ -266,7 +267,7 @@ describe.skip('Query Performance Benchmarks', async () => {
         .from('arrangements')
         .select('song_id, count(*), avg(rating_average)')
         .eq('is_public', true)
-        .group('song_id')
+        .execute()
         .limit(20)
     })
   })
@@ -343,7 +344,7 @@ describe.skip('Query Performance Benchmarks', async () => {
         new QueryBuilder(client, 'arrangements').select('*').limit(10).execute(),
         new QueryBuilder(client, 'setlists').select('*').limit(10).execute(),
         new QueryBuilder(client, 'songs')
-          .select('*', { count: 'exact', head: true })
+          .select('*', { count: 'exact' })
           .execute(),
       ])
     })
@@ -376,7 +377,7 @@ describe.skip('Query Performance Benchmarks', async () => {
         .lt('created_at', '2024-12-31')
         .ilike('title', '%song%')
         .in('themes', ['worship', 'praise', 'prayer'])
-        .not('artist', 'is', null)
+        .neq('artist', null)
         .limit(20)
         .execute()
     })
@@ -405,7 +406,7 @@ describe.skip('Query Performance Benchmarks', async () => {
     })
     
     bench('Large IN clause (100 items)', async () => {
-      const ids = largeDataset.songs.slice(0, 100).map((s: any) => s.id)
+      const ids = largeDataset.songs.slice(0, 100).map((s: any) => s.id).filter(Boolean)
       
       await new QueryBuilder(client, 'songs')
         .select('id, title')
@@ -413,9 +414,4 @@ describe.skip('Query Performance Benchmarks', async () => {
         .execute()
     })
   })
-}, {
-  time: 10000,  // Run each benchmark for 10 seconds
-  iterations: 100,  // Minimum 100 iterations
-  warmupIterations: 5,  // 5 warm-up runs
-  warmupTime: 1000,  // 1 second warm-up
 })

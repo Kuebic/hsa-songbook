@@ -9,28 +9,40 @@ import { ThemeProvider } from '@shared/contexts/ThemeContext'
 import { SongModalProvider } from '@features/songs/contexts/SongModalContext.tsx'
 import { GlobalSongModal } from '@features/songs/components/GlobalSongModal'
 import { ProtectedRoute, AuthProvider } from '@features/auth'
+import { initializePrefetching, prefetchCriticalRoutes } from './utils/routePrefetch'
+
+// Import feature-specific error boundaries
+import { ArrangementErrorBoundary } from '@features/arrangements/components/ArrangementErrorBoundary'
+import { SongListErrorBoundary } from '@features/songs/components/SongListErrorBoundary'
+import { SetlistErrorBoundary } from '@features/setlists/components/SetlistErrorBoundary'
 
 // Eagerly load the home page
 import { HomePage } from './pages/HomePage'
 
-// Lazy load other pages for code splitting
-const SearchPage = lazy(() => import('./pages/SearchPage').then(module => ({ default: module.SearchPage })))
-const SongListPage = lazy(() => import('@features/songs').then(module => ({ default: module.SongListPage })))
-const SongDetailPage = lazy(() => import('@features/songs').then(module => ({ default: module.SongDetailPage })))
-const SetlistsPage = lazy(() => import('@features/setlists').then(module => ({ default: module.SetlistsPage })))
-const ArrangementViewerPage = lazy(() => import('@features/arrangements/pages/ArrangementViewerPage').then(module => ({ default: module.ArrangementViewerPage })))
-const ChordEditingPage = lazy(() => import('@features/arrangements/pages/ChordEditingPage').then(module => ({ default: module.ChordEditingPage })))
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then(module => ({ default: module.AdminDashboard })))
-const ModerationDashboard = lazy(() => import('./pages/ModerationDashboard').then(module => ({ default: module.ModerationDashboard })))
-const PermissionManagement = lazy(() => import('./pages/PermissionManagement').then(module => ({ default: module.PermissionManagement })))
+// Lazy load other pages for code splitting with chunk names
+const SearchPage = lazy(() => import(/* webpackChunkName: "SearchPage" */ './pages/SearchPage').then(module => ({ default: module.SearchPage })))
+const SongListPage = lazy(() => import(/* webpackChunkName: "SongListPage" */ '@features/songs').then(module => ({ default: module.SongListPage })))
+const SongDetailPage = lazy(() => import(/* webpackChunkName: "SongDetailPage" */ '@features/songs').then(module => ({ default: module.SongDetailPage })))
+const SetlistsPage = lazy(() => import(/* webpackChunkName: "SetlistsPage" */ '@features/setlists').then(module => ({ default: module.SetlistsPage })))
+const ArrangementViewerPage = lazy(() => import(/* webpackChunkName: "ArrangementViewerPage" */ '@features/arrangements/pages/ArrangementViewerPage').then(module => ({ default: module.ArrangementViewerPage })))
+const ChordEditingPage = lazy(() => import(/* webpackChunkName: "ChordEditingPage" */ '@features/arrangements/pages/ChordEditingPage').then(module => ({ default: module.ChordEditingPage })))
+const AdminDashboard = lazy(() => import(/* webpackChunkName: "AdminDashboard" */ './pages/AdminDashboard').then(module => ({ default: module.AdminDashboard })))
+const ModerationDashboard = lazy(() => import(/* webpackChunkName: "ModerationDashboard" */ './pages/ModerationDashboard').then(module => ({ default: module.ModerationDashboard })))
+const PermissionManagement = lazy(() => import(/* webpackChunkName: "PermissionManagement" */ './pages/PermissionManagement').then(module => ({ default: module.PermissionManagement })))
 
 function App() {
   // Initialize web vitals monitoring
   useWebVitals()
 
-  // Initialize PWA offline handlers
+  // Initialize PWA offline handlers and prefetching
   useEffect(() => {
     setupOfflineHandlers()
+    
+    // Initialize intelligent prefetching
+    initializePrefetching()
+    
+    // Prefetch critical routes on idle
+    prefetchCriticalRoutes()
   }, [])
 
   return (
@@ -52,7 +64,9 @@ function App() {
               element={
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Songs">
-                    <SongListPage />
+                    <SongListErrorBoundary>
+                      <SongListPage />
+                    </SongListErrorBoundary>
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 
@@ -83,7 +97,9 @@ function App() {
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Chord Editor">
                     <ProtectedRoute>
-                      <ChordEditingPage />
+                      <ArrangementErrorBoundary>
+                        <ChordEditingPage />
+                      </ArrangementErrorBoundary>
                     </ProtectedRoute>
                   </LazyRouteWrapper>
                 </ErrorBoundary>
@@ -95,7 +111,9 @@ function App() {
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="New Arrangement">
                     <ProtectedRoute>
-                      <ChordEditingPage />
+                      <ArrangementErrorBoundary>
+                        <ChordEditingPage />
+                      </ArrangementErrorBoundary>
                     </ProtectedRoute>
                   </LazyRouteWrapper>
                 </ErrorBoundary>
@@ -116,7 +134,9 @@ function App() {
               element={
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Setlists">
-                    <SetlistsPage />
+                    <SetlistErrorBoundary>
+                      <SetlistsPage />
+                    </SetlistErrorBoundary>
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 
@@ -126,7 +146,9 @@ function App() {
               element={
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Setlist Details">
-                    <SetlistsPage />
+                    <SetlistErrorBoundary>
+                      <SetlistsPage />
+                    </SetlistErrorBoundary>
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 
@@ -136,7 +158,9 @@ function App() {
               element={
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Setlist Playback">
-                    <SetlistsPage />
+                    <SetlistErrorBoundary>
+                      <SetlistsPage />
+                    </SetlistErrorBoundary>
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 
@@ -146,7 +170,9 @@ function App() {
               element={
                 <ErrorBoundary level="page">
                   <LazyRouteWrapper pageName="Setlist Playback">
-                    <SetlistsPage />
+                    <SetlistErrorBoundary>
+                      <SetlistsPage />
+                    </SetlistErrorBoundary>
                   </LazyRouteWrapper>
                 </ErrorBoundary>
               } 

@@ -1,0 +1,132 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2024-01-01",
+  "metrics": {
+    "LCP": {
+      "budget": 2500,
+      "unit": "ms",
+      "description": "Largest Contentful Paint"
+    },
+    "FID": {
+      "budget": 100,
+      "unit": "ms",
+      "description": "First Input Delay (deprecated, use INP)"
+    },
+    "INP": {
+      "budget": 200,
+      "unit": "ms",
+      "description": "Interaction to Next Paint"
+    },
+    "CLS": {
+      "budget": 0.1,
+      "unit": "score",
+      "description": "Cumulative Layout Shift"
+    },
+    "FCP": {
+      "budget": 1800,
+      "unit": "ms",
+      "description": "First Contentful Paint"
+    },
+    "TTFB": {
+      "budget": 800,
+      "unit": "ms",
+      "description": "Time to First Byte"
+    },
+    "TBT": {
+      "budget": 200,
+      "unit": "ms",
+      "description": "Total Blocking Time"
+    },
+    "SI": {
+      "budget": 3800,
+      "unit": "ms",
+      "description": "Speed Index"
+    },
+    "TTI": {
+      "budget": 3800,
+      "unit": "ms",
+      "description": "Time to Interactive"
+    },
+    "max-potential-fid": {
+      "budget": 130,
+      "unit": "ms",
+      "description": "Max Potential First Input Delay"
+    }
+  },
+  "resources": {
+    "javascript": 300000,
+    "css": 100000,
+    "images": 500000,
+    "fonts": 100000,
+    "document": 20000,
+    "media": 0,
+    "third-party": 200000,
+    "total": 1500000
+  },
+  "counts": {
+    "requests": 50,
+    "scripts": 10,
+    "stylesheets": 5,
+    "images": 20,
+    "fonts": 5,
+    "documents": 5
+  },
+  "lighthouse": {
+    "performance": 90,
+    "accessibility": 90,
+    "best-practices": 90,
+    "seo": 90,
+    "pwa": 80
+  },
+  "custom": {
+    "bundle-size": {
+      "main": {
+        "budget": 200000,
+        "unit": "bytes",
+        "gzip": true
+      },
+      "vendor": {
+        "budget": 150000,
+        "unit": "bytes",
+        "gzip": true
+      },
+      "initial": {
+        "budget": 350000,
+        "unit": "bytes",
+        "gzip": true
+      }
+    },
+    "api-response": {
+      "p50": {
+        "budget": 200,
+        "unit": "ms"
+      },
+      "p90": {
+        "budget": 500,
+        "unit": "ms"
+      },
+      "p99": {
+        "budget": 1000,
+        "unit": "ms"
+      }
+    },
+    "db-query": {
+      "p50": {
+        "budget": 100,
+        "unit": "ms"
+      },
+      "p90": {
+        "budget": 300,
+        "unit": "ms"
+      },
+      "p99": {
+        "budget": 500,
+        "unit": "ms"
+      }
+    }
+  },
+  "thresholds": {
+    "warning": 0.9,
+    "error": 1.0
+  }
+}

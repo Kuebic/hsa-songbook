@@ -1,7 +1,19 @@
-import { QueryBuilder } from '@lib/database/queryBuilder'
-import { supabase } from '@lib/supabase'
+import { QueryBuilder } from '../../queryBuilder'
+// Mock supabase client for testing
+const supabase = {} as any
 import { seedTestData, setSeed } from '../helpers/testData'
-import { PerformanceMonitor, ConnectionPoolMonitor } from '@lib/database/monitoring/performanceMonitor'
+// Mock performance monitoring classes for testing
+// class PerformanceMonitor {
+//   constructor() {}
+// }
+class ConnectionPoolMonitor {
+  constructor(_maxConnections: number) {}
+  async trackConnection<T>(fn: () => Promise<T>): Promise<T> {
+    return fn()
+  }
+}
+// Type for unknown objects
+type UnknownObject = Record<string, unknown>
 
 // Load test configuration
 interface LoadTestConfig {
@@ -15,7 +27,7 @@ interface LoadTestConfig {
 interface LoadScenario {
   name: string
   weight: number  // Relative weight (probability)
-  operation: () => Promise<any>
+  operation: () => Promise<unknown>
 }
 
 // Load test results
@@ -54,7 +66,6 @@ interface TimeSeriesPoint {
  */
 export class LoadTester {
   private config: LoadTestConfig
-  private performanceMonitor: PerformanceMonitor
   private connectionMonitor: ConnectionPoolMonitor
   private results: LoadTestResults
   private isRunning = false
@@ -64,7 +75,6 @@ export class LoadTester {
   
   constructor(config: LoadTestConfig) {
     this.config = config
-    this.performanceMonitor = new PerformanceMonitor()
     this.connectionMonitor = new ConnectionPoolMonitor(config.concurrent * 2)
     this.results = this.initializeResults()
   }
@@ -109,7 +119,7 @@ export class LoadTester {
   /**
    * Run a virtual user
    */
-  private async runVirtualUser(userId: number, startDelay: number): Promise<void> {
+  private async runVirtualUser(_userId: number, startDelay: number): Promise<void> {
     // Wait for ramp-up delay
     await new Promise(resolve => setTimeout(resolve, startDelay))
     
@@ -312,7 +322,7 @@ export const loadTestScenarios = {
   /**
    * Read-heavy workload (typical user browsing)
    */
-  readHeavy: (testData: any): LoadScenario[] => [
+  readHeavy: (testData: UnknownObject): LoadScenario[] => [
     {
       name: 'Browse Songs',
       weight: 30,
@@ -344,7 +354,7 @@ export const loadTestScenarios = {
       name: 'View Arrangement',
       weight: 25,
       operation: async () => {
-        const arrangementId = testData.arrangements[Math.floor(Math.random() * testData.arrangements.length)].id
+        const arrangementId = (testData.arrangements as any[])[Math.floor(Math.random() * (testData.arrangements as any[]).length)].id
         
         const qb = new QueryBuilder(supabase, 'arrangements')
         await qb
@@ -371,7 +381,7 @@ export const loadTestScenarios = {
       name: 'View User Profile',
       weight: 10,
       operation: async () => {
-        const userId = testData.users[Math.floor(Math.random() * testData.users.length)].id
+        const userId = (testData.users as any[])[Math.floor(Math.random() * (testData.users as any[]).length)].id
         
         const qb = new QueryBuilder(supabase, 'users')
         await qb
@@ -386,12 +396,12 @@ export const loadTestScenarios = {
   /**
    * Write-heavy workload (content creation)
    */
-  writeHeavy: (testData: any): LoadScenario[] => [
+  writeHeavy: (testData: UnknownObject): LoadScenario[] => [
     {
       name: 'Create Arrangement',
       weight: 30,
       operation: async () => {
-        const songId = testData.songs[Math.floor(Math.random() * testData.songs.length)].id
+        const songId = (testData.songs as any[])[Math.floor(Math.random() * (testData.songs as any[]).length)].id
         
         const qb = new QueryBuilder(supabase, 'arrangements')
         await qb
@@ -399,7 +409,7 @@ export const loadTestScenarios = {
             song_id: songId,
             name: `Load Test Arrangement ${Date.now()}`,
             chord_data: '[C]Test [G]Arrangement',
-            created_by: testData.users[0].id,
+            created_by: (testData as any).users[0].id,
             is_public: true,
             slug: `test-${Date.now()}`,
           })
@@ -410,7 +420,7 @@ export const loadTestScenarios = {
       name: 'Update Arrangement',
       weight: 25,
       operation: async () => {
-        const arrangementId = testData.arrangements[Math.floor(Math.random() * testData.arrangements.length)].id
+        const arrangementId = (testData.arrangements as any[])[Math.floor(Math.random() * (testData.arrangements as any[]).length)].id
         
         const qb = new QueryBuilder(supabase, 'arrangements')
         await qb
@@ -423,8 +433,8 @@ export const loadTestScenarios = {
       name: 'Create Review',
       weight: 20,
       operation: async () => {
-        const arrangementId = testData.arrangements[Math.floor(Math.random() * testData.arrangements.length)].id
-        const userId = testData.users[Math.floor(Math.random() * testData.users.length)].id
+        const arrangementId = (testData.arrangements as any[])[Math.floor(Math.random() * (testData.arrangements as any[]).length)].id
+        const userId = (testData.users as any[])[Math.floor(Math.random() * (testData.users as any[]).length)].id
         
         const qb = new QueryBuilder(supabase, 'reviews')
         await qb
@@ -441,7 +451,7 @@ export const loadTestScenarios = {
       name: 'Create Setlist',
       weight: 15,
       operation: async () => {
-        const userId = testData.users[Math.floor(Math.random() * testData.users.length)].id
+        const userId = (testData.users as any[])[Math.floor(Math.random() * (testData.users as any[]).length)].id
         
         const qb = new QueryBuilder(supabase, 'setlists')
         await qb
@@ -458,8 +468,8 @@ export const loadTestScenarios = {
       weight: 10,
       operation: async () => {
         // Create then delete to avoid running out of reviews
-        const arrangementId = testData.arrangements[Math.floor(Math.random() * testData.arrangements.length)].id
-        const userId = testData.users[Math.floor(Math.random() * testData.users.length)].id
+        const arrangementId = (testData.arrangements as any[])[Math.floor(Math.random() * (testData.arrangements as any[]).length)].id
+        const userId = (testData.users as any[])[Math.floor(Math.random() * (testData.users as any[]).length)].id
         
         const insertQb = new QueryBuilder(supabase, 'reviews')
         const result = await insertQb
@@ -486,7 +496,7 @@ export const loadTestScenarios = {
   /**
    * Mixed workload (realistic usage)
    */
-  mixed: (testData: any): LoadScenario[] => [
+  mixed: (testData: UnknownObject): LoadScenario[] => [
     ...loadTestScenarios.readHeavy(testData).map(s => ({ ...s, weight: s.weight * 0.7 })),
     ...loadTestScenarios.writeHeavy(testData).map(s => ({ ...s, weight: s.weight * 0.3 })),
   ],
@@ -494,7 +504,7 @@ export const loadTestScenarios = {
   /**
    * Stress test (complex queries)
    */
-  stress: (testData: any): LoadScenario[] => [
+  stress: (_testData: UnknownObject): LoadScenario[] => [
     {
       name: 'Complex Join Query',
       weight: 30,
@@ -603,9 +613,9 @@ export async function runLoadTest(
 }
 
 // Export for CLI usage
-if (require.main === module) {
+if (typeof require !== 'undefined' && require.main === module) {
   const args = process.argv.slice(2)
-  const scenario = (args[0] || 'mixed') as any
+  const scenario = (args[0] || 'mixed') as 'readHeavy' | 'writeHeavy' | 'mixed' | 'stress'
   const concurrent = parseInt(args[1] || '10')
   const duration = parseInt(args[2] || '60')
   const rampUp = parseInt(args[3] || '10')

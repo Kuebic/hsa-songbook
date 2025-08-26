@@ -6,6 +6,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { QueryBuilder } from '../queryBuilder'
 import type { UserPermissions } from '../types'
+// Common type definition - commented out as not used in current tests
+// type UnknownObject = Record<string, unknown>
 
 // Mock Supabase client for testing
 const createMockSupabase = () => ({
@@ -29,7 +31,6 @@ const createMockSupabase = () => ({
 
 describe('QueryBuilder Integration', () => {
   it('should work with real Supabase types', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = createMockSupabase() as any
     
     const query = new QueryBuilder(supabase, 'songs')
@@ -50,7 +51,6 @@ describe('QueryBuilder Integration', () => {
   })
 
   it('should apply visibility filtering correctly', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = createMockSupabase() as any
     
     const permissions: UserPermissions = {
@@ -73,7 +73,6 @@ describe('QueryBuilder Integration', () => {
   })
 
   it('should handle pagination correctly', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = createMockSupabase() as any
     supabase.select.mockImplementation((_columns: string, options?: any) => {
       if (options?.count) {
@@ -109,7 +108,6 @@ describe('QueryBuilder Integration', () => {
   })
 
   it('should handle errors gracefully', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = createMockSupabase() as any
     const testError = { message: 'Database error', code: 'PGRST116' }
     supabase.single.mockResolvedValue({ data: null, error: testError })
@@ -129,7 +127,6 @@ describe('QueryBuilder Integration', () => {
   })
 
   it('should support method chaining', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = createMockSupabase() as any
     
     const query = new QueryBuilder(supabase, 'arrangements')
@@ -153,7 +150,6 @@ describe('QueryBuilder Integration', () => {
   })
 
   it('should handle insert operations', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = createMockSupabase() as any
     const mockData = { id: '123', title: 'New Song' }
     supabase.single.mockResolvedValue({ data: mockData, error: null })
@@ -172,7 +168,6 @@ describe('QueryBuilder Integration', () => {
   })
 
   it('should handle update operations', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = createMockSupabase() as any
     
     const query = new QueryBuilder(supabase, 'songs')
@@ -188,7 +183,6 @@ describe('QueryBuilder Integration', () => {
   })
 
   it('should handle delete operations', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = createMockSupabase() as any
     
     const query = new QueryBuilder(supabase, 'songs')

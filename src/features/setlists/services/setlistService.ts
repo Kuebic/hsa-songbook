@@ -9,6 +9,7 @@ import {
   createQueryBuilder 
 } from '../../../lib/database/migrationHelper'
 import type { Database } from '../../../lib/database.types'
+import type { JsonValue } from '../../../shared/types/common'
 
 // Type definitions
 type SupabaseSetlist = Database['public']['Tables']['setlists']['Row']
@@ -16,9 +17,8 @@ type SetlistInsert = Database['public']['Tables']['setlists']['Insert']
 type SetlistUpdate = Database['public']['Tables']['setlists']['Update']
 
 interface SetlistMetadata {
-  song_ids?: string[]
-  share_token?: string
-  [key: string]: any // Allow additional properties for Json compatibility
+  song_ids?: string[] | null
+  share_token?: string | null
 }
 
 export interface Setlist {
@@ -223,7 +223,7 @@ async function createSetlistWithQueryBuilder(setlistData: Partial<Setlist>): Pro
       metadata: {
         song_ids: setlistData.songIds || [],
         share_token: setlistData.shareToken || null
-      } as any,
+      } as SetlistMetadata as JsonValue,
       created_by: user.id,
       is_public: setlistData.isPublic || false,
       share_id: setlistData.shareToken || null
@@ -271,7 +271,7 @@ async function updateSetlistWithQueryBuilder(id: string, setlistData: Partial<Se
       const currentMetadata: SetlistMetadata = {}
       if (setlistData.songIds !== undefined) currentMetadata.song_ids = setlistData.songIds
       if (setlistData.shareToken !== undefined) currentMetadata.share_token = setlistData.shareToken
-      updateData.metadata = currentMetadata as any
+      updateData.metadata = currentMetadata as SetlistMetadata as JsonValue
     }
     if (setlistData.isPublic !== undefined) updateData.is_public = setlistData.isPublic
     if (setlistData.shareToken !== undefined) updateData.share_id = setlistData.shareToken
@@ -348,7 +348,7 @@ async function addSongToSetlistWithQueryBuilder(setlistId: string, songId: strin
       setlist.songIds.push(songId)
       
       const updateData: Partial<SetlistUpdate> = {
-        metadata: { song_ids: setlist.songIds } as SetlistMetadata
+        metadata: { song_ids: setlist.songIds } as SetlistMetadata as JsonValue
       }
 
       const queryBuilder = createQueryBuilder(supabase, 'setlists')
@@ -398,7 +398,7 @@ async function removeSongFromSetlistWithQueryBuilder(setlistId: string, songId: 
       setlist.songIds.splice(index, 1)
       
       const updateData: Partial<SetlistUpdate> = {
-        metadata: { song_ids: setlist.songIds } as SetlistMetadata
+        metadata: { song_ids: setlist.songIds } as SetlistMetadata as JsonValue
       }
 
       const queryBuilder = createQueryBuilder(supabase, 'setlists')

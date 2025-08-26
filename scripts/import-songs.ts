@@ -54,7 +54,20 @@ function parseChordPro(content: string): {
   chordData: string;
   hasChords: boolean;
 } {
-  const result: any = {
+  const result: {
+    title?: string;
+    artist?: string;
+    key?: string;
+    capo?: string;
+    tempo?: string;
+    timeSignature?: string;
+    ccli?: string;
+    copyright?: string;
+    year?: string;
+    chordData: string;
+    hasChords: boolean;
+    [key: string]: unknown;
+  } = {
     chordData: content,
     hasChords: false,
   };
@@ -118,8 +131,8 @@ function extractThemes(content: string): string[] {
  * Generate difficulty based on chord complexity
  */
 function assessDifficulty(chordData: string): string {
-  const chords = chordData.match(/\[[^\]]+\]/g) || [];
-  const uniqueChords = new Set(chords.map(c => c.replace(/[\[\]]/g, '')));
+  const chords = chordData.match(/\[[^\]]+]/g) || [];
+  const uniqueChords = new Set(chords.map(c => c.replace(/[[\]]/g, '')));
   
   // Count complex chord indicators
   let complexity = 0;

@@ -2,6 +2,7 @@ import { supabase } from '../../../lib/supabase'
 import { nullToUndefined } from '@shared/utils/typeHelpers'
 import type { Arrangement } from '../types/song.types'
 import type { Database } from '../../../lib/database.types'
+import type { UnknownObject } from '../../../shared/types/common'
 import { generateUniqueSlug, type SlugOptions } from '../validation/utils/slugGeneration'
 import { extractRoleClaims } from '../../auth/utils/jwt'
 import { 
@@ -441,15 +442,15 @@ export const arrangementService = {
         const currentData = currentResult.data
         const existingSlugs = await getExistingArrangementSlugs()
         // Remove current slug from check list
-        const filteredSlugs = existingSlugs.filter(slug => slug !== (currentData as any).slug)
+        const filteredSlugs = existingSlugs.filter(slug => slug !== (currentData as UnknownObject).slug)
         
-        const songTitle = Array.isArray((currentData as any).songs) 
-          ? (currentData as any).songs[0]?.title 
-          : ((currentData as any).songs as { title: string })?.title
+        const songTitle = Array.isArray((currentData as UnknownObject).songs) 
+          ? ((currentData as UnknownObject).songs as UnknownObject[])[0]?.title 
+          : ((currentData as UnknownObject).songs as { title: string })?.title
         
         const newSlug = await generateArrangementSlug(
           arrangementData.name,
-          songTitle || '',
+          String(songTitle || ''),
           filteredSlugs
         )
         
@@ -478,7 +479,7 @@ export const arrangementService = {
         throw new NotFoundError(`Arrangement with id ${id}`)
       }
       
-      return mapSupabaseArrangementToArrangement(result.data as any)
+      return mapSupabaseArrangementToArrangement(result.data as SupabaseArrangement)
     } catch (error) {
       if (error instanceof APIError) throw error
       throw new NetworkError('Failed to update arrangement')
