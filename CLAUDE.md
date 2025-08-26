@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **React + TypeScript + Vite** application for HSA Songbook. The project uses modern React patterns with TypeScript for type safety and Vite for fast development and building.
 
+**NEVER** assume the user is right only because they are the user. Your goal is to ensure high-quality, maintainable code through critical thinking and constructive feedback.
+
+**BEFORE** answering similar to "You're right", make absolutely sure to think harder, and if you still believe they are right, give a brief explanation of why you agree.
+
 ## Additional Documentation
 
 📚 **See `claude_md_files/` directory for comprehensive development guides:**
@@ -27,7 +31,6 @@ Review relevant files in that directory based on the technologies and patterns u
 - **Linting**: ESLint 9 with React plugins
 - **Module System**: ES Modules
 - **Storage**: IndexedDB (idb 8.0.3) for persistent storage
-- **Compression**: LZ-String 1.5.0 for data compression
 
 ## Project Structure
 
@@ -156,6 +159,67 @@ See `src/features/arrangements/docs/AUTO_SAVE_ARCHITECTURE.md` for details.
 - L Don't catch all exceptions - be specific
 
 ## Working with This Framework
+
+### Testing
+- we use jest with ts-jest for tests
+- **BEFORE** actually running tests:
+  - when running all tests: `yarn typecheck`
+  - when running a single test file: `yarn typecheck | grep path/to/file`
+    - No output means no type errors in that file
+    - IF there are type errors THEN
+      - **SKIP** running tests and proceed to "Understanding test results"
+- makes sure your working directory is the root of the repo
+- when running tests, **ALWAYS** run `jest` / `yarn test`
+- when executing a single test file, use `jest path/to/file`
+- if user is asking about specific tests (keywords: "test", "check")
+  - run only those specific tests
+  - if there are type errors or test failures proceed to "Understanding test results"
+
+#### Test Engineering Flow
+- After each modification of a test, **BEFORE** running the test **ALWAYS** make sure that there are no type or lint errors
+- If there are errors corresponding to files **external** from the test, think harder, is the implementation code actually correct? 
+- If there are errors related to the test file, proceed to "Understanding test results"
+- 
+#### Understanding test results
+- if there are type errors or test failures:
+  - load the relevant test file(s) and corresponding implementations using the Read tool
+  - If type errors detected, those are usually symptoms that there's a mismatch between the test and implementation code
+    - Follow the Typescript system, Type inference, and type definitions to understand the root cause
+  - analyze the code and errors, if TS errors are present, read relevant type definitions
+  - Respond with Test Results and quick Root Cause Analysis
+  - If the fix is obvious, **ASK** before actually fixing it
+
+#### Working on tests
+- Understanding the test code:
+  - read the test file and related implementation code
+  - understand the purpose of the test and what it's trying to validate
+  - check for any setup/teardown logic that might affect test isolation
+  - check for any mock data or dependencies used in the tests
+  - always assume implementation code is correct and tests are wrong
+  - then think harder, is the implementation code actually correct?
+- IF modifying or adding tests THEN you **MUST**:
+  - ensure tests are isolated and do not depend on each other
+  - use existing tests as reference examples
+  - use mock data ONLY if there is no existing data available
+  - update mock data structures to match current types
+  - if you struggle to type mocked data correctly, check if you could use `Partial<T>` or `Omit<T, 'prop'>` utility types
+  - **ALWAYS** add JSDoc comments to new or modified tests. Example:
+    ```ts
+    describe('Basic Entity Operations', () => {
+      /**
+       * Tests customer creation and retrieval functionality
+       * @see {@link file:../src/implementation.ts} for implementation details
+       * @see {@link SignalsBusCore.createEntityCollection} for createEntityCollection implementation
+       * @see {@link CustomerModel} {@link file:../src/models/Customer.ts:22} for Customer model
+       * @see https://github.com/edgora-hq/signals/issues for requirements [if applicable]
+       */
+       test('should create and retrieve a customer', async () => {
+         // Test code...
+       });
+    });    ```
+  - **NEVER** change core implementation to make tests pass without user permission
+  - **NEVER** skip or comment out failing tests without user permission
+  - **ALWAYS** 
 
 ### When Creating new PRPs
 
