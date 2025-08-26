@@ -4,7 +4,7 @@
  * Implements code splitting for the heavy editor dependencies
  */
 
-import React, { lazy, Suspense } from 'react'
+import React, { Component, lazy, Suspense } from 'react'
 import type { ComponentProps } from 'react'
 import type { ExtendedWindow } from '../../../shared/types/common'
 
@@ -117,7 +117,7 @@ export function LazyChordEditor({ onError, ...props }: LazyChordEditorProps) {
 }
 
 // Error boundary for handling chunk loading failures
-class ErrorBoundary extends React.Component<
+class ErrorBoundary extends Component<
   { children: React.ReactNode; onError?: (error: Error) => void },
   { hasError: boolean; error?: Error }
 > {
