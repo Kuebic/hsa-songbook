@@ -65,7 +65,7 @@ export const chunkStrategies: ChunkStrategy[] = [
   },
   {
     name: 'auth-vendor',
-    test: (id) => id.includes('@clerk') || id.includes('clerk'),
+    test: (id) => id.includes('jwt-decode') || id.includes('@supabase/auth'),
     priority: 60,
     minSize: 30000,
     maxSize: 150000

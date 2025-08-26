@@ -110,7 +110,7 @@ Song Form Design & Duplicate Prevention Strategy
   const reviewSchema = new Schema({
     songId: { type: Schema.Types.ObjectId, ref: 'Song' },
     arrangementId: { type: Schema.Types.ObjectId, ref: 'Arrangement' },
-    userId: { type: String, required: true }, // Clerk ID
+    userId: { type: String, required: true }, // Supabase user ID
     rating: { type: Number, min: 1, max: 5, required: true },
     comment: { type: String, maxlength: 1000 },
     createdAt: { type: Date, default: Date.now }

@@ -15,7 +15,7 @@ HSA Songbook is a full-stack Progressive Web Application (PWA) designed for musi
 - **Styling**: Tailwind CSS v4 with custom theme system
 - **Editor**: CodeMirror v6 for ChordPro editing with custom syntax highlighting
 - **ChordPro Parsing**: ChordSheetJS v12 for rendering chord charts
-- **Authentication**: Clerk React SDK for user management
+- **Authentication**: Supabase Auth for user management
 - **Routing**: React Router v7
 - **PWA**: Vite PWA plugin with Workbox for offline support
 - **Testing**: Vitest with React Testing Library
@@ -25,7 +25,7 @@ HSA Songbook is a full-stack Progressive Web Application (PWA) designed for musi
 - **Language**: TypeScript
 - **Database**: MongoDB with Mongoose ODM
 - **Compression**: ZSTD for chord data storage optimization
-- **Authentication**: Clerk webhook integration
+- **Authentication**: Supabase Auth with JWT tokens
 - **API Design**: RESTful with versioning (/api/v1)
 - **Security**: Helmet, CORS, rate limiting, input sanitization
 
@@ -83,7 +83,7 @@ server/
   notes: string (max: 2000)
   defaultArrangementId: ObjectId
   metadata: {
-    createdBy: string (Clerk userId)
+    createdBy: string (Supabase user ID)
     lastModifiedBy: string
     isPublic: boolean
     ratings: { average: number, count: number }
@@ -99,7 +99,7 @@ server/
   name: string (required, max: 200)
   songIds: ObjectId[] (references to songs)
   slug: string (unique, indexed)
-  createdBy: string (Clerk userId)
+  createdBy: string (Supabase user ID)
   chordData: Buffer (ZSTD compressed ChordPro)
   key: enum ['C','C#','Db',...,'B']
   tempo: number (40-240 BPM)
@@ -126,7 +126,7 @@ server/
   description: string
   createdAt: Date
   updatedAt: Date
-  createdBy: string (optional Clerk userId)
+  createdBy: string (optional Supabase user ID)
   isPublic: boolean
   shareId: string (for sharing)
   arrangements: Array<{
@@ -231,7 +231,7 @@ POST   /api/v1/arrangements/:id/rate     - Rate arrangement
 
 #### Users API
 ```
-POST   /api/v1/users/webhook   - Clerk webhook handler
+POST   /api/v1/auth/callback   - Supabase auth callback handler
 GET    /api/v1/users/profile   - Get user profile
 PUT    /api/v1/users/profile   - Update profile
 ```
@@ -318,7 +318,7 @@ PUT    /api/v1/users/profile   - Update profile
 ## 7. Security Requirements
 
 ### 7.1 Authentication & Authorization
-- **Provider**: Clerk with JWT tokens
+- **Provider**: Supabase Auth with JWT tokens
 - **Roles**: Public, User, Admin
 - **Session**: Secure, httpOnly cookies
 - **OAuth**: Google, GitHub providers
@@ -442,7 +442,7 @@ FRONTEND_URL=http://localhost:5173
 3. **Offline Sync**: Queue mutations in IndexedDB, replay when online
 4. **Compression**: ZSTD provides better ratios than gzip for text
 5. **Search**: MongoDB text indexes with weighted fields
-6. **Authentication**: Clerk webhooks for user sync
+6. **Authentication**: Supabase Auth for user sync
 7. **State Management**: TanStack Query for server state, avoid Redux
 8. **Testing**: Focus on user flows, not implementation details
 9. **Performance**: Virtualize long lists, debounce user input

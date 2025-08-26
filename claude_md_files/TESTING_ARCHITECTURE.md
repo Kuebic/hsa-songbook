@@ -10,8 +10,8 @@ Tests are fully integrated into the Vertical Slice Architecture - no separate te
 src/
 ├── shared/                         # Shared utilities (including test utils)
 │   ├── test-utils/                # Shared test utilities
-│   │   ├── setup.ts               # Global test setup and Clerk mocks
-│   │   └── clerk-test-utils.tsx   # Reusable Clerk test utilities
+│   │   ├── setup.ts               # Global test setup and auth mocks
+│   │   └── auth-test-utils.tsx    # Reusable auth test utilities
 │   ├── components/                # Shared UI components
 │   ├── hooks/                     # Shared hooks
 │   └── styles/                    # Global styles
@@ -95,7 +95,7 @@ npm test AuthButtons
   - ✅ Protected routes
   - ✅ User hooks
   - ✅ Setlist user association
-  - ✅ Clerk integration mocking
+  - ✅ Supabase Auth integration mocking
 
 ## 🔧 Test Configuration
 
@@ -106,7 +106,7 @@ npm test AuthButtons
 - Coverage exclusions for config files
 
 ### Test Setup (`src/test/setup.ts`)
-- Clerk mocks configured globally
+- Supabase Auth mocks configured globally
 - Testing Library DOM matchers
 - Browser API mocks (matchMedia, IntersectionObserver)
 

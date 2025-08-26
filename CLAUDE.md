@@ -43,7 +43,7 @@ hsa-songbook/
 │   │   └── pages/           # Route pages (HomePage, SearchPage)
 │   ├── features/            # Feature-based modules
 │   │   ├── arrangements/    # ChordPro editor, viewer, transposition
-│   │   ├── auth/           # Authentication (Clerk integration)
+│   │   ├── auth/           # Authentication (Supabase Auth)
 │   │   ├── monitoring/     # Error boundaries, web vitals
 │   │   ├── multilingual/   # Multi-language lyrics support
 │   │   ├── pwa/           # Progressive web app features

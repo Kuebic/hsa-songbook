@@ -30,8 +30,8 @@ A modern, responsive web application for searching, viewing, and managing worshi
 - **Background Sync**: Automatic synchronization when reconnected
 
 ### 🔐 User Management
-- **Authentication**: Secure login via Clerk
-- **Role-Based Access**: Public, User, and Admin permission levels
+- **Authentication**: Secure login via Supabase Auth
+- **Role-Based Access**: Public, User, Moderator, and Admin permission levels
 - **Personal Library**: Save and manage personal setlists
 
 ## Tech Stack
@@ -216,7 +216,7 @@ hsa-songbook/
 │   │   └── main.tsx      # Entry point
 │   ├── features/         # Feature modules
 │   │   ├── arrangements/ # ChordPro editor and viewer
-│   │   ├── auth/         # Authentication with Clerk
+│   │   ├── auth/         # Authentication with Supabase Auth
 │   │   ├── songs/        # Song management
 │   │   ├── setlists/     # Setlist features
 │   │   ├── search/       # Search functionality
@@ -293,7 +293,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - [ChordSheetJS](https://github.com/martijnversluis/ChordSheetJS) for ChordPro parsing
-- [Clerk](https://clerk.com) for authentication
+- [Supabase](https://supabase.com) for backend and authentication
 - [ShadCN UI](https://ui.shadcn.com) for UI components
 - [TanStack Query](https://tanstack.com/query) for data fetching
 
