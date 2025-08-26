@@ -21,15 +21,8 @@ export function useArrangementViewer(slug: string) {
       setError(null)
 
       try {
-        // Try to get with chord data first
-        let data
-        try {
-          data = await arrangementService.getArrangementBySlug(slug)
-        } catch (err) {
-          // If decompression fails, try without chord data
-          console.warn('Failed to get chord data, retrying without:', err)
-          data = await arrangementService.getArrangementBySlug(slug)
-        }
+        // Get the arrangement data
+        const data = await arrangementService.getArrangementBySlug(slug)
 
         if (data) {
           // Cast to DTO type for type safety

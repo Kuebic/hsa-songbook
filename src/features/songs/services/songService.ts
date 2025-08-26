@@ -125,12 +125,17 @@ function mapSupabaseSongToSong(supabaseSong: SupabaseSong): Song {
 }
 
 // Convert Supabase arrangement to application Arrangement type
-function mapSupabaseArrangementToArrangement(supabaseArrangement: SupabaseArrangement): Arrangement {
+function mapSupabaseArrangementToArrangement(supabaseArrangement: SupabaseArrangement & { song_id?: string | { id: string } }): Arrangement {
+  // Handle both cases: when song_id is a string (no join) or an object (with join)
+  const songId = typeof supabaseArrangement.song_id === 'object' && supabaseArrangement.song_id 
+    ? supabaseArrangement.song_id.id 
+    : supabaseArrangement.song_id
+    
   return {
     id: supabaseArrangement.id,
     name: supabaseArrangement.name,
     slug: supabaseArrangement.slug,
-    songIds: [supabaseArrangement.song_id], // Note: single song ID in array for compatibility
+    songIds: songId ? [songId] : [], // Note: single song ID in array for compatibility
     key: supabaseArrangement.key || '',
     tempo: supabaseArrangement.tempo || undefined,
     timeSignature: nullToUndefined(supabaseArrangement.time_signature),

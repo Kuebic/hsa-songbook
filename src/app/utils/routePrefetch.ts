@@ -118,6 +118,13 @@ function getNetworkQuality(): 'fast' | 'medium' | 'slow' | 'offline' {
  */
 function prefetchChunk(chunkName: string): Promise<void> {
   return new Promise((resolve, reject) => {
+    // Skip prefetching in development mode
+    // In dev, modules are loaded on-demand via Vite's HMR
+    if (import.meta.env.DEV) {
+      resolve()
+      return
+    }
+    
     // Check if already loaded
     if (window.__loadedChunks?.has(chunkName)) {
       resolve()
@@ -169,6 +176,11 @@ function prefetchChunk(chunkName: string): Promise<void> {
  * Prefetch a route and its dependencies
  */
 export async function prefetchRoute(config: RouteConfig): Promise<void> {
+  // Skip prefetching in development mode
+  if (import.meta.env.DEV) {
+    return
+  }
+  
   // Check network quality
   const networkQuality = getNetworkQuality()
   
@@ -356,6 +368,12 @@ export function setupFocusPrefetch(): void {
  * Initialize all prefetching strategies
  */
 export function initializePrefetching(): void {
+  // Skip all prefetching in development mode
+  if (import.meta.env.DEV) {
+    console.log('Route prefetching disabled in development mode')
+    return
+  }
+  
   // Wait for DOM to be ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializePrefetching)
@@ -416,6 +434,11 @@ export function manualPrefetch(path: string): Promise<void> {
  * Prefetch critical routes on idle
  */
 export function prefetchCriticalRoutes(): void {
+  // Skip all prefetching in development mode
+  if (import.meta.env.DEV) {
+    return
+  }
+  
   const criticalRoutes = routeConfigs.filter(r => 
     r.prefetchOn === 'visible' && 
     !r.path.includes('admin')

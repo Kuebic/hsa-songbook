@@ -61,8 +61,8 @@ export function useArrangements(options: UseArrangementsOptions = {}) {
       setPages(totalPages)
       
       // Auto-select first arrangement if none selected and auto-select is enabled
-      if (autoSelect && arrangementsData.length > 0 && !selectedArrangement) {
-        setSelectedArrangement(arrangementsData[0])
+      if (autoSelect && arrangementsData.length > 0) {
+        setSelectedArrangement(prev => prev || arrangementsData[0])
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load arrangements'
@@ -71,7 +71,7 @@ export function useArrangements(options: UseArrangementsOptions = {}) {
     } finally {
       setLoading(false)
     }
-  }, [filter, selectedArrangement, autoSelect, enabled])
+  }, [filter?.songId, autoSelect, enabled])
 
   const selectArrangement = useCallback((arrangement: Arrangement) => {
     setSelectedArrangement(arrangement)
@@ -89,10 +89,13 @@ export function useArrangements(options: UseArrangementsOptions = {}) {
     setError(null)
   }, [])
 
-  // Load arrangements on mount and when dependencies change
+  // Load arrangements on mount and when songId changes
   useEffect(() => {
-    fetchArrangements()
-  }, [fetchArrangements])
+    // Only fetch if we have a songId or if we want all arrangements (no filter)
+    if (filter?.songId || !filter) {
+      fetchArrangements()
+    }
+  }, [filter?.songId, fetchArrangements])
 
   return {
     arrangements,

@@ -36,12 +36,15 @@ async function checkUserPermissions(): Promise<{ canModerate: boolean; userId: s
 }
 
 // Convert Supabase arrangement to application Arrangement type
-export function mapSupabaseArrangementToArrangement(supabaseArrangement: SupabaseArrangement): Arrangement {
+export function mapSupabaseArrangementToArrangement(supabaseArrangement: SupabaseArrangement & { songs?: { title: string } | null }): Arrangement {
+  // song_id is always a string in the database, the songs field is from the join
+  const songId = supabaseArrangement.song_id
+    
   return {
     id: supabaseArrangement.id,
     name: supabaseArrangement.name,
     slug: supabaseArrangement.slug,
-    songIds: [supabaseArrangement.song_id], // Note: single song ID in array for compatibility
+    songIds: songId ? [songId] : [], // Note: single song ID in array for compatibility
     key: supabaseArrangement.key || '',
     tempo: supabaseArrangement.tempo || undefined,
     timeSignature: nullToUndefined(supabaseArrangement.time_signature),
@@ -148,7 +151,7 @@ export const arrangementService = {
       const result = await createQueryBuilder(supabase, 'arrangements')
         .select(`
           *,
-          songs!arrangements_song_id_fkey (title)
+          songs!arrangements_song_id_fkey(title)
         `)
         .withVisibility(permissions)
         .orderBy('name', { ascending: true })
@@ -184,7 +187,7 @@ export const arrangementService = {
       
       const permissions = buildUserPermissions({ userId, canModerate })
       const result = await createQueryBuilder(supabase, 'arrangements')
-        .select(`*, songs!arrangements_song_id_fkey (title)`)
+        .select(`*, songs!arrangements_song_id_fkey(title)`)
         .eq('id', id)
         .withVisibility(permissions)
         .single()
@@ -221,7 +224,7 @@ export const arrangementService = {
       
       const permissions = buildUserPermissions({ userId, canModerate })
       const result = await createQueryBuilder(supabase, 'arrangements')
-        .select(`*, songs!arrangements_song_id_fkey (title)`)
+        .select(`*, songs!arrangements_song_id_fkey(title)`)
         .eq('slug', slug)
         .withVisibility(permissions)
         .single()
@@ -258,7 +261,7 @@ export const arrangementService = {
       
       const permissions = buildUserPermissions({ userId, canModerate })
       const result = await createQueryBuilder(supabase, 'arrangements')
-        .select(`*, songs!arrangements_song_id_fkey (title)`)
+        .select(`*, songs!arrangements_song_id_fkey(title)`)
         .eq('song_id', songId)
         .withVisibility(permissions)
         .orderBy('name', { ascending: true })
@@ -292,7 +295,7 @@ export const arrangementService = {
       }
       
       let query = createQueryBuilder(supabase, 'arrangements')
-        .select(`*, songs!arrangements_song_id_fkey (title, artist)`)
+        .select(`*, song_id (title, artist)`)
       
       // Apply filters
       if (params.searchQuery) {
@@ -384,7 +387,7 @@ export const arrangementService = {
       // Use QueryBuilder for insert
       const result = await createQueryBuilder(supabase, 'arrangements')
         .insert(insertData)
-        .select('*, songs!arrangements_song_id_fkey (title)')
+        .select('*, songs!arrangements_song_id_fkey(title)')
         .single()
         .execute()
       
@@ -426,7 +429,7 @@ export const arrangementService = {
       // If name is being updated, regenerate slug
       if (arrangementData.name !== undefined) {
         const currentResult = await createQueryBuilder(supabase, 'arrangements')
-          .select('slug, songs!arrangements_song_id_fkey (title)')
+          .select('slug, songs!arrangements_song_id_fkey(title)')
           .eq('id', id)
           .single()
           .execute()
@@ -461,7 +464,7 @@ export const arrangementService = {
       const result = await createQueryBuilder(supabase, 'arrangements')
         .update(updateData)
         .eq('id', id)
-        .select('*, songs!arrangements_song_id_fkey (title)')
+        .select('*, songs!arrangements_song_id_fkey(title)')
         .single()
         .execute()
       

@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
+import { useMemo } from 'react'
 import { SongViewer } from '../components/SongViewer'
 import { ArrangementList } from '../components/arrangements/ArrangementList'
 import { ArrangementManagementModal } from '../components/ArrangementManagementModal'
@@ -14,10 +15,17 @@ export function SongDetailPage() {
   const navigate = useNavigate()
   const { user, isAdmin } = useAuth()
   const { song, loading, error } = useSong(slug || '', true)
+  
+  // Memoize filter to prevent recreating object on every render
+  const arrangementsFilter = useMemo(() => 
+    song?.id ? { songId: song.id } : undefined,
+    [song?.id]
+  )
+  
   const { 
     arrangements, 
     refreshArrangements
-  } = useArrangements({ filter: { songId: song?.id } })
+  } = useArrangements({ filter: arrangementsFilter, enabled: !!song?.id })
   const { deleteArrangement } = useArrangementMutations()
   const { addNotification } = useNotification()
   const { 

@@ -11,19 +11,7 @@ export interface ServiceWorkerHookReturn {
   close: () => void
 }
 
-// Stub implementation when PWA is disabled
-/* Stub implementation disabled - using real implementation
-export function useServiceWorker(): ServiceWorkerHookReturn {
-  return {
-    offlineReady: false,
-    needRefresh: false,
-    updateServiceWorker: async () => {},
-    close: () => {}
-  }
-}
-*/
-
-// Original implementation - uncomment when re-enabling PWA
+// Real implementation - PWA is enabled
 export function useServiceWorker(): ServiceWorkerHookReturn {
   const {
     offlineReady: [offlineReady, setOfflineReady],
