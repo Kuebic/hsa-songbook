@@ -1,4 +1,5 @@
-import { Component } from 'react';
+// @ts-expect-error React default import needed for production builds
+import React, { Component } from 'react';
 import type { ComponentType, ReactNode, ErrorInfo as ReactErrorInfo } from 'react';
 import { ErrorFallback } from './ErrorFallback';
 import { errorReportingService } from '../services/errorReportingService';

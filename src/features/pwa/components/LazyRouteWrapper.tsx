@@ -1,4 +1,5 @@
-import { Component, Suspense } from 'react'
+// React default import needed for production builds
+import React, { Component, Suspense } from 'react'
 import type { ReactNode } from 'react'
 import { OfflineFallback } from './OfflineFallback'
 
