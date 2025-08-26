@@ -193,7 +193,7 @@ jobs:
           script: |
             const comment = `⚠️ **Performance regression detected!**
             
-Please review the Lighthouse report for details on performance degradation compared to the baseline.`;
+            Please review the Lighthouse report for details on performance degradation compared to the baseline.`;
             
             await github.rest.issues.createComment({
               owner: context.repo.owner,
