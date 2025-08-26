@@ -1,5 +1,4 @@
-import React from 'react';
-import { Component } from 'react';
+import * as React from 'react';
 import type { ReactNode, ErrorInfo as ReactErrorInfo } from 'react';
 import { ErrorFallback } from './ErrorFallback';
 import { errorReportingService } from '../services/errorReportingService';
@@ -23,7 +22,7 @@ interface ErrorBoundaryProps {
   maxRetries?: number;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private retryTimeouts: Set<number> = new Set();
   private categorizeError?: (error: Error) => CategorizedError;
 
