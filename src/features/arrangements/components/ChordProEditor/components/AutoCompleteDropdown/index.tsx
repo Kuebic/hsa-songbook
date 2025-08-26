@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   useFloating,
   autoUpdate,
@@ -38,7 +38,7 @@ export const AutoCompleteDropdown: React.FC<AutoCompleteDropdownProps> = ({
   isSearching = false,
   onClose,
 }) => {
-  const listRef = useRef<HTMLDivElement>(null);
+  const [listElement, setListElement] = useState<HTMLDivElement | null>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const { isKeyboardVisible, keyboardHeight } = useVirtualKeyboard();
 
@@ -124,8 +124,8 @@ export const AutoCompleteDropdown: React.FC<AutoCompleteDropdownProps> = ({
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
       if (
-        listRef.current &&
-        !listRef.current.contains(target) &&
+        listElement &&
+        !listElement.contains(target) &&
         anchorEl &&
         !anchorEl.contains(target)
       ) {
@@ -149,7 +149,7 @@ export const AutoCompleteDropdown: React.FC<AutoCompleteDropdownProps> = ({
   const dropdownContent = (
     <div
       ref={(el) => {
-        listRef.current = el;
+        setListElement(el);
         refs.setFloating(el);
       }}
       style={floatingStyles}

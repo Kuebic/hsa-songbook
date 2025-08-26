@@ -1,4 +1,4 @@
-import { useState, useCallback, useOptimistic, useTransition } from 'react'
+import { useState, useCallback, useTransition, useEffect, useRef } from 'react'
 import { useAuth } from '@features/auth'
 import { songService } from '../../services/songService'
 // Note: Offline queue functionality removed
@@ -54,9 +54,18 @@ export function useSongMutations(props: UseSongMutationsProps = {}): UseSongMuta
   const { initialSongs = [], onSongsUpdate } = props
   const [_isPending, startTransition] = useTransition()
   
-  const [optimisticSongs, addOptimisticUpdate] = useOptimistic(
-    initialSongs,
-    (state: Song[], update: OptimisticUpdatePayload) => {
+  // React 18 compatible implementation of optimistic updates
+  const [optimisticSongs, setOptimisticSongs] = useState<Song[]>(initialSongs)
+  const optimisticSongsRef = useRef<Song[]>(initialSongs)
+  
+  // Update optimistic songs when initial songs change
+  useEffect(() => {
+    setOptimisticSongs(initialSongs)
+    optimisticSongsRef.current = initialSongs
+  }, [initialSongs])
+  
+  const addOptimisticUpdate = useCallback((update: OptimisticUpdatePayload) => {
+    setOptimisticSongs(state => {
       let newState: Song[]
       
       switch (update.type) {
@@ -100,13 +109,19 @@ export function useSongMutations(props: UseSongMutationsProps = {}): UseSongMuta
               : song
           )
           break
+          
+        default:
+          newState = state
       }
+      
+      // Update ref for synchronous access
+      optimisticSongsRef.current = newState
       
       // Notify parent of state change
       onSongsUpdate?.(newState)
       return newState
-    }
-  )
+    })
+  }, [onSongsUpdate])
   
   const [isCreating, setIsCreating] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -180,7 +195,7 @@ export function useSongMutations(props: UseSongMutationsProps = {}): UseSongMuta
     setError(null)
     
     // Find existing song
-    const existingSong = optimisticSongs.find(s => s.id === id)
+    const existingSong = optimisticSongsRef.current.find(s => s.id === id)
     if (!existingSong) {
       throw new Error('Song not found')
     }
@@ -225,7 +240,7 @@ export function useSongMutations(props: UseSongMutationsProps = {}): UseSongMuta
     } finally {
       setIsUpdating(false)
     }
-  }, [userId, isSignedIn, optimisticSongs, getToken, addOptimisticUpdate])
+  }, [userId, isSignedIn, getToken, addOptimisticUpdate])
   
   const updateSongTitle = useCallback(async (id: string, title: string): Promise<Song> => {
     return updateSong(id, { title })
@@ -248,7 +263,7 @@ export function useSongMutations(props: UseSongMutationsProps = {}): UseSongMuta
     setError(null)
     
     // Find song to delete
-    const songToDelete = optimisticSongs.find(s => s.id === id)
+    const songToDelete = optimisticSongsRef.current.find(s => s.id === id)
     if (!songToDelete) {
       throw new Error('Song not found')
     }
@@ -282,7 +297,7 @@ export function useSongMutations(props: UseSongMutationsProps = {}): UseSongMuta
     } finally {
       setIsDeleting(false)
     }
-  }, [userId, isSignedIn, optimisticSongs, getToken, addOptimisticUpdate])
+  }, [userId, isSignedIn, getToken, addOptimisticUpdate])
   
   const rateSong = useCallback(async (id: string, rating: number): Promise<void> => {
     if (!isSignedIn || !userId) {
@@ -297,7 +312,7 @@ export function useSongMutations(props: UseSongMutationsProps = {}): UseSongMuta
     setError(null)
     
     // Find song to rate
-    const song = optimisticSongs.find(s => s.id === id)
+    const song = optimisticSongsRef.current.find(s => s.id === id)
     if (!song) {
       throw new Error('Song not found')
     }
@@ -333,7 +348,7 @@ export function useSongMutations(props: UseSongMutationsProps = {}): UseSongMuta
     } finally {
       setIsRating(false)
     }
-  }, [userId, isSignedIn, optimisticSongs, getToken, addOptimisticUpdate])
+  }, [userId, isSignedIn, getToken, addOptimisticUpdate])
   
   return {
     createSong,

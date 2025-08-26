@@ -4,15 +4,12 @@
  * Implements code splitting for the heavy editor dependencies
  */
 
-'use client';
-// WORKAROUND for React 19 + Vite production build issue
-// Using namespace import (*) which is more reliable for CommonJS interop in production
-import * as React from 'react'
+import React, { Component, lazy, Suspense } from 'react'
 import type { ComponentProps } from 'react'
 import type { ExtendedWindow } from '../../../shared/types/common'
 
 // Lazy load the chord editor with chunk name
-const ChordEditorWithPreview = React.lazy(() => 
+const ChordEditorWithPreview = lazy(() => 
   import(/* webpackChunkName: "chord-editor" */ './ChordEditorWithPreview').then(module => ({ 
     default: module.ChordEditorWithPreview 
   }))
@@ -112,16 +109,15 @@ interface LazyChordEditorProps extends ChordEditorProps {
 export function LazyChordEditor({ onError, ...props }: LazyChordEditorProps) {
   return (
     <ErrorBoundary onError={onError}>
-      <React.Suspense fallback={<EditorSkeleton />}>
+      <Suspense fallback={<EditorSkeleton />}>
         <ChordEditorWithPreview {...props} />
-      </React.Suspense>
+      </Suspense>
     </ErrorBoundary>
   )
 }
 
 // Error boundary for handling chunk loading failures
-// Use React.Component from namespace import which is more reliable in production builds
-class ErrorBoundary extends React.Component<
+class ErrorBoundary extends Component<
   { children: React.ReactNode; onError?: (error: Error) => void },
   { hasError: boolean; error?: Error }
 > {

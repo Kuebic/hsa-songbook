@@ -1,7 +1,4 @@
-'use client';
-// WORKAROUND for React 19 + Vite production build issue  
-// Using namespace import (*) which is more reliable for CommonJS interop in production
-import * as React from 'react';
+import { Component } from 'react';
 import type { ComponentType, ReactNode, ErrorInfo } from 'react';
 import { ErrorFallback } from './ErrorFallback';
 import { errorReportingService } from '../services/errorReportingService';
@@ -25,8 +22,7 @@ interface ErrorBoundaryProps {
   maxRetries?: number;
 }
 
-// Use React.Component from namespace import which is more reliable in production builds
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private retryTimeouts: Set<number> = new Set();
   private categorizeError?: (error: Error) => CategorizedError;
 

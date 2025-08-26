@@ -1,7 +1,4 @@
-'use client';
-// WORKAROUND for React 19 + Vite production build issue
-// Using namespace import (*) which is more reliable for CommonJS interop in production
-import * as React from 'react'
+import React, { Component, Suspense } from 'react'
 import type { ReactNode } from 'react'
 import { OfflineFallback } from './OfflineFallback'
 
@@ -15,8 +12,7 @@ interface State {
   error: Error | null
 }
 
-// Use React.Component from namespace import which is more reliable in production builds
-class LazyRouteErrorBoundary extends React.Component<Props, State> {
+class LazyRouteErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = { hasError: false, error: null }
@@ -113,9 +109,9 @@ interface LazyRouteWrapperProps {
 export function LazyRouteWrapper({ children, pageName }: LazyRouteWrapperProps) {
   return (
     <LazyRouteErrorBoundary pageName={pageName}>
-      <React.Suspense fallback={<RouteLoader />}>
+      <Suspense fallback={<RouteLoader />}>
         {children}
-      </React.Suspense>
+      </Suspense>
     </LazyRouteErrorBoundary>
   )
 }

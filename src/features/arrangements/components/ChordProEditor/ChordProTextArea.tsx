@@ -17,7 +17,7 @@ interface ChordProTextAreaProps {
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => boolean | void;
   onInput?: () => void;
   onBeforeInput?: (e: InputEvent) => boolean;
-  textareaRef?: React.RefObject<HTMLTextAreaElement | null>;
+  textareaRef?: React.RefObject<HTMLTextAreaElement>;
   justCompletedDirective?: { position: number; timestamp: number } | null;
   onDirectiveCompleted?: () => void;
   theme?: Theme;

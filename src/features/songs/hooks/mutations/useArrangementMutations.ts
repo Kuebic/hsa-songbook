@@ -1,4 +1,4 @@
-import { useState, useCallback, useOptimistic, useTransition } from 'react'
+import { useState, useCallback, useTransition, useEffect, useRef } from 'react'
 import { useAuth } from '@features/auth'
 import { arrangementService } from '../../services/arrangementService'
 // Note: Offline queue functionality removed
@@ -54,9 +54,18 @@ export function useArrangementMutations(props: UseArrangementMutationsProps = {}
   const { initialArrangements = [], onArrangementsUpdate } = props
   const [_isPending, startTransition] = useTransition()
   
-  const [optimisticArrangements, addOptimisticUpdate] = useOptimistic(
-    initialArrangements,
-    (state: Arrangement[], update: OptimisticUpdatePayload) => {
+  // React 18 compatible implementation of optimistic updates
+  const [optimisticArrangements, setOptimisticArrangements] = useState<Arrangement[]>(initialArrangements)
+  const optimisticArrangementsRef = useRef<Arrangement[]>(initialArrangements)
+  
+  // Update optimistic arrangements when initial arrangements change
+  useEffect(() => {
+    setOptimisticArrangements(initialArrangements)
+    optimisticArrangementsRef.current = initialArrangements
+  }, [initialArrangements])
+  
+  const addOptimisticUpdate = useCallback((update: OptimisticUpdatePayload) => {
+    setOptimisticArrangements(state => {
       let newState: Arrangement[]
       
       switch (update.type) {
@@ -100,13 +109,19 @@ export function useArrangementMutations(props: UseArrangementMutationsProps = {}
               : arrangement
           )
           break
+        
+        default:
+          newState = state
       }
+      
+      // Update ref for synchronous access
+      optimisticArrangementsRef.current = newState
       
       // Notify parent of state change
       onArrangementsUpdate?.(newState)
       return newState
-    }
-  )
+    })
+  }, [onArrangementsUpdate])
   
   const [isCreating, setIsCreating] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -197,7 +212,7 @@ export function useArrangementMutations(props: UseArrangementMutationsProps = {}
     setError(null)
     
     // Find existing arrangement for rollback
-    const existingArrangement = optimisticArrangements.find(a => a.id === id)
+    const existingArrangement = optimisticArrangementsRef.current.find(a => a.id === id)
     if (!existingArrangement) {
       throw new Error('Arrangement not found')
     }
@@ -258,7 +273,7 @@ export function useArrangementMutations(props: UseArrangementMutationsProps = {}
     } finally {
       setIsUpdating(false)
     }
-  }, [userId, isSignedIn, optimisticArrangements, getToken, addOptimisticUpdate])
+  }, [userId, isSignedIn, getToken, addOptimisticUpdate])
   
   const updateArrangementName = useCallback(async (id: string, name: string): Promise<Arrangement> => {
     return updateArrangement(id, { name })
@@ -281,7 +296,7 @@ export function useArrangementMutations(props: UseArrangementMutationsProps = {}
     setError(null)
     
     // Find arrangement to delete
-    const arrangementToDelete = optimisticArrangements.find(a => a.id === id)
+    const arrangementToDelete = optimisticArrangementsRef.current.find(a => a.id === id)
     if (!arrangementToDelete) {
       throw new Error('Arrangement not found')
     }
@@ -315,7 +330,7 @@ export function useArrangementMutations(props: UseArrangementMutationsProps = {}
     } finally {
       setIsDeleting(false)
     }
-  }, [userId, isSignedIn, optimisticArrangements, getToken, addOptimisticUpdate])
+  }, [userId, isSignedIn, getToken, addOptimisticUpdate])
   
   const rateArrangement = useCallback(async (id: string, rating: number): Promise<void> => {
     if (!isSignedIn || !userId) {
@@ -330,7 +345,7 @@ export function useArrangementMutations(props: UseArrangementMutationsProps = {}
     setError(null)
     
     // Find arrangement to rate
-    const arrangement = optimisticArrangements.find(a => a.id === id)
+    const arrangement = optimisticArrangementsRef.current.find(a => a.id === id)
     if (!arrangement) {
       throw new Error('Arrangement not found')
     }
@@ -366,7 +381,7 @@ export function useArrangementMutations(props: UseArrangementMutationsProps = {}
     } finally {
       setIsRating(false)
     }
-  }, [userId, isSignedIn, optimisticArrangements, getToken, addOptimisticUpdate])
+  }, [userId, isSignedIn, getToken, addOptimisticUpdate])
   
   return {
     createArrangement,
