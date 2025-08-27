@@ -1,4 +1,6 @@
 import type { Metric } from 'web-vitals';
+import type { ReactNode, ErrorInfo as ReactErrorInfo } from 'react';
+import type { FallbackProps } from 'react-error-boundary';
 
 export interface ErrorInfo {
   message: string;
@@ -23,10 +25,20 @@ export interface ErrorBoundaryState {
   errorBoundaryKey: number;
 }
 
-export interface ErrorFallbackProps {
-  error: Error;
-  resetErrorBoundary: () => void;
-  errorInfo?: React.ErrorInfo;
+// Maintains compatibility with existing code while aliasing to react-error-boundary's FallbackProps
+export interface ErrorFallbackProps extends FallbackProps {
+  errorInfo?: React.ErrorInfo; // Additional prop for backwards compatibility
+}
+
+// ErrorBoundaryProps for backwards compatibility with existing API
+export interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: React.ComponentType<ErrorFallbackProps>;
+  onError?: (error: Error, errorInfo: ReactErrorInfo) => void;
+  level?: 'app' | 'page' | 'section' | 'component';
+  resetKeys?: Array<string | number>;
+  resetOnPropsChange?: boolean;
+  isolate?: boolean;
 }
 
 export type WebVitalsReporter = (metric: Metric) => void;

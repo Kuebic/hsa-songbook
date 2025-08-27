@@ -26,6 +26,66 @@ With React 19's compiler, manual optimizations are largely unnecessary. Focus on
 - **Composition Over Inheritance**: MUST use React's composition model
 - **Fail Fast**: MUST validate inputs early with Zod, throw errors immediately
 
+## 📍 React Best Practices (MANDATORY)
+
+### ALWAYS Use Functional Components with Hooks
+
+**NEVER use class-based components** - React's future and all optimizations are built around functional components with hooks.
+
+#### ✅ CORRECT: Functional Components with Hooks
+
+```typescript
+import { useState, useEffect, ReactElement } from 'react';
+
+// Functional component with hooks
+export function UserProfile({ userId }: { userId: string }): ReactElement {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUser(userId).then(data => {
+      setUser(data);
+      setLoading(false);
+    });
+  }, [userId]);
+
+  if (loading) return <Spinner />;
+  return <div>{user?.name}</div>;
+}
+```
+
+#### ❌ FORBIDDEN: Class-Based Components
+
+```typescript
+// NEVER DO THIS - Class components are legacy
+class UserProfile extends React.Component<Props, State> {
+  componentDidMount() {
+    // Legacy lifecycle methods
+  }
+  
+  render() {
+    return <div>{this.state.user?.name}</div>;
+  }
+}
+```
+
+### Why Functional Components Only
+
+1. **React 19 Optimizations**: The React Compiler is optimized for functional components
+2. **Simpler Mental Model**: No `this` binding issues, cleaner code
+3. **Better TypeScript Support**: Easier to type, better inference
+4. **Hooks Ecosystem**: All modern React features use hooks
+5. **Performance**: React's concurrent features work best with functional components
+6. **Testing**: Easier to test without class instance complexity
+
+### Essential Hooks Patterns
+
+- **State Management**: `useState`, `useReducer` for local state
+- **Side Effects**: `useEffect`, `useLayoutEffect` for lifecycle events  
+- **Performance**: Let React 19 compiler handle optimization (no manual `useMemo`/`useCallback` needed)
+- **Context**: `useContext` for consuming context values
+- **Custom Hooks**: Prefix with `use` for reusable logic
+
 ## 🤖 AI Assistant Guidelines
 
 ### Context Awareness
@@ -37,6 +97,7 @@ With React 19's compiler, manual optimizations are largely unnecessary. Focus on
 
 ### Common Pitfalls to Avoid
 
+- Using class-based components (ALWAYS use functional components with hooks)
 - Creating duplicate functionality
 - Overwriting existing tests
 - Modifying core frameworks without explicit instruction
@@ -559,6 +620,72 @@ Object.defineProperty(import.meta, "env", {
 
 ## 🎨 Component Guidelines (STRICT REQUIREMENTS)
 
+### MANDATORY: Functional Components Only
+
+**CRITICAL**: ALL components MUST be functional components with hooks. Class-based components are STRICTLY FORBIDDEN.
+
+```typescript
+// ✅ CORRECT: Functional component with typed props
+export function Button({ onClick, children }: ButtonProps): ReactElement {
+  return <button onClick={onClick}>{children}</button>;
+}
+
+// ✅ CORRECT: Arrow function component with React.FC
+export const Button: React.FC<ButtonProps> = ({ onClick, children }) => {
+  return <button onClick={onClick}>{children}</button>;
+};
+
+// ❌ FORBIDDEN: Class component
+class Button extends React.Component<ButtonProps> {
+  render() {
+    return <button onClick={this.props.onClick}>{this.props.children}</button>;
+  }
+}
+
+// ❌ FORBIDDEN: createClass (deprecated)
+const Button = React.createClass({
+  render: function() {
+    return <button onClick={this.props.onClick}>{this.props.children}</button>;
+  }
+});
+```
+
+### Component Patterns with Hooks
+
+```typescript
+// Complex component with multiple hooks
+export function DataTable({ apiEndpoint }: DataTableProps): ReactElement {
+  // Local state management
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [filter, setFilter] = useState('');
+  
+  // Fetch data with custom hook
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['data', apiEndpoint, sortOrder, filter],
+    queryFn: () => fetchData(apiEndpoint, { sortOrder, filter })
+  });
+  
+  // Side effects
+  useEffect(() => {
+    console.log('Filter changed:', filter);
+  }, [filter]);
+  
+  // Event handlers
+  const handleSort = useCallback(() => {
+    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  }, []);
+  
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage error={error} />;
+  
+  return (
+    <table>
+      {/* Table implementation */}
+    </table>
+  );
+}
+```
+
 ### MANDATORY JSDoc Documentation
 
 **MUST document ALL exported functions, classes, and complex logic following Google JSDoc standards**
@@ -987,6 +1114,9 @@ export default defineConfig(({ mode }) => ({
 
 ### FORBIDDEN Practices
 
+- **NEVER use class-based components** - ALWAYS use functional components with hooks
+- **NEVER use `React.Component` or `React.PureComponent`** - use function components
+- **NEVER use `componentDidMount`, `componentWillUnmount`, etc.** - use useEffect instead
 - **NEVER use `any` type** (except library declaration merging with comments)
 - **NEVER skip tests**
 - **NEVER ignore TypeScript errors**
@@ -1003,6 +1133,16 @@ export default defineConfig(({ mode }) => ({
 ---
 
 ## 📝 Recent Updates
+
+### January 2025 - Functional Components Enforcement
+
+Added explicit guidance to ALWAYS use functional components with hooks and NEVER use class-based components:
+
+- **React Best Practices Section**: Added comprehensive section on functional components only
+- **Common Pitfalls**: Listed class components as a forbidden practice
+- **Component Guidelines**: Explicit rules and examples for functional components
+- **FORBIDDEN Practices**: Clear prohibition of React.Component, React.PureComponent, and lifecycle methods
+- **Rationale**: React 19's optimizations, simpler mental model, better TypeScript support, hooks ecosystem
 
 ### June 2025 - TypeScript Strict Compliance Update
 
